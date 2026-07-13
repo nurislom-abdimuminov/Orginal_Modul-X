@@ -1,0 +1,1019 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Eskiz — 20-Modul (1-qism). Deep Learning - Asoslar</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:#0a0e1a;color:#dde5f0;font-family:'JetBrains Mono',monospace;font-size:13px;min-height:100vh;}
+.top{background:#0f1520;border-bottom:1px solid #1e3048;padding:8px 14px;display:flex;align-items:center;gap:8px;position:sticky;top:0;z-index:50;}
+.top-t{color:#00f0c8;font-size:.78rem;font-weight:700;}
+.top-s{color:#4a6080;font-size:.65rem;margin-left:auto;}
+.bright-bar{background:#0f1520;border-bottom:1px solid #1e3048;padding:6px 14px;display:flex;align-items:center;gap:10px;position:sticky;top:41px;z-index:49;}
+.bright-lbl{font-size:.65rem;color:#4a6080;flex-shrink:0;}
+.bright-slider{flex:1;-webkit-appearance:none;height:4px;border-radius:2px;background:#1e3048;outline:none;cursor:pointer;}
+.bright-slider::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:#00f0c8;cursor:pointer;}
+.bright-val{font-size:.68rem;color:#00f0c8;font-weight:700;width:20px;text-align:right;flex-shrink:0;}
+.wrap{padding:10px 14px;max-width:540px;margin:0 auto;}
+.tabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;margin-bottom:10px;scrollbar-width:none;}
+.tabs::-webkit-scrollbar{display:none;}
+.tab{flex-shrink:0;padding:6px 12px;border-radius:20px;border:1px solid #1e3048;background:#141e2e;color:#4a6080;font-size:.68rem;cursor:pointer;transition:all .15s;}
+.tab.on{border-color:#00f0c8;color:#00f0c8;background:rgba(0,240,200,.08);}
+.tab.done{border-color:#22c55e;color:#22c55e;background:rgba(34,197,94,.06);}
+.stats{display:flex;gap:8px;margin-bottom:10px;}
+.stat{flex:1;background:#141e2e;border:1px solid #1e3048;border-radius:8px;padding:7px 8px;text-align:center;}
+.sv{font-size:.95rem;font-weight:700;color:#00f0c8;}
+.sl{font-size:.58rem;color:#4a6080;margin-top:2px;}
+.progress-bar{height:3px;background:#1e3048;border-radius:2px;margin-bottom:10px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,#00f0c8,#2563eb);border-radius:2px;transition:width .4s;}
+.intro-box{background:#0d1828;border:1px solid #1e3048;border-left:3px solid #00f0c8;border-radius:10px;padding:14px;margin-bottom:10px;}
+.intro-title{font-size:.8rem;font-weight:700;color:#00f0c8;margin-bottom:8px;}
+.intro-text{font-size:.7rem;line-height:1.85;color:#9fb0c8;white-space:pre-wrap;}
+.intro-stats{display:flex;gap:8px;margin-top:10px;}
+.intro-stat{flex:1;background:#080c14;border:1px solid #1e3048;border-radius:8px;padding:8px;text-align:center;}
+.intro-stat-v{font-size:1.1rem;font-weight:700;color:#00f0c8;}
+.intro-stat-l{font-size:.58rem;color:#4a6080;margin-top:2px;}
+.terms-box{background:#080c14;border:1px solid #1e3048;border-left:3px solid #a855f7;border-radius:8px;padding:10px 12px;margin-bottom:10px;}
+.terms-title{font-size:.68rem;font-weight:700;color:#a855f7;margin-bottom:8px;}
+.term-row{display:flex;gap:6px;margin-bottom:5px;align-items:flex-start;}
+.term-key{font-size:.64rem;color:#fbbf24;font-weight:700;min-width:120px;flex-shrink:0;}
+.term-val{font-size:.63rem;color:#4a6080;line-height:1.6;}
+.detail-panel{display:none;background:#0a1628;border:1px solid #2563eb;border-radius:8px;padding:12px 14px;margin-bottom:10px;font-size:.72rem;line-height:2;color:#93c5fd;white-space:pre-wrap;}
+.detail-panel.show{display:block;}
+.detail-title{color:#60a5fa;font-weight:700;margin-bottom:8px;font-size:.76rem;}
+
+/* TEST PANEL */
+.test-panel{background:#080c14;border:1px solid #1e3048;border-radius:10px;padding:12px;margin-bottom:10px;}
+.test-title{font-size:.72rem;font-weight:700;color:#fbbf24;margin-bottom:12px;}
+.test-q{background:#0d1828;border-left:3px solid #a855f7;border-radius:6px;padding:10px 12px;margin-bottom:10px;}
+.test-qtext{font-size:.71rem;color:#c4b5fd;line-height:1.7;margin-bottom:10px;}
+.test-opts{display:flex;flex-direction:column;gap:6px;}
+.test-opt{padding:8px 12px;border-radius:8px;border:1px solid #1e3048;background:#141e2e;font-size:.68rem;color:#8ba0c0;cursor:pointer;text-align:left;font-family:'JetBrains Mono',monospace;transition:all .15s;}
+.test-opt:active{opacity:.7;}
+.test-opt.correct{border-color:#22c55e;color:#22c55e;background:rgba(34,197,94,.1);}
+.test-opt.wrong{border-color:#f43f5e;color:#f43f5e;background:rgba(244,63,94,.1);}
+.test-opt.show-correct{border-color:#22c55e;color:#22c55e;background:rgba(34,197,94,.05);}
+.test-exp{display:none;font-size:.66rem;line-height:1.7;color:#64748b;padding:8px 0 0 4px;border-top:1px dashed #1e3048;margin-top:8px;}
+.test-exp.show{display:block;}
+.test-score{text-align:center;padding:10px;font-size:.78rem;font-weight:700;color:#00f0c8;display:none;}
+.test-score.show{display:block;}
+.btn-test-check{width:100%;padding:10px;background:#2563eb;color:#fff;font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:700;border:none;border-radius:8px;cursor:pointer;margin-top:8px;}
+
+/* ESKIZ (kod yozish mavzulari uchun) */
+.skip-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;padding:8px 12px;background:#141e2e;border:1px solid #1e3048;border-radius:8px;cursor:pointer;}
+.skip-row span{font-size:.7rem;color:#4a6080;}
+.sw{width:34px;height:18px;background:#1e3048;border-radius:10px;position:relative;transition:background .2s;flex-shrink:0;}
+.sw.on{background:#fbbf24;}
+.sw::after{content:'';position:absolute;top:2px;left:2px;width:14px;height:14px;background:#fff;border-radius:50%;transition:left .2s;}
+.sw.on::after{left:18px;}
+.sim-wrap{width:100%;overflow-x:auto;}
+.sim-wrap pre{font-size:.68rem;line-height:1.9;color:#22c55e;white-space:pre;}
+.result-panel{display:none;background:#080c14;border:1px solid #22c55e;border-radius:10px;padding:12px;margin-bottom:10px;}
+.result-panel.show{display:block;}
+.result-title{color:#22c55e;font-size:.72rem;font-weight:700;margin-bottom:8px;}
+.code-block{border:1px solid #1e3048;border-radius:10px;overflow:hidden;margin-bottom:10px;background:#090d18;}
+.fbar{display:flex;align-items:center;gap:5px;padding:7px 12px;background:#0f1520;border-bottom:1px solid #1e3048;}
+.dot{width:6px;height:6px;border-radius:50%;}
+.dot.r{background:#f43f5e;}.dot.y{background:#fbbf24;}.dot.g{background:#22c55e;}
+.fn{font-size:.65rem;color:#4a6080;margin-left:4px;}
+.fhint{margin-left:auto;font-size:.6rem;color:#00f0c8;opacity:.7;}
+.lines-wrap{padding:4px 0;}
+.line-block{margin:0;}
+.line-row{display:flex;align-items:center;position:relative;min-height:30px;}
+.line-num{width:28px;flex-shrink:0;font-size:.63rem;padding:4px 4px 4px 5px;color:#2a3a50;text-align:right;user-select:none;transition:color .2s;align-self:center;}
+.line-content{flex:1;position:relative;overflow-x:auto;overflow-y:hidden;min-height:30px;}
+.line-content::-webkit-scrollbar{height:2px;}
+.line-content::-webkit-scrollbar-thumb{background:#1e3048;border-radius:1px;}
+.line-ghost{font-size:.76rem;line-height:1.8;padding:4px 8px;white-space:pre;pointer-events:none;min-height:30px;display:block;}
+.line-ghost.skip-c{opacity:.08!important;}
+.line-colors{position:absolute;top:0;left:0;font-size:.76rem;line-height:1.8;padding:4px 8px;white-space:pre;pointer-events:none;z-index:2;min-height:30px;}
+.line-input{position:absolute;top:0;left:0;right:0;bottom:0;width:100%;font-family:'JetBrains Mono',monospace;font-size:.76rem;line-height:1.8;padding:4px 8px;color:transparent;-webkit-text-fill-color:transparent;caret-color:#00f0c8;background:transparent;border:none;outline:none;white-space:pre;overflow:hidden;z-index:10;-webkit-appearance:none;}
+.line-input:disabled{cursor:default;}
+.line-done-note{display:none;font-size:.66rem;line-height:1.6;padding:3px 8px 3px 34px;color:#38bdf8;background:rgba(56,189,248,.06);border-left:2px solid #38bdf8;white-space:pre-wrap;animation:fadeIn .25s ease;}
+.line-done-note.show{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:translateY(0)}}
+.btn-row{display:flex;gap:6px;flex-wrap:wrap;padding:9px 12px;background:#0f1520;border-top:1px solid #1e3048;}
+.btn{padding:8px 11px;border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:.68rem;font-weight:700;border:none;cursor:pointer;flex-shrink:0;transition:opacity .15s;}
+.btn:active{opacity:.7;}
+.btn-chk{background:#00f0c8;color:#080c14;}
+.btn-clr{background:transparent;border:1px solid #1e3048;color:#4a6080;}
+.btn-det{background:#2563eb;color:#fff;}
+.btn-ghost{background:#7c3aed;color:#fff;}
+.btn-res{background:#16a34a;color:#fff;}
+.badge{display:none;margin:0 12px 10px;padding:7px 12px;border-radius:8px;font-size:.7rem;border:1px solid #1e3048;}
+.badge.show{display:block;}
+.badge.g{border-color:#22c55e;color:#22c55e;background:rgba(34,197,94,.07);}
+.badge.o{border-color:#fbbf24;color:#fbbf24;background:rgba(251,191,36,.07);}
+.badge.r{border-color:#f43f5e;color:#f43f5e;background:rgba(244,63,94,.07);}
+.rating-box{background:#0d1828;border:1px solid #fbbf24;border-radius:12px;padding:14px 16px;margin-top:10px;display:none;}
+.rating-box.show{display:block;}
+.rating-title{font-size:.72rem;font-weight:700;color:#fbbf24;text-align:center;margin-bottom:4px;}
+.rating-sub{font-size:.62rem;color:#4a6080;text-align:center;margin-bottom:12px;}
+.stars{display:flex;justify-content:center;gap:4px;margin-bottom:10px;flex-wrap:wrap;}
+.star{font-size:1.5rem;cursor:pointer;filter:grayscale(1);opacity:.35;transition:transform .1s,filter .1s;user-select:none;}
+.star.on{filter:none;opacity:1;}
+.rating-score{text-align:center;font-size:.72rem;color:#fbbf24;font-weight:700;margin-bottom:8px;min-height:18px;}
+.rating-comment{width:100%;background:#141e2e;border:1px solid #1e3048;border-radius:8px;padding:8px 10px;color:#dde5f0;font-family:'JetBrains Mono',monospace;font-size:.68rem;resize:none;outline:none;margin-bottom:8px;}
+.rating-submit{width:100%;padding:10px;background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#080c14;font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:700;border:none;border-radius:8px;cursor:pointer;}
+.rating-thanks{display:none;text-align:center;padding:10px;font-size:.72rem;color:#22c55e;font-weight:700;}
+</style>
+</head>
+<body>
+<div class="top">
+  <div class="top-t">🧠 Deep Learning (1/4) — 20-Modul</div>
+  <div class="top-s" id="topSub">20.1</div>
+</div>
+<div class="bright-bar">
+  <span class="bright-lbl">👁️ Xiralik:</span>
+  <input type="range" class="bright-slider" id="brightSlider" min="1" max="10" value="3" oninput="setBright(this.value)">
+  <span class="bright-val" id="brightVal">3</span>
+</div>
+<div class="wrap">
+  <div class="stats">
+    <div class="stat"><div class="sv" id="svScore">—</div><div class="sl">TEST BALL</div></div>
+    <div class="stat"><div class="sv" id="svDone">0/0</div><div class="sl">BAJARILDI</div></div>
+    <div class="stat"><div class="sv" id="svMod">1/21</div><div class="sl">MAVZU</div></div>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+  <div class="tabs" id="tabs"></div>
+  <div class="intro-box" id="introBox"></div>
+  <div class="terms-box" id="termsBox"></div>
+  <div class="detail-panel" id="detailPanel">
+    <div class="detail-title">📘 BATAFSIL</div>
+    <div id="detailContent"></div>
+  </div>
+  <div id="mainContent"></div>
+  <div class="rating-box" id="ratingBox">
+    <div class="rating-title">⭐ 20-Modul (1-qism)ni baholang</div>
+    <div class="rating-sub">Fikringiz keyingi versiyani yaxshilashga yordam beradi</div>
+    <div class="stars" id="stars"></div>
+    <div class="rating-score" id="ratingScore">Baho tanlang (1–10)</div>
+    <textarea class="rating-comment" id="ratingComment" rows="2" placeholder="Izoh..."></textarea>
+    <button class="rating-submit" onclick="submitRating()">⭐ Yuborish</button>
+    <div class="rating-thanks" id="ratingThanks">✅ Rahmat!</div>
+  </div>
+</div>
+<script>
+var MODULE_INTRO = {
+  title: "🧠 20-Modul (1-qism) haqida",
+  text: "Bu — Deep Learning (Chuqur o'qitish) moduli, 4 qismdan iborat: 20a (Asoslar), 20b (CNN/RNN), 20c (NLP/Transformer), 20d (Amaliyot/Deployment).\n\nUshbu 1-qismda Perceptron, aktivlashtirish funksiyalari, yo'qotish funksiyasi, birinchi neyron tarmoq kodini yozish, va Overfitting/Giperparametrlarni o'rganasiz — bu butun Deep Learning ning poydevori.",
+  count: 21
+};
+
+var M = [
+
+{id:'20.1', type:'test',
+ title:'Kirish',
+ terms:[
+   ['Deep Learning','Ko\'p qatlamli neyron tarmoqlar asosidagi Machine Learning sohasi'],
+   ['Neyron tarmoq (Neural Network)','Inson miyasi ishlashidan ilhomlangan hisoblash modeli'],
+   ['Qatlam (Layer)','Neyronlar guruhlangan bosqich'],
+   ['Modul 20 tarkibi','Asoslar → CNN/RNN → NLP/Transformer → Amaliyot/Deployment']
+ ],
+ detail:'DEEP LEARNING MODULIGA XUSH KELIBSIZ\n\n14-20 modullarda siz klassik Machine Learning (Linear Regression, k-NN, Decision Tree, Random Forest) ni o\'rgandingiz. Bu modullarda model siz uchun xususiyatlarni (feature) qo\'lda tanlashingizni talab qiladi.\n\nDEEP LEARNING FARQI: Deep Learning — ko\'p qatlamli neyron tarmoqlardan iborat usul, u xususiyatlarni AVTOMATIK ravishda, ma\'lumotning o\'zidan o\'rganadi. Ayniqsa rasm, matn, ovoz kabi murakkab, struktura aniq bo\'lmagan ma\'lumotlarda kuchli.\n\nMODUL TARKIBI: Bu modul 4 qismdan iborat: (1) Asoslar — Perceptron, aktivlashtirish, yo\'qotish funksiyasi, birinchi kod; (2) CNN/RNN — rasm va ketma-ketlik uchun maxsus arxitekturalar; (3) NLP/Transformer — zamonaviy til modellari; (4) Amaliyot/Deployment — Hugging Face, fine-tuning, real loyihaga chiqarish.\n\nNEGA BU TARTIBDA? Har bir keyingi tushuncha avvalgisiga asoslanadi — Perceptron tushunilmasa, ko\'p qatlamli tarmoqni, u tushunilmasa CNN/RNN ni, ular tushunilmasa Transformer ni tushunish qiyin bo\'ladi.',
+ tests:[
+   {q:'Klassik Machine Learning va Deep Learning orasidagi asosiy farq nima?',
+    opts:['Deep Learning faqat matn bilan ishlaydi','Deep Learning xususiyatlarni avtomatik o\'rganadi, klassik ML da inson tanlaydi','Klassik ML har doim aniqroq','Ular bir xil narsa'],
+    ans:1,
+    exp:'Klassik ML da feature engineering (xususiyat tanlash) ko\'pincha inson tomonidan qilinadi, Deep Learning esa bu jarayonni ma\'lumotning o\'zidan avtomatik o\'rganadi.'},
+   {q:'Deep Learning ayniqsa qaysi turdagi ma\'lumotlarda kuchli?',
+    opts:['Faqat jadval (table) ma\'lumotlarda','Rasm, matn, ovoz kabi murakkab ma\'lumotlarda','Faqat kichik datasetlarda','Hech qaysi birida ustunlik qilmaydi'],
+    ans:1,
+    exp:'Deep Learning rasm, matn, ovoz kabi struktura aniq bo\'lmagan, murakkab ma\'lumotlarda ayniqsa kuchli natija beradi.'},
+   {q:'Bu modul (20-modul) nechta asosiy qismdan iborat?',
+    opts:['2','3','4','5'],
+    ans:2,
+    exp:'Modul 4 qismdan iborat: Asoslar, CNN/RNN, NLP/Transformer, Amaliyot/Deployment.'}
+ ]},
+
+{id:'20.2', type:'test',
+ title:'Chuqur o\'qitish nima?',
+ terms:[
+   ['Chuqur o\'qitish (Deep Learning)','Ko\'p (odatda 3 dan ortiq) qatlamli neyron tarmoqlar bilan o\'qitish'],
+   ['Shallow Network','Kam qatlamli (1-2 qatlam) oddiy neyron tarmoq'],
+   ['Hierarchical Feature Learning','Har bir qatlam avvalgisidan murakkabroq naqsh o\'rganishi'],
+   ['Representation Learning','Ma\'lumotning foydali ichki tasvirini avtomatik topish']
+ ],
+ detail:'"CHUQUR" SO\'ZI NIMANI BILDIRADI?\n\n"Chuqur" (deep) so\'zi — tarmoqdagi QATLAMLAR sonini bildiradi. Oddiy ("shallow") neyron tarmoqda 1-2 qatlam bo\'ladi, Deep Learning esa o\'nlab, yuzlab, ba\'zan minglab qatlamlardan iborat bo\'lishi mumkin.\n\nHIERARCHICAL FEATURE LEARNING: Har bir qatlam avvalgisidan murakkabroq naqshni o\'rganadi. Masalan rasm tanishda: birinchi qatlamlar — chiziq va burchaklarni, o\'rta qatlamlar — shakl va teksturalarni, oxirgi qatlamlar — to\'liq obyektlarni (yuz, mashina) aniqlaydi. Bu — REPRESENTATION LEARNING deyiladi: model ma\'lumotning eng foydali ichki tasvirini o\'zi topadi, inson buni qo\'lda dasturlashtirishi shart emas.\n\nMISOL: An\'anaviy rasm tanishda, inson dasturchi "qulaylik aniqlovchi" yoki "burchak aniqlovchi" algoritmlarni qo\'lda yozishi kerak edi. Deep Learning da, tarmoqning o\'zi minglab rasmlarni ko\'rib, qaysi naqshlar foydali ekanini avtomatik topadi.',
+ tests:[
+   {q:'"Chuqur" (deep) so\'zi Deep Learning da nimani bildiradi?',
+    opts:['Modelning aniqligi yuqori ekanini','Tarmoqdagi qatlamlar ko\'p ekanini','Ma\'lumot hajmi katta ekanini','Modelni tushunish qiyin ekanini'],
+    ans:1,
+    exp:'"Chuqur" — tarmoqda ko\'p qatlam borligini bildiradi, bu modelning murakkab naqshlarni bosqichma-bosqich o\'rganish imkonini beradi.'},
+   {q:'Hierarchical Feature Learning da rasm tanishda birinchi qatlamlar odatda nimani aniqlaydi?',
+    opts:['To\'liq obyektlarni (masalan yuz)','Oddiy chiziq va burchaklarni','Matn ma\'nosini','Ovoz balandligini'],
+    ans:1,
+    exp:'Birinchi qatlamlar eng sodda naqshlarni (chiziq, burchak) aniqlaydi, keyingi qatlamlar bulardan murakkabroq shakllarni quradi.'},
+   {q:'Representation Learning nima?',
+    opts:['Ma\'lumotni qo\'lda belgilash','Modelning ma\'lumot ichki tasvirini avtomatik topishi','Faqat rasm formatini o\'zgartirish','Modelni tezlashtirish usuli'],
+    ans:1,
+    exp:'Representation Learning — model ma\'lumotning eng foydali ichki tasvirini (qaysi xususiyatlar muhim ekanini) o\'zi, avtomatik o\'rganishi.'}
+ ]},
+
+{id:'20.3', type:'test',
+ title:'Nega chuqur o\'qitish trendda?',
+ terms:[
+   ['Big Data','Internet va raqamli qurilmalar orqali to\'plangan ulkan ma\'lumot hajmi'],
+   ['GPU (Graphics Processing Unit)','Parallel hisoblashga mos protsessor, DL ni tezlashtiradi'],
+   ['ImageNet momenti','2012-yilda CNN ning rasm tanishda inqilob qilgan voqeasi'],
+   ['Transfer Learning','Oldindan o\'qitilgan modeldan foydalanish imkoniyati']
+ ],
+ detail:'NEGA AYNI HOZIR DEEP LEARNING GULLAB-YASHNAYAPTI?\n\nDeep Learning g\'oyalari aslida 1980-yillardan beri mavjud edi, lekin amalda keng qo\'llanilishi uchun UCH OMIL kerak bo\'ldi:\n\n1. BIG DATA: Internet, smartfonlar, ijtimoiy tarmoqlar tufayli rasm, matn, ovoz ma\'lumotlari ulkan hajmda mavjud bo\'ldi. Neyron tarmoqlar yaxshi ishlashi uchun KO\'P ma\'lumot kerak.\n\n2. GPU: Grafik protsessorlar (GPU) asli video o\'yinlar uchun yaratilgan, lekin ular matritsa amallarini parallel (bir vaqtda ko\'plab) bajarish uchun ajoyib mos keladi — bu aynan neyron tarmoq hisoblashlarining tabiati. Bu DL ni o\'qitishni necha o\'n marta tezlashtirdi.\n\n3. ALGORITM YUTUQLARI: 2012-yilda ImageNet musobaqasida CNN arxitekturasi (AlexNet) boshqa usullarni katta farq bilan ortda qoldirdi — bu "ImageNet momenti" Deep Learning ga umumjahon e\'tiborni qaratdi.\n\nTRANSFER LEARNING: Bugungi kunda, katta kompaniyalar (Google, OpenAI, Meta) ulkan ma\'lumot va hisoblash kuchi bilan modellarni oldindan o\'qitib, ularni OCHIQ qiladi (masalan Hugging Face orqali). Endi har kim ulardan FOYDALANISHI mumkin, noldan o\'qitish shart emas — bu modul oxirida (20d qismda) batafsil ko\'riladi.',
+ tests:[
+   {q:'Deep Learning ning keng qo\'llanilishi uchun qaysi uch omil hal qiluvchi bo\'ldi?',
+    opts:['Faqat internet tezligi','Big Data, GPU va algoritm yutuqlari','Faqat narx pasayishi','Faqat universitet tadqiqotlari'],
+    ans:1,
+    exp:'Ulkan ma\'lumot hajmi (Big Data), tezkor parallel hisoblash (GPU), va algoritm yutuqlari (masalan CNN) birgalikda Deep Learning ni amaliy qildi.'},
+   {q:'GPU nima uchun Deep Learning uchun ayniqsa mos keladi?',
+    opts:['U arzonroq','U matritsa amallarini parallel bajarishga mos','U faqat o\'yinlar uchun ishlatiladi','U internetga ulanish kerak emas'],
+    ans:1,
+    exp:'GPU minglab amallarni bir vaqtda (parallel) bajarishga mo\'ljallangan — bu aynan neyron tarmoq hisoblashlarining tabiati bilan mos keladi.'},
+   {q:'Transfer Learning nima imkonini beradi?',
+    opts:['Modelni noldan tezroq o\'qitish','Oldindan o\'qitilgan modeldan foydalanib, noldan boshlamaslik','Faqat kichik modellarni ishlatish','Internetsiz ishlash'],
+    ans:1,
+    exp:'Transfer Learning — boshqalar tomonidan oldindan o\'qitilgan katta modellardan foydalanib, o\'z vazifangiz uchun moslashtirish imkonini beradi.'}
+ ]},
+
+{id:'20.4', type:'test',
+ title:'1-test',
+ terms:[
+   ['Qisqa nazorat','20.1-20.3 mavzularini birlashtiruvchi tekshiruv'],
+   ['Deep Learning ta\'rifi','Ko\'p qatlamli neyron tarmoqlar bilan o\'qitish usuli'],
+   ['Trend sabablari','Big Data + GPU + algoritm yutuqlari'],
+   ['Modul tuzilishi','4 qismli yo\'l xaritasi']
+ ],
+ detail:'QISQA NAZORAT — 20.1, 20.2, 20.3\n\nBu nazorat oldingi uch mavzuni birlashtiradi: Deep Learning nima ekanligi, "chuqur" so\'zining ma\'nosi, va bu soha nega aynan hozir keng tarqalgani.\n\nESLATMA: Deep Learning — ko\'p qatlamli neyron tarmoq, xususiyatlarni avtomatik o\'rganadi (representation learning), va uning hozirgi mashhurligi Big Data, GPU hisoblash kuchi va algoritm yutuqlari (ImageNet momenti) birikmasidan kelib chiqadi.',
+ tests:[
+   {q:'Deep Learning klassik ML dan nimasi bilan tubdan farq qiladi?',
+    opts:['U faqat tekin','Xususiyatlarni avtomatik, ma\'lumotning o\'zidan o\'rganadi','U hech qachon xato qilmaydi','U faqat kichik ma\'lumotlar bilan ishlaydi'],
+    ans:1,
+    exp:'Deep Learning xususiyatlarni (feature) avtomatik o\'rganadi — klassik MLda bu ko\'pincha inson tomonidan qo\'lda qilinadi.'},
+   {q:'2012-yildagi "ImageNet momenti" nimani anglatadi?',
+    opts:['Internetning ixtiro qilinishini','CNN arxitekturasining rasm tanishda inqilob qilganini','Birinchi kompyuterning yaratilishini','GPU ning ixtiro qilinishini'],
+    ans:1,
+    exp:'2012-yilda CNN (AlexNet) ImageNet musobaqasida boshqa usullarni katta farq bilan ortda qoldirib, Deep Learning ga umumjahon e\'tiborni qaratdi.'},
+   {q:'Bu modulning qaysi qismida Hugging Face va fine-tuning o\'rganiladi?',
+    opts:['1-qism (Asoslar)','2-qism (CNN/RNN)','3-qism (NLP/Transformer)','4-qism (Amaliyot/Deployment)'],
+    ans:3,
+    exp:'Hugging Face, fine-tuning va deployment — modulning 4-qismida (Amaliyot/Deployment) o\'rganiladi.'}
+ ]},
+
+{id:'20.5', type:'eskiz',
+ title:'Kerakli dasturlarni o\'rnatamiz',
+ terms:[
+   ['TensorFlow','Google tomonidan yaratilgan Deep Learning kutubxonasi'],
+   ['Keras','TensorFlow ustida ishlaydigan sodda, yuqori darajadagi API'],
+   ['pip install','Python kutubxonalarini o\'rnatish buyrug\'i'],
+   ['import tensorflow as tf','TensorFlow ni kodda ishlatish uchun yuklash']
+ ],
+ detail:'DEEP LEARNING UCHUN KERAKLI VOSITALAR\n\nDeep Learning bilan ishlash uchun maxsus kutubxonalar kerak — bular oddiy numpy/sklearn dan farqli, GPU bilan ishlashga va avtomatik gradient hisoblashga (backpropagation uchun) mo\'ljallangan.\n\nTENSORFLOW VA KERAS: TensorFlow — Google yaratgan, eng mashhur Deep Learning kutubxonalaridan biri. Keras — TensorFlow ustida ishlaydigan, juda SODDA va o\'qish-yozish oson API — aynan shu sababli ko\'pchilik o\'quv kurslari (jumladan bu modul) Keras dan boshlaydi.\n\nO\'RNATISH: Google Colab yoki Kaggle Notebook da (Ha sizning ishlash muhitingiz) TensorFlow odatda OLDINDAN o\'rnatilgan keladi — shuning uchun faqat import qilish kifoya, qayta o\'rnatish kerak emas. Agar mahalliy kompyuterda ishlasangiz, pip install tensorflow buyrug\'i kerak bo\'ladi.',
+ sim:'>>> import tensorflow as tf\n>>> print(tf.__version__)\n2.16.1\n>>> from tensorflow import keras\n>>> print(keras.__version__)\n3.3.3',
+ eskizlar:[
+  {q:'TensorFlow ni import qilib, versiyasini chiqaring.',
+   lines:[
+    {c:'import tensorflow as tf',n:'Siz TensorFlow kutubxonasini tf nomi bilan yukladingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'print(tf.__version__)',n:'Siz TensorFlow versiyasini ekranga chiqardingiz'},
+   ]},
+  {q:'Keras modulini TensorFlow ichidan import qilib, mavjudligini tekshiring.',
+   lines:[
+    {c:'from tensorflow import keras',n:'Siz Keras modulini TensorFlow ichidan import qildingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'print(\'Keras tayyor:\', keras.__version__)',n:'Siz Keras versiyasini chiqarib, tayyor ekanini tasdiqladingiz'},
+   ]},
+ ]},
+
+{id:'20.6', type:'test',
+ title:'Neyron tarmoqlari o\'rganishi',
+ terms:[
+   ['O\'rganish (Learning)','Tarmoq xato asosida og\'irliklarni yaxshilab borishi'],
+   ['Og\'irlik (Weight)','Har bir bog\'lanishning kuchini bildiruvchi son'],
+   ['Iteratsiya (Epoch)','Butun ma\'lumot to\'plamidan bir marta o\'tish'],
+   ['Yaqinlashish (Convergence)','Tarmoq xatosi kamayib, barqarorlashishi']
+ ],
+ detail:'NEYRON TARMOQ QANDAY "O\'RGANADI"?\n\nNeyron tarmoq "o\'rganishi" — aslida OG\'IRLIKLARNI (weights) asta-sekin yaxshilab borish jarayoni. Boshida og\'irliklar tasodifiy qiymatlarga ega bo\'ladi (tarmoq hali "bilmaydi"), va o\'qitish davomida ular xatoni kamaytiradigan tomonga siljiydi.\n\nUMUMIY JARAYON: (1) Ma\'lumot tarmoqqa beriladi → bashorat chiqadi; (2) Bashorat haqiqiy javob bilan solishtiriladi → xato hisoblanadi; (3) Xato asosida og\'irliklar ozgina TUZATILADI; (4) Bu jarayon minglab marta takrorlanadi, har safar ozgina yaxshilanib boradi.\n\nEPOCH NIMA? Bir EPOCH — butun train ma\'lumot to\'plamidan bir marta to\'liq o\'tish. Odatda tarmoq bir necha (10, 50, 100) epoch davomida o\'qitiladi — har bir epoch da xato kamayib boradi, toki YAQINLASHISH (convergence) ro\'y berguncha — bu yerda xato deyarli o\'zgarmay qoladi, demak tarmoq imkon qadar yaxshi natijaga yetdi.',
+ tests:[
+   {q:'Neyron tarmoq "o\'rganishi" aslida nimani anglatadi?',
+    opts:['Yangi neyron qo\'shilishini','Og\'irliklarning xato asosida asta-sekin tuzatilishini','Ma\'lumotning o\'chirilishini','Kod tilining o\'zgarishini'],
+    ans:1,
+    exp:'O\'rganish — og\'irliklarning (weights) xato signali asosida iterativ ravishda yaxshilab borilishi jarayoni.'},
+   {q:'Bir Epoch nimani bildiradi?',
+    opts:['Bitta neyronni o\'qitish','Butun train ma\'lumotidan bir marta to\'liq o\'tish','Modelni butunlay qayta yaratish','Faqat bitta savolga javob berish'],
+    ans:1,
+    exp:'Bir Epoch — tarmoq butun train ma\'lumot to\'plamini bir marta to\'liq ko\'rib chiqishi.'},
+   {q:'Yaqinlashish (Convergence) qachon ro\'y beradi?',
+    opts:['O\'qitish boshlanganda darhol','Xato deyarli o\'zgarmay, barqarorlashganda','Ma\'lumot o\'chirilganda','Faqat 1 epochdan keyin doim'],
+    ans:1,
+    exp:'Convergence — xato kamayib, keyingi epochlarda deyarli o\'zgarmay qolgan holat, bu tarmoq imkon qadar yaxshi natijaga yetganini bildiradi.'}
+ ]},
+
+{id:'20.7', type:'test',
+ title:'Perseptron nima?',
+ terms:[
+   ['Perseptron','Eng sodda neyron tarmoq birligi — bitta "sun\'iy neyron"'],
+   ['Kirish (Input)','Perseptronga beriladigan x1, x2, ... qiymatlar'],
+   ['Og\'irlik va Bias','Har bir kirish uchun og\'irlik (w) va qo\'shimcha bias (b)'],
+   ['Aktivlashtirish (Activation)','Yig\'indini yakuniy chiqishga aylantiruvchi qadam']
+ ],
+ detail:'PERSEPTRON — DEEP LEARNING NING "G\'ISHTI"\n\nPerseptron — 1958-yilda yaratilgan, eng sodda sun\'iy neyron modeli. Har bir murakkab neyron tarmoq, aslida, ko\'plab perseptronlardan (neyronlardan) tashkil topgan.\n\nPERSEPTRON QANDAY ISHLAYDI?\n1. Bir necha kirish qiymati keladi: x1, x2, x3...\n2. Har biriga o\'z OG\'IRLIGI (w1, w2, w3...) ko\'paytiriladi\n3. Natijalar yig\'iladi, va qo\'shimcha BIAS (b) qo\'shiladi: z = w1*x1 + w2*x2 + ... + b\n4. Yig\'indi AKTIVLASHTIRISH FUNKSIYASI orqali o\'tkaziladi, yakuniy chiqish hosil bo\'ladi\n\nBU TANISH KO\'RINADI! Diqqat qiling: z = w1*x1+w2*x2+...+b formulasi 16-modulda o\'rgangan Multiple Linear Regression formulasiga JUDA O\'XSHASH! Farqi — Perseptronda natija qo\'shimcha aktivlashtirish funksiyasidan o\'tadi (20.9-20.10 da batafsil), bu uni nochiziqli (non-linear) qaror qabul qila olishga imkon beradi.\n\nNEGA BU MUHIM? Bitta Perseptron — oddiy chiziqli ajratish qila oladi (Logistic Regression ga o\'xshash). Lekin KO\'P Perseptronni qatlamlarga birlashtirsangiz (Multi-Layer Network), tarmoq juda murakkab, egri chegaralarni ham o\'rganishga qodir bo\'ladi.',
+ tests:[
+   {q:'Perseptron formulasi z = w1*x1 + w2*x2 + ... + b qaysi modul formulasiga o\'xshash?',
+    opts:['k-NN','Multiple Linear Regression','Decision Tree','K-Means'],
+    ans:1,
+    exp:'Bu formula 16-moduldagi Multiple Linear Regression formulasiga (y=w1x1+w2x2+...+b) juda o\'xshash — farqi keyin aktivlashtirish funksiyasi qo\'llanadi.'},
+   {q:'Perseptronda "bias" (b) nima vazifani bajaradi?',
+    opts:['Kirish qiymatlarini ko\'paytiradi','Yig\'indiga qo\'shimcha doimiy qiymat qo\'shadi','Aktivlashtirish funksiyasini o\'chiradi','Faqat test rejimida ishlaydi'],
+    ans:1,
+    exp:'Bias — og\'irliklangan yig\'indiga qo\'shiladigan qo\'shimcha doimiy qiymat, bu modelga ko\'proq moslashuvchanlik beradi.'},
+   {q:'Bitta Perseptron nima qila oladi?',
+    opts:['Faqat murakkab egri chegaralarni ajratishni','Oddiy chiziqli ajratishni (Logistic Regression ga o\'xshash)','Rasm tanishni mukammal','Hech narsa qila olmaydi'],
+    ans:1,
+    exp:'Bitta Perseptron — chiziqli ajratish qila oladi. Murakkab, egri chegaralar uchun ko\'p Perseptronni qatlamlarga birlashtirish kerak.'}
+ ]},
+
+{id:'20.8', type:'test',
+ title:'2-test',
+ terms:[
+   ['Qisqa nazorat','20.5-20.7 mavzularini birlashtiruvchi tekshiruv'],
+   ['TensorFlow/Keras','O\'rnatilgan asosiy Deep Learning vositalari'],
+   ['O\'rganish jarayoni','Og\'irliklarni xato asosida tuzatish'],
+   ['Perseptron formulasi','z = og\'irliklangan yig\'indi + bias, keyin aktivlashtirish']
+ ],
+ detail:'QISQA NAZORAT — 20.5, 20.6, 20.7\n\nBu nazorat dastur o\'rnatish, neyron tarmoq o\'rganish jarayoni va Perseptron asoslarini birlashtiradi.\n\nESLATMA: TensorFlow/Keras — ishlatiladigan asosiy vosita. O\'rganish — og\'irliklarning xato asosida iterativ tuzatilishi. Perseptron — kirishlarni og\'irlik bilan ko\'paytirib, bias qo\'shib, aktivlashtirish funksiyasidan o\'tkazadigan eng sodda neyron birligi.',
+ tests:[
+   {q:'Keras nima uchun ishlatiladi?',
+    opts:['Ma\'lumotni vizualizatsiya qilish uchun','TensorFlow ustida sodda, yuqori darajadagi API sifatida','Faqat rasm formatlarini o\'zgartirish uchun','Internetga ulanish uchun'],
+    ans:1,
+    exp:'Keras — TensorFlow ustida ishlaydigan, neyron tarmoq qurishni soddalashtiruvchi yuqori darajadagi API.'},
+   {q:'Neyron tarmoqning o\'qitilishi necha marta takrorlanadigan jarayon?',
+    opts:['Faqat bir marta','Minglab marta, har safar ozgina yaxshilanib','Hech qachon takrorlanmaydi','Faqat 2 marta'],
+    ans:1,
+    exp:'O\'qitish — og\'irliklarni minglab marta, har safar ozgina tuzatib boradigan iterativ jarayon.'},
+   {q:'Perseptronda yig\'indi (z) hisoblangandan keyin nima sodir bo\'ladi?',
+    opts:['U to\'g\'ridan-to\'g\'ri yakuniy javob bo\'ladi','U aktivlashtirish funksiyasidan o\'tkaziladi','U o\'chirib tashlanadi','U faqat saqlanadi, ishlatilmaydi'],
+    ans:1,
+    exp:'Yig\'indi (z) aktivlashtirish funksiyasidan o\'tkaziladi — bu yakuniy chiqishni hosil qiladi va nochiziqlilik kiritadi.'}
+ ]},
+
+{id:'20.9', type:'test',
+ title:'Aktivlashtirish funksiyasi (1-qism)',
+ terms:[
+   ['Aktivlashtirish funksiyasi','Neyron chiqishini nochiziqli qiluvchi funksiya'],
+   ['Nochiziqlilik (Non-linearity)','Tarmoqqa murakkab naqshlarni o\'rganish qobiliyatini beruvchi xususiyat'],
+   ['Sigmoid','Natijani 0 va 1 orasiga siquvchi aktivlashtirish funksiyasi'],
+   ['Tanh','Natijani -1 va 1 orasiga siquvchi aktivlashtirish funksiyasi']
+ ],
+ detail:'NEGA AKTIVLASHTIRISH FUNKSIYASI KERAK?\n\nAgar Perseptronlar faqat chiziqli formula (w*x+b) bilan cheklansa, hattoki YUZLAB qatlamni ustma-ust qo\'ysangiz ham, natija baribir CHIZIQLI bo\'lib qoladi (chiziqli funksiyalar kombinatsiyasi — hali ham chiziqli). Bu esa tarmoqning real dunyodagi murakkab, egri naqshlarni o\'rganishiga to\'sqinlik qiladi.\n\nYECHIM — AKTIVLASHTIRISH FUNKSIYASI: Har bir neyron chiqishidan keyin NOCHIZIQLI funksiya qo\'llaniladi. Bu tarmoqqa "egrilik" qo\'shadi — endi ko\'p qatlamni birlashtirish HAQIQATAN murakkabroq, egri qaror chegaralarini hosil qiladi.\n\nSIGMOID: Formula 1/(1+e^-z). Natijani 0 va 1 orasiga "siqadi" — 17-moduldagi Logistic Regression da ko\'rgan xuddi shu funksiya! Foydali ehtimollik talab qilinganda (masalan yakuniy chiqish qatlamida, binary classification uchun).\n\nTANH: Sigmoid ga o\'xshash, lekin natijani -1 va 1 orasiga siqadi (markazi 0 da). Ko\'pincha sigmoid dan biroz yaxshiroq ishlaydi, chunki uning chiqishi markazlashgan (zero-centered), bu o\'qitishni biroz barqarorlashtiradi.\n\nIKKISINING KAMCHILIGI: Katta yoki kichik z qiymatlarida, ikkisining grafigi "tekislashadi" (gradient deyarli 0 bo\'lib qoladi) — bu "vanishing gradient" muammosiga olib keladi, chuqur tarmoqlarda o\'qitishni qiyinlashtiradi. Bu muammo 20.10 da ko\'riladigan ReLU orqali asosan hal qilinadi.',
+ tests:[
+   {q:'Agar aktivlashtirish funksiyasi bo\'lmasa, ko\'p qatlamli tarmoq nima bo\'lib qoladi?',
+    opts:['Avtomatik tezlashadi','Baribir chiziqli model bo\'lib qoladi','Xato qaytaradi','Hech narsa o\'zgarmaydi'],
+    ans:1,
+    exp:'Aktivlashtirish funksiyasisiz, chiziqli funksiyalar kombinatsiyasi hali ham chiziqli bo\'lib qoladi — tarmoq murakkab naqshlarni o\'rgana olmaydi.'},
+   {q:'Sigmoid funksiyasi natijani qaysi oraliqqa siqadi?',
+    opts:['-1 dan 1 gacha','0 dan 1 gacha','-∞ dan +∞ gacha','0 dan 100 gacha'],
+    ans:1,
+    exp:'Sigmoid natijani 0 va 1 orasiga siqadi — bu ehtimollik sifatida talqin qilish uchun foydali.'},
+   {q:'Sigmoid va Tanh ning umumiy kamchiligi nima?',
+    opts:['Ular juda tez hisoblanadi','Katta/kichik qiymatlarda gradient deyarli 0 ga aylanadi (vanishing gradient)','Ular faqat rasm bilan ishlaydi','Ular hech qachon ishlatilmaydi'],
+    ans:1,
+    exp:'Ikkisi ham ekstremal qiymatlarda "tekislashadi" — gradient deyarli yo\'qoladi, bu chuqur tarmoqlarda o\'qitishni qiyinlashtiradi (vanishing gradient muammosi).'}
+ ]},
+
+{id:'20.10', type:'test',
+ title:'Aktivlashtirish funksiyasi (2-qism)',
+ terms:[
+   ['ReLU (Rectified Linear Unit)','max(0, z) formulali, eng ko\'p ishlatiladigan aktivlashtirish funksiyasi'],
+   ['Vanishing Gradient','Chuqur tarmoqlarda gradientning deyarli yo\'qolib qolishi muammosi'],
+   ['Softmax','Ko\'p toifali klassifikatsiya uchun ehtimolliklar taqsimotini chiqaruvchi funksiya'],
+   ['Qaysi qatlamda qaysi funksiya','Yashirin qatlamlarda ReLU, chiqish qatlamida vazifaga mos funksiya']
+ ],
+ detail:'RELU — ZAMONAVIY STANDART\n\nReLU formulasi juda sodda: f(z) = max(0, z) — agar z manfiy bo\'lsa, natija 0; agar musbat bo\'lsa, natija aynan z ning o\'zi.\n\nNEGA RELU SHUNCHALIK MASHHUR? (1) Hisoblash JUDA tez (faqat solishtirish, murakkab eksponensial yo\'q); (2) Musbat qiymatlarda gradient hech qachon "tekislashmaydi" (vanishing gradient muammosi sezilarli kamayadi); (3) Amalda chuqur tarmoqlarni Sigmoid/Tanh ga qaraganda ancha tezroq va barqarorroq o\'qitadi.\n\nQAYSI QATLAMDA QAYSI FUNKSIYA ISHLATILADI? YASHIRIN (hidden) qatlamlarda — deyarli har doim ReLU (yoki uning variantlari) ishlatiladi. CHIQISH (output) qatlamida — vazifaga bog\'liq: Binary Classification uchun Sigmoid (0-1 ehtimollik), Multiclass Classification uchun SOFTMAX, Regression uchun aktivlashtirish funksiyasi UMUMAN ishlatilmaydi (xom raqamli qiymat kerak).\n\nSOFTMAX NIMA? Ko\'p toifali klassifikatsiyada (masalan 10 xil raqamni tanish), Softmax barcha toifalar uchun ehtimolliklarni chiqaradi, va ularning YIG\'INDISI har doim 1 ga teng bo\'ladi (masalan [0.7, 0.1, 0.05, ..., 0.02] — eng yuqori ehtimollik yakuniy bashorat sifatida tanlanadi).',
+ tests:[
+   {q:'ReLU funksiyasining formulasi qanday?',
+    opts:['1/(1+e^-z)','max(0, z)','(e^z - e^-z)/(e^z + e^-z)','z²'],
+    ans:1,
+    exp:'ReLU = max(0, z) — manfiy qiymatlarni 0 ga, musbat qiymatlarni o\'zgartirmasdan qaytaradi.'},
+   {q:'ReLU nima uchun Sigmoid/Tanh dan ko\'proq ishlatiladi?',
+    opts:['U faqat rasm bilan ishlaydi','Tezroq hisoblanadi va vanishing gradient muammosini kamaytiradi','U har doim 100% aniqlik beradi','U eng eski funksiya'],
+    ans:1,
+    exp:'ReLU hisoblash tezligi va musbat qiymatlarda gradientning "yo\'qolmasligi" tufayli chuqur tarmoqlarni samaraliroq o\'qitishga yordam beradi.'},
+   {q:'Ko\'p toifali klassifikatsiyada (masalan 10 raqamni tanish) chiqish qatlamida odatda qaysi funksiya ishlatiladi?',
+    opts:['ReLU','Sigmoid','Softmax','Hech qaysi funksiya kerak emas'],
+    ans:2,
+    exp:'Softmax — ko\'p toifa uchun ehtimolliklar taqsimotini (yig\'indisi 1 ga teng) chiqaradi, bu multiclass classification uchun mos.'}
+ ]},
+
+{id:'20.11', type:'test',
+ title:'3-test',
+ terms:[
+   ['Qisqa nazorat','20.9-20.10 aktivlashtirish funksiyalarini birlashtiruvchi tekshiruv'],
+   ['Sigmoid/Tanh','0-1 yoki -1-1 oralig\'iga siquvchi, eski-an\'anaviy funksiyalar'],
+   ['ReLU','Yashirin qatlamlar uchun zamonaviy standart'],
+   ['Softmax','Ko\'p toifali chiqish qatlami uchun ehtimollik funksiyasi']
+ ],
+ detail:'QISQA NAZORAT — 20.9, 20.10\n\nBu nazorat barcha asosiy aktivlashtirish funksiyalarini (Sigmoid, Tanh, ReLU, Softmax) va ularning qaysi vaziyatda ishlatilishini birlashtiradi.\n\nESLATMA: Yashirin qatlamlarda — ReLU (tez, vanishing gradient kam). Chiqish qatlamida — vazifaga bog\'liq: Binary uchun Sigmoid, Multiclass uchun Softmax, Regression uchun aktivlashtirish kerak emas.',
+ tests:[
+   {q:'Aktivlashtirish funksiyasi umuman nima uchun zarur?',
+    opts:['Modelni tezlashtirish uchun','Tarmoqqa nochiziqlilik (murakkab naqsh o\'rganish qobiliyati) qo\'shish uchun','Faqat estetik sabablarga ko\'ra','Xotira tejash uchun'],
+    ans:1,
+    exp:'Aktivlashtirish funksiyasi tarmoqqa nochiziqlilik qo\'shadi — bu murakkab, egri qaror chegaralarini o\'rganish imkonini beradi.'},
+   {q:'Binary Classification (ikki toifa) uchun chiqish qatlamida odatda qaysi funksiya ishlatiladi?',
+    opts:['ReLU','Sigmoid','Hech qaysi funksiya','Faqat Tanh'],
+    ans:1,
+    exp:'Binary Classification uchun Sigmoid — natijani 0-1 ehtimollikka aylantiradi, bu ikki toifadan birini tanlash uchun mos.'},
+   {q:'Regression vazifasida chiqish qatlamida aktivlashtirish funksiyasi odatda kerak boʻladimi?',
+    opts:['Ha, har doim Sigmoid kerak','Yo\'q, xom raqamli qiymat kerak bo\'lgani uchun odatda ishlatilmaydi','Faqat ReLU ishlatiladi','Faqat Softmax ishlatiladi'],
+    ans:1,
+    exp:'Regression da chiqish cheklanmagan raqamli qiymat bo\'lishi kerak, shuning uchun chiqish qatlamida aktivlashtirish funksiyasi odatda ishlatilmaydi.'}
+ ]},
+
+{id:'20.12', type:'test',
+ title:'Yo\'qotish funksiyasi va optimallashtirish',
+ terms:[
+   ['Loss function (Yo\'qotish funksiyasi)','Modelning xatosini bitta son bilan o\'lchaydigan funksiya'],
+   ['Gradient Descent','Xatoni kamaytirish uchun og\'irliklarni qadam-baqadam o\'zgartirish usuli'],
+   ['Learning Rate','Har bir qadamda og\'irliklar qanchalik o\'zgarishini boshqaruvchi parametr'],
+   ['Optimizer (masalan Adam)','Gradient Descent ni amalga oshiruvchi algoritm']
+ ],
+ detail:'MODEL XATOSINI QANDAY O\'LCHASH VA KAMAYTIRISH MUMKIN?\n\nLOSS FUNCTION: Bu — modelning bashorati haqiqiy javobdan qanchalik farq qilishini BITTA SON bilan o\'lchaydigan funksiya. Regression uchun ko\'pincha MSE (16-moduldan tanish), Classification uchun Cross-Entropy Loss ishlatiladi (bu — model qanchalik "ishonchli noto\'g\'ri" bo\'lganini kuchli jazolaydi).\n\nGRADIENT DESCENT: Loss ni kamaytirish uchun ishlatiladigan asosiy usul. Tasavvur qiling — siz tog\'dan tushayotgan odam, ko\'zingiz yopiq, va pastga (eng kichik loss tomon) yo\'l topishingiz kerak. Har qadamda, qaysi yo\'nalish "pastga" ekanini (gradient) his qilib, shu tomonga kichik qadam tashlaysiz. Bu jarayon minglab marta takrorlanadi.\n\nLEARNING RATE: Har bir qadam QANCHALIK katta bo\'lishini belgilaydi. Juda KATTA learning rate — qadamlar haddan katta, model "sakraydi", hech qachon eng pastga yetib bormaydi. Juda KICHIK learning rate — o\'qitish juda sekin boradi, ko\'p vaqt talab qiladi.\n\nOPTIMIZER: Gradient Descent ning sodda versiyasi (SGD) dan tashqari, zamonaviy optimizerlar (eng mashhuri — ADAM) qo\'shimcha "aqlli" hisob-kitoblar bilan o\'qitishni tezlashtiradi va barqarorlashtiradi. Amalda, deyarli har doim Adam optimizer standart tanlov hisoblanadi.',
+ tests:[
+   {q:'Loss function nima vazifani bajaradi?',
+    opts:['Ma\'lumotni tozalaydi','Modelning xatosini bitta son bilan o\'lchaydi','Modelni tezlashtiradi','Yangi xususiyat yaratadi'],
+    ans:1,
+    exp:'Loss function — bashorat va haqiqiy javob orasidagi farqni bitta son bilan o\'lchaydi, bu o\'qitish jarayonida minimallashtirilishi kerak.'},
+   {q:'Learning Rate juda katta bo\'lsa, nima bo\'ladi?',
+    opts:['O\'qitish juda tez va aniq bo\'ladi','Qadamlar haddan katta bo\'lib, model "sakraydi" va yaxshi yaqinlasha olmaydi','Hech qanday farq bo\'lmaydi','Model darhol 100% aniqlikka erishadi'],
+    ans:1,
+    exp:'Juda katta learning rate qadamlarni haddan tashqari kattalashtiradi — model eng kichik loss nuqtasini "sakrab o\'tib ketishi" mumkin.'},
+   {q:'Adam nima?',
+    opts:['Aktivlashtirish funksiyasi turi','Mashhur, aqlli optimizer algoritmi','Loss function turi','Dataset nomi'],
+    ans:1,
+    exp:'Adam — Gradient Descent ning zamonaviy, samarali versiyasi, deyarli barcha Deep Learning loyihalarida standart tanlov sifatida ishlatiladi.'}
+ ]},
+
+{id:'20.13', type:'test',
+ title:'4-test',
+ terms:[
+   ['Qisqa nazorat','20.12 yo\'qotish funksiyasi va optimallashtirishni mustahkamlovchi tekshiruv'],
+   ['Loss function','Xatoni o\'lchaydigan son'],
+   ['Gradient Descent','Xatoni kamaytirish jarayoni'],
+   ['Adam optimizer','Zamonaviy, samarali standart tanlov']
+ ],
+ detail:'QISQA NAZORAT — 20.12\n\nBu nazorat Loss function, Gradient Descent, Learning Rate va Optimizer tushunchalarini mustahkamlaydi.\n\nESLATMA: Loss function xatoni o\'lchaydi, Gradient Descent uni kamaytiradigan yo\'nalishni topadi, Learning Rate qadam kattaligini belgilaydi, va Adam kabi optimizerlar bu jarayonni samaraliroq qiladi.',
+ tests:[
+   {q:'Gradient Descent jarayonini eng yaxshi tasvirlaydigan o\'xshatish qaysi?',
+    opts:['Tasodifiy sonlar generatori','Ko\'zi yopiq odamning tog\'dan pastga (eng kichik loss tomon) qadam-baqadam tushishi','Ma\'lumotni tartiblash algoritmi','Rasmni siqish usuli'],
+    ans:1,
+    exp:'Gradient Descent — har qadamda gradient yo\'nalishini his qilib, loss ni kamaytiradigan tomonga kichik qadam tashlash jarayoni, xuddi ko\'zi yopiq tog\'dan tushish kabi.'},
+   {q:'Learning Rate juda kichik bo\'lsa, qanday natija kutiladi?',
+    opts:['O\'qitish darhol tugaydi','O\'qitish juda sekin boradi, ko\'p vaqt talab qiladi','Model darhol overfitting qiladi','Hech qanday farq bo\'lmaydi'],
+    ans:1,
+    exp:'Juda kichik learning rate qadamlarni juda kichik qiladi — eng kichik loss nuqtasiga yetish uchun ko\'p epoch va vaqt kerak bo\'ladi.'},
+   {q:'Regression masalasida Loss function sifatida ko\'pincha nima ishlatiladi?',
+    opts:['Softmax','Cross-Entropy','MSE (O\'rtacha kvadrat xato)','ReLU'],
+    ans:2,
+    exp:'Regression uchun MSE (Mean Squared Error) ko\'pincha ishlatiladi — bu 16-moduldan tanish metrika.'}
+ ]},
+
+{id:'20.14', type:'test',
+ title:'Oddiy neyrondan butun tarmoqqacha',
+ terms:[
+   ['Multi-Layer Network (Ko\'p qatlamli tarmoq)','Bir nechta neyron qatlamidan tashkil topgan tarmoq'],
+   ['Input Layer','Ma\'lumot kiradigan birinchi qatlam'],
+   ['Hidden Layer (Yashirin qatlam)','Kirish va chiqish orasidagi qatlam(lar)'],
+   ['Output Layer','Yakuniy bashoratni chiqaradigan oxirgi qatlam']
+ ],
+ detail:'BITTA NEYRONDAN TO\'LIQ TARMOQQACHA\n\n20.7 da bitta Perseptron — chiziqli ajratishdan boshqa narsa qila olmasligini ko\'rdik. Haqiqiy kuch — bir nechta neyronni QATLAMLARGA birlashtirishda.\n\nUCH ASOSIY QATLAM TURI:\n1. INPUT LAYER — ma\'lumot shu yerdan kiradi (masalan rasm piksellari, yoki jadval xususiyatlari). Bu qatlam hisoblash qilmaydi, faqat ma\'lumotni qabul qiladi.\n2. HIDDEN LAYER(LAR) — bu yerda haqiqiy "fikrlash" sodir bo\'ladi. Har bir hidden qatlam, avvalgi qatlamdan kelgan ma\'lumotni og\'irlik+bias+aktivlashtirish orqali qayta ishlaydi. "Deep" (chuqur) so\'zi — ko\'p hidden qatlam borligini bildiradi.\n3. OUTPUT LAYER — yakuniy bashoratni chiqaradi (masalan bitta son regression uchun, yoki bir nechta ehtimollik classification uchun).\n\nFEEDFORWARD: Ma\'lumot INPUT dan OUTPUT ga tomon, faqat OLDINGA oqadi (shuning uchun "Feedforward Neural Network" deyiladi) — bu eng sodda arxitektura turi, CNN va RNN (20b qismda) bundan farqli, maxsus ulanish naqshlariga ega.\n\nFULLY CONNECTED (DENSE): Oddiy ko\'p qatlamli tarmoqda, har bir qatlamdagi HAR BIR neyron, keyingi qatlamdagi HAR BIR neyron bilan bog\'langan — shuning uchun bu qatlamlar "Dense" (Keras da shunday nomlanadi) yoki "Fully Connected" deyiladi.',
+ tests:[
+   {q:'Hidden Layer qaysi vazifani bajaradi?',
+    opts:['Faqat ma\'lumotni qabul qiladi, hisoblamaydi','Kirish va chiqish orasida haqiqiy "fikrlash" (qayta ishlash) sodir bo\'ladigan qatlam','Faqat yakuniy javobni chiqaradi','Hech qanday vazifa bajarmaydi'],
+    ans:1,
+    exp:'Hidden Layer(lar) — ma\'lumotni og\'irlik, bias va aktivlashtirish orqali qayta ishlaydigan, haqiqiy hisoblash sodir bo\'ladigan qatlamlar.'},
+   {q:'"Deep" (chuqur) so\'zi tarmoq tuzilishida nimani bildiradi?',
+    opts:['Ko\'p Input Layer borligini','Ko\'p Hidden Layer borligini','Ko\'p Output Layer borligini','Hech narsani bildirmaydi'],
+    ans:1,
+    exp:'"Deep" — ko\'p Hidden Layer (yashirin qatlam) borligini bildiradi, bu tarmoqqa murakkab naqshlarni bosqichma-bosqich o\'rganish imkonini beradi.'},
+   {q:'"Fully Connected" (Dense) qatlam nimani anglatadi?',
+    opts:['Faqat bir nechta neyron bog\'langan','Har bir neyron keyingi qatlamdagi har bir neyron bilan bog\'langan','Hech qanday bog\'lanish yo\'q','Faqat oxirgi qatlamga tegishli'],
+    ans:1,
+    exp:'Fully Connected (Dense) qatlamda, bir qatlamdagi har bir neyron, keyingi qatlamdagi BARCHA neyronlar bilan bog\'langan.'}
+ ]},
+
+{id:'20.15', type:'test',
+ title:'5-test',
+ terms:[
+   ['Qisqa nazorat','20.14 tarmoq strukturasini mustahkamlovchi tekshiruv'],
+   ['Input/Hidden/Output Layer','Tarmoqning uch asosiy qatlam turi'],
+   ['Feedforward','Ma\'lumot faqat oldinga oqadigan oddiy arxitektura'],
+   ['Dense (Fully Connected)','Har bir neyron keyingisi bilan to\'liq bog\'langan qatlam turi']
+ ],
+ detail:'QISQA NAZORAT — 20.14\n\nBu nazorat ko\'p qatlamli tarmoq strukturasini (Input, Hidden, Output Layer) va Dense/Feedforward tushunchalarini mustahkamlaydi.\n\nESLATMA: Input Layer ma\'lumotni qabul qiladi, Hidden Layer(lar) qayta ishlaydi, Output Layer yakuniy javobni beradi. Oddiy tarmoqda barcha qatlamlar "Dense" (to\'liq bog\'langan) bo\'ladi.',
+ tests:[
+   {q:'Output Layer qanday vazifani bajaradi?',
+    opts:['Ma\'lumotni qabul qiladi','Yakuniy bashoratni chiqaradi','Hech narsa qilmaydi','Faqat ma\'lumotni saqlaydi'],
+    ans:1,
+    exp:'Output Layer — barcha hidden qatlamlardan o\'tgan ma\'lumot asosida yakuniy bashoratni chiqaradigan oxirgi qatlam.'},
+   {q:'"Feedforward" nima degani?',
+    opts:['Ma\'lumot orqaga qaytadi','Ma\'lumot faqat oldinga (input dan outputga) oqadi','Ma\'lumot tasodifiy yo\'nalishda harakatlanadi','Hech qanday ma\'lumot oqimi yo\'q'],
+    ans:1,
+    exp:'Feedforward arxitekturada ma\'lumot faqat bir yo\'nalishda — Input dan Output ga tomon oqadi.'},
+   {q:'Agar tarmoqda faqat Input va Output Layer bo\'lsa (hidden qatlamsiz), bu nima bo\'ladi?',
+    opts:['Eng kuchli Deep Learning modeli','Aslida shunchaki Perseptron/chiziqli model darajasida bo\'ladi','Har doim 100% aniqlik beradi','Bu mumkin emas'],
+    ans:1,
+    exp:'Hidden qatlamsiz, tarmoq murakkab naqshlarni o\'rgana olmaydi — u aslida sodda chiziqli model (Perseptron) darajasida qoladi.'}
+ ]},
+
+{id:'20.16', type:'eskiz',
+ title:'Neyron tarmoqlariga kod o\'rgatamiz (1-qism)',
+ terms:[
+   ['keras.Sequential()','Qatlamlarni ketma-ket joylashtirib model yaratish usuli'],
+   ['Dense qatlam','keras.layers.Dense() — to\'liq bog\'langan qatlam yaratish'],
+   ['units parametri','Qatlamdagi neyronlar sonini belgilaydigan parametr'],
+   ['input_shape','Birinchi qatlamga kirish ma\'lumoti shaklini bildirish']
+ ],
+ detail:'KERAS BILAN BIRINCHI NEYRON TARMOQ\n\nKeras da eng sodda model qurish usuli — keras.Sequential() — bu yerda qatlamlar RO\'YXAT ko\'rinishida, ketma-ket qo\'shiladi.\n\nDENSE QATLAM: keras.layers.Dense(units=64, activation=\'relu\') — units: bu qatlamda nechta neyron bo\'lishini, activation: qaysi aktivlashtirish funksiyasi ishlatilishini belgilaydi.\n\nINPUT_SHAPE: Faqat BIRINCHI qatlamda kerak — bu tarmoqqa har bir ma\'lumot namunasi necha xususiyatdan iborat ekanini aytadi (masalan input_shape=(4,) — 4 xususiyatli ma\'lumot uchun).',
+ sim:'>>> from tensorflow import keras\n>>> model = keras.Sequential([\n...     keras.layers.Dense(8, activation=\'relu\', input_shape=(4,)),\n...     keras.layers.Dense(1)\n... ])\n>>> model.summary()',
+ eskizlar:[
+  {q:'Sequential model yaratib, birinchi Dense qatlamni qo\'shing.',
+   lines:[
+    {c:'from tensorflow import keras',n:'Siz keras modulini import qildingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'model = keras.Sequential([',n:'Siz Sequential model yaratishni boshladingiz'},
+    {c:'    keras.layers.Dense(8, activation=\'relu\', input_shape=(4,)),',n:'Siz 8 neyronli, ReLU aktivlashtiruvchi birinchi qatlamni qo\'shdingiz'},
+   ]},
+  {q:'Modelga yakuniy (output) Dense qatlamni qo\'shib, yopib, summary chiqaring.',
+   lines:[
+    {c:'    keras.layers.Dense(1)',n:'Siz 1 neyronli output qatlamni qo\'shdingiz (regression uchun)'},
+    {c:'])',n:'Siz model ro\'yxatini yopdingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'model.summary()',n:'Siz model strukturasini ekranga chiqardingiz'},
+   ]},
+ ]},
+
+{id:'20.17', type:'eskiz',
+ title:'Neyron tarmoqlariga kod o\'rgatamiz (2-qism)',
+ terms:[
+   ['.compile()','Modelga optimizer, loss va metrikalarni belgilash metodi'],
+   ['.fit(X, y, epochs=...)','Modelni ma\'lumotga o\'qitish metodi'],
+   ['optimizer=\'adam\'','Adam optimizerini tanlash'],
+   ['loss=\'mse\'','Regression uchun MSE yo\'qotish funksiyasini tanlash']
+ ],
+ detail:'MODELNI O\'QITISH — COMPILE VA FIT\n\n20.16 da model STRUKTURASINI yaratdik, lekin u hali "o\'qitishga tayyor" emas — avval QANDAY o\'qitilishini belgilash kerak.\n\n.COMPILE(): model.compile(optimizer=\'adam\', loss=\'mse\') — bu yerda optimizer (20.12 dan tanish — Adam), va loss function (regression uchun MSE) belgilanadi. Bu — modelga "qanday xato qilishingni o\'lchaymiz va qanday tuzataman" qoidalarini aytish.\n\n.FIT(): model.fit(X, y, epochs=50) — bu metod haqiqiy o\'qitish jarayonini boshlaydi. epochs — necha marta butun ma\'lumotdan o\'tilishini belgilaydi (20.6 dan tanish tushuncha). Har epoch da, Keras loss qiymatini ko\'rsatadi — bu kamayib borishi kerak, agar model to\'g\'ri o\'qitilayotgan bo\'lsa.',
+ sim:'>>> model.compile(optimizer=\'adam\', loss=\'mse\')\n>>> model.fit(X, y, epochs=50)\nEpoch 1/50\nloss: 12.450\nEpoch 50/50\nloss: 0.832',
+ eskizlar:[
+  {q:'Modelni compile qiling — Adam optimizer va MSE loss bilan.',
+   lines:[
+    {c:'model.compile(',n:'Siz modelni compile qilishni boshladingiz'},
+    {c:'    optimizer=\'adam\',',n:'Siz Adam optimizerini tanladingiz'},
+    {c:'    loss=\'mse\')',n:'Siz MSE yo\'qotish funksiyasini tanladingiz'},
+   ]},
+  {q:'fit() metodi bilan modelni 50 epoch davomida o\'qiting.',
+   lines:[
+    {c:'natija = model.fit(X, y, epochs=50)',n:'Siz modelni 50 epoch davomida o\'qitdingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'print(\'O\\\'qitish tugadi\')',n:'Siz o\'qitish tugaganini bildiruvchi xabar chiqardingiz'},
+   ]},
+ ]},
+
+{id:'20.18', type:'eskiz',
+ title:'1-amaliy vazifa',
+ terms:[
+   ['To\'liq Keras workflow','Model qurishdan o\'qitishgacha bo\'lgan barcha qadamlar'],
+   ['.predict()','O\'qitilgan model bilan yangi ma\'lumot uchun bashorat qilish'],
+   ['Birinchi mustaqil tarmoq','20.16-20.17 bilimini birlashtirib qo\'llash'],
+   ['Natijani tekshirish','Bashoratni haqiqiy qiymat bilan solishtirish']
+ ],
+ detail:'BIRINCHI AMALIY VAZIFA — HAMMASINI BIRLASHTIRISH\n\nBu — 20.16 va 20.17 da o\'rgangan barcha qadamlarni (model qurish, compile qilish, o\'qitish) birlashtirib, MUSTAQIL ravishda oddiy bir neyron tarmoq yaratish vazifasi, so\'ngra predict() bilan yangi ma\'lumot uchun bashorat qilish.\n\nBU NEGA MUHIM? Bu — sizning birinchi to\'liq, ishlaydigan Deep Learning modelingiz! Keyingi barcha mavzular (CNN, RNN, Transformer) aynan shu asosiy workflow (Sequential → compile → fit → predict) ustiga quriladi, faqat qatlam turlari murakkablashadi.',
+ sim:'>>> model = keras.Sequential([\n...     keras.layers.Dense(8, activation=\'relu\', input_shape=(2,)),\n...     keras.layers.Dense(1)\n... ])\n>>> model.compile(optimizer=\'adam\', loss=\'mse\')\n>>> model.fit(X, y, epochs=50)\n>>> model.predict([[5, 3]])\narray([[14.2]])',
+ eskizlar:[
+  {q:'2 xususiyatli kirish uchun to\'liq model qurib, compile qiling.',
+   lines:[
+    {c:'from tensorflow import keras',n:'Siz keras modulini import qildingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'model = keras.Sequential([',n:'Siz Sequential model yaratishni boshladingiz'},
+    {c:'    keras.layers.Dense(8, activation=\'relu\', input_shape=(2,)),',n:'Siz 8 neyronli yashirin qatlam qo\'shdingiz (2 xususiyatli kirish uchun)'},
+    {c:'    keras.layers.Dense(1)',n:'Siz 1 neyronli output qatlamni qo\'shdingiz'},
+    {c:'])',n:'Siz model ro\'yxatini yopdingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'model.compile(optimizer=\'adam\', loss=\'mse\')',n:'Siz modelni Adam va MSE bilan compile qildingiz'},
+   ]},
+  {q:'Modelni o\'qitib, yangi ma\'lumot uchun bashorat qiling.',
+   lines:[
+    {c:'model.fit(X, y, epochs=50)',n:'Siz modelni 50 epoch davomida o\'qitdingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'yangi_nuqta = [[5, 3]]',n:'Siz yangi ma\'lumot nuqtasini yaratdingiz'},
+    {c:'bashorat = model.predict(yangi_nuqta)',n:'Siz yangi nuqta uchun bashorat qildingiz'},
+    {c:'print(\'Bashorat:\', bashorat)',n:'Siz bashoratni ekranga chiqardingiz'},
+   ]},
+ ]},
+
+{id:'20.19', type:'test',
+ title:'Oshiqcha moslashish va tartibga solish',
+ terms:[
+   ['Overfitting (Oshiqcha moslashish)','Tarmoq train ma\'lumotni yodlab, yangi ma\'lumotda yomon ishlashi'],
+   ['Dropout','O\'qitish paytida tasodifiy neyronlarni "o\'chirib qo\'yish" usuli'],
+   ['L1/L2 Regularization','Og\'irliklarni kichik ushlab turishga undovchi jazo qo\'shish'],
+   ['Early Stopping','Validation xato yomonlashganda o\'qitishni to\'xtatish']
+ ],
+ detail:'NEYRON TARMOQLARDA OVERFITTING\n\n16-modulda Overfitting tushunchasini o\'rgangansiz — neyron tarmoqlar, ko\'p parametrga ega bo\'lgani uchun, BU MUAMMOGA AYNIQSA MOYIL. Tarmoq train ma\'lumotni "yodlab olishi", lekin yangi ma\'lumotda yomon ishlashi mumkin.\n\nDROPOUT: Eng mashhur va samarali yechimlardan biri. O\'qitish paytida, har bir qadamda, TASODIFIY tanlangan ba\'zi neyronlar "o\'chirib qo\'yiladi" (vaqtincha e\'tiborga olinmaydi). Bu tarmoqni biror bitta neyronga "haddan tashqari bog\'lanib qolishdan" saqlaydi, va u o\'rniga ko\'proq UMUMIY, barqaror naqshlarni o\'rganishga majburlaydi. Keras da: keras.layers.Dropout(0.3) — 30% neyronlar har qadamda tasodifiy o\'chiriladi.\n\nL1/L2 REGULARIZATION: 16-moduldagi Ridge/Lasso ga juda o\'xshash g\'oya — og\'irliklarning juda katta bo\'lishiga "jazo" qo\'shiladi, bu modelni soddaroq ushlab turadi.\n\nEARLY STOPPING: O\'qitish davomida, agar VALIDATION (sinov uchun ajratilgan, lekin trainga ishlatilmagan) ma\'lumotdagi xato YOMONLASHA boshlasa (train xato kamayishda davom etsa-da) — bu overfitting boshlangan degani, va o\'qitishni shu nuqtada TO\'XTATISH kerak, hatto belgilangan epoch soniga yetmagan bo\'lsa ham.',
+ tests:[
+   {q:'Dropout qanday ishlaydi?',
+    opts:['Barcha neyronlarni butunlay o\'chiradi','O\'qitish paytida tasodifiy tanlangan neyronlarni vaqtincha "o\'chiradi"','Faqat test paytida ishlaydi','Ma\'lumotni o\'chiradi'],
+    ans:1,
+    exp:'Dropout — o\'qitish paytida har qadamda tasodifiy neyronlarni vaqtincha e\'tiborga olmaslik, bu modelni umumiyroq naqshlarni o\'rganishga undaydi.'},
+   {q:'Early Stopping qachon o\'qitishni to\'xtatadi?',
+    opts:['Belgilangan epoch soniga yetganda har doim','Validation xato yomonlasha boshlaganda (overfitting belgisi)','O\'qitish boshlanganidan keyin darhol','Hech qachon to\'xtamaydi'],
+    ans:1,
+    exp:'Early Stopping — validation ma\'lumotdagi xato yomonlasha boshlasa, bu overfitting belgisi, va o\'qitish shu nuqtada to\'xtatiladi.'},
+   {q:'L1/L2 Regularization neyron tarmoqlarda qaysi klassik ML usuliga o\'xshash?',
+    opts:['k-NN','Ridge/Lasso Regression','Decision Tree','K-Means'],
+    ans:1,
+    exp:'L1/L2 Regularization — 16-moduldagi Ridge (L2) va Lasso (L1) bilan bir xil g\'oyaga asoslangan: katta og\'irliklarga jazo qo\'shish.'}
+ ]},
+
+{id:'20.20', type:'test',
+ title:'Giperparametrlar va parametrlar',
+ terms:[
+   ['Parametr','Model o\'qitish jarayonida o\'zi o\'rganadigan qiymatlar (og\'irlik, bias)'],
+   ['Giperparametr','O\'qitishdan OLDIN inson tomonidan belgilanadigan sozlamalar'],
+   ['Batch Size','Har bir og\'irlik yangilanishidan oldin ko\'rib chiqiladigan namunalar soni'],
+   ['Grid/Random Search','Eng yaxshi giperparametr kombinatsiyasini qidirish usullari']
+ ],
+ detail:'PARAMETR VA GIPERPARAMETR FARQI\n\nBu ikkisi ko\'p chalkashtiriladi, lekin farq aniq:\n\nPARAMETR — model o\'qitish DAVOMIDA o\'zi o\'rganadigan qiymatlar: og\'irliklar (weights) va bias. Inson bularni qo\'lda belgilamaydi — Gradient Descent ularni avtomatik topadi.\n\nGIPERPARAMETR — o\'qitish BOSHLANISHIDAN OLDIN, inson tomonidan tanlanadigan sozlamalar: Learning Rate, Epoch soni, Batch Size, qatlamlar soni, har qatlamdagi neyron soni (units), Dropout darajasi va h.k. Bularni TO\'G\'RI tanlash — model sifatiga katta ta\'sir qiladi.\n\nBATCH SIZE NIMA? Amalda, butun train ma\'lumotini bir vaqtda tarmoqqa berish xotira jihatdan qiyin (ayniqsa katta datasetlarda). Shuning uchun ma\'lumot kichik "to\'plamlarga" (batch) bo\'linadi — masalan batch_size=32 — har 32 namunadan keyin og\'irliklar bir marta yangilanadi. Kichik batch — ko\'proq, lekin "shovqinli" yangilanishlar; katta batch — kamroq, lekin barqarorroq yangilanishlar.\n\nENG YAXSHI GIPERPARAMETRNI QANDAY TOPISH MUMKIN? Xuddi 17-moduldagi "eng yaxshi k" qidirish kabi — turli kombinatsiyalarni sinab ko\'rish (Grid Search — barcha kombinatsiyani sinash, Random Search — tasodifiy kombinatsiyalarni sinash) orqali eng yaxshi natija beradigan sozlamalar topiladi.',
+ tests:[
+   {q:'Quyidagilardan qaysi biri PARAMETR (model o\'zi o\'rganadigan), giperparametr emas?',
+    opts:['Learning Rate','Epoch soni','Og\'irliklar (weights)','Batch Size'],
+    ans:2,
+    exp:'Og\'irliklar (weights) — model o\'qitish davomida o\'zi, Gradient Descent orqali o\'rganadigan parametr. Qolganlari — inson tomonidan oldindan belgilanadigan giperparametrlar.'},
+   {q:'Batch Size nimani belgilaydi?',
+    opts:['Tarmoqdagi qatlamlar sonini','Har bir og\'irlik yangilanishidan oldin ko\'rib chiqiladigan namunalar sonini','Aktivlashtirish funksiyasi turini','Loss function turini'],
+    ans:1,
+    exp:'Batch Size — har bir og\'irlik yangilanishi (gradient qadami) dan oldin nechta namuna ko\'rib chiqilishini belgilaydi.'},
+   {q:'Grid Search nima qiladi?',
+    opts:['Faqat bitta giperparametrni tasodifiy tanlaydi','Barcha mumkin bo\'lgan giperparametr kombinatsiyalarini sinab ko\'radi','Modelni o\'qitishni to\'xtatadi','Ma\'lumotni tozalaydi'],
+    ans:1,
+    exp:'Grid Search — belgilangan barcha giperparametr kombinatsiyalarini ketma-ket sinab, eng yaxshi natija beradiganini topadi.'}
+ ]},
+
+{id:'20.21', type:'test',
+ title:'6-test',
+ terms:[
+   ['Qisqa nazorat','20.19-20.20 mavzularini birlashtiruvchi tekshiruv'],
+   ['Overfitting yechimlari','Dropout, Regularization, Early Stopping'],
+   ['Parametr vs Giperparametr','O\'zi o\'rganiladigan vs inson belgilaydigan sozlamalar'],
+   ['1-qism yakuni','Asoslar bo\'limi tugadi, navbat CNN/RNN ga']
+ ],
+ detail:'QISQA NAZORAT — 20.19, 20.20 (1-QISM YAKUNI)\n\nBu nazorat Overfitting yechimlari (Dropout, Regularization, Early Stopping) va Parametr/Giperparametr farqini birlashtiradi — va shu bilan 20-modulning 1-qismi (Asoslar) yakunlanadi!\n\nKEYINGI QADAM: 2-qismda (20.22 dan boshlab) siz CNN (rasm uchun) va RNN (ketma-ketlik uchun) maxsus arxitekturalarini o\'rganasiz — ular aynan shu modulda o\'rgangan Dense qatlam, aktivlashtirish, loss/optimizer asoslari ustiga quriladi.',
+ tests:[
+   {q:'Quyidagilardan qaysi biri Overfitting ga qarshi YECHIM emas?',
+    opts:['Dropout','Early Stopping','Learning Rate ni cheksiz oshirish','L2 Regularization'],
+    ans:2,
+    exp:'Learning Rate ni cheksiz oshirish Overfitting ga yechim emas — bu aslida o\'qitishni beqarorlashtirishi mumkin. Dropout, Early Stopping va Regularization — haqiqiy yechimlar.'},
+   {q:'Giperparametrlar qachon belgilanadi?',
+    opts:['O\'qitish davomida, avtomatik','O\'qitish boshlanishidan oldin, inson tomonidan','O\'qitish tugagandan keyin','Hech qachon belgilanmaydi'],
+    ans:1,
+    exp:'Giperparametrlar (Learning Rate, Epoch, Batch Size va h.k.) o\'qitish boshlanishidan OLDIN, inson tomonidan tanlanadi.'},
+   {q:'20-modulning 2-qismida (20.22 dan boshlab) qaysi mavzular o\'rganiladi?',
+    opts:['Faqat statistika','CNN va RNN maxsus arxitekturalari','Faqat SQL','Faqat web dizayn'],
+    ans:1,
+    exp:'2-qismda CNN (rasm uchun) va RNN (ketma-ketlik uchun) maxsus neyron tarmoq arxitekturalari o\'rganiladi.'}
+ ]},
+
+];
+
+// ═══════ HOLAT ═══════
+var cur=0, curEskiz=0, skipOn=false, ghostVisible=true;
+var lineData=[], doneSet=new Set(), eskizDoneSet=new Set();
+var testAnswers={}, selectedStar=0, ratingSubmitted=false;
+var BRIGHT=[0,0.05,0.1,0.2,0.3,0.42,0.55,0.65,0.75,0.85,0.95];
+
+window.onload=function(){buildStars();buildTabs();buildIntro();loadMod(0);};
+
+function buildIntro(){
+  var testTopics=M.filter(function(m){return m.type==='test';}).length;
+  var eskizCount=M.reduce(function(s,m){return s+(m.type==='eskiz'?m.eskizlar.length:0);},0);
+  var h='<div class="intro-title">'+MODULE_INTRO.title+'</div>';
+  h+='<div class="intro-text">'+esc(MODULE_INTRO.text)+'</div>';
+  h+='<div class="intro-stats">';
+  h+='<div class="intro-stat"><div class="intro-stat-v">'+testTopics+'</div><div class="intro-stat-l">TEST</div></div>';
+  h+='<div class="intro-stat"><div class="intro-stat-v">'+eskizCount+'</div><div class="intro-stat-l">ESKIZ</div></div>';
+  h+='<div class="intro-stat"><div class="intro-stat-v">Keras</div><div class="intro-stat-l">KUTUBXONA</div></div>';
+  h+='</div>';
+  document.getElementById('introBox').innerHTML=h;
+}
+
+function loadMod(i){
+  cur=i; curEskiz=0;
+  document.getElementById('detailPanel').classList.remove('show');
+  document.getElementById('badge') && (document.getElementById('badge').className='badge');
+  var m=M[i];
+  document.getElementById('topSub').textContent=m.id;
+  document.getElementById('svMod').textContent=(i+1)+'/'+M.length;
+  // terms
+  var th='<div class="terms-title">📚 Yangi atamalar:</div>';
+  m.terms.forEach(function(t){
+    th+='<div class="term-row"><span class="term-key">'+esc(t[0])+'</span><span class="term-val">'+esc(t[1])+'</span></div>';
+  });
+  document.getElementById('termsBox').innerHTML=th;
+  // content
+  if(m.type==='test') renderTest(m);
+  else renderEskiz(m);
+  buildTabs(); updateTopStats();
+}
+
+// ═══════ TEST ═══════
+function renderTest(m){
+  if(!testAnswers[cur]) testAnswers[cur]={};
+  var h='<div class="test-panel"><div class="test-title">🧠 '+m.title+' — Test</div>';
+  m.tests.forEach(function(t,qi){
+    h+='<div class="test-q" id="tq'+qi+'">';
+    h+='<div class="test-qtext">'+(qi+1)+'. '+esc(t.q)+'</div>';
+    h+='<div class="test-opts">';
+    var answered = testAnswers[cur][qi] !== undefined;
+    t.opts.forEach(function(o,oi){
+      var cls='test-opt';
+      if(answered){
+        if(oi===t.ans) cls+=' show-correct';
+        else if(oi===testAnswers[cur][qi] && oi!==t.ans) cls+=' wrong';
+      }
+      h+='<button class="'+cls+'" onclick="answerTest('+qi+','+oi+')" '+(answered?'disabled':'')+'>'+esc(o)+'</button>';
+    });
+    h+='</div>';
+    if(answered){
+      var isCorrect = testAnswers[cur][qi]===t.ans;
+      h+='<div class="test-exp show">'+(isCorrect?'✅':'❌')+' '+esc(t.exp)+'</div>';
+    }
+    h+='</div>';
+  });
+  // score
+  var answered=Object.keys(testAnswers[cur]).length;
+  var correct=0;
+  Object.keys(testAnswers[cur]).forEach(function(qi){
+    if(testAnswers[cur][qi]===m.tests[qi].ans) correct++;
+  });
+  if(answered===m.tests.length){
+    h+='<div class="test-score show">Natija: '+correct+'/'+m.tests.length+' ✅</div>';
+    doneSet.add(cur);
+  }
+  h+='</div>';
+  document.getElementById('mainContent').innerHTML=h;
+  document.getElementById('result-panel') && document.getElementById('result-panel').classList.remove('show');
+  updateTopStats();
+}
+
+function answerTest(qi,oi){
+  if(!testAnswers[cur]) testAnswers[cur]={};
+  if(testAnswers[cur][qi]!==undefined) return;
+  testAnswers[cur][qi]=oi;
+  renderTest(M[cur]);
+  buildTabs(); updateTopStats();
+}
+
+// ═══════ ESKIZ (kod yozish mavzulari) ═══════
+function renderEskiz(m){
+  var e=m.eskizlar[curEskiz];
+  // eskiz dots
+  var dotsH='<div style="display:flex;gap:6px;justify-content:center;margin-bottom:10px;">';
+  m.eskizlar.forEach(function(_,i){
+    var key=cur+'-'+i;
+    var w=i===curEskiz?'40px':'26px';
+    var bg=eskizDoneSet.has(key)?'#22c55e':(i===curEskiz?'#00f0c8':'#1e3048');
+    dotsH+='<div onclick="jumpEskiz('+i+')" style="width:'+w+';height:6px;border-radius:3px;background:'+bg+';cursor:pointer;transition:all .2s;"></div>';
+  });
+  dotsH+='</div>';
+  // question
+  var qH='<div style="background:#0d1828;border:1px solid #1e3048;border-left:3px solid #a855f7;border-radius:8px;padding:10px 12px;margin-bottom:10px;font-size:.71rem;line-height:1.8;color:#c4b5fd;white-space:pre-wrap;">Eskiz '+(curEskiz+1)+'/'+m.eskizlar.length+' — '+esc(e.q)+'</div>';
+  // skip row
+  var skipH='<div class="skip-row" onclick="toggleSkip()"><div class="sw" id="sw"></div><span id="skipLbl"># Kommentlarni o\'tkazib yuboring</span></div>';
+  // result panel
+  var resH='<div class="result-panel" id="resultPanel"><div class="result-title">📊 NATIJA — SIMULYATSIYA</div><div class="sim-wrap" id="simWrap"></div></div>';
+  // code block
+  var codeH='<div class="code-block"><div class="fbar"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div><div class="fn" id="fname">dl_20a_'+(curEskiz+1)+'.py</div><div class="fhint">↔️ suring ✏️ yozing</div></div><div class="lines-wrap" id="linesWrap"></div><div class="btn-row"><button class="btn btn-chk" onclick="doCheck()">✅ Tekshir</button><button class="btn btn-clr" onclick="doClear()">🗑️ Tozala</button><button class="btn btn-ghost" id="ghostBtn" onclick="toggleGhost()">👁️ Yashir</button><button class="btn btn-det" onclick="toggleDetail()">📖 Batafsil</button><button class="btn btn-res" onclick="toggleResult()">📊 Natija</button></div><div class="badge" id="badge"></div></div>';
+  document.getElementById('mainContent').innerHTML=dotsH+qH+skipH+resH+codeH;
+  buildLines(e);
+  // sync skip sw
+  document.getElementById('sw').classList.toggle('on',skipOn);
+  document.getElementById('skipLbl').textContent=skipOn?'Kommentlar o\'tkazilmoqda':'# Kommentlarni o\'tkazib yuboring';
+  applyBright(); updateStats();
+}
+
+function jumpEskiz(i){ curEskiz=i; renderEskiz(M[cur]); }
+
+function buildLines(e){
+  var wrap=document.getElementById('linesWrap');
+  if(!wrap) return;
+  wrap.innerHTML=''; lineData=[];
+  var op=BRIGHT[parseInt(document.getElementById('brightSlider').value)||3];
+  e.lines.forEach(function(ln,i){
+    var isCom=ln.c.replace(/^\s+/,'').charAt(0)==='#';
+    var isEmpty=ln.c==='';
+    var isSlash=ln.c.endsWith('\\');
+    var block=document.createElement('div');
+    block.className='line-block';
+    var row=document.createElement('div');
+    row.className='line-row';
+    var num=document.createElement('div');
+    num.className='line-num'; num.id='num'+i;
+    num.textContent=isEmpty?'':(i+1);
+    var content=document.createElement('div');
+    content.className='line-content';
+    var ghost=document.createElement('div');
+    ghost.className='line-ghost'+((isCom&&skipOn)?' skip-c':'');
+    ghost.id='ghost'+i;
+    ghost.style.color=ghostVisible?'rgba(74,96,128,'+op+')':'transparent';
+    ghost.textContent=ln.c||' ';
+    var colors=document.createElement('div');
+    colors.className='line-colors'; colors.id='clr'+i;
+    var inp=document.createElement('input');
+    inp.type='text'; inp.className='line-input'; inp.id='inp'+i;
+    inp.setAttribute('spellcheck','false'); inp.setAttribute('autocorrect','off');
+    inp.setAttribute('autocapitalize','off'); inp.setAttribute('autocomplete','off');
+    if(isEmpty||(isCom&&skipOn)) inp.disabled=true;
+    (function(idx,target,noteText){
+      inp.addEventListener('input',function(){
+        if(!target) return;
+        updateLineClr(idx,target);
+        if(inp.value===target&&target!==''&&noteText!=='') showNote(idx);
+        else if(inp.value!==target) hideNote(idx);
+        updateStats();
+      });
+    })(i,ln.c,ln.n);
+    content.appendChild(ghost); content.appendChild(colors); content.appendChild(inp);
+    row.appendChild(num); row.appendChild(content);
+    var note=document.createElement('div');
+    note.className='line-done-note'; note.id='note'+i;
+    note.textContent=ln.n?('✅ '+ln.n+'!'):'';
+    block.appendChild(row);
+    if(ln.n) block.appendChild(note);
+    wrap.appendChild(block);
+    lineData.push({inp:inp,target:ln.c,isCom:isCom,isEmpty:isEmpty});
+  });
+}
+
+function updateLineClr(idx,target){
+  var inp=document.getElementById('inp'+idx);
+  var clr=document.getElementById('clr'+idx);
+  if(!inp||!clr) return;
+  var typed=inp.value, html='';
+  for(var ci=0;ci<target.length;ci++){
+    var ch=target[ci];
+    if(ci<typed.length) html+=typed[ci]===ch?'<span style="color:#22c55e">'+esc(ch)+'</span>':'<span style="color:#f43f5e;text-decoration:underline">'+esc(ch)+'</span>';
+    else html+='<span style="color:transparent">'+esc(ch)+'</span>';
+  }
+  clr.innerHTML=html;
+  var num=document.getElementById('num'+idx);
+  if(num) num.style.color=(typed===target&&target!=='')?'#22c55e':'';
+}
+
+function showNote(i){var n=document.getElementById('note'+i);if(n&&n.textContent)n.classList.add('show');}
+function hideNote(i){var n=document.getElementById('note'+i);if(n)n.classList.remove('show');}
+
+function doCheck(){
+  var e=M[cur].eskizlar[curEskiz];
+  var done=0,total=0,errors=[];
+  lineData.forEach(function(l,i){
+    if(l.isEmpty||(l.isCom&&skipOn)) return;
+    total++;
+    if(l.inp.value===l.target){
+      done++; document.getElementById('num'+i).style.color='#22c55e';
+      if(e.lines[i].n) showNote(i);
+    } else {
+      errors.push(i+1); document.getElementById('num'+i).style.color='#f43f5e';
+    }
+  });
+  var pct=total>0?Math.round(done/total*100):0;
+  var b=document.getElementById('badge');
+  if(!b) return;
+  b.className='badge show';
+  if(pct>=85){
+    b.className+=' g';
+    eskizDoneSet.add(cur+'-'+curEskiz);
+    var isLast=curEskiz===M[cur].eskizlar.length-1;
+    if(isLast){ doneSet.add(cur); b.textContent='✅ Zo\'r! '+pct+'% — barcha eskizlar tugadi!'; showRating(); }
+    else { b.textContent='✅ Zo\'r! '+pct+'% — keyingi eskiz →'; setTimeout(function(){curEskiz++;renderEskiz(M[cur]);},900); }
+  } else if(pct>=55){
+    b.className+=' o'; b.textContent='⚡ '+pct+'% — xato qatorlar: '+errors.join(', ')+'-qator';
+  } else {
+    b.className+=' r'; b.textContent='❌ '+pct+'% — qaytadan urinib ko\'ring';
+  }
+  updateStats(); buildTabs();
+}
+
+function doClear(){
+  lineData.forEach(function(l,i){
+    l.inp.value='';
+    var clr=document.getElementById('clr'+i); if(clr) clr.innerHTML='';
+    var num=document.getElementById('num'+i); if(num) num.style.color='';
+    hideNote(i);
+  });
+  var b=document.getElementById('badge'); if(b) b.className='badge';
+  updateStats();
+}
+
+function updateStats(){
+  if(M[cur].type!=='eskiz') return;
+  var done=0,total=0;
+  lineData.forEach(function(l){
+    if(l.isEmpty||(l.isCom&&skipOn)) return;
+    total++;
+    if(l.inp.value===l.target) done++;
+  });
+  var pct=total>0?Math.round(done/total*100):0;
+  document.getElementById('svDone').textContent=done+'/'+total;
+  document.getElementById('svScore').textContent=done>0?pct+'%':'—';
+  document.getElementById('progressFill').style.width=(doneSet.size/M.length*100)+'%';
+}
+
+function updateTopStats(){
+  // test balini hisoblash
+  var totalQ=0, correctQ=0;
+  M.forEach(function(m,mi){
+    if(m.type!=='test') return;
+    m.tests.forEach(function(t,qi){
+      totalQ++;
+      if(testAnswers[mi]&&testAnswers[mi][qi]===t.ans) correctQ++;
+    });
+  });
+  document.getElementById('svScore').textContent=totalQ>0?(correctQ+'/'+totalQ):'—';
+  document.getElementById('svDone').textContent=doneSet.size+'/'+M.length;
+  document.getElementById('progressFill').style.width=(doneSet.size/M.length*100)+'%';
+}
+
+function toggleGhost(){
+  ghostVisible=!ghostVisible;
+  document.querySelectorAll('.line-ghost').forEach(function(g){g.style.visibility=ghostVisible?'visible':'hidden';});
+  var gb=document.getElementById('ghostBtn');
+  if(gb) gb.textContent=ghostVisible?'👁️ Yashir':'👁️ Ko\'rsat';
+}
+
+function toggleSkip(){
+  skipOn=!skipOn;
+  var sw=document.getElementById('sw'); if(sw) sw.classList.toggle('on',skipOn);
+  var sl=document.getElementById('skipLbl'); if(sl) sl.textContent=skipOn?'Kommentlar o\'tkazilmoqda':'# Kommentlarni o\'tkazib yuboring';
+  if(M[cur].type==='eskiz'){ buildLines(M[cur].eskizlar[curEskiz]); applyBright(); updateStats(); }
+}
+
+function toggleDetail(){
+  var p=document.getElementById('detailPanel');
+  if(p.classList.contains('show')){p.classList.remove('show');}
+  else{document.getElementById('detailContent').textContent=M[cur].detail;p.classList.add('show');}
+}
+
+function toggleResult(){
+  var p=document.getElementById('resultPanel');
+  if(!p) return;
+  if(p.classList.contains('show')){p.classList.remove('show');}
+  else{document.getElementById('simWrap').innerHTML='<pre>'+esc(M[cur].sim)+'</pre>';p.classList.add('show');}
+}
+
+function setBright(v){document.getElementById('brightVal').textContent=v;applyBright();}
+
+function applyBright(){
+  var v=parseInt(document.getElementById('brightSlider').value)||3;
+  var op=BRIGHT[v];
+  document.querySelectorAll('.line-ghost').forEach(function(g){
+    if(!g.classList.contains('skip-c')&&ghostVisible) g.style.color='rgba(74,96,128,'+op+')';
+  });
+}
+
+function buildTabs(){
+  var c=document.getElementById('tabs'); c.innerHTML='';
+  M.forEach(function(m,i){
+    var d=document.createElement('div');
+    d.className='tab'+(i===cur?' on':'')+(doneSet.has(i)?' done':'');
+    d.textContent=m.id;
+    d.onclick=(function(n){return function(){loadMod(n);};})(i);
+    c.appendChild(d);
+  });
+}
+
+function buildStars(){
+  var sc=document.getElementById('stars'); sc.innerHTML='';
+  for(var i=1;i<=10;i++){
+    var s=document.createElement('span');
+    s.className='star'; s.textContent='⭐'; s.dataset.v=i;
+    s.onclick=(function(v){return function(){
+      selectedStar=v;
+      document.getElementById('ratingScore').textContent=v+' / 10';
+      document.querySelectorAll('.star').forEach(function(st){st.classList.toggle('on',parseInt(st.dataset.v)<=v);});
+    };})(i);
+    sc.appendChild(s);
+  }
+}
+
+function showRating(){document.getElementById('ratingBox').classList.add('show');}
+
+function submitRating(){
+  if(ratingSubmitted) return;
+  if(selectedStar===0){alert('Baho tanlang!');return;}
+  ratingSubmitted=true;
+  document.getElementById('ratingThanks').style.display='block';
+  document.querySelector('.rating-submit').style.display='none';
+}
+
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+</script>
+</body>
+</html>

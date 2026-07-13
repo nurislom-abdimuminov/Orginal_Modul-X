@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Eskiz — NumPy 8.14–8.26</title>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-DLNN5M2C11"></script>
+<script>
+window.dataLayer=window.dataLayer||[];
+function gtag(){dataLayer.push(arguments);}
+gtag('js',new Date());
+gtag('config','G-DLNN5M2C11');
+</script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:#0a0e1a;color:#dde5f0;font-family:'JetBrains Mono',monospace;font-size:13px;min-height:100vh;}
+.top{background:#0f1520;border-bottom:1px solid #1e3048;padding:8px 14px;display:flex;align-items:center;gap:8px;position:sticky;top:0;z-index:50;}
+.top-t{color:#00f0c8;font-size:.78rem;font-weight:700;}
+.top-s{color:#4a6080;font-size:.65rem;margin-left:auto;}
+.bright-bar{background:#0f1520;border-bottom:1px solid #1e3048;padding:6px 14px;display:flex;align-items:center;gap:10px;position:sticky;top:41px;z-index:49;}
+.bright-lbl{font-size:.65rem;color:#4a6080;flex-shrink:0;}
+.bright-slider{flex:1;-webkit-appearance:none;height:4px;border-radius:2px;background:#1e3048;outline:none;cursor:pointer;}
+.bright-slider::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:#00f0c8;cursor:pointer;}
+.bright-val{font-size:.68rem;color:#00f0c8;font-weight:700;width:20px;text-align:right;flex-shrink:0;}
+.wrap{padding:10px 14px;max-width:540px;margin:0 auto;}
+.nav-btns{display:flex;gap:6px;margin-bottom:8px;}
+.nav-btn{flex:1;padding:7px 10px;border-radius:8px;border:1px solid #1e3048;background:#141e2e;color:#4a6080;font-family:'JetBrains Mono',monospace;font-size:.68rem;font-weight:700;cursor:pointer;text-align:center;text-decoration:none;}
+.nav-btn:active{opacity:.7;}
+.nav-btn.active-part{border-color:#00f0c8;color:#00f0c8;background:rgba(0,240,200,.08);}
+.tabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;margin-bottom:10px;scrollbar-width:none;}
+.tabs::-webkit-scrollbar{display:none;}
+.tab{flex-shrink:0;padding:6px 12px;border-radius:20px;border:1px solid #1e3048;background:#141e2e;color:#4a6080;font-size:.68rem;cursor:pointer;transition:all .15s;}
+.tab.on{border-color:#00f0c8;color:#00f0c8;background:rgba(0,240,200,.08);}
+.tab.done{border-color:#22c55e;color:#22c55e;background:rgba(34,197,94,.06);}
+.skip-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;padding:8px 12px;background:#141e2e;border:1px solid #1e3048;border-radius:8px;cursor:pointer;}
+.skip-row span{font-size:.7rem;color:#4a6080;}
+.sw{width:34px;height:18px;background:#1e3048;border-radius:10px;position:relative;transition:background .2s;flex-shrink:0;}
+.sw.on{background:#fbbf24;}
+.sw::after{content:'';position:absolute;top:2px;left:2px;width:14px;height:14px;background:#fff;border-radius:50%;transition:left .2s;}
+.sw.on::after{left:18px;}
+.stats{display:flex;gap:8px;margin-bottom:10px;}
+.stat{flex:1;background:#141e2e;border:1px solid #1e3048;border-radius:8px;padding:7px 8px;text-align:center;}
+.sv{font-size:.95rem;font-weight:700;color:#00f0c8;}
+.sl{font-size:.58rem;color:#4a6080;margin-top:2px;}
+.progress-bar{height:3px;background:#1e3048;border-radius:2px;margin-bottom:10px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,#00f0c8,#2563eb);border-radius:2px;transition:width .4s;}
+.plan-box{background:#0d1828;border:1px solid #1e3048;border-left:3px solid #00f0c8;border-radius:8px;padding:10px 12px;margin-bottom:10px;}
+.plan-title{font-size:.68rem;font-weight:700;color:#00f0c8;margin-bottom:8px;}
+.plan-item{font-size:.67rem;color:#8ba0c0;line-height:1.9;padding-left:4px;}
+.plan-item::before{content:'→ ';color:#00f0c8;}
+.terms-box{background:#080c14;border:1px solid #1e3048;border-left:3px solid #a855f7;border-radius:8px;padding:10px 12px;margin-bottom:10px;}
+.terms-title{font-size:.68rem;font-weight:700;color:#a855f7;margin-bottom:8px;}
+.term-row{display:flex;gap:6px;margin-bottom:5px;align-items:flex-start;}
+.term-key{font-size:.64rem;color:#fbbf24;font-weight:700;min-width:90px;flex-shrink:0;}
+.term-val{font-size:.63rem;color:#4a6080;line-height:1.6;}
+.info-box{background:#0f1520;border:1px solid #1e3048;border-left:3px solid #00f0c8;border-radius:8px;padding:10px 12px;margin-bottom:10px;font-size:.71rem;line-height:1.8;color:#8ba0c0;white-space:pre-wrap;}
+.detail-panel{display:none;background:#0a1628;border:1px solid #2563eb;border-radius:8px;padding:10px 12px;margin-bottom:10px;font-size:.71rem;line-height:1.9;color:#93c5fd;white-space:pre-wrap;}
+.detail-panel.show{display:block;}
+.detail-title{color:#60a5fa;font-weight:700;margin-bottom:6px;}
+.result-panel{display:none;background:#080c14;border:1px solid #22c55e;border-radius:10px;padding:12px;margin-bottom:10px;}
+.result-panel.show{display:block;}
+.result-title{color:#22c55e;font-size:.72rem;font-weight:700;margin-bottom:8px;}
+.sim-wrap{width:100%;overflow-x:auto;}
+.sim-wrap pre{font-size:.68rem;line-height:1.9;color:#22c55e;white-space:pre;}
+.code-block{border:1px solid #1e3048;border-radius:10px;overflow:hidden;margin-bottom:10px;background:#090d18;}
+.fbar{display:flex;align-items:center;gap:5px;padding:7px 12px;background:#0f1520;border-bottom:1px solid #1e3048;}
+.dot{width:6px;height:6px;border-radius:50%;}
+.dot.r{background:#f43f5e;}.dot.y{background:#fbbf24;}.dot.g{background:#22c55e;}
+.fn{font-size:.65rem;color:#4a6080;margin-left:4px;}
+.fhint{margin-left:auto;font-size:.6rem;color:#00f0c8;opacity:.7;}
+.lines-wrap{padding:4px 0;}
+.line-block{margin:0;}
+.line-row{display:flex;align-items:center;position:relative;min-height:30px;}
+.line-num{width:28px;flex-shrink:0;font-size:.63rem;padding:4px 4px 4px 5px;color:#2a3a50;text-align:right;user-select:none;transition:color .2s;align-self:center;}
+.line-content{flex:1;position:relative;overflow-x:auto;overflow-y:hidden;min-height:30px;}
+.line-content::-webkit-scrollbar{height:2px;}
+.line-content::-webkit-scrollbar-thumb{background:#1e3048;border-radius:1px;}
+.line-ghost{font-size:.76rem;line-height:1.8;padding:4px 8px;white-space:nowrap;pointer-events:none;min-height:30px;display:block;}
+.line-ghost.skip-c{opacity:.08!important;}
+.line-colors{position:absolute;top:0;left:0;font-size:.76rem;line-height:1.8;padding:4px 8px;white-space:nowrap;pointer-events:none;z-index:2;min-height:30px;}
+.line-input{position:absolute;top:0;left:0;right:0;bottom:0;width:100%;font-family:'JetBrains Mono',monospace;font-size:.76rem;line-height:1.8;padding:4px 8px;color:transparent;-webkit-text-fill-color:transparent;caret-color:#00f0c8;background:transparent;border:none;outline:none;white-space:nowrap;overflow:hidden;z-index:10;-webkit-appearance:none;}
+.line-input:disabled{cursor:default;}
+.line-done-note{display:none;font-size:.66rem;line-height:1.6;padding:3px 8px 3px 34px;color:#38bdf8;background:rgba(56,189,248,.06);border-left:2px solid #38bdf8;white-space:pre-wrap;animation:fadeIn .25s ease;}
+.line-done-note.show{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:translateY(0)}}
+.btn-row{display:flex;gap:6px;flex-wrap:wrap;padding:9px 12px;background:#0f1520;border-top:1px solid #1e3048;}
+.btn{padding:8px 11px;border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:.68rem;font-weight:700;border:none;cursor:pointer;flex-shrink:0;transition:opacity .15s;}
+.btn:active{opacity:.7;}
+.btn-chk{background:#00f0c8;color:#080c14;}
+.btn-clr{background:transparent;border:1px solid #1e3048;color:#4a6080;}
+.btn-det{background:#2563eb;color:#fff;}
+.btn-ghost{background:#7c3aed;color:#fff;}
+.btn-res{background:#16a34a;color:#fff;}
+.badge{display:none;margin:0 12px 10px;padding:7px 12px;border-radius:8px;font-size:.7rem;border:1px solid #1e3048;}
+.badge.show{display:block;}
+.badge.g{border-color:#22c55e;color:#22c55e;background:rgba(34,197,94,.07);}
+.badge.o{border-color:#fbbf24;color:#fbbf24;background:rgba(251,191,36,.07);}
+.badge.r{border-color:#f43f5e;color:#f43f5e;background:rgba(244,63,94,.07);}
+.rating-box{background:#0d1828;border:1px solid #fbbf24;border-radius:12px;padding:14px 16px;margin-top:10px;}
+
+.rating-title{font-size:.72rem;font-weight:700;color:#fbbf24;text-align:center;margin-bottom:4px;}
+.rating-sub{font-size:.62rem;color:#4a6080;text-align:center;margin-bottom:12px;}
+.stars{display:flex;justify-content:center;gap:4px;margin-bottom:10px;flex-wrap:wrap;}
+.star{font-size:1.5rem;cursor:pointer;filter:grayscale(1);opacity:.35;transition:transform .1s,filter .1s,opacity .1s;user-select:none;}
+.star.on{filter:none;opacity:1;}
+.star:active{transform:scale(1.3);}
+.rating-score{text-align:center;font-size:.72rem;color:#fbbf24;font-weight:700;margin-bottom:8px;min-height:18px;}
+.rating-comment{width:100%;background:#141e2e;border:1px solid #1e3048;border-radius:8px;padding:8px 10px;color:#dde5f0;font-family:'JetBrains Mono',monospace;font-size:.68rem;resize:none;outline:none;margin-bottom:8px;}
+.rating-comment:focus{border-color:#fbbf24;}
+.rating-submit{width:100%;padding:10px;background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#080c14;font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:700;border:none;border-radius:8px;cursor:pointer;}
+.rating-submit:active{opacity:.8;}
+.rating-thanks{display:none;text-align:center;padding:10px;font-size:.72rem;color:#22c55e;font-weight:700;}
+.footer-nav{display:flex;gap:8px;margin-top:12px;margin-bottom:20px;}
+.footer-link{flex:1;padding:10px;border-radius:10px;border:1px solid #1e3048;background:#141e2e;color:#4a6080;font-size:.68rem;text-align:center;text-decoration:none;font-family:'JetBrains Mono',monospace;}
+.footer-link.prev{border-color:#2563eb;color:#2563eb;background:rgba(37,99,235,.06);}
+.footer-link.menu{border-color:#00f0c8;color:#00f0c8;background:rgba(0,240,200,.06);}
+</style>
+</head>
+<body>
+<div class="top">
+  <div class="top-t">✏️ NumPy — 8.14–8.26</div>
+  <div class="top-s" id="topSub">8.14</div>
+</div>
+<div class="bright-bar">
+  <span class="bright-lbl">👁️ Xiralik:</span>
+  <input type="range" class="bright-slider" id="brightSlider" min="1" max="10" value="3" oninput="setBright(this.value)">
+  <span class="bright-val" id="brightVal">3</span>
+</div>
+<div class="wrap">
+  <div class="nav-btns">
+    <a class="nav-btn" href="eskiz_numpy_part1.html">← 8.1–8.13 (1-qism)</a>
+    <div class="nav-btn active-part">📗 8.14–8.26 (2-qism)</div>
+  </div>
+  <div class="stats">
+    <div class="stat"><div class="sv" id="svPct">—</div><div class="sl">TO'G'RI</div></div>
+    <div class="stat"><div class="sv" id="svDone">0/0</div><div class="sl">BAJARILDI</div></div>
+    <div class="stat"><div class="sv" id="svMod">1/13</div><div class="sl">MAVZU</div></div>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+  <div class="tabs" id="tabs"></div>
+  <div class="skip-row" onclick="toggleSkip()">
+    <div class="sw" id="sw"></div>
+    <span id="skipLbl"># Kommentlarni o'tkazib yuboring</span>
+  </div>
+  <div class="plan-box" id="planBox"></div>
+  <div class="terms-box" id="termsBox"></div>
+  <div class="info-box" id="infoBox"></div>
+  <div class="detail-panel" id="detailPanel">
+    <div class="detail-title">📘 BATAFSIL</div>
+    <div id="detailContent"></div>
+  </div>
+  <div class="result-panel" id="resultPanel">
+    <div class="result-title">📊 NATIJA — SIMULYATSIYA</div>
+    <div class="sim-wrap" id="simWrap"></div>
+  </div>
+  <div class="code-block">
+    <div class="fbar">
+      <div class="dot r"></div><div class="dot y"></div><div class="dot g"></div>
+      <div class="fn" id="fname">numpy.py</div>
+      <div class="fhint">↔️ suring ✏️ yozing</div>
+    </div>
+    <div class="lines-wrap" id="linesWrap"></div>
+    <div class="btn-row">
+      <button class="btn btn-chk" onclick="doCheck()">✅ Tekshir</button>
+      <button class="btn btn-clr" onclick="doClear()">🗑️ Tozala</button>
+      <button class="btn btn-ghost" id="ghostBtn" onclick="toggleGhost()">👁️ Yashir</button>
+      <button class="btn btn-det" onclick="toggleDetail()">📖 Batafsil</button>
+      <button class="btn btn-res" onclick="toggleResult()">📊 Natija</button>
+    </div>
+    <div class="badge" id="badge"></div>
+  </div>
+  <div class="rating-box" id="ratingBox">
+    <div class="rating-title">⭐ NumPy modulini to'liq baholang</div>
+    <div class="rating-sub">8.1 dan 8.26 gacha — fikringiz muhim!</div>
+    <div class="stars" id="stars"></div>
+    <div class="rating-score" id="ratingScore">Baho tanlang (1–10)</div>
+    <textarea class="rating-comment" id="ratingComment" rows="2" placeholder="Izoh: nima yoqdi, nima yetishmadi..."></textarea>
+    <button class="rating-submit" onclick="submitRating()">⭐ Yuborish</button>
+    <div class="rating-thanks" id="ratingThanks">✅ Rahmat! Fikringiz qabul qilindi.</div>
+  </div>
+  <div class="footer-nav">
+    <a class="footer-link prev" href="eskiz_numpy_part1.html">← 1-qism (8.1–8.13)</a>
+    <a class="footer-link menu" href="menu.html">🏠 Bosh menyu</a>
+  </div>
+</div>
+
+<script>
+var M = [
+
+// 8.14 ─────────────────────────────────────────
+{id:'8.14 Test: Universal funksiyalar',f:'numpy_8_14.py',
+plan:['Ufunc — amaliy mashqlar','np.power() — daraja hisoblash','np.mod() — qoldiq hisoblash','np.maximum() va np.minimum()'],
+terms:[
+  ['np.power()','Darajaga ko\'tarish: a**b kabi'],
+  ['np.mod()','Qoldiqli bo\'lish: a % b kabi'],
+  ['np.maximum()','Ikkita massivdan kattaroqlarini olish'],
+  ['np.clip()','Qiymatlarni [min, max] oralig\'ida kesish']
+],
+info:'8.14 — TEST: UNIVERSAL FUNKSIYALAR\n\nnp.power(a, b)   → a^b, har element\nnp.mod(a, b)     → a % b\nnp.maximum(a, b) → har pozitsiyada kattaroq\nnp.minimum(a, b) → har pozitsiyada kichikroq\nnp.clip(a, 0, 1) → 0 dan kichik=0, 1 dan katta=1\nnp.sign(a)       → -1, 0, yoki 1',
+detail:'8.14 BATAFSIL — UFUNC TEST\n\n━━━ POWER ━━━\n\nnp.power([2,3,4], 2)  → [4, 9, 16]\nnp.power(2, [1,2,3,4])→ [2, 4, 8, 16]\n\n━━━ MOD ━━━\n\nnp.mod([10,11,12], 3) → [1, 2, 0]\nJuft sonlar: a[np.mod(a,2)==0]\n\n━━━ MAXIMUM/MINIMUM ━━━\n\na = np.array([1, 5, 3])\nb = np.array([4, 2, 6])\nnp.maximum(a,b) → [4, 5, 6]\nnp.minimum(a,b) → [1, 2, 3]\n\n━━━ CLIP ━━━\n\na = np.array([-2, 0, 0.5, 1, 2])\nnp.clip(a, 0, 1) → [0., 0., 0.5, 1., 1.]\nML da: ReLU = np.clip(a, 0, None)',
+sim:'>>> a = np.array([1, 2, 3, 4, 5])\n>>> np.power(a, 2)\narray([ 1,  4,  9, 16, 25])\n>>> np.mod(a, 3)\narray([1, 2, 0, 1, 2])\n>>> np.clip(a, 2, 4)\narray([2, 2, 3, 4, 4])\n>>> b = np.array([5,4,3,2,1])\n>>> np.maximum(a,b)\narray([5, 4, 3, 4, 5])',
+lines:[
+  {c:'import numpy as np',n:''},
+  {c:'',n:''},
+  {c:'a = np.array([1, 2, 3, 4, 5])',n:'5 elementli massiv yaratdingiz'},
+  {c:'',n:''},
+  {c:'print(np.power(a, 2))',n:'har elementni kvadratga ko\'tardingiz'},
+  {c:'print(np.mod(a, 3))',n:'har elementni 3 ga bo\'lganda qoldiqni hisobladingiz'},
+  {c:'',n:''},
+  {c:'b = np.array([5, 4, 3, 2, 1])',n:'teskari tartibdagi massiv yaratdingiz'},
+  {c:'print(np.maximum(a, b))',n:'har pozitsiyada kattaroq qiymatni oldingiz'},
+  {c:'print(np.minimum(a, b))',n:'har pozitsiyada kichikroq qiymatni oldingiz'},
+  {c:'',n:''},
+  {c:'# clip — ReLU aktivatsiya funksiyasi',n:''},
+  {c:'c = np.array([-2, -1, 0, 1, 2])',n:'manfiy va musbat aralash massiv'},
+  {c:'print(np.clip(c, 0, None))',n:'ReLU: manfiylarni 0 ga kesib oldingiz'}
+]},
+
+// 8.15 ─────────────────────────────────────────
+{id:'8.15 Mantiqiy shart operatori',f:'numpy_8_15.py',
+plan:['np.all() — hammasi rostmi','np.any() — birontasi rostmi','np.logical_and(), np.logical_or()','np.isnan(), np.isinf() — maxsus qiymatlar'],
+terms:[
+  ['np.all()','Massivning barcha elementlari True?'],
+  ['np.any()','Massivning hech bo\'lmasa bittasi True?'],
+  ['np.isnan()','NaN (Not a Number) elementlarini topish'],
+  ['np.isinf()','Cheksiz (inf) qiymatlarni topish']
+],
+info:'8.15 — MANTIQIY OPERATORLAR\n\nnp.all(a > 0)   → hammasi 0 dan katta?\nnp.any(a > 0)   → birontasi 0 dan katta?\n\nnp.logical_and(a>0, a<10) → 0<x<10\nnp.logical_or(a<0, a>10)  → tashqarida\nnp.logical_not(a>5)       → not\n\nMaxsus:\n  np.isnan(a)   → NaN elementlar\n  np.isinf(a)   → inf elementlar\n  np.isfinite(a)→ chekli qiymatlar',
+detail:'8.15 BATAFSIL — MANTIQIY\n\n━━━ ALL VA ANY ━━━\n\na = np.array([1, 2, 3, 4, 5])\nnp.all(a > 0)   → True\nnp.all(a > 3)   → False\nnp.any(a > 4)   → True\nnp.any(a > 10)  → False\n\n━━━ AXIS BILAN ━━━\n\nm = np.array([[1,2,3],[4,5,6]])\nnp.all(m > 0, axis=0) → [T,T,T] (ustunlar)\nnp.any(m > 5, axis=1) → [F,T] (qatorlar)\n\n━━━ NAN VA INF ━━━\n\na = np.array([1, np.nan, 3, np.inf])\nnp.isnan(a)  → [F,T,F,F]\nnp.isinf(a)  → [F,F,F,T]\nnp.isfinite(a)→ [T,F,T,F]\n\nNaN ni tozalash:\na[np.isnan(a)] = 0',
+sim:'>>> a = np.array([1, 2, 3, 4, 5])\n>>> np.all(a > 0)\nTrue\n>>> np.any(a > 4)\nTrue\n>>> b = np.array([1, np.nan, 3, np.inf])\n>>> np.isnan(b)\narray([False,  True, False, False])\n>>> b[~np.isnan(b)]\narray([  1.,   3., inf])',
+lines:[
+  {c:'import numpy as np',n:''},
+  {c:'',n:''},
+  {c:'a = np.array([1, 2, 3, 4, 5])',n:'5 elementli massiv yaratdingiz'},
+  {c:'print(np.all(a > 0))',n:'barcha elementlar 0 dan katta — True'},
+  {c:'print(np.any(a > 4))',n:'kamida bitta 4 dan katta — True'},
+  {c:'print(np.all(a > 3))',n:'barchasi 3 dan katta emas — False'},
+  {c:'',n:''},
+  {c:'# NaN bilan ishlash',n:''},
+  {c:'b = np.array([1.0, np.nan, 3.0, np.inf, 5.0])',n:'NaN va inf qiymatli massiv yaratdingiz'},
+  {c:'print(np.isnan(b))',n:'NaN bo\'lgan joylarni True bilan ko\'rdingiz'},
+  {c:'print(np.isinf(b))',n:'inf bo\'lgan joylarni True bilan ko\'rdingiz'},
+  {c:'b[np.isnan(b)] = 0',n:'NaN qiymatlarni 0 ga almashtirib tozaladingiz'},
+  {c:'print(b)',n:'tozalangan massivni chiqardingiz'}
+]},
+
+// 8.16 ─────────────────────────────────────────
+{id:'8.16 Arifmetik amallar',f:'numpy_8_16.py',
+plan:['Element bo\'yicha: +, -, *, /, **','Broadcasting mexanizmi','np.add(), np.subtract(), np.multiply()','Matritsa ko\'paytmasi: np.dot(), @'],
+terms:[
+  ['broadcasting','Turli o\'lchamdagi massivlarga amal qilish qoidasi'],
+  ['element-wise','Har element alohida: [1,2]*[3,4]=[3,8]'],
+  ['np.dot()','Skalar va matritsa ko\'paytmasi'],
+  ['@ operator','Python 3.5+ matritsa ko\'paytma operatori']
+],
+info:'8.16 — ARIFMETIK AMALLAR\n\nElement bo\'yicha:\n  a + b  → element qo\'shish\n  a * b  → element ko\'paytish\n  a / b  → element bo\'lish\n  a ** 2 → kvadrat\n\nBroadcasting:\n  a + 5        → har elementga 5\n  m + [1,2,3]  → har qatorga qo\'shish\n\nMatritsa:\n  A @ B        → matritsa ko\'paytma\n  np.dot(A, B) → xuddi shunday',
+detail:'8.16 BATAFSIL — ARIFMETIK\n\n━━━ ELEMENT BO\'YICHA ━━━\n\na = np.array([1,2,3])\nb = np.array([4,5,6])\na + b  → [5,7,9]\na - b  → [-3,-3,-3]\na * b  → [4,10,18]\na / b  → [0.25,0.4,0.5]\na ** 2 → [1,4,9]\n\n━━━ BROADCASTING ━━━\n\nm = np.array([[1,2,3],[4,5,6]])\nm + 10       → [[11,12,13],[14,15,16]]\nm * [1,2,3]  → [[1,4,9],[4,10,18]]\n\n━━━ MATRITSA KO\'PAYTMA ━━━\n\nA(2,3) @ B(3,4) → C(2,4)\n\nElement ko\'paytma ≠ Matritsa ko\'paytma!\na * b  → element ko\'paytma\na @ b  → matritsa ko\'paytma',
+sim:'>>> a = np.array([1,2,3])\n>>> b = np.array([4,5,6])\n>>> a + b\narray([5, 7, 9])\n>>> a * b\narray([ 4, 10, 18])\n>>> A = np.array([[1,2],[3,4]])\n>>> B = np.array([[5,6],[7,8]])\n>>> A @ B\narray([[19, 22],\n       [43, 50]])',
+lines:[
+  {c:'import numpy as np',n:''},
+  {c:'',n:''},
+  {c:'a = np.array([1, 2, 3, 4])',n:''},
+  {c:'b = np.array([4, 3, 2, 1])',n:''},
+  {c:'',n:''},
+  {c:'print(a + b)',n:'element bo\'yicha qo\'shish — [5,5,5,5]'},
+  {c:'print(a * b)',n:'element bo\'yicha ko\'paytish — [4,6,6,4]'},
+  {c:'print(a ** 2)',n:'har elementni kvadratga ko\'tardingiz'},
+  {c:'',n:''},
+  {c:'# Broadcasting',n:''},
+  {c:'m = np.array([[1, 2, 3], [4, 5, 6]])',n:'2x3 matritsa yaratdingiz'},
+  {c:'print(m + 10)',n:'broadcasting: har elementga 10 qo\'shildi'},
+  {c:'',n:''},
+  {c:'# Matritsa ko\'paytmasi',n:''},
+  {c:'A = np.array([[1, 2], [3, 4]])',n:'2x2 matritsa A yaratdingiz'},
+  {c:'B = np.array([[5, 6], [7, 8]])',n:'2x2 matritsa B yaratdingiz'},
+  {c:'print(A @ B)',n:'matritsa ko\'paytmasini hisobladingiz'}
+]},
+
+// 8.17 ─────────────────────────────────────────
+{id:'8.17 Matematik va statistik amallar',f:'numpy_8_17.py',
+plan:['np.sum(), mean(), std(), var()','Axis parametri — yo\'nalish bo\'yicha','np.cumsum() — to\'plangan yig\'indi','np.percentile(), np.median()'],
+terms:[
+  ['axis=0','Ustunlar bo\'yicha hisoblash (vertikal)'],
+  ['axis=1','Qatorlar bo\'yicha hisoblash (gorizontal)'],
+  ['std','Standart og\'ish — tarqalish o\'lchami'],
+  ['percentile','N% elementlar qaysi qiymatdan kichik']
+],
+info:'8.17 — STATISTIK AMALLAR\n\nnp.sum(a)      → yig\'indi\nnp.mean(a)     → o\'rtacha\nnp.std(a)      → standart og\'ish\nnp.var(a)      → dispersiya\nnp.median(a)   → mediana\nnp.max/min(a)  → maksimum/minimum\n\nAxis:\n  axis=0 → har ustun (vertikal)\n  axis=1 → har qator (gorizontal)\n\nQo\'shimcha:\n  np.cumsum()       → to\'plangan\n  np.percentile(a,75)→ 75-persentil',
+detail:'8.17 BATAFSIL — STATISTIKA\n\n━━━ BASIC ━━━\n\na = np.array([1,2,3,4,5,6])\nnp.sum(a)    → 21\nnp.mean(a)   → 3.5\nnp.std(a)    → 1.708\nnp.var(a)    → 2.916\nnp.median(a) → 3.5\n\n━━━ 2D AXIS ━━━\n\nm = np.array([[1,2,3],[4,5,6]])\nnp.sum(m)        → 21  (hammasi)\nnp.sum(m,axis=0) → [5,7,9]  (har ustun)\nnp.sum(m,axis=1) → [6,15]   (har qator)\nnp.mean(m,axis=0)→ [2.5, 3.5, 4.5]\n\n━━━ CUMSUM ━━━\n\nnp.cumsum([1,2,3,4]) → [1,3,6,10]\n→ har pog\'onada yig\'ilgan summa\n→ grafik, moliya hisobiychun\n\n━━━ PERCENTILE ━━━\n\nnp.percentile(a, 25) → 1-kvartel\nnp.percentile(a, 50) → mediana\nnp.percentile(a, 75) → 3-kvartel',
+sim:'>>> m = np.array([[1,2,3],[4,5,6]])\n>>> np.sum(m)\n21\n>>> np.sum(m, axis=0)\narray([5, 7, 9])\n>>> np.sum(m, axis=1)\narray([ 6, 15])\n>>> np.percentile([1,2,3,4,5], 75)\n4.0\n>>> np.cumsum([1,2,3,4])\narray([ 1,  3,  6, 10])',
+lines:[
+  {c:'import numpy as np',n:''},
+  {c:'',n:''},
+  {c:'m = np.array([[1, 2, 3], [4, 5, 6]])',n:'2x3 matritsa yaratdingiz'},
+  {c:'',n:''},
+  {c:'print("Jami:", np.sum(m))',n:'barcha elementlar yig\'indisi — 21'},
+  {c:'print("Ustunlar:", np.sum(m, axis=0))',n:'har ustun yig\'indisi — [5,7,9]'},
+  {c:'print("Qatorlar:", np.sum(m, axis=1))',n:'har qator yig\'indisi — [6,15]'},
+  {c:'',n:''},
+  {c:'print("O\'rtacha:", np.mean(m))',n:'barcha elementlar o\'rtachasi — 3.5'},
+  {c:'print("Std:", np.std(m))',n:'standart og\'ishni hisobladingiz'},
+  {c:'',n:''},
+  {c:'a = np.array([3, 1, 4, 1, 5, 9, 2, 6])',n:''},
+  {c:'print("Mediana:", np.median(a))',n:'mediananani hisobladingiz'},
+  {c:'print("75%:", np.percentile(a, 75))',n:'75-persentilni hisobladingiz'},
+  {c:'print("cumsum:", np.cumsum(a))',n:'to\'plangan yig\'indini hisobladingiz'}
+]},
+
+// 8.18 ─────────────────────────────────────────
+{id:'8.18 Tartiblash (Sorting)',f:'numpy_8_18.py',
+plan:['np.sort() — massivni saralash','np.argsort() — saralash indekslari','np.argmax(), np.argmin() — indeks topish','2D massivlarni saralash'],
+terms:[
+  ['np.sort()','Saralangan yangi massiv qaytaradi'],
+  ['a.sort()','Asl massivni o\'rnida saralaydi (in-place)'],
+  ['np.argsort()','Saralangan tartibdagi indekslarni qaytaradi'],
+  ['np.argmax()','Maksimal elementning indeksini qaytaradi']
+],
+info:'8.18 — TARTIBLASH\n\nnp.sort(a)        → saralangan nusxa\na.sort()          → aslini o\'zgartiradi\nnp.sort(a)[::-1]  → teskari (katta→kichik)\n\nnp.argsort(a)     → saralash indekslari\nnp.argmax(a)      → eng katta indeksi\nnp.argmin(a)      → eng kichik indeksi\n\n2D:\n  np.sort(m, axis=0) → ustunlar bo\'yicha\n  np.sort(m, axis=1) → qatorlar bo\'yicha',
+detail:'8.18 BATAFSIL — SORT\n\n━━━ SORT VS ARGSORT ━━━\n\na = np.array([3,1,4,1,5,9,2,6])\nnp.sort(a)     → [1,1,2,3,4,5,6,9]\nnp.argsort(a)  → [1,3,6,0,2,4,7,5]\n→ asl massivdagi pozitsiyalar!\n\nFoyda: a[np.argsort(a)] == np.sort(a)\n\n━━━ ARGMAX/ARGMIN ━━━\n\nscores = [85,92,78,96,88]\nnp.argmax(scores) → 3  (96 ning indeksi)\nnp.argmin(scores) → 2  (78 ning indeksi)\n\n━━━ 2D SORT ━━━\n\nm = np.array([[3,1,2],[6,4,5]])\nnp.sort(m, axis=1)  → har qator saralangan\n→ [[1,2,3],[4,5,6]]\nnp.sort(m, axis=0)  → har ustun saralangan',
+sim:'>>> a = np.array([3,1,4,1,5,9])\n>>> np.sort(a)\narray([1, 1, 3, 4, 5, 9])\n>>> np.argsort(a)\narray([1, 3, 0, 2, 4, 5])\n>>> np.argmax(a)\n5\n>>> np.sort(a)[::-1]\narray([9, 5, 4, 3, 1, 1])',
+lines:[
+  {c:'import numpy as np',n:''},
+  {c:'',n:''},
+  {c:'a = np.array([3, 1, 4, 1, 5, 9, 2, 6])',n:'saralanmagan massiv yaratdingiz'},
+  {c:'',n:''},
+  {c:'print("sorted:", np.sort(a))',n:'kichikdan kattaga saralangan nusxa oldingiz'},
+  {c:'print("reverse:", np.sort(a)[::-1])',n:'kattadan kichikka saralangan nusxa oldingiz'},
+  {c:'print("argsort:", np.argsort(a))',n:'saralangan pozitsiyalarning indekslarini oldingiz'},
+  {c:'',n:''},
+  {c:'print("argmax:", np.argmax(a))',n:'eng katta elementning indeksini topdingiz'},
+  {c:'print("argmin:", np.argmin(a))',n:'eng kichik elementning indeksini topdingiz'},
+  {c:'',n:''},
+  {c:'# 2D saralash',n:''},
+  {c:'m = np.array([[3, 1, 2], [6, 4, 5]])',n:'2x3 matritsa yaratdingiz'},
+  {c:'print(np.sort(m, axis=1))',n:'har qatorni alohida saraladingiz'}
+]},
+
+// 8.19 ─────────────────────────────────────────
+{id:'8.19 Takrorlanmas va boshqa amallar',f:'numpy_8_19.py',
+plan:['np.unique() — takrorlanmaydigan elementlar','np.concatenate(), vstack, hstack','np.split(), hsplit, vsplit','np.tile(), np.repeat()'],
+terms:[
+  ['np.unique()','Takrorlanmaydigan elementlar + hisoblar'],
+  ['np.concatenate()','Massivlarni birlashtirish'],
+  ['np.tile()','Massivni n marta takrorlash'],
+  ['np.repeat()','Har elementni n marta takrorlash']
+],
+info:'8.19 — UNIQUE VA BOSHQA AMALLAR\n\nnp.unique(a)                → takrorsiz elementlar\nnp.unique(a, return_counts=True) → soni ham\n\nnp.concatenate([a,b])        → birlashtirish\nnp.vstack([m1,m2])           → vertikal\nnp.hstack([m1,m2])           → gorizontal\n\nnp.split(a, 3)               → 3 teng qism\nnp.tile([1,2], 3)            → [1,2,1,2,1,2]\nnp.repeat([1,2,3], 2)        → [1,1,2,2,3,3]',
+detail:'8.19 BATAFSIL\n\n━━━ UNIQUE ━━━\n\na = np.array([1,2,2,3,3,3])\nnp.unique(a)\n→ [1, 2, 3]\n\nnp.unique(a, return_counts=True)\n→ ([1,2,3], [1,2,3])  (qiymat, soni)\n\n━━━ BIRLASHTIRISH ━━━\n\nnp.concatenate([a,b])       → 1D\nnp.vstack([m1,m2]) → axis=0 (qator)\nnp.hstack([m1,m2]) → axis=1 (ustun)\nnp.dstack([m1,m2]) → axis=2 (chuqurlik)\n\n━━━ TILE VS REPEAT ━━━\n\nnp.tile([1,2,3], 3)\n→ [1,2,3,1,2,3,1,2,3]  (blok takror)\n\nnp.repeat([1,2,3], 3)\n→ [1,1,1,2,2,2,3,3,3]  (element takror)',
+sim:'>>> a = np.array([1,2,2,3,3,3,1])\n>>> np.unique(a)\narray([1, 2, 3])\n>>> np.unique(a, return_counts=True)\n(array([1, 2, 3]), array([2, 2, 3]))\n>>> np.tile([1,2], 3)\narray([1, 2, 1, 2, 1, 2])\n>>> np.repeat([1,2,3], 2)\narray([1, 1, 2, 2, 3, 3])',
+lines:[
+  {c:'import numpy as np',n:''},
+  {c:'',n:''},
+  {c:'a = np.array([1, 2, 2, 3, 3, 3, 1, 4])',n:'takrorlanuvchi elementli massiv'},
+  {c:'print(np.unique(a))',n:'takrorlanmaydigan elementlarni oldingiz'},
+  {c:'vals, counts = np.unique(a, return_counts=True)',n:'qiymat va ularning sonini ajratdingiz'},
+  {c:'print(vals, counts)',n:'har elementning necha marta uchrashini ko\'rdingiz'},
+  {c:'',n:''},
+  {c:'# Tile va repeat',n:''},
+  {c:'print(np.tile([1, 2, 3], 3))',n:'massivni 3 marta takrorladingiz'},
+  {c:'print(np.repeat([1, 2, 3], 2))',n:'har elementni 2 marta takrorladingiz'},
+  {c:'',n:''},
+  {c:'# Birlashtirish',n:''},
+  {c:'m1 = np.array([[1, 2], [3, 4]])',n:''},
+  {c:'m2 = np.array([[5, 6], [7, 8]])',n:''},
+  {c:'print(np.vstack([m1, m2]))',n:'vertikal birlashtirdingiz — 4x2 matritsa'}
+]},
+
+// 8.20 ─────────────────────────────────────────
+{id:'8.20 Fayllar bilan ishlash',f:'numpy_8_20.py',
+plan:['np.save() — .npy formatida saqlash','np.load() — yuklash','np.savetxt() — matn fayl','np.loadtxt() — matn fayldan yuklash'],
+terms:[
+  ['np.save()','NumPy massivini .npy formatida saqlash'],
+  ['np.load()','Saqlangan massivni yuklash'],
+  ['np.savetxt()','Massivni CSV yoki TXT ga saqlash'],
+  ['np.savez()','Bir nechta massivni bitta faylga saqlash']
+],
+info:'8.20 — FAYLLAR BILAN ISHLASH\n\nBinari format (.npy):\n  np.save("fayl.npy", arr)    → saqlash\n  np.load("fayl.npy")         → yuklash\n\nMatn format (.csv, .txt):\n  np.savetxt("fayl.csv", arr, delimiter=",")\n  np.loadtxt("fayl.csv", delimiter=",")\n\nKo\'p massiv:\n  np.savez("fayl.npz", a=arr1, b=arr2)\n  data = np.load("fayl.npz")\n  data["a"], data["b"]',
+detail:'8.20 BATAFSIL — FAYL\n\n━━━ .NPY FORMAT ━━━\n\nAfzallik:\n  → dtype saqlanadi\n  → tez yuklanadi\n  → NumPy uchun maxsus\n\nKamchilik:\n  → faqat Python/NumPy o\'qiy oladi\n\n━━━ SAVETXT ━━━\n\nnp.savetxt("data.csv", m,\n    delimiter=",",\n    header="x,y,z",\n    fmt="%.2f")\n\n━━━ SAVEZ ━━━\n\nnp.savez("model.npz",\n    weights=W,\n    biases=b)\ndata = np.load("model.npz")\nW = data["weights"]\nb = data["biases"]',
+sim:'>>> arr = np.array([[1,2,3],[4,5,6]])\n>>> np.save("test.npy", arr)\n>>> loaded = np.load("test.npy")\n>>> loaded\narray([[1, 2, 3],\n       [4, 5, 6]])\n>>> np.savetxt("test.csv", arr, delimiter=",")\n# Fayl: 1.0,2.0,3.0\\n4.0,5.0,6.0',
+lines:[
+  {c:'import numpy as np',n:''},
+  {c:'',n:''},
+  {c:'arr = np.array([[1, 2, 3], [4, 5, 6]])',n:'saqlash uchun massiv yaratdingiz'},
+  {c:'',n:''},
+  {c:'# .npy formatida saqlash va yuklash',n:''},
+  {c:'np.save("mydata.npy", arr)',n:'massivni mydata.npy faylga sakladingiz'},
+  {c:'loaded = np.load("mydata.npy")',n:'fayldan massivni qayta yuklagingiz'},
+  {c:'print("loaded:", loaded)',n:'yuklanagan massivni chiqardingiz'},
+  {c:'',n:''},
+  {c:'# CSV formatida saqlash',n:''},
+  {c:'np.savetxt("mydata.csv", arr, delimiter=",")',n:'massivni CSV formatda sakladingiz'},
+  {c:'loaded_csv = np.loadtxt("mydata.csv", delimiter=",")',n:'CSV fayldan massivni yuklagingiz'},
+  {c:'print("csv:", loaded_csv)',n:'CSV dan yuklangan massivni chiqardingiz'}
+]},
+
+// 8.21 ─────────────────────────────────────────
+{id:'8.21 Chiziqli algebra',f:'numpy_8_21.py',
+plan:['np.linalg.det() — determinant','np.linalg.inv() — teskari matritsa','np.linalg.eig() — eigenvalue','np.linalg.solve() — tenglamalar tizimi'],
+terms:[
+  ['determinant','Matritsaning skalari: geometrik ma\'no'],
+  ['inverse','A⁻¹: A @ A⁻¹ = birlik matritsa'],
+  ['eigenvalue','Ax = λx — o\'zgarmaydi faqat masshtablanadi'],
+  ['np.linalg.solve()','Ax = b tenglamalar tizimini yechish']
+],
+info:'8.21 — CHIZIQLI ALGEBRA\n\nnp.linalg.det(A)      → determinant\nnp.linalg.inv(A)      → teskari matritsa\nnp.linalg.norm(v)     → vektor uzunligi\nnp.linalg.eig(A)      → eigenvalue/vector\nnp.linalg.solve(A,b)  → Ax=b yechim\nnp.linalg.svd(A)      → SVD parchalash\n\nML da:\n  PCA → eigenvalue\n  Linear regression → solve\n  Neural net → matritsa ko\'paytma',
+detail:'8.21 BATAFSIL — LINALG\n\n━━━ DETERMINANT ━━━\n\nA = [[1,2],[3,4]]\ndet(A) = 1*4 - 2*3 = -2\n→ det=0 bo\'lsa teskari yo\'q!\n\n━━━ TESKARI MATRITSA ━━━\n\nA @ np.linalg.inv(A) → birlik matritsa\nFaqat kvadrat va det≠0 bo\'lsa\n\n━━━ SOLVE ━━━\n\n2x + 3y = 8\n x + 2y = 5\nA = [[2,3],[1,2]]\nb = [8, 5]\nnp.linalg.solve(A,b) → [1., 2.]\n\n━━━ NORM ━━━\n\nnp.linalg.norm([3,4])    → 5.0  (L2)\nnp.linalg.norm([3,4], 1) → 7.0  (L1)\nnp.linalg.norm([3,4], np.inf) → 4.0',
+sim:'>>> A = np.array([[1,2],[3,4]])\n>>> np.linalg.det(A)\n-2.0\n>>> np.linalg.inv(A)\narray([[-2. ,  1. ],\n       [ 1.5, -0.5]])\n>>> A @ np.linalg.inv(A)\narray([[1., 0.],\n       [0., 1.]])\n>>> np.linalg.norm([3,4])\n5.0',
+lines:[
+  {c:'import numpy as np',n:''},
+  {c:'',n:''},
+  {c:'A = np.array([[1, 2], [3, 4]])',n:'2x2 matritsa yaratdingiz'},
+  {c:'',n:''},
+  {c:'print("det:", np.linalg.det(A))',n:'determinantni hisobladingiz — -2.0'},
+  {c:'print("inv:\\n", np.linalg.inv(A))',n:'teskari matritsani hisobladingiz'},
+  {c:'print("A @ inv(A):\\n", A @ np.linalg.inv(A))',n:'birlik matritsaga tengligini tasdiqlad ingiz'},
+  {c:'',n:''},
+  {c:'# Tenglamalar tizimi: 2x+3y=8, x+2y=5',n:''},
+  {c:'coef = np.array([[2, 3], [1, 2]])',n:'koeffitsientlar matritsasi yaratdingiz'},
+  {c:'rhs = np.array([8, 5])',n:'o\'ng tomon vektori yaratdingiz'},
+  {c:'sol = np.linalg.solve(coef, rhs)',n:'tenglamalar tizimini yechdingiz'},
+  {c:'print("yechim x,y:", sol)',n:'x=1, y=2 ekanini ko\'rdingiz'}
+]},
+
+// 8.22 ─────────────────────────────────────────
+{id:'8.22 Test: NumPy umumiy',f:'numpy_8_22.py',
+plan:['Barcha mavzularni takrorlash','Aralash vazifalar — kichik test','Xato tuzatish mashqi','Kodni o\'qish va tushunish'],
+terms:[
+  ['vectorization','Tsikl yozmasdan massiv amallar'],
+  ['in-place','Asl massivni o\'zgartirish (+=, sort())'],
+  ['copy vs view','Nusxa vs ko\'rsatgich farqi'],
+  ['broadcasting rules','Turli o\'lchamdagi massivlar qoidasi']
+],
+info:'8.22 — UMUMIY TEST\n\nQuyidagi amallarni bajaring:\n  1. 5x5 tasodifiy butun sonlar massivi\n  2. Har ustun o\'rtachasi\n  3. Diagonal elementlar yig\'indisi\n  4. Eng katta 3 ta element\n  5. Matritsani normallashtirish',
+detail:'8.22 BATAFSIL — TEST YECHIM\n\n━━━ DIAGONAL ━━━\n\nnp.diag(m)        → diagonal elementlar\nnp.diag(m).sum()  → iz (trace)\nnp.trace(m)       → xuddi shunday\n\n━━━ ENG KATTA N TA ━━━\n\nnp.sort(a)[-3:]        → oxirgi 3 ta\nnp.argsort(a)[-3:]     → ularning indeksi\nnp.partition(a, -3)[-3:] → tezroq (partial)\n\n━━━ NORMALLASHTIRISH ━━━\n\nMin-Max: (m - m.min()) / (m.max() - m.min())\nZ-score: (m - m.mean()) / m.std()\n\n━━━ BROADCASTING QOIDA ━━━\n\n(3,4) + (4,)   → OK  (broadcast)\n(3,4) + (3,)   → XATO\n(3,4) + (1,4)  → OK\n(3,4) + (3,1)  → OK',
+sim:'>>> np.random.seed(0)\n>>> m = np.random.randint(1,50,(5,5))\n>>> m.mean(axis=0).round(1)\narray([28.6, 24.2, 21. , 19.6, 32. ])\n>>> np.trace(m)\n151\n>>> np.sort(m.flatten())[-3:]\narray([44, 46, 49])\n>>> norm = (m-m.min())/(m.max()-m.min())\n>>> norm.round(2)',
+lines:[
+  {c:'import numpy as np',n:''},
+  {c:'',n:''},
+  {c:'np.random.seed(42)',n:'takrorlanadigan natijalar uchun seed o\'rnatdingiz'},
+  {c:'m = np.random.randint(1, 50, (5, 5))',n:'5x5 tasodifiy butun sonlar matritsasi yaratdingiz'},
+  {c:'print("Matritsa:\\n", m)',n:''},
+  {c:'',n:''},
+  {c:'print("Har ustun o\'rtachasi:", m.mean(axis=0).round(1))',n:'har ustunning o\'rtacha qiymatini hisobladingiz'},
+  {c:'print("Diagonal yig\'indi:", np.trace(m))',n:'diagonal elementlar yig\'indisini (trace) hisobladingiz'},
+  {c:'',n:''},
+  {c:'print("Eng katta 3 ta:", np.sort(m.flatten())[-3:])',n:'barcha elementlardan eng katta 3 tasini topdingiz'},
+  {c:'',n:''},
+  {c:'norm = (m - m.min()) / (m.max() - m.min())',n:'matritsani 0-1 oralig\'iga normalizatsiya qildingiz'},
+  {c:'print("Norm min/max:", norm.min().round(2), norm.max().round(2))',n:'normalizatsiyadan keyin 0 va 1 ekanini tasdiqlad ingiz'}
+]},
+
+// 8.23 ─────────────────────────────────────────
+{id:'8.23 Yakuniy amaliyot',f:'numpy_8_23.py',
+plan:['Real ma\'lumotlar bilan to\'liq ish','O\'quvchilar test natijalari tahlili','Statistika + filtrlash + vizualizatsiya ma\'lumotlari','NumPy yordamida hisobot yaratish'],
+terms:[
+  ['data pipeline','Ma\'lumotlarni qayta ishlash zanjiri'],
+  ['outlier','Qolganlardan keskin farq qiluvchi qiymat'],
+  ['correlation','Ikki massiv orasidagi bog\'liqlik darajasi'],
+  ['np.corrcoef()','Korrelyatsiya koeffitsientini hisoblash']
+],
+info:'8.23 — YAKUNIY AMALIYOT\n\n30 ta o\'quvchi, 5 ta fan:\n  matematika, fizika, kimyo, biologiya, ingliz\n\nVazifalar:\n  1. Har fan bo\'yicha o\'rtacha\n  2. Eng yaxshi o\'quvchi\n  3. Yiqilganlar (60 dan past)\n  4. Fanlar orasida korrelyatsiya\n  5. Normalizatsiya',
+detail:'8.23 BATAFSIL — AMALIYOT\n\n━━━ KORRELYATSIYA ━━━\n\nnp.corrcoef(a, b)\n→ [[1, r],[r, 1]]\nr = 1: to\'liq musbat bog\'liqlik\nr = -1: to\'liq manfiy\nr = 0: bog\'liqlik yo\'q\n\n━━━ OUTLIER TOPISH ━━━\n\nmean = a.mean()\nstd = a.std()\noutliers = a[np.abs(a - mean) > 2 * std]\n\n━━━ ARGMAX 2D ━━━\n\nm.argmax()         → global indeks\nnp.unravel_index(m.argmax(), m.shape)\n→ (qator, ustun) ko\'rinishida',
+sim:'>>> np.random.seed(1)\n>>> scores = np.random.randint(50,100,(30,5))\n>>> scores.mean(axis=0).round(1)\narray([74.2, 75.3, 74.5, 74.8, 74.5])\n>>> best = scores.mean(axis=1).argmax()\n>>> best, scores[best].mean()\n(22, 87.2)\n>>> (scores < 60).any(axis=1).sum()\n8',
+lines:[
+  {c:'import numpy as np',n:''},
+  {c:'',n:''},
+  {c:'np.random.seed(1)',n:''},
+  {c:'scores = np.random.randint(50, 100, (30, 5))',n:'30 o\'quvchi 5 fandan ball matritsasi yaratdingiz'},
+  {c:'fanlar = ["Mat", "Fiz", "Kim", "Bio", "Ing"]',n:'fan nomlarini yaratdingiz'},
+  {c:'',n:''},
+  {c:'# Har fan o\'rtachasi',n:''},
+  {c:'avg = scores.mean(axis=0)',n:'har fan bo\'yicha o\'rtacha ball hisobladingiz'},
+  {c:'print("O\'rtachalar:", dict(zip(fanlar, avg.round(1))))',n:''},
+  {c:'',n:''},
+  {c:'# Eng yaxshi o\'quvchi',n:''},
+  {c:'best_idx = scores.mean(axis=1).argmax()',n:'umumiy o\'rtachasi eng yuqori o\'quvchi topildi'},
+  {c:'print("Eng yaxshi:", best_idx, "ball:", scores[best_idx])',n:''},
+  {c:'',n:''},
+  {c:'# Yiqilganlar (60 dan past)',n:''},
+  {c:'failed = (scores < 60).any(axis=1).sum()',n:'kamida bir fandan yiqilganlar soni hisobdlandi'},
+  {c:'print("Yiqilganlar soni:", failed)',n:''}
+]},
+
+// 8.24 ─────────────────────────────────────────
+{id:'8.24 Bo\'lim bo\'yicha nazariy test',f:'numpy_8_24.py',
+plan:['NumPy asosiy tushunchalar takrori','dtype, shape, ndim farqlari','View vs Copy — xavfli holatlar','Broadcasting qoidalari'],
+terms:[
+  ['strides','Xotirada keyingi elementga o\'tish baytlari'],
+  ['contiguous','Xotirada ketma-ket joylashgan massiv'],
+  ['Fortran order','Ustunlar asosida saqlash (F-order)'],
+  ['C order','Qatorlar asosida saqlash (C-order, standart)']
+],
+info:'8.24 — NAZARIY TEST\n\nMuhim farqlar:\n  shape (3,) → 1D\n  shape (3,1) → 2D ustun\n  shape (1,3) → 2D qator\n\nView xavfi:\n  b = a[1:3]   → view!\n  b[0] = 99    → a ham o\'zgaradi!\n\nCopy:\n  b = a[1:3].copy() → xavfsiz\n\nBroadcasting:\n  (3,1) + (1,4) → (3,4) → OK\n  (3,2) + (3,3) → XATO',
+detail:'8.24 BATAFSIL — CHUQUR\n\n━━━ STRIDES ━━━\n\na = np.array([[1,2,3],[4,5,6]])\na.strides → (24, 8)\n→ 24 byte: keyingi qatorga\n→ 8 byte: keyingi elementga\n\n━━━ C vs FORTRAN ORDER ━━━\n\nnp.ascontiguousarray(a)  → C-order\nnp.asfortranarray(a)     → F-order\n\nML: aksariyat C-order talab qiladi\n\n━━━ BASE ATRIBUTI ━━━\n\nb = a.reshape(3, 2)\nb.base is a  → True (view!)\n\nc = a.copy()\nc.base is None → True (mustaqil)',
+sim:'>>> a = np.array([1,2,3,4,5])\n>>> b = a[1:4]\n>>> b.base is a\nTrue  # view!\n>>> b[0] = 99\n>>> a\narray([ 1, 99,  3,  4,  5])  # a ham o\'zgardi!\n>>> c = a.copy()\n>>> c.base is None\nTrue  # mustaqil nusxa',
+lines:[
+  {c:'import numpy as np',n:''},
+  {c:'',n:''},
+  {c:'# View va Copy farqi',n:''},
+  {c:'a = np.array([1, 2, 3, 4, 5])',n:'asl massiv yaratdingiz'},
+  {c:'b = a[1:4]',n:'b — a ning VIEW si, nusxa emas!'},
+  {c:'print("b.base is a:", b.base is a)',n:'True: b asl a massivini ko\'rsatadi'},
+  {c:'b[0] = 99',n:'b ni o\'zgartirdingiz'},
+  {c:'print("a o\'zgardimi:", a)',n:'a ham o\'zgardi — xavfli tuzog\'!'},
+  {c:'',n:''},
+  {c:'# Xavfsiz nusxa',n:''},
+  {c:'c = a.copy()',n:'a ning mustaqil nusxasini oldingiz'},
+  {c:'c[0] = 0',n:'c ni o\'zgartirdingiz'},
+  {c:'print("a saqlandimi:", a)',n:'a o\'zgarmadi — nusxa to\'g\'ri ishladi'}
+]},
+
+// 8.25 ─────────────────────────────────────────
+{id:'8.25 Bo\'lim bo\'yicha amaliy test',f:'numpy_8_25.py',
+plan:['Amaliy masalalar to\'plami','Raqamlar tahlili pipeline','Matritsalar bilan operatsiyalar','Realworld data preprocessing'],
+terms:[
+  ['preprocessing','Model uchun ma\'lumotlarni tayyorlash'],
+  ['normalization','Qiymatlarni standart oralig\'iga keltirish'],
+  ['imputation','Yo\'qolgan qiymatlarni to\'ldirish'],
+  ['feature scaling','Har feature ni bir xil masshtabga keltirish']
+],
+info:'8.25 — AMALIY TEST\n\nTo\'liq pipeline:\n  1. Ma\'lumot yaratish (random)\n  2. NaN larni o\'rtacha bilan to\'ldirish\n  3. Outlierlarni clip bilan cheklash\n  4. Normalizatsiya (0-1)\n  5. Statistika hisoboti',
+detail:'8.25 BATAFSIL — PIPELINE\n\n━━━ NAN IMPUTATION ━━━\n\na = np.array([1., np.nan, 3., np.nan, 5.])\nmean = np.nanmean(a)   → NaN ni e\'tiborsiz\na[np.isnan(a)] = mean  → NaN → mean\n\n━━━ OUTLIER CLIPPING ━━━\n\nmean = a.mean()\nstd = a.std()\nnp.clip(a, mean-2*std, mean+2*std)\n\n━━━ MIN-MAX SCALE ━━━\n\ndef minmax(x):\n    return (x - x.min()) / (x.max()-x.min())\n\n━━━ NANFUNCSIYALAR ━━━\n\nnp.nanmean()   → NaN e\'tiborsiz mean\nnp.nanstd()    → NaN e\'tiborsiz std\nnp.nansum()    → NaN e\'tiborsiz sum\nnp.nanmax()    → NaN e\'tiborsiz max',
+sim:'>>> a = np.array([1., np.nan, 3., np.nan, 5.])\n>>> np.nanmean(a)\n3.0\n>>> a[np.isnan(a)] = np.nanmean(a)\n>>> a\narray([1., 3., 3., 3., 5.])\n>>> np.clip(a, 2, 4)\narray([2., 3., 3., 3., 4.])',
+lines:[
+  {c:'import numpy as np',n:''},
+  {c:'',n:''},
+  {c:'# Ma\'lumot (NaN bilan)',n:''},
+  {c:'np.random.seed(7)',n:''},
+  {c:'data = np.random.randn(20).round(2)',n:'20 ta normal taqsimlangan son yaratdingiz'},
+  {c:'data[[3, 7, 15]] = np.nan',n:'3 ta elementni NaN ga aylantirib yo\'qolgan qiymat simulatsiya qildingiz'},
+  {c:'',n:''},
+  {c:'# NaN ni o\'rtacha bilan to\'ldirish',n:''},
+  {c:'mean_val = np.nanmean(data)',n:'NaN larni e\'tiborsiz qoldirib o\'rtachani hisobladingiz'},
+  {c:'data[np.isnan(data)] = mean_val',n:'NaN o\'rniga o\'rtacha qiymat qo\'ydingiz'},
+  {c:'print("NaN qoldimi:", np.isnan(data).any())',n:'NaN yo\'qolganini tasdiqlad ingiz'},
+  {c:'',n:''},
+  {c:'# Normalizatsiya',n:''},
+  {c:'norm = (data - data.min()) / (data.max() - data.min())',n:'ma\'lumotlarni 0-1 oralig\'iga normalizatsiya qildingiz'},
+  {c:'print("min:", norm.min().round(2), "max:", norm.max().round(2))',n:'normalizatsiyadan keyin chegaralarni tekshirdingiz'}
+]},
+
+// 8.26 ─────────────────────────────────────────
+{id:'8.26 NumPy amaliy vazifa',f:'numpy_8_26.py',
+plan:['Yakuniy katta amaliy vazifa','Tasvir ma\'lumotlarini simulatsiya qilish','Signal qayta ishlash','NumPy bilan to\'liq data science pipeline'],
+terms:[
+  ['pixel','Tasvir elementi — 0-255 qiymat'],
+  ['grayscale','Kulrang tasvir — bir kanal'],
+  ['RGB','Qizil-Yashil-Ko\'k — uch kanal tasvir'],
+  ['signal processing','Signal (ovoz, tasvir) ni raqamli qayta ishlash']
+],
+info:'8.26 — YAKUNIY AMALIY VAZIFA\n\nTasvir simulatsiyasi:\n  28x28 grayscale rasm (MNIST kabi)\n  Piksellar 0-255 orasida\n\nAmалlar:\n  1. Tasodifiy rasm yaratish\n  2. Normalizatsiya (0-1)\n  3. Flip (oynada ko\'rsatish)\n  4. Yorqinlikni oshirish\n  5. Statistika hisoblash\n\nBu MNIST raqamlar datasetida\nqilingan aynan shu narsa!',
+detail:'8.26 BATAFSIL — TASVIR\n\n━━━ TASVIR TUZILISHI ━━━\n\nGrayscale: (yukslik, kenglik)\nRGB: (yukslik, kenglik, 3)\nRGBA: (yukslik, kenglik, 4)\n\n━━━ NORMALIZATSIYA ━━━\n\nimg / 255.0  → [0, 1]\n→ ML modellar shu formatda ishlatadi\n\n━━━ FLIP ━━━\n\nnp.flip(img, axis=0)  → vertikal flip\nnp.flip(img, axis=1)  → gorizontal flip\nnp.flipud(img)        → ustdan pastga\nnp.fliplr(img)        → chapdan o\'ngga\nnp.rot90(img)         → 90 daraja\n\n━━━ KONVOLYUTSIYA ━━━\n\nManual kernel:\nkernel = np.array([[-1,-1,-1],\n                   [-1, 8,-1],\n                   [-1,-1,-1]])\n→ Chetlarni ajratib olish\n\nCNN asosi aynan shu!',
+sim:'>>> img = np.random.randint(0, 256, (28, 28))\n>>> img.shape\n(28, 28)\n>>> img.dtype\ndtype(\'int64\')\n>>> norm_img = img / 255.0\n>>> norm_img.min(), norm_img.max()\n(0.0, 1.0)\n>>> flipped = np.fliplr(img)\n>>> img.mean()\n127.3',
+lines:[
+  {c:'import numpy as np',n:''},
+  {c:'',n:''},
+  {c:'# 28x28 grayscale rasm simulatsiyasi (MNIST)',n:''},
+  {c:'np.random.seed(42)',n:''},
+  {c:'img = np.random.randint(0, 256, (28, 28))',n:'28x28 piksellik tasodifiy rasm yaratdingiz'},
+  {c:'print("Rasm shakli:", img.shape)',n:''},
+  {c:'print("Piksel oraliq:", img.min(), "-", img.max())',n:'piksellar 0-255 orasida ekanini ko\'rdingiz'},
+  {c:'',n:''},
+  {c:'# Normalizatsiya (ML uchun)',n:''},
+  {c:'norm_img = img / 255.0',n:'piksellarni 0-1 oralig\'iga normalizatsiya qildingiz'},
+  {c:'print("Norm oraliq:", norm_img.min().round(2), "-", norm_img.max().round(2))',n:''},
+  {c:'',n:''},
+  {c:'# Flip operatsiyalari',n:''},
+  {c:'flipped_h = np.fliplr(img)',n:'rasmni gorizontal aks ettirdingiz (oynada)'},
+  {c:'flipped_v = np.flipud(img)',n:'rasmni vertikal aks ettirdingiz (teskari)'},
+  {c:'',n:''},
+  {c:'# Statistika',n:''},
+  {c:'print("O\'rtacha yorqinlik:", img.mean().round(1))',n:'rasmning o\'rtacha yorqinligini hisobladingiz'},
+  {c:'print("Std:", img.std().round(1))',n:'piksel tarqalishini ko\'rdingiz'}
+]}
+
+]; // M end
+
+// ═══════════════════════════════════════════════
+// ASOSIY O'ZGARUVCHILAR
+// ═══════════════════════════════════════════════
+var cur=0, skipOn=false, ghostVisible=true;
+var lineData=[], doneSet=new Set();
+var selectedStar=0, ratingSubmitted=false;
+var BRIGHT=[0,0.05,0.1,0.2,0.3,0.42,0.55,0.65,0.75,0.85,0.95];
+
+window.onload=function(){
+  buildStars(); buildTabs(); loadMod(0);
+  if(window.visualViewport){
+    var t=null;
+    window.visualViewport.addEventListener('resize',function(){
+      clearTimeout(t);
+      t=setTimeout(function(){
+        var el=document.activeElement;
+        if(!el||!el.classList.contains('line-input'))return;
+        var blk=el.closest('.line-block');
+        if(!blk)return;
+        var vp=window.visualViewport;
+        var rc=blk.getBoundingClientRect();
+        var tgt=window.scrollY+rc.top+rc.height/2-(vp.offsetTop+vp.height*0.38);
+        window.scrollTo({top:tgt,behavior:'smooth'});
+      },150);
+    });
+  }
+};
+
+function loadMod(i){
+  cur=i;
+  document.getElementById('detailPanel').classList.remove('show');
+  document.getElementById('resultPanel').classList.remove('show');
+  document.getElementById('badge').className='badge';
+  var m=M[i];
+  document.getElementById('fname').textContent=m.f;
+  document.getElementById('topSub').textContent=m.id;
+  document.getElementById('svMod').textContent=(i+1)+'/'+M.length;
+  var ph='<div class="plan-title">📋 Bu darsda o\'rganasiz:</div>';
+  m.plan.forEach(function(p){ph+='<div class="plan-item">'+esc(p)+'</div>';});
+  document.getElementById('planBox').innerHTML=ph;
+  var th='<div class="terms-title">📚 Yangi atamalar:</div>';
+  m.terms.forEach(function(t){th+='<div class="term-row"><span class="term-key">'+esc(t[0])+'</span><span class="term-val">'+esc(t[1])+'</span></div>';});
+  document.getElementById('termsBox').innerHTML=th;
+  document.getElementById('infoBox').textContent=m.info;
+  buildLines(m); buildTabs(); updateStats();
+  gtag('event','open_lesson',{lesson:m.id});
+}
+
+function buildLines(m){
+  var wrap=document.getElementById('linesWrap');
+  wrap.innerHTML=''; lineData=[];
+  var op=BRIGHT[parseInt(document.getElementById('brightSlider').value)||3];
+  m.lines.forEach(function(ln,i){
+    var isCom=ln.c.trimLeft().charAt(0)==='#';
+    var isEmpty=ln.c==='';
+    var block=document.createElement('div');
+    block.className='line-block'; block.id='block'+i;
+    var row=document.createElement('div'); row.className='line-row';
+    var num=document.createElement('div');
+    num.className='line-num'; num.id='num'+i;
+    num.textContent=isEmpty?'':(i+1);
+    var content=document.createElement('div'); content.className='line-content';
+    var ghost=document.createElement('div');
+    ghost.className='line-ghost'+((isCom&&skipOn)?' skip-c':'');
+    ghost.id='ghost'+i;
+    ghost.style.color=ghostVisible?'rgba(74,96,128,'+op+')':'transparent';
+    ghost.textContent=ln.c||' ';
+    var colors=document.createElement('div');
+    colors.className='line-colors'; colors.id='clr'+i;
+    var inp=document.createElement('input');
+    inp.type='text'; inp.className='line-input'; inp.id='inp'+i;
+    inp.setAttribute('spellcheck','false');
+    inp.setAttribute('autocorrect','off');
+    inp.setAttribute('autocapitalize','off');
+    inp.setAttribute('autocomplete','off');
+    if(isEmpty||(isCom&&skipOn))inp.disabled=true;
+    (function(idx,target,noteText){
+      inp.addEventListener('input',function(){
+        if(isEmpty)return;
+        updateLineClr(idx,target);
+        if(inp.value===target&&target!==''&&noteText!==''){
+          showNote(idx);
+        } else {
+          hideNote(idx);
+        }
+        updateStats();
+      });
+    })(i,ln.c,ln.n);
+    content.appendChild(ghost); content.appendChild(colors); content.appendChild(inp);
+    row.appendChild(num); row.appendChild(content);
+    var note=document.createElement('div');
+    note.className='line-done-note'; note.id='note'+i;
+    note.textContent='✅ Siz '+ln.n+'!';
+    block.appendChild(row);
+    if(ln.n)block.appendChild(note);
+    wrap.appendChild(block);
+    lineData.push({inp:inp,target:ln.c,isCom:isCom,isEmpty:isEmpty});
+  });
+}
+
+function updateLineClr(idx,target){
+  var inp=document.getElementById('inp'+idx);
+  var clr=document.getElementById('clr'+idx);
+  if(!inp||!clr)return;
+  var typed=inp.value; var html='';
+  for(var ci=0;ci<target.length;ci++){
+    var ch=target[ci];
+    if(ci<typed.length){
+      html+=typed[ci]===ch
+        ?'<span style="color:#22c55e">'+esc(ch)+'</span>'
+        :'<span style="color:#f43f5e;text-decoration:underline">'+esc(ch)+'</span>';
+    } else {
+      html+='<span style="color:transparent">'+esc(ch)+'</span>';
+    }
+  }
+  clr.innerHTML=html;
+  var num=document.getElementById('num'+idx);
+  if(num)num.style.color=(typed===target&&target!=='')?'#22c55e':'';
+}
+function showNote(i){var n=document.getElementById('note'+i);if(n)n.classList.add('show');}
+function hideNote(i){var n=document.getElementById('note'+i);if(n)n.classList.remove('show');}
+
+function updateStats(){
+  var done=0,total=0;
+  lineData.forEach(function(l){
+    if(l.isEmpty||(l.isCom&&skipOn))return;
+    total++; if(l.inp.value===l.target)done++;
+  });
+  var pct=total>0?Math.round(done/total*100):0;
+  document.getElementById('svPct').textContent=done>0?pct+'%':'—';
+  document.getElementById('svDone').textContent=done+'/'+total;
+  if(done===total&&total>0)doneSet.add(cur);
+  document.getElementById('progressFill').style.width=(doneSet.size/M.length*100)+'%';
+  buildTabs();
+}
+
+function doCheck(){
+  var done=0,total=0,errors=[];
+  lineData.forEach(function(l,i){
+    if(l.isEmpty||(l.isCom&&skipOn))return;
+    total++;
+    if(l.inp.value===l.target){
+      done++;
+      document.getElementById('num'+i).style.color='#22c55e';
+      if(M[cur].lines[i].n)showNote(i);
+    } else {
+      errors.push(i+1);
+      document.getElementById('num'+i).style.color='#f43f5e';
+    }
+  });
+  var pct=total>0?Math.round(done/total*100):0;
+  var b=document.getElementById('badge'); b.className='badge show';
+  if(pct>=85){
+    b.className+=' g'; b.textContent='✅ Zo\'r! '+pct+'% ('+done+'/'+total+' to\'g\'ri)';
+    doneSet.add(cur);
+    showRating();
+  } else if(pct>=55){
+    b.className+=' o'; b.textContent='⚡ '+pct+'% — xato qatorlar: '+errors.join(', ')+'-qator';
+  } else {
+    b.className+=' r'; b.textContent='❌ '+pct+'% — qaytadan urinib ko\'ring';
+  }
+  updateStats();
+  gtag('event','check',{lesson:M[cur].id,score:pct});
+}
+
+function doClear(){
+  lineData.forEach(function(l,i){
+    l.inp.value='';
+    var clr=document.getElementById('clr'+i); if(clr)clr.innerHTML='';
+    var num=document.getElementById('num'+i); if(num)num.style.color='';
+    hideNote(i);
+  });
+  document.getElementById('badge').className='badge';
+  updateStats();
+}
+
+function toggleGhost(){
+  ghostVisible=!ghostVisible;
+  document.querySelectorAll('.line-ghost').forEach(function(g){
+    g.style.visibility=ghostVisible?'visible':'hidden';
+  });
+  document.getElementById('ghostBtn').textContent=ghostVisible?'👁️ Yashir':'👁️ Ko\'rsat';
+}
+
+function toggleSkip(){
+  skipOn=!skipOn;
+  document.getElementById('sw').classList.toggle('on',skipOn);
+  document.getElementById('skipLbl').textContent=skipOn?'Kommentlar o\'tkazilmoqda':'# Kommentlarni o\'tkazib yuboring';
+  buildLines(M[cur]); applyBright(); updateStats();
+}
+
+function toggleDetail(){
+  var p=document.getElementById('detailPanel');
+  if(p.classList.contains('show')){p.classList.remove('show');}
+  else{document.getElementById('detailContent').textContent=M[cur].detail; p.classList.add('show');}
+}
+
+function toggleResult(){
+  var p=document.getElementById('resultPanel');
+  if(p.classList.contains('show')){p.classList.remove('show');}
+  else{document.getElementById('simWrap').innerHTML='<pre>'+esc(M[cur].sim)+'</pre>'; p.classList.add('show');}
+}
+
+function setBright(v){document.getElementById('brightVal').textContent=v; applyBright();}
+function applyBright(){
+  var v=parseInt(document.getElementById('brightSlider').value)||3;
+  var op=BRIGHT[v];
+  document.querySelectorAll('.line-ghost').forEach(function(g){
+    if(!g.classList.contains('skip-c')&&ghostVisible)g.style.color='rgba(74,96,128,'+op+')';
+  });
+}
+
+function buildTabs(){
+  var c=document.getElementById('tabs'); c.innerHTML='';
+  M.forEach(function(m,i){
+    var d=document.createElement('div');
+    d.className='tab'+(i===cur?' on':'')+(doneSet.has(i)?' done':'');
+    d.textContent=m.id;
+    d.onclick=(function(n){return function(){loadMod(n);};})(i);
+    c.appendChild(d);
+  });
+}
+
+function buildStars(){
+  var sc=document.getElementById('stars'); sc.innerHTML='';
+  for(var i=1;i<=10;i++){
+    var s=document.createElement('span');
+    s.className='star'; s.textContent='⭐'; s.dataset.v=i;
+    s.onclick=(function(v){return function(){
+      selectedStar=v;
+      document.getElementById('ratingScore').textContent=v+' / 10';
+      document.querySelectorAll('.star').forEach(function(st){st.classList.toggle('on',parseInt(st.dataset.v)<=v);});
+    };})(i);
+    sc.appendChild(s);
+  }
+}
+
+function showRating(){
+  document.getElementById('ratingBox').classList.add('show');
+  gtag('event','rating_shown',{module:'numpy_part2'});
+}
+
+function submitRating(){
+  if(ratingSubmitted)return;
+  if(selectedStar===0){alert('Iltimos baho tanlang!');return;}
+  ratingSubmitted=true;
+  var comment=document.getElementById('ratingComment').value.trim();
+  document.getElementById('ratingThanks').style.display='block';
+  document.querySelector('.rating-submit').style.display='none';
+  gtag('event','rating_submit',{module:'numpy_part2',score:selectedStar,comment:comment});
+}
+
+function esc(s){
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+</script>
+</body>
+</html>

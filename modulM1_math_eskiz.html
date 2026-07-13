@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Eskiz — Deep Learning Matematikasi (1-qism)</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:#0a0e1a;color:#dde5f0;font-family:'JetBrains Mono',monospace;font-size:13px;min-height:100vh;}
+.top{background:#0f1520;border-bottom:1px solid #1e3048;padding:8px 14px;display:flex;align-items:center;gap:8px;position:sticky;top:0;z-index:50;}
+.top-t{color:#00f0c8;font-size:.78rem;font-weight:700;}
+.top-s{color:#4a6080;font-size:.65rem;margin-left:auto;}
+.bright-bar{background:#0f1520;border-bottom:1px solid #1e3048;padding:6px 14px;display:flex;align-items:center;gap:10px;position:sticky;top:41px;z-index:49;}
+.bright-lbl{font-size:.65rem;color:#4a6080;flex-shrink:0;}
+.bright-slider{flex:1;-webkit-appearance:none;height:4px;border-radius:2px;background:#1e3048;outline:none;cursor:pointer;}
+.bright-slider::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:#00f0c8;cursor:pointer;}
+.bright-val{font-size:.68rem;color:#00f0c8;font-weight:700;width:20px;text-align:right;flex-shrink:0;}
+.wrap{padding:10px 14px;max-width:540px;margin:0 auto;}
+.tabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;margin-bottom:10px;scrollbar-width:none;}
+.tabs::-webkit-scrollbar{display:none;}
+.tab{flex-shrink:0;padding:6px 12px;border-radius:20px;border:1px solid #1e3048;background:#141e2e;color:#4a6080;font-size:.68rem;cursor:pointer;transition:all .15s;}
+.tab.on{border-color:#00f0c8;color:#00f0c8;background:rgba(0,240,200,.08);}
+.tab.done{border-color:#22c55e;color:#22c55e;background:rgba(34,197,94,.06);}
+.stats{display:flex;gap:8px;margin-bottom:10px;}
+.stat{flex:1;background:#141e2e;border:1px solid #1e3048;border-radius:8px;padding:7px 8px;text-align:center;}
+.sv{font-size:.95rem;font-weight:700;color:#00f0c8;}
+.sl{font-size:.58rem;color:#4a6080;margin-top:2px;}
+.progress-bar{height:3px;background:#1e3048;border-radius:2px;margin-bottom:10px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,#00f0c8,#2563eb);border-radius:2px;transition:width .4s;}
+.intro-box{background:#0d1828;border:1px solid #1e3048;border-left:3px solid #00f0c8;border-radius:10px;padding:14px;margin-bottom:10px;}
+.intro-title{font-size:.8rem;font-weight:700;color:#00f0c8;margin-bottom:8px;}
+.intro-text{font-size:.7rem;line-height:1.85;color:#9fb0c8;white-space:pre-wrap;}
+.intro-stats{display:flex;gap:8px;margin-top:10px;}
+.intro-stat{flex:1;background:#080c14;border:1px solid #1e3048;border-radius:8px;padding:8px;text-align:center;}
+.intro-stat-v{font-size:1.1rem;font-weight:700;color:#00f0c8;}
+.intro-stat-l{font-size:.58rem;color:#4a6080;margin-top:2px;}
+.terms-box{background:#080c14;border:1px solid #1e3048;border-left:3px solid #a855f7;border-radius:8px;padding:10px 12px;margin-bottom:10px;}
+.terms-title{font-size:.68rem;font-weight:700;color:#a855f7;margin-bottom:8px;}
+.term-row{display:flex;gap:6px;margin-bottom:5px;align-items:flex-start;}
+.term-key{font-size:.64rem;color:#fbbf24;font-weight:700;min-width:120px;flex-shrink:0;}
+.term-val{font-size:.63rem;color:#4a6080;line-height:1.6;}
+.detail-panel{display:none;background:#0a1628;border:1px solid #2563eb;border-radius:8px;padding:12px 14px;margin-bottom:10px;font-size:.72rem;line-height:2;color:#93c5fd;white-space:pre-wrap;}
+.detail-panel.show{display:block;}
+.detail-title{color:#60a5fa;font-weight:700;margin-bottom:8px;font-size:.76rem;}
+
+/* TEST PANEL */
+.test-panel{background:#080c14;border:1px solid #1e3048;border-radius:10px;padding:12px;margin-bottom:10px;}
+.test-title{font-size:.72rem;font-weight:700;color:#fbbf24;margin-bottom:12px;}
+.test-q{background:#0d1828;border-left:3px solid #a855f7;border-radius:6px;padding:10px 12px;margin-bottom:10px;}
+.test-qtext{font-size:.71rem;color:#c4b5fd;line-height:1.7;margin-bottom:10px;}
+.test-opts{display:flex;flex-direction:column;gap:6px;}
+.test-opt{padding:8px 12px;border-radius:8px;border:1px solid #1e3048;background:#141e2e;font-size:.68rem;color:#8ba0c0;cursor:pointer;text-align:left;font-family:'JetBrains Mono',monospace;transition:all .15s;}
+.test-opt:active{opacity:.7;}
+.test-opt.correct{border-color:#22c55e;color:#22c55e;background:rgba(34,197,94,.1);}
+.test-opt.wrong{border-color:#f43f5e;color:#f43f5e;background:rgba(244,63,94,.1);}
+.test-opt.show-correct{border-color:#22c55e;color:#22c55e;background:rgba(34,197,94,.05);}
+.test-exp{display:none;font-size:.66rem;line-height:1.7;color:#64748b;padding:8px 0 0 4px;border-top:1px dashed #1e3048;margin-top:8px;}
+.test-exp.show{display:block;}
+.test-score{text-align:center;padding:10px;font-size:.78rem;font-weight:700;color:#00f0c8;display:none;}
+.test-score.show{display:block;}
+.btn-test-check{width:100%;padding:10px;background:#2563eb;color:#fff;font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:700;border:none;border-radius:8px;cursor:pointer;margin-top:8px;}
+
+/* ESKIZ (kod yozish mavzulari uchun) */
+.skip-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;padding:8px 12px;background:#141e2e;border:1px solid #1e3048;border-radius:8px;cursor:pointer;}
+.skip-row span{font-size:.7rem;color:#4a6080;}
+.sw{width:34px;height:18px;background:#1e3048;border-radius:10px;position:relative;transition:background .2s;flex-shrink:0;}
+.sw.on{background:#fbbf24;}
+.sw::after{content:'';position:absolute;top:2px;left:2px;width:14px;height:14px;background:#fff;border-radius:50%;transition:left .2s;}
+.sw.on::after{left:18px;}
+.sim-wrap{width:100%;overflow-x:auto;}
+.sim-wrap pre{font-size:.68rem;line-height:1.9;color:#22c55e;white-space:pre;}
+.result-panel{display:none;background:#080c14;border:1px solid #22c55e;border-radius:10px;padding:12px;margin-bottom:10px;}
+.result-panel.show{display:block;}
+.result-title{color:#22c55e;font-size:.72rem;font-weight:700;margin-bottom:8px;}
+.code-block{border:1px solid #1e3048;border-radius:10px;overflow:hidden;margin-bottom:10px;background:#090d18;}
+.fbar{display:flex;align-items:center;gap:5px;padding:7px 12px;background:#0f1520;border-bottom:1px solid #1e3048;}
+.dot{width:6px;height:6px;border-radius:50%;}
+.dot.r{background:#f43f5e;}.dot.y{background:#fbbf24;}.dot.g{background:#22c55e;}
+.fn{font-size:.65rem;color:#4a6080;margin-left:4px;}
+.fhint{margin-left:auto;font-size:.6rem;color:#00f0c8;opacity:.7;}
+.lines-wrap{padding:4px 0;}
+.line-block{margin:0;}
+.line-row{display:flex;align-items:center;position:relative;min-height:30px;}
+.line-num{width:28px;flex-shrink:0;font-size:.63rem;padding:4px 4px 4px 5px;color:#2a3a50;text-align:right;user-select:none;transition:color .2s;align-self:center;}
+.line-content{flex:1;position:relative;overflow-x:auto;overflow-y:hidden;min-height:30px;}
+.line-content::-webkit-scrollbar{height:2px;}
+.line-content::-webkit-scrollbar-thumb{background:#1e3048;border-radius:1px;}
+.line-ghost{font-size:.76rem;line-height:1.8;padding:4px 8px;white-space:pre;pointer-events:none;min-height:30px;display:block;}
+.line-ghost.skip-c{opacity:.08!important;}
+.line-colors{position:absolute;top:0;left:0;font-size:.76rem;line-height:1.8;padding:4px 8px;white-space:pre;pointer-events:none;z-index:2;min-height:30px;}
+.line-input{position:absolute;top:0;left:0;right:0;bottom:0;width:100%;font-family:'JetBrains Mono',monospace;font-size:.76rem;line-height:1.8;padding:4px 8px;color:transparent;-webkit-text-fill-color:transparent;caret-color:#00f0c8;background:transparent;border:none;outline:none;white-space:pre;overflow:hidden;z-index:10;-webkit-appearance:none;}
+.line-input:disabled{cursor:default;}
+.line-done-note{display:none;font-size:.66rem;line-height:1.6;padding:3px 8px 3px 34px;color:#38bdf8;background:rgba(56,189,248,.06);border-left:2px solid #38bdf8;white-space:pre-wrap;animation:fadeIn .25s ease;}
+.line-done-note.show{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:translateY(0)}}
+.btn-row{display:flex;gap:6px;flex-wrap:wrap;padding:9px 12px;background:#0f1520;border-top:1px solid #1e3048;}
+.btn{padding:8px 11px;border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:.68rem;font-weight:700;border:none;cursor:pointer;flex-shrink:0;transition:opacity .15s;}
+.btn:active{opacity:.7;}
+.btn-chk{background:#00f0c8;color:#080c14;}
+.btn-clr{background:transparent;border:1px solid #1e3048;color:#4a6080;}
+.btn-det{background:#2563eb;color:#fff;}
+.btn-ghost{background:#7c3aed;color:#fff;}
+.btn-res{background:#16a34a;color:#fff;}
+.badge{display:none;margin:0 12px 10px;padding:7px 12px;border-radius:8px;font-size:.7rem;border:1px solid #1e3048;}
+.badge.show{display:block;}
+.badge.g{border-color:#22c55e;color:#22c55e;background:rgba(34,197,94,.07);}
+.badge.o{border-color:#fbbf24;color:#fbbf24;background:rgba(251,191,36,.07);}
+.badge.r{border-color:#f43f5e;color:#f43f5e;background:rgba(244,63,94,.07);}
+.rating-box{background:#0d1828;border:1px solid #fbbf24;border-radius:12px;padding:14px 16px;margin-top:10px;display:none;}
+.rating-box.show{display:block;}
+.rating-title{font-size:.72rem;font-weight:700;color:#fbbf24;text-align:center;margin-bottom:4px;}
+.rating-sub{font-size:.62rem;color:#4a6080;text-align:center;margin-bottom:12px;}
+.stars{display:flex;justify-content:center;gap:4px;margin-bottom:10px;flex-wrap:wrap;}
+.star{font-size:1.5rem;cursor:pointer;filter:grayscale(1);opacity:.35;transition:transform .1s,filter .1s;user-select:none;}
+.star.on{filter:none;opacity:1;}
+.rating-score{text-align:center;font-size:.72rem;color:#fbbf24;font-weight:700;margin-bottom:8px;min-height:18px;}
+.rating-comment{width:100%;background:#141e2e;border:1px solid #1e3048;border-radius:8px;padding:8px 10px;color:#dde5f0;font-family:'JetBrains Mono',monospace;font-size:.68rem;resize:none;outline:none;margin-bottom:8px;}
+.rating-submit{width:100%;padding:10px;background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#080c14;font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:700;border:none;border-radius:8px;cursor:pointer;}
+.rating-thanks{display:none;text-align:center;padding:10px;font-size:.72rem;color:#22c55e;font-weight:700;}
+.katex{font-size:1.05em !important;color:#fbbf24;}
+.katex-display{margin:.6em 0 !important;overflow-x:auto;overflow-y:hidden;padding:4px 0;}
+.term-val .katex,.test-qtext .katex,.test-opt .katex,.test-exp .katex{color:inherit;font-size:1em !important;}
+</style>
+</head>
+<body>
+<div class="top">
+  <div class="top-t">🔬 DL Matematika (1/3) — Asoslar</div>
+  <div class="top-s" id="topSub">M1.1</div>
+</div>
+<div class="bright-bar">
+  <span class="bright-lbl">👁️ Xiralik:</span>
+  <input type="range" class="bright-slider" id="brightSlider" min="1" max="10" value="3" oninput="setBright(this.value)">
+  <span class="bright-val" id="brightVal">3</span>
+</div>
+<div class="wrap">
+  <div class="stats">
+    <div class="stat"><div class="sv" id="svScore">—</div><div class="sl">TEST BALL</div></div>
+    <div class="stat"><div class="sv" id="svDone">0/0</div><div class="sl">BAJARILDI</div></div>
+    <div class="stat"><div class="sv" id="svMod">1/11</div><div class="sl">MAVZU</div></div>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+  <div class="tabs" id="tabs"></div>
+  <div class="intro-box" id="introBox"></div>
+  <div class="terms-box" id="termsBox"></div>
+  <div class="detail-panel" id="detailPanel">
+    <div class="detail-title">📘 BATAFSIL</div>
+    <div id="detailContent"></div>
+  </div>
+  <div id="mainContent"></div>
+  <div class="rating-box" id="ratingBox">
+    <div class="rating-title">⭐ DL Matematika (1-qism)ni baholang</div>
+    <div class="rating-sub">Fikringiz keyingi versiyani yaxshilashga yordam beradi</div>
+    <div class="stars" id="stars"></div>
+    <div class="rating-score" id="ratingScore">Baho tanlang (1–10)</div>
+    <textarea class="rating-comment" id="ratingComment" rows="2" placeholder="Izoh..."></textarea>
+    <button class="rating-submit" onclick="submitRating()">⭐ Yuborish</button>
+    <div class="rating-thanks" id="ratingThanks">✅ Rahmat!</div>
+  </div>
+</div>
+<script>
+var MODULE_INTRO = {
+  title: "🔬 Deep Learning — Matematika (1-qism)",
+  text: "Bu — 20-modulga (Deep Learning) hamroh, MATEMATIK chuqurlashtirish moduli. 20a-d qismlarda Keras orqali \"qanday ishlatish\"ni o'rgandingiz — bu yerda \"NEGA va QANDAY ishlaydi\"ni, haqiqiy formulalar va Backpropagation ning to'liq matematik chiqarilishini o'rganasiz.\n\n1-qismda: aktivlashtirish funksiyalari hosilalari, Loss function gradienti, va eng muhimi — Backpropagation algoritmining zanjir qoidasi (chain rule) orqali to'liq matematik chiqarilishi.\n\nHar bir eskiz mashqida, Keras emas — TOZA numpy bilan, formulalarni qo'lda implement qilasiz.",
+  count: 11
+};
+
+var M = [
+
+{id:'M1.1', type:'test',
+ title:'Sigmoid funksiyasi va uning hosilasi',
+ terms:[
+   ['Sigmoid','$\\sigma(z) = \\dfrac{1}{1+e^{-z}}$ formulali aktivlashtirish funksiyasi'],
+   ['Hosila (Derivative)','Funksiyaning o\'zgarish tezligini ko\'rsatuvchi matematik amal'],
+   ['$\\sigma\'(z)$','Sigmoid hosilasi — backpropagation uchun zarur'],
+   ['Zanjir qoidasi (Chain Rule)','Murakkab funksiya hosilasini bosqichma-bosqich hisoblash usuli']
+ ],
+ detail:'SIGMOID FORMULASI\n\n$$\\sigma(z) = \\frac{1}{1+e^{-z}}$$\n\nBu funksiya har qanday haqiqiy sonni (z) 0 va 1 orasiga "siqadi". z juda katta bo\'lsa, natija 1 ga yaqinlashadi; z juda kichik (manfiy katta) bo\'lsa, natija 0 ga yaqinlashadi; z=0 da, natija aniq 0.5.\n\nNEGA HOSILA KERAK?\nBackpropagation (20.12 va M1.3 da batafsil) — Gradient Descent ni qo\'llash uchun, har bir funksiyaning HOSILASINI bilishimiz kerak. Hosila — "agar kirish ozgina o\'zgarsa, chiqish qanchalik o\'zgaradi" degan savolga javob beradi.\n\nSIGMOID HOSILASINI CHIQARISH\n\nSigmoid hosilasini matematik chiqarish (bo\'linma qoidasi, quotient rule, orqali):\n\n$$\\sigma\'(z) = \\frac{d}{dz}\\left[\\frac{1}{1+e^{-z}}\\right] = \\frac{e^{-z}}{(1+e^{-z})^2}$$\n\nBu formulani ELEGANT shaklga keltirish mumkin — uni sigmoidning o\'zi orqali ifodalash:\n\n$$\\sigma\'(z) = \\sigma(z)\\cdot(1-\\sigma(z))$$\n\nBU NEGA AJOYIB? Bu shuni anglatadi — sigmoid hosilasini hisoblash uchun, sigmoidning o\'zini BIR MARTA hisoblab, keyin shu qiymatdan foydalanish kifoya: $\\sigma\'(z) = \\sigma(z)(1-\\sigma(z))$. Hisoblash jihatdan bu JUDA samarali — qaytadan murakkab eksponensial hisoblash kerak emas!\n\nGRAFIK XULOSA: $\\sigma\'(z)$ ning eng katta qiymati $z=0$ da, va u $0.25$ ga teng ($\\sigma(0)=0.5$, $0.5 \\times 0.5 = 0.25$). $z$ katta yoki kichik bo\'lganda, $\\sigma\'(z) \\to 0$ — bu 20.9 da o\'rgangan "vanishing gradient" muammosining matematik ildizi!',
+ tests:[
+   {q:'Sigmoid hosilasi $\\sigma\'(z)$ ni qanday formula bilan ifodalash mumkin?',
+    opts:['$\\sigma(z) + 1$','$\\sigma(z)\\cdot(1-\\sigma(z))$','$1 - \\sigma(z)$','$\\sigma(z)^2$'],
+    ans:1,
+    exp:'$\\sigma\'(z) = \\sigma(z)(1-\\sigma(z))$ — bu sigmoidning o\'z qiymati orqali ifodalangan, hisoblash uchun juda qulay shakl.'},
+   {q:'$\\sigma\'(z)$ ning maksimal qiymati qaysi nuqtada va nimaga teng?',
+    opts:['$z=1$ da, $1.0$ ga teng','$z=0$ da, $0.25$ ga teng','$z=-1$ da, $0.5$ ga teng','Maksimal qiymat yo\'q'],
+    ans:1,
+    exp:'$z=0$ da $\\sigma(0)=0.5$, shuning uchun $\\sigma\'(0)=0.5\\times 0.5=0.25$ — bu sigmoid hosilasining eng katta qiymati.'},
+   {q:'$z$ qiymati juda katta (masalan $z=10$) bo\'lganda, $\\sigma\'(z)$ ga nima bo\'ladi?',
+    opts:['U ham juda katta bo\'ladi','U deyarli $0$ ga yaqinlashadi','U $1$ ga teng bo\'ladi','U manfiy bo\'ladi'],
+    ans:1,
+    exp:'Katta $z$ da $\\sigma(z)\\to 1$, shuning uchun $\\sigma\'(z)=\\sigma(z)(1-\\sigma(z))\\to 1\\times 0 = 0$ — bu vanishing gradient muammosining matematik sababi.'}
+ ]},
+
+{id:'M1.2', type:'eskiz',
+ title:'Sigmoid va hosilasini numpy bilan implement qilish',
+ terms:[
+   ['np.exp(-z)','$e^{-z}$ ni hisoblash uchun numpy funksiyasi'],
+   ['Sigmoid implementatsiyasi','$1/(1+e^{-z})$ formulasini kodga aylantirish'],
+   ['Hosila implementatsiyasi','$\\sigma(z)(1-\\sigma(z))$ formulasini kodga aylantirish'],
+   ['Numerik tekshirish','Kichik $h$ bilan taqribiy hosilani hisoblab, formula bilan solishtirish']
+ ],
+ detail:'SIGMOID VA HOSILANI QO\'LDA YOZISH\n\nKeras da bu funksiya "activation=\'sigmoid\'" deb yozilsa, ichida aynan shu formula ishlaydi. Endi buni numpy bilan o\'zimiz yozamiz.\n\nNUMERIK TEKSHIRISH (Gradient Checking): Formula orqali hisoblangan hosilani TEKSHIRISH uchun, matematikada "numerik hosila" usuli ishlatiladi: $\\sigma\'(z) \\approx \\dfrac{\\sigma(z+h)-\\sigma(z-h)}{2h}$, juda kichik $h$ (masalan $0.0001$) bilan. Agar formula bilan hisoblangan natija va bu taqribiy natija bir-biriga yaqin bo\'lsa — formula TO\'G\'RI ekanligi tasdiqlanadi. Bu — har qanday Deep Learning kutubxonasi (TensorFlow, PyTorch) ichida ham ishlatiladigan haqiqiy tekshirish usuli!',
+ sim:'>>> import numpy as np\n>>> def sigmoid(z):\n...     return 1 / (1 + np.exp(-z))\n>>> def sigmoid_derivative(z):\n...     s = sigmoid(z)\n...     return s * (1 - s)\n>>> sigmoid_derivative(0)\n0.25\n>>> sigmoid_derivative(10)\n4.5e-05',
+ eskizlar:[
+  {q:'sigmoid(z) va sigmoid_derivative(z) funksiyalarini numpy bilan yozing.',
+   lines:[
+    {c:'import numpy as np',n:'Siz numpy kutubxonasini import qildingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'def sigmoid(z):',n:'Siz sigmoid funksiyasini ta\'riflashni boshladingiz'},
+    {c:'    return 1 / (1 + np.exp(-z))',n:'Siz $1/(1+e^{-z})$ formulasini yozdingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'def sigmoid_derivative(z):',n:'Siz hosila funksiyasini ta\'riflashni boshladingiz'},
+    {c:'    s = sigmoid(z)',n:'Siz avval sigmoid qiymatini hisobladingiz'},
+    {c:'    return s * (1 - s)',n:'Siz $\\sigma(z)(1-\\sigma(z))$ formulasini qo\'lladingiz'},
+   ]},
+  {q:'Numerik hosila bilan formula natijasini solishtirib tekshiring.',
+   lines:[
+    {c:'z = 2.0',n:'Siz tekshirish uchun z qiymatini tanladingiz'},
+    {c:'h = 0.0001',n:'Siz juda kichik h qiymatini belgiladingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'numerik = (sigmoid(z+h) - sigmoid(z-h)) / (2*h)',n:'Siz taqribiy (numerik) hosilani hisobladingiz'},
+    {c:'formula = sigmoid_derivative(z)',n:'Siz formula orqali aniq hosilani hisobladingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'print(\'Numerik:\', numerik, \'Formula:\', formula)',n:'Siz ikkisini solishtirib chiqardingiz'},
+   ]},
+ ]},
+
+{id:'M1.3', type:'test',
+ title:'ReLU va Tanh hosilalari',
+ terms:[
+   ['ReLU hosilasi','$z>0$ bo\'lsa $1$, $z<0$ bo\'lsa $0$'],
+   ['Tanh','$\\tanh(z) = \\dfrac{e^z-e^{-z}}{e^z+e^{-z}}$ formulali funksiya'],
+   ['Tanh hosilasi','$1-\\tanh^2(z)$ formulasi'],
+   ['Subgradient','ReLU ning $z=0$ nuqtasidagi maxsus holati']
+ ],
+ detail:'RELU HOSILASI — ENG SODDA HOSILA\n\nReLU: $f(z)=\\max(0,z)$. Uning hosilasi JUDA sodda:\n\n$$f\'(z) = \\begin{cases} 1 & z > 0 \\\\ 0 & z < 0 \\end{cases}$$\n\n$z=0$ nuqtasida, matematik jihatdan hosila ANIQLANMAGAN (funksiya "burchak" hosil qiladi), lekin amalda dasturlarda bu nuqtada $0$ yoki $1$ deb qabul qilinadi (subgradient) — bu deyarli hech qachon amaliy natijaga ta\'sir qilmaydi, chunki $z$ aniq $0$ ga teng bo\'lish ehtimoli juda kichik.\n\nNEGA RELU HISOBLASH JIHATDAN AFZAL? Sigmoid hosilasi $\\sigma(z)(1-\\sigma(z))$ — eksponensial talab qiladi. ReLU hosilasi — shunchaki $0$ yoki $1$, hech qanday murakkab hisoblash kerak emas. Bu, 20.10 da aytilganidek, ReLU ni katta tarmoqlarda sezilarli tezroq qiladi.\n\nTANH HOSILASI\n\n$\\tanh(z) = \\dfrac{e^z-e^{-z}}{e^z+e^{-z}}$, natijasi $-1$ va $1$ orasida.\n\nUning hosilasi:\n$$\\tanh\'(z) = 1-\\tanh^2(z)$$\n\nDiqqat qiling — bu sigmoid hosilasiga JUDA o\'xshash STRUKTURAGA ega (funksiyaning o\'zi orqali ifodalangan). Tanh hosilasining maksimal qiymati $z=0$ da, va u $1$ ga teng — bu sigmoidning $0.25$ dan KATTA, shuning uchun tanh, sigmoidga qaraganda, odatda biroz tezroq o\'qitishga yordam beradi (gradient kattaroq).',
+ tests:[
+   {q:'ReLU funksiyasining hosilasi $z>0$ bo\'lganda nimaga teng?',
+    opts:['$0$','$1$','$z$ ning o\'zi','$z^2$'],
+    ans:1,
+    exp:'$z>0$ bo\'lganda ReLU $f(z)=z$ ga teng, uning hosilasi esa $1$ (chiziqning og\'ish koeffitsienti).'},
+   {q:'Tanh hosilasi qanday formula bilan ifodalanadi?',
+    opts:['$\\tanh(z)$','$1-\\tanh^2(z)$','$\\tanh(z)^2$','$1+\\tanh(z)$'],
+    ans:1,
+    exp:'$\\tanh\'(z) = 1-\\tanh^2(z)$ — bu sigmoid hosilasiga o\'xshash, funksiyaning o\'zi orqali ifodalangan shakl.'},
+   {q:'ReLU hosilasi nima uchun hisoblash jihatdan Sigmoid hosilasidan tezroq?',
+    opts:['ReLU har doim noldan katta','ReLU hosilasi shunchaki 0 yoki 1, eksponensial hisoblash kerak emas','Sigmoid hech qachon hisoblanmaydi','Ular bir xil tezlikda ishlaydi'],
+    ans:1,
+    exp:'ReLU hosilasi oddiy shart tekshirish ($0$ yoki $1$), Sigmoid hosilasi esa eksponensial amal talab qiladi — bu ReLU ni hisoblash jihatdan ancha tezroq qiladi.'}
+ ]},
+
+{id:'M1.4', type:'eskiz',
+ title:'ReLU va Tanh hosilalarini numpy bilan implement qilish',
+ terms:[
+   ['np.where()','Shart asosida ikki qiymatdan birini tanlash funksiyasi'],
+   ['np.tanh()','Tanh funksiyasini hisoblash uchun numpy funksiyasi'],
+   ['Vectorized implementation','Butun massiv uchun bir vaqtda hisoblash (sikl emas)'],
+   ['Grafik solishtirish','Uch hosilani bir grafikda ko\'rsatish']
+ ],
+ detail:'UCH HOSILANI QO\'LDA YOZISH\n\nNP.WHERE(): ReLU hosilasini massiv uchun samarali yozish uchun np.where(shart, agar_to\'g\'ri, agar_noto\'g\'ri) ishlatiladi — bu har bir elementni alohida tekshiradigan sikl (`for`) yozishdan ANCHA tezroq, chunki numpy buni "vectorized" (C tilida, ichki optimallashtirilgan) bajaradi.\n\nVECTORIZED YONDASHUV NEGA MUHIM? Real neyron tarmoqlarda, bir qatlamda minglab neyron bo\'lishi mumkin — agar har biri uchun Python `for` sikli yozilsa, bu JUDA sekin bo\'ladi. Shuning uchun barcha Deep Learning kutubxonalari (va bizning kodimiz ham) massiv amallarini "vectorized" qo\'llaydi.',
+ sim:'>>> import numpy as np\n>>> def relu_derivative(z):\n...     return np.where(z > 0, 1, 0)\n>>> def tanh_derivative(z):\n...     return 1 - np.tanh(z)**2\n>>> z = np.array([-2, -0.5, 0, 0.5, 2])\n>>> relu_derivative(z)\narray([0, 0, 0, 1, 1])\n>>> tanh_derivative(z)\narray([0.071, 0.786, 1.0, 0.786, 0.071])',
+ eskizlar:[
+  {q:'relu_derivative va tanh_derivative funksiyalarini numpy bilan yozing.',
+   lines:[
+    {c:'import numpy as np',n:'Siz numpy kutubxonasini import qildingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'def relu_derivative(z):',n:'Siz ReLU hosilasi funksiyasini ta\'riflashni boshladingiz'},
+    {c:'    return np.where(z > 0, 1, 0)',n:'Siz shart asosida 1 yoki 0 qaytaruvchi formulani yozdingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'def tanh_derivative(z):',n:'Siz Tanh hosilasi funksiyasini ta\'riflashni boshladingiz'},
+    {c:'    return 1 - np.tanh(z)**2',n:'Siz $1-\\tanh^2(z)$ formulasini yozdingiz'},
+   ]},
+  {q:'Uchta hosilani (Sigmoid, ReLU, Tanh) bir massiv uchun solishtirib chiqaring.',
+   lines:[
+    {c:'z = np.array([-2, -0.5, 0, 0.5, 2])',n:'Siz solishtirish uchun z qiymatlarini yaratdingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'print(\'Sigmoid hosila:\', sigmoid_derivative(z))',n:'Siz Sigmoid hosilasini chiqardingiz'},
+    {c:'print(\'ReLU hosila:\', relu_derivative(z))',n:'Siz ReLU hosilasini chiqardingiz'},
+    {c:'print(\'Tanh hosila:\', tanh_derivative(z))',n:'Siz Tanh hosilasini chiqardingiz'},
+   ]},
+ ]},
+
+{id:'M1.5', type:'test',
+ title:'Loss function va uning gradienti',
+ terms:[
+   ['MSE Loss','$L=\\frac{1}{n}\\sum (y-\\hat{y})^2$ — regression uchun yo\'qotish'],
+   ['MSE gradienti','$\\frac{\\partial L}{\\partial \\hat{y}} = -\\frac{2}{n}(y-\\hat{y})$'],
+   ['Binary Cross-Entropy','$L=-[y\\log\\hat{y}+(1-y)\\log(1-\\hat{y})]$ — classification uchun'],
+   ['$\\hat{y}$ (y-hat)','Modelning bashorat qilgan qiymati']
+ ],
+ detail:'MSE LOSS VA UNING GRADIENTI\n\n16-moduldan tanish MSE formulasi:\n\n$$L = \\frac{1}{n}\\sum_{i=1}^{n}(y_i-\\hat{y}_i)^2$$\n\nBu yerda $y$ — haqiqiy qiymat, $\\hat{y}$ — model bashorati. Backpropagation uchun, biz $L$ ning $\\hat{y}$ bo\'yicha gradienti (hosilasi) kerak — chunki $\\hat{y}$ — tarmoqning chiqishi, va biz xatoni ORQAGA, tarmoq ichiga "tarqatishimiz" kerak.\n\nBitta namuna uchun ($n=1$): $L=(y-\\hat{y})^2$. Zanjir qoidasi bilan:\n\n$$\\frac{\\partial L}{\\partial \\hat{y}} = -2(y-\\hat{y}) = 2(\\hat{y}-y)$$\n\nBU NIMANI BILDIRADI? Agar bashorat ($\\hat{y}$) haqiqiy qiymatdan ($y$) KATTA bo\'lsa, gradient MUSBAT — demak $\\hat{y}$ ni KAMAYTIRISH kerak. Agar $\\hat{y}$ KICHIK bo\'lsa, gradient MANFIY — $\\hat{y}$ ni OSHIRISH kerak. Bu — Gradient Descent ning asosi: gradient yo\'nalishining QARAMA-QARSHISIGA siljish.\n\nBINARY CROSS-ENTROPY (Classification uchun)\n\n$$L = -[y\\log(\\hat{y}) + (1-y)\\log(1-\\hat{y})]$$\n\nBu yerda $\\hat{y}$ — Sigmoid orqali chiqqan ehtimollik ($0$ va $1$ orasida), $y$ — haqiqiy toifa ($0$ yoki $1$). MSE dan farqli — bu funksiya, model "ishonchli NOTO\'G\'RI" bo\'lganda (masalan $y=1$ bo\'lib, $\\hat{y}=0.01$ bashorat qilinganda), JUDA katta jazo beradi (chunki $\\log(0.01)$ katta manfiy son). Bu klassifikatsiya uchun MSE dan ko\'proq mos keladi.',
+ tests:[
+   {q:'MSE Loss ning $\\hat{y}$ bo\'yicha gradienti qanday formula bilan ifodalanadi (bitta namuna uchun)?',
+    opts:['$y-\\hat{y}$','$2(\\hat{y}-y)$','$(\\hat{y}-y)^2$','$\\hat{y}\\cdot y$'],
+    ans:1,
+    exp:'$\\frac{\\partial L}{\\partial \\hat{y}}=2(\\hat{y}-y)$ — bu zanjir qoidasi bilan $L=(y-\\hat{y})^2$ ni $\\hat{y}$ bo\'yicha differensiallashdan kelib chiqadi.'},
+   {q:'Agar gradient $\\frac{\\partial L}{\\partial \\hat{y}}$ musbat chiqsa, bu nimani bildiradi?',
+    opts:['$\\hat{y}$ ni oshirish kerak','$\\hat{y}$ ni kamaytirish kerak (chunki u $y$ dan katta)','Hech narsa o\'zgartirmaslik kerak','Model mukammal'],
+    ans:1,
+    exp:'Musbat gradient — bashorat haqiqiy qiymatdan katta ekanini bildiradi, shuning uchun Gradient Descent $\\hat{y}$ ni KAMAYTIRISH tomon harakat qiladi.'},
+   {q:'Binary Cross-Entropy MSE dan farqli, nima uchun classification uchun ko\'proq mos?',
+    opts:['U tezroq hisoblanadi','U "ishonchli noto\'g\'ri" bashoratlarni kuchliroq jazolaydi','U faqat musbat sonlar bilan ishlaydi','Ular aslida bir xil'],
+    ans:1,
+    exp:'Cross-Entropy logarifm tufayli, model juda ishonchli, lekin noto\'g\'ri bashorat qilganda (masalan 0.01 ehtimollik, lekin haqiqiy javob 1), JUDA katta jazo beradi — bu classification uchun foydali xususiyat.'}
+ ]},
+
+{id:'M1.6', type:'eskiz',
+ title:'Loss va gradientni numpy bilan implement qilish',
+ terms:[
+   ['mse_loss(y, y_hat)','MSE formulasini funksiya sifatida yozish'],
+   ['mse_gradient(y, y_hat)','MSE gradientini funksiya sifatida yozish'],
+   ['bce_loss(y, y_hat)','Binary Cross-Entropy formulasini yozish'],
+   ['np.clip()','Logarifm uchun 0 yoki 1 qiymatlarini xavfsiz chegaralash']
+ ],
+ detail:'LOSS VA GRADIENTNI QO\'LDA YOZISH\n\nNP.CLIP() NEGA KERAK? Binary Cross-Entropy formulasida $\\log(\\hat{y})$ bor — agar $\\hat{y}=0$ bo\'lib qolsa, $\\log(0) = -\\infty$ (xato!). Shuning uchun amalda, $\\hat{y}$ qiymati np.clip(y_hat, 1e-10, 1-1e-10) bilan juda kichik/katta chegaraga "qisib qo\'yiladi" — bu kichik texnik hiyla, lekin DEYARLI har bir real Deep Learning kutubxonasi ichida ishlatiladi.',
+ sim:'>>> import numpy as np\n>>> def mse_loss(y, y_hat):\n...     return np.mean((y - y_hat)**2)\n>>> def mse_gradient(y, y_hat):\n...     return 2 * (y_hat - y) / len(y)\n>>> y = np.array([1, 0, 1])\n>>> y_hat = np.array([0.9, 0.1, 0.8])\n>>> mse_loss(y, y_hat)\n0.02\n>>> mse_gradient(y, y_hat)\narray([-0.067, 0.067, -0.133])',
+ eskizlar:[
+  {q:'mse_loss va mse_gradient funksiyalarini numpy bilan yozing.',
+   lines:[
+    {c:'import numpy as np',n:'Siz numpy kutubxonasini import qildingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'def mse_loss(y, y_hat):',n:'Siz MSE loss funksiyasini ta\'riflashni boshladingiz'},
+    {c:'    return np.mean((y - y_hat)**2)',n:'Siz $L=\\frac{1}{n}\\sum(y-\\hat{y})^2$ formulasini yozdingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'def mse_gradient(y, y_hat):',n:'Siz MSE gradienti funksiyasini ta\'riflashni boshladingiz'},
+    {c:'    return 2 * (y_hat - y) / len(y)',n:'Siz $2(\\hat{y}-y)/n$ formulasini yozdingiz'},
+   ]},
+  {q:'bce_loss (Binary Cross-Entropy) funksiyasini np.clip bilan xavfsiz yozing.',
+   lines:[
+    {c:'def bce_loss(y, y_hat):',n:'Siz Binary Cross-Entropy funksiyasini ta\'riflashni boshladingiz'},
+    {c:'    y_hat = np.clip(y_hat, 1e-10, 1 - 1e-10)',n:'Siz log(0) xatosining oldini olish uchun qiymatni chegaraladingiz'},
+    {c:'    return -np.mean(y*np.log(y_hat) + (1-y)*np.log(1-y_hat))',n:'Siz Cross-Entropy formulasini yozdingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'y = np.array([1, 0, 1])',n:'Siz haqiqiy toifalarni yaratdingiz'},
+    {c:'y_hat = np.array([0.9, 0.1, 0.8])',n:'Siz bashorat qilingan ehtimolliklarni yaratdingiz'},
+    {c:'print(bce_loss(y, y_hat))',n:'Siz Cross-Entropy natijasini chiqardingiz'},
+   ]},
+ ]},
+
+{id:'M1.7', type:'test',
+ title:'Backpropagation — zanjir qoidasi asosida chiqarish',
+ terms:[
+   ['Zanjir qoidasi (Chain Rule)','$\\frac{dy}{dx}=\\frac{dy}{du}\\cdot\\frac{du}{dx}$ — murakkab funksiya hosilasi'],
+   ['Forward pass','Kirishdan chiqishgacha hisoblash yo\'nalishi'],
+   ['Backward pass','Chiqishdan kirishgacha gradientni "orqaga tarqatish"'],
+   ['$\\delta$ (delta)','Har bir qatlamdagi xato signali']
+ ],
+ detail:'BACKPROPAGATION — DEEP LEARNING NING YURAGI\n\nBitta sodda misol bilan boshlaylik: bitta neyron, bitta kirish $x$, og\'irlik $w$, bias $b$, Sigmoid aktivlashtirish, va MSE loss.\n\nFORWARD PASS (oldinga hisoblash):\n$$z = wx+b \\quad\\rightarrow\\quad \\hat{y}=\\sigma(z) \\quad\\rightarrow\\quad L=(y-\\hat{y})^2$$\n\nSAVOL: $L$ ni KAMAYTIRISH uchun $w$ ni qanday o\'zgartirish kerak? Bunga javob — $\\frac{\\partial L}{\\partial w}$ kerak. Lekin $L$ to\'g\'ridan-to\'g\'ri $w$ ga bog\'liq emas — u $\\hat{y}$ orqali, $\\hat{y}$ esa $z$ orqali, $z$ esa $w$ orqali bog\'liq! Aynan shu yerda ZANJIR QOIDASI yordamga keladi:\n\n$$\\frac{\\partial L}{\\partial w} = \\frac{\\partial L}{\\partial \\hat{y}} \\cdot \\frac{\\partial \\hat{y}}{\\partial z} \\cdot \\frac{\\partial z}{\\partial w}$$\n\nHar bir bo\'lakni alohida hisoblaymiz (BACKWARD PASS — orqaga, $L$ dan $w$ ga tomon):\n\n1. $\\frac{\\partial L}{\\partial \\hat{y}} = 2(\\hat{y}-y)$ — M1.5 dan tanish (Loss gradienti)\n2. $\\frac{\\partial \\hat{y}}{\\partial z} = \\sigma(z)(1-\\sigma(z))$ — M1.1 dan tanish (Sigmoid hosilasi)\n3. $\\frac{\\partial z}{\\partial w} = x$ — chunki $z=wx+b$, $w$ bo\'yicha hosila aynan $x$\n\nBARCHASINI BIRLASHTIRISH:\n$$\\frac{\\partial L}{\\partial w} = 2(\\hat{y}-y)\\cdot\\sigma(z)(1-\\sigma(z))\\cdot x$$\n\nBu — bitta og\'irlik uchun TO\'LIQ gradient formulasi! Ko\'p qatlamli tarmoqda, bu jarayon har bir qatlam uchun, OXIRGI qatlamdan BIRINCHI qatlamgacha (shuning uchun "BACK"-propagation — orqaga tarqatish) takrorlanadi, har safar oldingi qatlamdan kelgan $\\delta$ (xato signali) keyingi (oldinroq) qatlamga "uzatiladi".\n\nBU NEGA "DEEP" TARMOQLARDA QIYIN? Ko\'p qatlamli tarmoqda, zanjir UZUNROQ bo\'ladi — ko\'plab kichik sonlar (masalan sigmoid hosilalari, har biri $\\leq 0.25$) ko\'paytiriladi. Agar 10 qatlam bo\'lsa, $0.25^{10}$ JUDA kichik son bo\'lib qoladi — bu aynan "vanishing gradient" muammosining matematik mexanizmi, va nega ReLU (hosilasi $1$, kichraymaydi) buni yengillashtiradi.',
+ tests:[
+   {q:'Zanjir qoidasi (Chain Rule) nima uchun Backpropagation da zarur?',
+    opts:['Modelni tezlashtirish uchun','$L$ ning $w$ ga bog\'liqligi bilvosita ($\\hat{y}$ va $z$ orqali) bo\'lgani uchun, to\'g\'ridan-to\'g\'ri hisoblab bo\'lmaydi','Faqat estetik sabablarga ko\'ra','Bu shart emas, oddiy ko\'paytirish kifoya'],
+    ans:1,
+    exp:'$L$, $w$ ga bilvosita ($\\hat{y}$, $z$ zanjiri orqali) bog\'liq, shuning uchun to\'liq gradientni hisoblash uchun har bir oraliq bosqich hosilasini ko\'paytirish (zanjir qoidasi) kerak.'},
+   {q:'$\\frac{\\partial L}{\\partial w} = 2(\\hat{y}-y)\\cdot\\sigma(z)(1-\\sigma(z))\\cdot x$ formulasida $\\sigma(z)(1-\\sigma(z))$ qaysi bosqichni ifodalaydi?',
+    opts:['Loss ning $\\hat{y}$ bo\'yicha gradienti','Sigmoid aktivlashtirishning $z$ bo\'yicha gradienti','$z$ ning $w$ bo\'yicha gradienti','Hech qaysisi'],
+    ans:1,
+    exp:'$\\sigma(z)(1-\\sigma(z))$ — Sigmoid funksiyasining o\'z kirishi ($z$) bo\'yicha hosilasi, zanjirning o\'rtadagi bo\'lagi.'},
+   {q:'Nega chuqur (ko\'p qatlamli) tarmoqlarda vanishing gradient muammosi kuchliroq bo\'ladi?',
+    opts:['Chunki ko\'proq ma\'lumot kerak bo\'ladi','Chunki zanjir uzunroq bo\'lib, ko\'plab kichik sonlar (masalan $\\leq 0.25$) ko\'paytirilib, natija juda kichrayadi','Chunki GPU yetarli emas','Bu hech qachon ro\'y bermaydi'],
+    ans:1,
+    exp:'Har qatlamda sigmoid hosilasi kabi kichik son ($\\leq 0.25$) ko\'paytirilgani uchun, ko\'p qatlamda umumiy gradient ($0.25^{10}$ kabi) juda kichrayib, deyarli yo\'qoladi.'}
+ ]},
+
+{id:'M1.8', type:'eskiz',
+ title:'Backpropagation ni numpy bilan noldan implement qilish',
+ terms:[
+   ['forward(x, w, b)','Forward pass — z va y_hat ni hisoblash'],
+   ['backward(x, y, y_hat, z)','Backward pass — gradientlarni hisoblash'],
+   ['dL_dw','$\\partial L/\\partial w$ — w bo\'yicha gradient'],
+   ['Gradient Descent qadami','$w_{yangi} = w_{eski} - \\text{learning\\_rate}\\times dL/dw$']
+ ],
+ detail:'TO\'LIQ BACKPROPAGATION — BITTA NEYRON UCHUN\n\nBu mashqda M1.7 da chiqargan formulani to\'liq, ISHLAYDIGAN kodga aylantirasiz: forward pass (bashorat hisoblash) va backward pass (gradient hisoblash), so\'ngra Gradient Descent qadami bilan og\'irlikni yangilash.\n\nBU NEGA MUHIM? Bu — TensorFlow/PyTorch ichida "avtomatik" sodir bo\'ladigan jarayonning aynan o\'zi, faqat siz buni QO\'LDA, bitta neyron uchun bajarasiz. Buni tushunish — nima uchun ba\'zan o\'qitish "ishlamay qolishini" (gradient portlashi, yo\'qolishi) tushunish uchun asos bo\'ladi.',
+ sim:'>>> import numpy as np\n>>> def sigmoid(z): return 1/(1+np.exp(-z))\n>>> x, y, w, b = 2.0, 1.0, 0.5, 0.1\n>>> z = w*x + b\n>>> y_hat = sigmoid(z)\n>>> dL_dyhat = 2*(y_hat - y)\n>>> dyhat_dz = sigmoid(z)*(1-sigmoid(z))\n>>> dz_dw = x\n>>> dL_dw = dL_dyhat * dyhat_dz * dz_dw\n>>> print(dL_dw)\n-0.0908\n>>> w_yangi = w - 0.1*dL_dw\n>>> print(w_yangi)\n0.5091',
+ eskizlar:[
+  {q:'Forward pass — z va y_hat ni hisoblang.',
+   lines:[
+    {c:'import numpy as np',n:'Siz numpy kutubxonasini import qildingiz'},
+    {c:'def sigmoid(z): return 1/(1+np.exp(-z))',n:'Siz sigmoid funksiyasini ta\'rifladingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'x, y, w, b = 2.0, 1.0, 0.5, 0.1',n:'Siz boshlang\'ich x, y, w, b qiymatlarini berdingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'z = w*x + b',n:'Siz forward pass: og\'irliklangan yig\'indini hisobladingiz'},
+    {c:'y_hat = sigmoid(z)',n:'Siz forward pass: bashoratni hisobladingiz'},
+   ]},
+  {q:'Backward pass — zanjir qoidasi bilan dL_dw ni hisoblang.',
+   lines:[
+    {c:'dL_dyhat = 2*(y_hat - y)',n:'Siz Loss ning y_hat bo\'yicha gradientini hisobladingiz'},
+    {c:'dyhat_dz = sigmoid(z)*(1-sigmoid(z))',n:'Siz Sigmoid hosilasini hisobladingiz'},
+    {c:'dz_dw = x',n:'Siz z ning w bo\'yicha gradientini oldingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'dL_dw = dL_dyhat * dyhat_dz * dz_dw',n:'Siz zanjir qoidasi bilan to\'liq gradientni hisobladingiz'},
+    {c:'print(\'dL/dw:\', dL_dw)',n:'Siz gradientni ekranga chiqardingiz'},
+   ]},
+  {q:'Gradient Descent qadami bilan og\'irlikni yangilang.',
+   lines:[
+    {c:'learning_rate = 0.1',n:'Siz learning rate qiymatini belgiladingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'w_yangi = w - learning_rate * dL_dw',n:'Siz og\'irlikni gradientga qarama-qarshi tomonga siljitdingiz'},
+    {c:'print(\'Eski w:\', w, \'Yangi w:\', w_yangi)',n:'Siz eski va yangi og\'irlikni solishtirib chiqardingiz'},
+   ]},
+ ]},
+
+{id:'M1.9', type:'test',
+ title:'Softmax va Cross-Entropy matematikasi',
+ terms:[
+   ['Softmax formulasi','$\\text{softmax}(z_i)=\\dfrac{e^{z_i}}{\\sum_j e^{z_j}}$'],
+   ['Categorical Cross-Entropy','$L=-\\sum_i y_i\\log(\\hat{y}_i)$ — ko\'p toifa uchun'],
+   ['Softmax + Cross-Entropy gradienti','$\\hat{y}-y$ — ajoyib sodda yakuniy formula'],
+   ['Numerik barqarorlik','Katta $z$ qiymatlarida $e^z$ portlashining oldini olish']
+ ],
+ detail:'SOFTMAX FORMULASI\n\n20.10 da tanish bo\'lgan Softmax — ko\'p toifali chiqish uchun:\n\n$$\\text{softmax}(z_i) = \\frac{e^{z_i}}{\\sum_{j=1}^{K} e^{z_j}}$$\n\nBu yerda $K$ — toifalar soni. Har bir $z_i$ uchun, uning eksponensiali butun yig\'indiga bo\'linadi — natijada barcha chiqishlar yig\'indisi har doim $1$ ga teng bo\'ladi (ehtimollik taqsimoti).\n\nNUMERIK BARQARORLIK MUAMMOSI: Agar $z$ qiymatlari katta bo\'lsa (masalan $z=1000$), $e^{1000}$ kompyuterda "portlab" ketadi (overflow). Yechim — har bir $z_i$ dan MAKSIMAL $z$ ni ayirish: $\\text{softmax}(z_i)=\\dfrac{e^{z_i-\\max(z)}}{\\sum_j e^{z_j-\\max(z)}}$. Bu MATEMATIK jihatdan natijani o\'zgartirmaydi (chunki bu nisbat saqlanadi), lekin hisoblashni xavfsiz qiladi — bu trick HAR BIR Deep Learning kutubxonasida ishlatiladi.\n\nSOFTMAX + CROSS-ENTROPY NING AJOYIB XUSUSIYATI\n\nKategorial Cross-Entropy: $L=-\\sum_i y_i\\log(\\hat{y}_i)$, bu yerda $\\hat{y}=\\text{softmax}(z)$.\n\nAgar siz Softmax va Cross-Entropy ni BIRGALIKDA differensiallasangiz (zanjir qoidasi bilan), natija AJOYIB DARAJADA SODDA bo\'ladi:\n\n$$\\frac{\\partial L}{\\partial z_i} = \\hat{y}_i - y_i$$\n\nBu — Backpropagation formulalari ichida eng chiroyli natijalardan biri! Murakkab eksponensial va logarifm amallaridan keyin, yakuniy gradient shunchaki "bashorat minus haqiqat" bo\'lib chiqadi. Aynan shu sababdan, deyarli barcha klassifikatsiya tarmoqlari chiqish qatlamida Softmax + Cross-Entropy juftligini ishlatadi.',
+ tests:[
+   {q:'Softmax chiqishlarining yig\'indisi nimaga teng?',
+    opts:['Har doim $0$','Har doim $1$','Kirish qiymatlariga bog\'liq, o\'zgaruvchan','Har doim $100$'],
+    ans:1,
+    exp:'Softmax — ehtimollik taqsimoti hosil qiladi, shuning uchun barcha chiqishlar yig\'indisi har doim aniq $1$ ga teng.'},
+   {q:'Katta $z$ qiymatlarida $e^z$ "portlab ketishi" (overflow) qanday oldini olinadi?',
+    opts:['$z$ ni butunlay e\'tiborsiz qoldirish','Har bir $z_i$ dan maksimal $z$ ni ayirib olish','Faqat kichik datasetlarda ishlatish','Bu muammo umuman mavjud emas'],
+    ans:1,
+    exp:'Har bir $z_i$ dan $\\max(z)$ ni ayirish, natijani o\'zgartirmasdan (nisbat saqlanadi), hisoblashni numerik jihatdan xavfsiz qiladi.'},
+   {q:'Softmax + Cross-Entropy birgalikda differensiallanganda, $\\partial L/\\partial z_i$ qanday sodda formulaga keladi?',
+    opts:['$\\hat{y}_i \\times y_i$','$\\hat{y}_i - y_i$','$\\log(\\hat{y}_i)$','$y_i / \\hat{y}_i$'],
+    ans:1,
+    exp:'Ajoyib natija: $\\partial L/\\partial z_i = \\hat{y}_i - y_i$ — shunchaki bashorat va haqiqat orasidagi farq, bu Softmax+Cross-Entropy juftligining asosiy afzalligi.'}
+ ]},
+
+{id:'M1.10', type:'eskiz',
+ title:'Softmax va Cross-Entropy ni numpy bilan implement qilish',
+ terms:[
+   ['softmax(z)','np.exp va np.sum bilan Softmax ni implement qilish'],
+   ['Maksimal ayirish trick','np.max(z) ni ayirib, numerik barqarorlikni ta\'minlash'],
+   ['categorical_cross_entropy','Ko\'p toifali Cross-Entropy ni yozish'],
+   ['Gradient tekshiruvi','$\\hat{y}-y$ formulasini to\'g\'ridan-to\'g\'ri tekshirish']
+ ],
+ detail:'SOFTMAX VA CROSS-ENTROPY NI QO\'LDA YOZISH\n\nBu mashqda M1.9 da o\'rgangan, numerik jihatdan XAVFSIZ Softmax implementatsiyasini, va uning Cross-Entropy bilan birgalikdagi sodda gradientini ($\\hat{y}-y$) tekshirib ko\'rasiz.',
+ sim:'>>> import numpy as np\n>>> def softmax(z):\n...     z_safe = z - np.max(z)\n...     exp_z = np.exp(z_safe)\n...     return exp_z / np.sum(exp_z)\n>>> z = np.array([2.0, 1.0, 0.1])\n>>> y_hat = softmax(z)\n>>> print(y_hat)\n[0.659 0.242 0.099]\n>>> y = np.array([1, 0, 0])\n>>> gradient = y_hat - y\n>>> print(gradient)\n[-0.341 0.242 0.099]',
+ eskizlar:[
+  {q:'Numerik jihatdan xavfsiz softmax(z) funksiyasini yozing.',
+   lines:[
+    {c:'import numpy as np',n:'Siz numpy kutubxonasini import qildingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'def softmax(z):',n:'Siz softmax funksiyasini ta\'riflashni boshladingiz'},
+    {c:'    z_safe = z - np.max(z)',n:'Siz overflow oldini olish uchun maksimalni ayirdingiz'},
+    {c:'    exp_z = np.exp(z_safe)',n:'Siz eksponensiallarni hisobladingiz'},
+    {c:'    return exp_z / np.sum(exp_z)',n:'Siz har birini yig\'indiga bo\'lib, ehtimollik oldingiz'},
+   ]},
+  {q:'Softmax natijasi va Cross-Entropy gradientini ($\\hat{y}-y$) hisoblang.',
+   lines:[
+    {c:'z = np.array([2.0, 1.0, 0.1])',n:'Siz xom (raw) chiqish qiymatlarini yaratdingiz'},
+    {c:'y_hat = softmax(z)',n:'Siz Softmax orqali ehtimolliklarni hisobladingiz'},
+    {c:'print(\'Ehtimolliklar:\', y_hat)',n:'Siz ehtimolliklarni chiqardingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'y = np.array([1, 0, 0])',n:'Siz haqiqiy toifani (one-hot) yaratdingiz'},
+    {c:'gradient = y_hat - y',n:'Siz sodda gradient formulasini qo\'lladingiz'},
+    {c:'print(\'Gradient:\', gradient)',n:'Siz yakuniy gradientni chiqardingiz'},
+   ]},
+ ]},
+
+{id:'M1.11', type:'test',
+ title:'1-qism yakuniy nazorat',
+ terms:[
+   ['Sigmoid/Tanh/ReLU hosilalari','Backpropagation uchun zarur asosiy formulalar'],
+   ['Loss gradienti','$2(\\hat{y}-y)$ (MSE) yoki $\\hat{y}-y$ (Softmax+CE)'],
+   ['Zanjir qoidasi','Backpropagation ning matematik asosi'],
+   ['Keyingi qism','M2 — CNN va RNN matematikasi']
+ ],
+ detail:'1-QISM YAKUNI — HAMMASI BIR-BIRIGA QANDAY BOG\'LANADI\n\nBu modulning 1-qismida siz Deep Learning ning butun matematik POYDEVORINI ko\'rib chiqdingiz:\n\n1. Aktivlashtirish funksiyalari va ularning hosilalari (Sigmoid, ReLU, Tanh)\n2. Loss function va uning gradienti (MSE, Cross-Entropy)\n3. Zanjir qoidasi — bularni BIRLASHTIRIB, Backpropagation algoritmini hosil qiluvchi matematik vosita\n4. Softmax+Cross-Entropy ning ajoyib sodda gradienti ($\\hat{y}-y$)\n\nBu formulalar — TensorFlow, PyTorch, va boshqa har qanday Deep Learning kutubxonasi "qora qutisi" ichida, har bir .fit() chaqirilganda, MILLIONLAB marta avtomatik bajariladigan aynan shu hisob-kitoblar.\n\nKEYINGI QADAM (M2): CNN (Convolution operatsiyasining matematikasi) va RNN (recurrence formula, Backpropagation Through Time) ushbu asosga qurilgan — ular faqat $z=wx+b$ formulasini boshqacha, maxsus strukturaga ega qiladi.',
+ tests:[
+   {q:'Backpropagation algoritmining matematik asosi nima?',
+    opts:['Gradient Descent','Zanjir qoidasi (Chain Rule)','Random Forest','K-Means'],
+    ans:1,
+    exp:'Zanjir qoidasi — murakkab, ko\'p bosqichli funksiyalar (tarmoq qatlamlari) gradientini hisoblash imkonini beradi, bu Backpropagation ning matematik yuragi.'},
+   {q:'Softmax + Cross-Entropy birgalikda ishlatilganda, nima uchun bu juftlik ayniqsa qulay?',
+    opts:['Ular hech qachon xato qilmaydi','Yakuniy gradient ajoyib sodda ($\\hat{y}-y$) formulaga keladi','Ular eng sekin ishlaydi','Bu juftlik hech qachon ishlatilmaydi'],
+    ans:1,
+    exp:'Bu juftlikning differensiali ajoyib soddalashadi: $\\partial L/\\partial z=\\hat{y}-y$ — bu hisoblash jihatdan juda samarali va sodda.'},
+   {q:'M2-qismda (keyingi qism) qaysi mavzular o\'rganiladi?',
+    opts:['Faqat statistika','CNN konvolyutsiya matematikasi va RNN/BPTT','Faqat SQL so\'rovlari','Faqat web dizayn'],
+    ans:1,
+    exp:'M2-qismda CNN (konvolyutsiya amalining matematikasi) va RNN (recurrence formula, Backpropagation Through Time) chuqur matematik tahlil bilan o\'rganiladi.'}
+ ]},
+
+];
+
+// ═══════ HOLAT ═══════
+var cur=0, curEskiz=0, skipOn=false, ghostVisible=true;
+var lineData=[], doneSet=new Set(), eskizDoneSet=new Set();
+var testAnswers={}, selectedStar=0, ratingSubmitted=false;
+var BRIGHT=[0,0.05,0.1,0.2,0.3,0.42,0.55,0.65,0.75,0.85,0.95];
+
+window.onload=function(){buildStars();buildTabs();buildIntro();loadMod(0);};
+
+function buildIntro(){
+  var testTopics=M.filter(function(m){return m.type==='test';}).length;
+  var eskizCount=M.reduce(function(s,m){return s+(m.type==='eskiz'?m.eskizlar.length:0);},0);
+  var h='<div class="intro-title">'+MODULE_INTRO.title+'</div>';
+  h+='<div class="intro-text">'+esc(MODULE_INTRO.text)+'</div>';
+  h+='<div class="intro-stats">';
+  h+='<div class="intro-stat"><div class="intro-stat-v">'+testTopics+'</div><div class="intro-stat-l">TEST</div></div>';
+  h+='<div class="intro-stat"><div class="intro-stat-v">'+eskizCount+'</div><div class="intro-stat-l">ESKIZ</div></div>';
+  h+='<div class="intro-stat"><div class="intro-stat-v">numpy</div><div class="intro-stat-l">KUTUBXONA</div></div>';
+  h+='</div>';
+  document.getElementById('introBox').innerHTML=h;
+  renderMath('introBox');
+}
+
+function loadMod(i){
+  cur=i; curEskiz=0;
+  document.getElementById('detailPanel').classList.remove('show');
+  document.getElementById('badge') && (document.getElementById('badge').className='badge');
+  var m=M[i];
+  document.getElementById('topSub').textContent=m.id;
+  document.getElementById('svMod').textContent=(i+1)+'/'+M.length;
+  // terms
+  var th='<div class="terms-title">📚 Yangi atamalar:</div>';
+  m.terms.forEach(function(t){
+    th+='<div class="term-row"><span class="term-key">'+esc(t[0])+'</span><span class="term-val">'+esc(t[1])+'</span></div>';
+  });
+  document.getElementById('termsBox').innerHTML=th;
+  renderMath('termsBox');
+  // content
+  if(m.type==='test') renderTest(m);
+  else renderEskiz(m);
+  buildTabs(); updateTopStats();
+}
+
+// ═══════ TEST ═══════
+function renderTest(m){
+  if(!testAnswers[cur]) testAnswers[cur]={};
+  var h='<div class="test-panel"><div class="test-title">🧠 '+m.title+' — Test</div>';
+  m.tests.forEach(function(t,qi){
+    h+='<div class="test-q" id="tq'+qi+'">';
+    h+='<div class="test-qtext">'+(qi+1)+'. '+esc(t.q)+'</div>';
+    h+='<div class="test-opts">';
+    var answered = testAnswers[cur][qi] !== undefined;
+    t.opts.forEach(function(o,oi){
+      var cls='test-opt';
+      if(answered){
+        if(oi===t.ans) cls+=' show-correct';
+        else if(oi===testAnswers[cur][qi] && oi!==t.ans) cls+=' wrong';
+      }
+      h+='<button class="'+cls+'" onclick="answerTest('+qi+','+oi+')" '+(answered?'disabled':'')+'>'+esc(o)+'</button>';
+    });
+    h+='</div>';
+    if(answered){
+      var isCorrect = testAnswers[cur][qi]===t.ans;
+      h+='<div class="test-exp show">'+(isCorrect?'✅':'❌')+' '+esc(t.exp)+'</div>';
+    }
+    h+='</div>';
+  });
+  // score
+  var answered=Object.keys(testAnswers[cur]).length;
+  var correct=0;
+  Object.keys(testAnswers[cur]).forEach(function(qi){
+    if(testAnswers[cur][qi]===m.tests[qi].ans) correct++;
+  });
+  if(answered===m.tests.length){
+    h+='<div class="test-score show">Natija: '+correct+'/'+m.tests.length+' ✅</div>';
+    doneSet.add(cur);
+  }
+  h+='</div>';
+  document.getElementById('mainContent').innerHTML=h;
+  renderMath('mainContent');
+  document.getElementById('result-panel') && document.getElementById('result-panel').classList.remove('show');
+  updateTopStats();
+}
+
+function answerTest(qi,oi){
+  if(!testAnswers[cur]) testAnswers[cur]={};
+  if(testAnswers[cur][qi]!==undefined) return;
+  testAnswers[cur][qi]=oi;
+  renderTest(M[cur]);
+  buildTabs(); updateTopStats();
+}
+
+// ═══════ ESKIZ (kod yozish mavzulari) ═══════
+function renderEskiz(m){
+  var e=m.eskizlar[curEskiz];
+  // eskiz dots
+  var dotsH='<div style="display:flex;gap:6px;justify-content:center;margin-bottom:10px;">';
+  m.eskizlar.forEach(function(_,i){
+    var key=cur+'-'+i;
+    var w=i===curEskiz?'40px':'26px';
+    var bg=eskizDoneSet.has(key)?'#22c55e':(i===curEskiz?'#00f0c8':'#1e3048');
+    dotsH+='<div onclick="jumpEskiz('+i+')" style="width:'+w+';height:6px;border-radius:3px;background:'+bg+';cursor:pointer;transition:all .2s;"></div>';
+  });
+  dotsH+='</div>';
+  // question
+  var qH='<div style="background:#0d1828;border:1px solid #1e3048;border-left:3px solid #a855f7;border-radius:8px;padding:10px 12px;margin-bottom:10px;font-size:.71rem;line-height:1.8;color:#c4b5fd;white-space:pre-wrap;">Eskiz '+(curEskiz+1)+'/'+m.eskizlar.length+' — '+esc(e.q)+'</div>';
+  // skip row
+  var skipH='<div class="skip-row" onclick="toggleSkip()"><div class="sw" id="sw"></div><span id="skipLbl"># Kommentlarni o\'tkazib yuboring</span></div>';
+  // result panel
+  var resH='<div class="result-panel" id="resultPanel"><div class="result-title">📊 NATIJA — SIMULYATSIYA</div><div class="sim-wrap" id="simWrap"></div></div>';
+  // code block
+  var codeH='<div class="code-block"><div class="fbar"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div><div class="fn" id="fname">m1math_'+(curEskiz+1)+'.py</div><div class="fhint">↔️ suring ✏️ yozing</div></div><div class="lines-wrap" id="linesWrap"></div><div class="btn-row"><button class="btn btn-chk" onclick="doCheck()">✅ Tekshir</button><button class="btn btn-clr" onclick="doClear()">🗑️ Tozala</button><button class="btn btn-ghost" id="ghostBtn" onclick="toggleGhost()">👁️ Yashir</button><button class="btn btn-det" onclick="toggleDetail()">📖 Batafsil</button><button class="btn btn-res" onclick="toggleResult()">📊 Natija</button></div><div class="badge" id="badge"></div></div>';
+  document.getElementById('mainContent').innerHTML=dotsH+qH+skipH+resH+codeH;
+  renderMath('mainContent');
+  buildLines(e);
+  // sync skip sw
+  document.getElementById('sw').classList.toggle('on',skipOn);
+  document.getElementById('skipLbl').textContent=skipOn?'Kommentlar o\'tkazilmoqda':'# Kommentlarni o\'tkazib yuboring';
+  applyBright(); updateStats();
+}
+
+function jumpEskiz(i){ curEskiz=i; renderEskiz(M[cur]); }
+
+function buildLines(e){
+  var wrap=document.getElementById('linesWrap');
+  if(!wrap) return;
+  wrap.innerHTML=''; lineData=[];
+  var op=BRIGHT[parseInt(document.getElementById('brightSlider').value)||3];
+  e.lines.forEach(function(ln,i){
+    var isCom=ln.c.replace(/^\s+/,'').charAt(0)==='#';
+    var isEmpty=ln.c==='';
+    var isSlash=ln.c.endsWith('\\');
+    var block=document.createElement('div');
+    block.className='line-block';
+    var row=document.createElement('div');
+    row.className='line-row';
+    var num=document.createElement('div');
+    num.className='line-num'; num.id='num'+i;
+    num.textContent=isEmpty?'':(i+1);
+    var content=document.createElement('div');
+    content.className='line-content';
+    var ghost=document.createElement('div');
+    ghost.className='line-ghost'+((isCom&&skipOn)?' skip-c':'');
+    ghost.id='ghost'+i;
+    ghost.style.color=ghostVisible?'rgba(74,96,128,'+op+')':'transparent';
+    ghost.textContent=ln.c||' ';
+    var colors=document.createElement('div');
+    colors.className='line-colors'; colors.id='clr'+i;
+    var inp=document.createElement('input');
+    inp.type='text'; inp.className='line-input'; inp.id='inp'+i;
+    inp.setAttribute('spellcheck','false'); inp.setAttribute('autocorrect','off');
+    inp.setAttribute('autocapitalize','off'); inp.setAttribute('autocomplete','off');
+    if(isEmpty||(isCom&&skipOn)) inp.disabled=true;
+    (function(idx,target,noteText){
+      inp.addEventListener('input',function(){
+        if(!target) return;
+        updateLineClr(idx,target);
+        if(inp.value===target&&target!==''&&noteText!=='') showNote(idx);
+        else if(inp.value!==target) hideNote(idx);
+        updateStats();
+      });
+    })(i,ln.c,ln.n);
+    content.appendChild(ghost); content.appendChild(colors); content.appendChild(inp);
+    row.appendChild(num); row.appendChild(content);
+    var note=document.createElement('div');
+    note.className='line-done-note'; note.id='note'+i;
+    note.textContent=ln.n?('✅ '+ln.n+'!'):'';
+    block.appendChild(row);
+    if(ln.n) block.appendChild(note);
+    wrap.appendChild(block);
+    lineData.push({inp:inp,target:ln.c,isCom:isCom,isEmpty:isEmpty});
+  });
+}
+
+function updateLineClr(idx,target){
+  var inp=document.getElementById('inp'+idx);
+  var clr=document.getElementById('clr'+idx);
+  if(!inp||!clr) return;
+  var typed=inp.value, html='';
+  for(var ci=0;ci<target.length;ci++){
+    var ch=target[ci];
+    if(ci<typed.length) html+=typed[ci]===ch?'<span style="color:#22c55e">'+esc(ch)+'</span>':'<span style="color:#f43f5e;text-decoration:underline">'+esc(ch)+'</span>';
+    else html+='<span style="color:transparent">'+esc(ch)+'</span>';
+  }
+  clr.innerHTML=html;
+  var num=document.getElementById('num'+idx);
+  if(num) num.style.color=(typed===target&&target!=='')?'#22c55e':'';
+}
+
+function showNote(i){var n=document.getElementById('note'+i);if(n&&n.textContent)n.classList.add('show');}
+function hideNote(i){var n=document.getElementById('note'+i);if(n)n.classList.remove('show');}
+
+function doCheck(){
+  var e=M[cur].eskizlar[curEskiz];
+  var done=0,total=0,errors=[];
+  lineData.forEach(function(l,i){
+    if(l.isEmpty||(l.isCom&&skipOn)) return;
+    total++;
+    if(l.inp.value===l.target){
+      done++; document.getElementById('num'+i).style.color='#22c55e';
+      if(e.lines[i].n) showNote(i);
+    } else {
+      errors.push(i+1); document.getElementById('num'+i).style.color='#f43f5e';
+    }
+  });
+  var pct=total>0?Math.round(done/total*100):0;
+  var b=document.getElementById('badge');
+  if(!b) return;
+  b.className='badge show';
+  if(pct>=85){
+    b.className+=' g';
+    eskizDoneSet.add(cur+'-'+curEskiz);
+    var isLast=curEskiz===M[cur].eskizlar.length-1;
+    if(isLast){ doneSet.add(cur); b.textContent='✅ Zo\'r! '+pct+'% — barcha eskizlar tugadi!'; showRating(); }
+    else { b.textContent='✅ Zo\'r! '+pct+'% — keyingi eskiz →'; setTimeout(function(){curEskiz++;renderEskiz(M[cur]);},900); }
+  } else if(pct>=55){
+    b.className+=' o'; b.textContent='⚡ '+pct+'% — xato qatorlar: '+errors.join(', ')+'-qator';
+  } else {
+    b.className+=' r'; b.textContent='❌ '+pct+'% — qaytadan urinib ko\'ring';
+  }
+  updateStats(); buildTabs();
+}
+
+function doClear(){
+  lineData.forEach(function(l,i){
+    l.inp.value='';
+    var clr=document.getElementById('clr'+i); if(clr) clr.innerHTML='';
+    var num=document.getElementById('num'+i); if(num) num.style.color='';
+    hideNote(i);
+  });
+  var b=document.getElementById('badge'); if(b) b.className='badge';
+  updateStats();
+}
+
+function updateStats(){
+  if(M[cur].type!=='eskiz') return;
+  var done=0,total=0;
+  lineData.forEach(function(l){
+    if(l.isEmpty||(l.isCom&&skipOn)) return;
+    total++;
+    if(l.inp.value===l.target) done++;
+  });
+  var pct=total>0?Math.round(done/total*100):0;
+  document.getElementById('svDone').textContent=done+'/'+total;
+  document.getElementById('svScore').textContent=done>0?pct+'%':'—';
+  document.getElementById('progressFill').style.width=(doneSet.size/M.length*100)+'%';
+}
+
+function updateTopStats(){
+  // test balini hisoblash
+  var totalQ=0, correctQ=0;
+  M.forEach(function(m,mi){
+    if(m.type!=='test') return;
+    m.tests.forEach(function(t,qi){
+      totalQ++;
+      if(testAnswers[mi]&&testAnswers[mi][qi]===t.ans) correctQ++;
+    });
+  });
+  document.getElementById('svScore').textContent=totalQ>0?(correctQ+'/'+totalQ):'—';
+  document.getElementById('svDone').textContent=doneSet.size+'/'+M.length;
+  document.getElementById('progressFill').style.width=(doneSet.size/M.length*100)+'%';
+}
+
+function toggleGhost(){
+  ghostVisible=!ghostVisible;
+  document.querySelectorAll('.line-ghost').forEach(function(g){g.style.visibility=ghostVisible?'visible':'hidden';});
+  var gb=document.getElementById('ghostBtn');
+  if(gb) gb.textContent=ghostVisible?'👁️ Yashir':'👁️ Ko\'rsat';
+}
+
+function toggleSkip(){
+  skipOn=!skipOn;
+  var sw=document.getElementById('sw'); if(sw) sw.classList.toggle('on',skipOn);
+  var sl=document.getElementById('skipLbl'); if(sl) sl.textContent=skipOn?'Kommentlar o\'tkazilmoqda':'# Kommentlarni o\'tkazib yuboring';
+  if(M[cur].type==='eskiz'){ buildLines(M[cur].eskizlar[curEskiz]); applyBright(); updateStats(); }
+}
+
+function toggleDetail(){
+  var p=document.getElementById('detailPanel');
+  if(p.classList.contains('show')){p.classList.remove('show');}
+  else{document.getElementById('detailContent').textContent=M[cur].detail;p.classList.add('show');renderMath('detailContent');}
+}
+
+function toggleResult(){
+  var p=document.getElementById('resultPanel');
+  if(!p) return;
+  if(p.classList.contains('show')){p.classList.remove('show');}
+  else{document.getElementById('simWrap').innerHTML='<pre>'+esc(M[cur].sim)+'</pre>';p.classList.add('show');}
+}
+
+function setBright(v){document.getElementById('brightVal').textContent=v;applyBright();}
+
+function applyBright(){
+  var v=parseInt(document.getElementById('brightSlider').value)||3;
+  var op=BRIGHT[v];
+  document.querySelectorAll('.line-ghost').forEach(function(g){
+    if(!g.classList.contains('skip-c')&&ghostVisible) g.style.color='rgba(74,96,128,'+op+')';
+  });
+}
+
+function buildTabs(){
+  var c=document.getElementById('tabs'); c.innerHTML='';
+  M.forEach(function(m,i){
+    var d=document.createElement('div');
+    d.className='tab'+(i===cur?' on':'')+(doneSet.has(i)?' done':'');
+    d.textContent=m.id;
+    d.onclick=(function(n){return function(){loadMod(n);};})(i);
+    c.appendChild(d);
+  });
+}
+
+function buildStars(){
+  var sc=document.getElementById('stars'); sc.innerHTML='';
+  for(var i=1;i<=10;i++){
+    var s=document.createElement('span');
+    s.className='star'; s.textContent='⭐'; s.dataset.v=i;
+    s.onclick=(function(v){return function(){
+      selectedStar=v;
+      document.getElementById('ratingScore').textContent=v+' / 10';
+      document.querySelectorAll('.star').forEach(function(st){st.classList.toggle('on',parseInt(st.dataset.v)<=v);});
+    };})(i);
+    sc.appendChild(s);
+  }
+}
+
+function showRating(){document.getElementById('ratingBox').classList.add('show');}
+
+function submitRating(){
+  if(ratingSubmitted) return;
+  if(selectedStar===0){alert('Baho tanlang!');return;}
+  ratingSubmitted=true;
+  document.getElementById('ratingThanks').style.display='block';
+  document.querySelector('.rating-submit').style.display='none';
+}
+
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+function renderMath(elId){
+  var el=document.getElementById(elId);
+  if(!el||typeof renderMathInElement==='undefined') return;
+  try{
+    renderMathInElement(el,{
+      delimiters:[
+        {left:'$$',right:'$$',display:true},
+        {left:'$',right:'$',display:false}
+      ],
+      throwOnError:false
+    });
+  }catch(e){}
+}
+
+</script>
+</body>
+</html>

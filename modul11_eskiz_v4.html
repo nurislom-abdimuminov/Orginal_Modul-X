@@ -1,0 +1,1060 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Eskiz — 11-Modul. Ma'lumotlarni tayyorlash</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:#0a0e1a;color:#dde5f0;font-family:'JetBrains Mono',monospace;font-size:13px;min-height:100vh;}
+.top{background:#0f1520;border-bottom:1px solid #1e3048;padding:8px 14px;display:flex;align-items:center;gap:8px;position:sticky;top:0;z-index:50;}
+.top-t{color:#00f0c8;font-size:.78rem;font-weight:700;}
+.top-s{color:#4a6080;font-size:.65rem;margin-left:auto;}
+.bright-bar{background:#0f1520;border-bottom:1px solid #1e3048;padding:6px 14px;display:flex;align-items:center;gap:10px;position:sticky;top:41px;z-index:49;}
+.bright-lbl{font-size:.65rem;color:#4a6080;flex-shrink:0;}
+.bright-slider{flex:1;-webkit-appearance:none;height:4px;border-radius:2px;background:#1e3048;outline:none;cursor:pointer;}
+.bright-slider::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:#00f0c8;cursor:pointer;}
+.bright-val{font-size:.68rem;color:#00f0c8;font-weight:700;width:20px;text-align:right;flex-shrink:0;}
+.wrap{padding:10px 14px;max-width:540px;margin:0 auto;}
+.tabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;margin-bottom:10px;scrollbar-width:none;}
+.tabs::-webkit-scrollbar{display:none;}
+.tab{flex-shrink:0;padding:6px 12px;border-radius:20px;border:1px solid #1e3048;background:#141e2e;color:#4a6080;font-size:.68rem;cursor:pointer;transition:all .15s;}
+.tab.on{border-color:#00f0c8;color:#00f0c8;background:rgba(0,240,200,.08);}
+.tab.done{border-color:#22c55e;color:#22c55e;background:rgba(34,197,94,.06);}
+.skip-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;padding:8px 12px;background:#141e2e;border:1px solid #1e3048;border-radius:8px;cursor:pointer;}
+.skip-row span{font-size:.7rem;color:#4a6080;}
+.sw{width:34px;height:18px;background:#1e3048;border-radius:10px;position:relative;transition:background .2s;flex-shrink:0;}
+.sw.on{background:#fbbf24;}
+.sw::after{content:'';position:absolute;top:2px;left:2px;width:14px;height:14px;background:#fff;border-radius:50%;transition:left .2s;}
+.sw.on::after{left:18px;}
+.stats{display:flex;gap:8px;margin-bottom:10px;}
+.stat{flex:1;background:#141e2e;border:1px solid #1e3048;border-radius:8px;padding:7px 8px;text-align:center;}
+.sv{font-size:.95rem;font-weight:700;color:#00f0c8;}
+.sl{font-size:.58rem;color:#4a6080;margin-top:2px;}
+.progress-bar{height:3px;background:#1e3048;border-radius:2px;margin-bottom:10px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,#00f0c8,#2563eb);border-radius:2px;transition:width .4s;}
+.intro-box{background:#0d1828;border:1px solid #1e3048;border-left:3px solid #00f0c8;border-radius:10px;padding:14px;margin-bottom:10px;}
+.intro-title{font-size:.8rem;font-weight:700;color:#00f0c8;margin-bottom:8px;}
+.intro-text{font-size:.7rem;line-height:1.85;color:#9fb0c8;margin-bottom:10px;white-space:pre-wrap;}
+.intro-stats{display:flex;gap:8px;margin-top:10px;}
+.intro-stat{flex:1;background:#080c14;border:1px solid #1e3048;border-radius:8px;padding:8px;text-align:center;}
+.intro-stat-v{font-size:1.1rem;font-weight:700;color:#00f0c8;}
+.intro-stat-l{font-size:.58rem;color:#4a6080;margin-top:2px;}
+.terms-box{background:#080c14;border:1px solid #1e3048;border-left:3px solid #a855f7;border-radius:8px;padding:10px 12px;margin-bottom:10px;}
+.terms-title{font-size:.68rem;font-weight:700;color:#a855f7;margin-bottom:8px;}
+.term-row{display:flex;gap:6px;margin-bottom:5px;align-items:flex-start;}
+.term-key{font-size:.64rem;color:#fbbf24;font-weight:700;min-width:110px;flex-shrink:0;}
+.term-val{font-size:.63rem;color:#4a6080;line-height:1.6;}
+.detail-panel{display:none;background:#0a1628;border:1px solid #2563eb;border-radius:8px;padding:12px 14px;margin-bottom:10px;font-size:.72rem;line-height:2;color:#93c5fd;white-space:pre-wrap;}
+.detail-panel.show{display:block;}
+.detail-title{color:#60a5fa;font-weight:700;margin-bottom:8px;font-size:.76rem;}
+.result-panel{display:none;background:#080c14;border:1px solid #22c55e;border-radius:10px;padding:12px;margin-bottom:10px;}
+.result-panel.show{display:block;}
+.result-title{color:#22c55e;font-size:.72rem;font-weight:700;margin-bottom:8px;}
+.sim-wrap{width:100%;overflow-x:auto;}
+.sim-wrap pre{font-size:.68rem;line-height:1.9;color:#22c55e;white-space:pre;}
+.code-block{border:1px solid #1e3048;border-radius:10px;overflow:hidden;margin-bottom:10px;background:#090d18;}
+.fbar{display:flex;align-items:center;gap:5px;padding:7px 12px;background:#0f1520;border-bottom:1px solid #1e3048;}
+.dot{width:6px;height:6px;border-radius:50%;}
+.dot.r{background:#f43f5e;}.dot.y{background:#fbbf24;}.dot.g{background:#22c55e;}
+.fn{font-size:.65rem;color:#4a6080;margin-left:4px;}
+.fhint{margin-left:auto;font-size:.6rem;color:#00f0c8;opacity:.7;}
+.lines-wrap{padding:4px 0;}
+.line-block{margin:0;}
+.line-row{display:flex;align-items:center;position:relative;min-height:30px;}
+.line-num{width:28px;flex-shrink:0;font-size:.63rem;padding:4px 4px 4px 5px;color:#2a3a50;text-align:right;user-select:none;transition:color .2s;align-self:center;}
+.line-content{flex:1;position:relative;overflow-x:auto;overflow-y:hidden;min-height:30px;}
+.line-content::-webkit-scrollbar{height:2px;}
+.line-content::-webkit-scrollbar-thumb{background:#1e3048;border-radius:1px;}
+.line-ghost{font-size:.76rem;line-height:1.8;padding:4px 8px;white-space:pre;pointer-events:none;min-height:30px;display:block;}
+.line-ghost.skip-c{opacity:.08!important;}
+.line-colors{position:absolute;top:0;left:0;font-size:.76rem;line-height:1.8;padding:4px 8px;white-space:pre;pointer-events:none;z-index:2;min-height:30px;}
+.line-input{position:absolute;top:0;left:0;right:0;bottom:0;width:100%;font-family:'JetBrains Mono',monospace;font-size:.76rem;line-height:1.8;padding:4px 8px;color:transparent;-webkit-text-fill-color:transparent;caret-color:#00f0c8;background:transparent;border:none;outline:none;white-space:pre;overflow:hidden;z-index:10;-webkit-appearance:none;}
+.line-input:disabled{cursor:default;}
+.line-done-note{display:none;font-size:.66rem;line-height:1.6;padding:3px 8px 3px 34px;color:#38bdf8;background:rgba(56,189,248,.06);border-left:2px solid #38bdf8;white-space:pre-wrap;animation:fadeIn .25s ease;}
+.line-done-note.show{display:block;}
+.line-start-note{display:none;font-size:.64rem;line-height:1.6;padding:3px 8px 3px 34px;color:#a855f7;background:rgba(168,85,247,.06);border-left:2px solid #a855f7;white-space:pre-wrap;animation:fadeIn .25s ease;}
+.line-start-note.show{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:translateY(0)}}
+.btn-row{display:flex;gap:6px;flex-wrap:wrap;padding:9px 12px;background:#0f1520;border-top:1px solid #1e3048;}
+.btn{padding:8px 11px;border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:.68rem;font-weight:700;border:none;cursor:pointer;flex-shrink:0;transition:opacity .15s;}
+.btn:active{opacity:.7;}
+.btn-chk{background:#00f0c8;color:#080c14;}
+.btn-clr{background:transparent;border:1px solid #1e3048;color:#4a6080;}
+.btn-det{background:#2563eb;color:#fff;}
+.btn-ghost{background:#7c3aed;color:#fff;}
+.btn-res{background:#16a34a;color:#fff;}
+.badge{display:none;margin:0 12px 10px;padding:7px 12px;border-radius:8px;font-size:.7rem;border:1px solid #1e3048;}
+.badge.show{display:block;}
+.badge.g{border-color:#22c55e;color:#22c55e;background:rgba(34,197,94,.07);}
+.badge.o{border-color:#fbbf24;color:#fbbf24;background:rgba(251,191,36,.07);}
+.badge.r{border-color:#f43f5e;color:#f43f5e;background:rgba(244,63,94,.07);}
+.rating-box{background:#0d1828;border:1px solid #fbbf24;border-radius:12px;padding:14px 16px;margin-top:10px;display:none;}
+.rating-box.show{display:block;}
+.rating-title{font-size:.72rem;font-weight:700;color:#fbbf24;text-align:center;margin-bottom:4px;}
+.rating-sub{font-size:.62rem;color:#4a6080;text-align:center;margin-bottom:12px;}
+.stars{display:flex;justify-content:center;gap:4px;margin-bottom:10px;flex-wrap:wrap;}
+.star{font-size:1.5rem;cursor:pointer;filter:grayscale(1);opacity:.35;transition:transform .1s,filter .1s,opacity .1s;user-select:none;}
+.star.on{filter:none;opacity:1;}
+.star:active{transform:scale(1.3);}
+.rating-score{text-align:center;font-size:.72rem;color:#fbbf24;font-weight:700;margin-bottom:8px;min-height:18px;}
+.rating-comment{width:100%;background:#141e2e;border:1px solid #1e3048;border-radius:8px;padding:8px 10px;color:#dde5f0;font-family:'JetBrains Mono',monospace;font-size:.68rem;resize:none;outline:none;margin-bottom:8px;}
+.rating-comment:focus{border-color:#fbbf24;}
+.rating-submit{width:100%;padding:10px;background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#080c14;font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:700;border:none;border-radius:8px;cursor:pointer;}
+.rating-submit:active{opacity:.8;}
+.rating-thanks{display:none;text-align:center;padding:10px;font-size:.72rem;color:#22c55e;font-weight:700;}
+</style>
+</head>
+<body>
+<div class="top">
+  <div class="top-t">✏️ Pandas — 11-Modul</div>
+  <div class="top-s" id="topSub">11.2</div>
+</div>
+<div class="bright-bar">
+  <span class="bright-lbl">👁️ Xiralik:</span>
+  <input type="range" class="bright-slider" id="brightSlider" min="1" max="10" value="3" oninput="setBright(this.value)">
+  <span class="bright-val" id="brightVal">3</span>
+</div>
+<div class="wrap">
+  <div class="stats">
+    <div class="stat"><div class="sv" id="svPctV">—</div><div class="sl">TO'G'RI</div></div>
+    <div class="stat"><div class="sv" id="svDone">0/0</div><div class="sl">BAJARILDI</div></div>
+    <div class="stat"><div class="sv" id="svMod">1/9</div><div class="sl">MAVZU</div></div>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+  <div class="tabs" id="tabs"></div>
+  <div class="skip-row" onclick="toggleSkip()">
+    <div class="sw" id="sw"></div>
+    <span id="skipLbl"># Kommentlarni o'tkazib yuboring</span>
+  </div>
+
+  <div class="intro-box" id="introBox"></div>
+
+  <div class="terms-box" id="termsBox"></div>
+  <div class="detail-panel" id="detailPanel">
+    <div class="detail-title">📘 BATAFSIL</div>
+    <div id="detailContent"></div>
+  </div>
+  <div class="result-panel" id="resultPanel">
+    <div class="result-title">📊 NATIJA — SIMULYATSIYA</div>
+    <div class="sim-wrap" id="simWrap"></div>
+  </div>
+  <div class="code-block">
+    <div class="fbar">
+      <div class="dot r"></div><div class="dot y"></div><div class="dot g"></div>
+      <div class="fn" id="fname">pandas_11.py</div>
+      <div class="fhint">↔️ suring ✏️ yozing</div>
+    </div>
+    <div class="lines-wrap" id="linesWrap"></div>
+    <div class="btn-row">
+      <button class="btn btn-chk" onclick="doCheck()">✅ Tekshir</button>
+      <button class="btn btn-clr" onclick="doClear()">🗑️ Tozala</button>
+      <button class="btn btn-ghost" id="ghostBtn" onclick="toggleGhost()">👁️ Yashir</button>
+      <button class="btn btn-det" onclick="toggleDetail()">📖 Batafsil</button>
+      <button class="btn btn-res" onclick="toggleResult()">📊 Natija</button>
+    </div>
+    <div class="badge" id="badge"></div>
+  </div>
+  <div class="rating-box" id="ratingBox">
+    <div class="rating-title">⭐ 11-Modulni baholang</div>
+    <div class="rating-sub">Fikringiz keyingi versiyani yaxshilashga yordam beradi</div>
+    <div class="stars" id="stars"></div>
+    <div class="rating-score" id="ratingScore">Baho tanlang (1–10)</div>
+    <textarea class="rating-comment" id="ratingComment" rows="2" placeholder="Izoh: nima yoqdi, nima yetishmadi..."></textarea>
+    <button class="rating-submit" onclick="submitRating()">⭐ Yuborish</button>
+    <div class="rating-thanks" id="ratingThanks">✅ Rahmat! Fikringiz qabul qilindi.</div>
+  </div>
+</div>
+
+<script>
+var MODULE_INTRO = {
+  title: "📦 11-Modul haqida",
+  text: "Bu modulda siz xom (raw) ma'lumotlarni tozalash va ishga tayyorlashni o'rganasiz.\n\nHaqiqiy hayotda ma'lumotlar deyarli hech qachon toza kelmaydi — kimdir bo'sh joy qoldirgan, kimdir bir xil yozuvni ikki marta kiritgan, kimdir narxni manfiy raqam qilib yuborgan. Tajribali Data Analyst ishining katta qismi aynan shu — tahlildan oldin ma'lumotni tozalash.\n\nMavzular ketma-ket bog'langan: avval bo'sh qiymatlarni (NaN) topib hal qilasiz, keyin takrorlanishlarni tozalaysiz, qiymatlarni to'g'ri nomlarga almashtirasiz, ma'lumotlarni guruhlarga bo'lib statistik xulosa chiqarasiz, g'ayritabiiy qiymatlarni topasiz, va oxirida sana-vaqt bilan ishlashni o'rganasiz.\n\nReal loyihada bu nima beradi? Onlayn-do'kon misolida: mijoz yoshi bo'sh qolishi mumkin (dropna/fillna), bir mijoz ikki marta ro'yxatdan o'tgan bo'lishi mumkin (drop_duplicates), shahar nomlari turlicha yozilgan bo'lishi mumkin (replace), buyurtma narxi xato kiritilgan bo'lishi mumkin (outlier), sotuvlar oylik kesimda tahlil qilinishi kerak (datetime + groupby). Aynan shu ko'nikmalar sizni amaliy Data Analyst darajasiga olib chiqadi.",
+  count: 9
+};
+
+var M = [
+
+{id:'11.2',f:'pandas_11_2.py',
+plan:['dropna() nima va nima uchun kerak','subset parametri bilan ishlatish','thresh parametri — minimal qiymatlar soni'],
+terms:[
+  ['NaN','Not a Number — bo\'sh yoki noma\'lum qiymat'],
+  ['dropna()','NaN qiymatli qatorlarni o\'chirish'],
+  ['subset','Faqat ko\'rsatilgan ustunni tekshirish'],
+  ['thresh','Minimal NON-NaN qiymatlar soni']
+],
+detail:'NAN NIMA VA NEGA PAYDO BO\'LADI?\n\nNaN — "qiymat yo\'q" degan ma\'noni bildiradi. Mijozlar ro\'yxatida kimdir yoshini yozmagan bo\'lsa, o\'sha katakcha bo\'sh qoladi — pandas buni avtomatik NaN deb belgilaydi.\n\nNaN qayerdan paydo bo\'ladi? Forma to\'ldirilganda foydalanuvchi maydonni bo\'sh qoldirgan, ma\'lumotlar birlashtirilganda mos yozuv topilmagan, yoki sensor vaqtincha ishlamay o\'lchov yozilmagan bo\'lishi mumkin.\n\nNEGA MUAMMO? NaN bilan matematik amal bajarib bo\'lmaydi. O\'rtacha yoshni hisoblamoqchi bo\'lsangiz, NaN bor qatorlar hisobni buzadi. Shuning uchun tahlildan oldin NaN bilan nima qilishni hal qilish kerak: o\'chirish (dropna) yoki to\'ldirish (fillna).\n\nQACHON O\'CHIRISH KERAK? Agar NaN kam bo\'lsa — o\'chirish xavfsiz. Agar ko\'p bo\'lsa, o\'chirish ma\'lumotning katta qismini yo\'qotadi, fillna() ko\'proq mantiqiy.\n\nTHRESH NIMA UCHUN? Ba\'zan "hech bo\'lmasa N ta ustun to\'ldirilgan bo\'lsin" demoqchisiz. 5 ustundan kamida 3 tasi to\'ldirilgan qatorlarni saqlash uchun thresh=3 ishlatiladi.',
+sim:'>>> import pandas as pd\n>>> df = pd.DataFrame({\n...   \'Ism\':[\'Ali\',\'Vali\',None],\n...   \'Yosh\':[20,None,30]})\n>>> df.dropna()\n   Ism  Yosh\n0  Ali  20.0\n>>> df.dropna(subset=[\'Yosh\'])\n    Ism  Yosh\n0   Ali  20.0\n2  None  30.0\n>>> df.dropna(thresh=2)\n   Ism  Yosh\n0  Ali  20.0',
+eskizlar:[
+{q:'Barcha NaN qatorlarni o\'chiring.\n\n📋: Ism va Yosh ustunlari, ba\'zi joylar bo\'sh.',
+ lines:[
+  {c:'import pandas as pd',n:'Siz pandas kutubxonasini pd nomi bilan yukladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'df = pd.DataFrame({',n:'Siz DataFrame yaratishni boshladingiz'},
+  {c:'  \'Ism\':[\'Ali\',\'Vali\',None],',n:'Siz Ism ustunini qo\'shdingiz, oxirgi qiymat bo\'sh'},
+  {c:'  \'Yosh\':[20,None,30]',n:'Siz Yosh ustunini qo\'shdingiz, o\'rtadagi qiymat bo\'sh'},
+  {c:'})',n:'Siz DataFrame yaratishni yakunladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'toza = df.dropna()',n:'Siz NaN bo\'lgan barcha qatorlarni o\'chirdingiz'},
+  {c:'print(toza)',n:'Siz natijani ekranga chiqardingiz'},
+ ]},
+{q:'Faqat "Yosh" ustunida NaN bo\'lgan qatorlarni o\'chiring.',
+ lines:[
+  {c:'import pandas as pd',n:'Siz pandas kutubxonasini pd nomi bilan yukladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'df = pd.DataFrame({',n:'Siz DataFrame yaratishni boshladingiz'},
+  {c:'  \'Ism\':[\'Ali\',\'Vali\',\'Sara\'],',n:'Siz Ism ustunini to\'liq qiymatlar bilan qo\'shdingiz'},
+  {c:'  \'Yosh\':[20,None,30]',n:'Siz Yosh ustunini qo\'shdingiz, o\'rtadagisi bo\'sh'},
+  {c:'})',n:'Siz DataFrame yaratishni yakunladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'natija = df.dropna(',n:'Siz faqat Yosh ustunini tekshirishni boshladingiz'},
+  {c:'  subset=[\'Yosh\']',n:'Siz subset orqali faqat Yosh ustunini ko\'rsatdingiz'},
+  {c:')',n:'Siz dropna chaqiruvini yakunladingiz'},
+  {c:'print(natija)',n:'Siz natijani ekranga chiqardingiz'},
+ ]},
+{q:'Kamida 2 ta NON-NaN qiymat bo\'lgan qatorlarni QOLDIRING.',
+ lines:[
+  {c:'import pandas as pd',n:'Siz pandas kutubxonasini pd nomi bilan yukladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'df = pd.DataFrame({',n:'Siz DataFrame yaratishni boshladingiz'},
+  {c:'  \'A\':[1,None,None],',n:'Siz A ustunini qo\'shdingiz, 2 ta qiymati bo\'sh'},
+  {c:'  \'B\':[None,2,None],',n:'Siz B ustunini qo\'shdingiz, 2 ta qiymati bo\'sh'},
+  {c:'  \'C\':[3,4,None]',n:'Siz C ustunini qo\'shdingiz, 1 ta qiymati bo\'sh'},
+  {c:'})',n:'Siz DataFrame yaratishni yakunladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'natija = df.dropna(thresh=2)',n:'Siz kamida 2 ta qiymati bor qatorlarni qoldirdingiz'},
+  {c:'print(natija)',n:'Siz natijani ekranga chiqardingiz'},
+ ]},
+]},
+
+{id:'11.3',f:'pandas_11_3.py',
+plan:['fillna() — NaN ni to\'ldirish usullari','mean() bilan to\'ldirish','ffill — oldingi qiymat bilan','bfill — keyingi qiymat bilan'],
+terms:[
+  ['fillna()','NaN o\'rniga qiymat qo\'yish'],
+  ['ffill()','Forward fill — oldingi qiymatni olish'],
+  ['bfill()','Backward fill — keyingi qiymatni olish'],
+  ['mean()','O\'rtacha qiymat']
+],
+detail:'QAYSI TO\'LDIRISH USULINI QACHON TANLASH KERAK?\n\nfillna(0) — eng oddiy usul, lekin ehtiyot bo\'ling: agar 0 ma\'noli qiymat bo\'lsa, bu noto\'g\'ri xulosa chiqarishi mumkin. Bo\'sh va nol — ikki xil narsa.\n\nfillna(mean()) — o\'rtacha qiymat bilan to\'ldirish, raqamli ma\'lumotlar uchun mos. Mijozlarning yoshi ba\'zi joylarda yo\'q bo\'lsa, mavjud yoshlarning o\'rtachasi bilan to\'ldirish statistik tahlilni unchalik buzmaydi.\n\nffill() — vaqt seriyali ma\'lumotlarda foydali. Harorat har soatda o\'lchanadi, bitta soat tushib qolgan — eng mantiqiy yechim oldingi soat haroratini olish, chunki harorat keskin o\'zgarmaydi.\n\nbfill() — aksincha, keyingi qiymatni oladi. Kamroq ishlatiladi, lekin "narx keyingi oyda ma\'lum bo\'ladi" holatlarida foydali — masalan ombor jadvalida birinchi qatorlar hali narxlanmagan bo\'lsa, keyinroq kelgan narxni orqaga qarab to\'ldirish mantiqiy.\n\nDIQQAT: Eski darsliklarda fillna(method=\'ffill\') ko\'rinishida yozilgan, lekin yangi pandas versiyalarida bu usul olib tashlangan — endi to\'g\'ridan-to\'g\'ri .ffill() yoki .bfill() chaqiriladi.',
+sim:'>>> df = pd.DataFrame({\n...   \'Temp\':[20,None,None,25,None]})\n>>> df.fillna(0)\n   Temp\n0  20.0\n1   0.0\n2   0.0\n3  25.0\n4   0.0\n>>> df.ffill()\n   Temp\n0  20.0\n1  20.0\n2  20.0\n3  25.0\n4  25.0\n>>> df.bfill()\n   Temp\n0  20.0\n1  25.0\n2  25.0\n3  25.0\n4   NaN',
+eskizlar:[
+{q:'Barcha NaN ni 0 bilan to\'ldiring.',
+ lines:[
+  {c:'import pandas as pd',n:'Siz pandas kutubxonasini pd nomi bilan yukladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'df = pd.DataFrame({',n:'Siz DataFrame yaratishni boshladingiz'},
+  {c:'  \'Baho\':[5,None,4,None,3]',n:'Siz Baho ustunini qo\'shdingiz, 2 ta qiymati bo\'sh'},
+  {c:'})',n:'Siz DataFrame yaratishni yakunladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'natija = df.fillna(0)',n:'Siz NaN o\'rniga 0 qo\'ydingiz'},
+  {c:'print(natija)',n:'Siz natijani ekranga chiqardingiz'},
+ ]},
+{q:'NaN ni o\'rtacha qiymat bilan to\'ldiring.',
+ lines:[
+  {c:'import pandas as pd',n:'Siz pandas kutubxonasini pd nomi bilan yukladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'df = pd.DataFrame({',n:'Siz DataFrame yaratishni boshladingiz'},
+  {c:'  \'Narx\':[100,None,200,None]',n:'Siz Narx ustunini qo\'shdingiz, 2 ta qiymati bo\'sh'},
+  {c:'})',n:'Siz DataFrame yaratishni yakunladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'ortacha = df[\'Narx\']',n:'Siz o\'rtachani hisoblashni boshladingiz'},
+  {c:'  .mean()',n:'Siz mean() bilan o\'rtacha qiymatni hisobladingiz'},
+  {c:'natija = df[\'Narx\']',n:'Siz NaN ni to\'ldirishni boshladingiz'},
+  {c:'  .fillna(ortacha)',n:'Siz NaN o\'rniga o\'rtacha qiymatni qo\'ydingiz'},
+  {c:'print(natija)',n:'Siz natijani ekranga chiqardingiz'},
+ ]},
+{q:'NaN ni oldingi qiymat bilan to\'ldiring (forward fill).',
+ lines:[
+  {c:'import pandas as pd',n:'Siz pandas kutubxonasini pd nomi bilan yukladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'df = pd.DataFrame({',n:'Siz DataFrame yaratishni boshladingiz'},
+  {c:'  \'Temp\':[20,None,None,25]',n:'Siz Temp ustunini qo\'shdingiz, 2 ta qiymati bo\'sh'},
+  {c:'})',n:'Siz DataFrame yaratishni yakunladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'natija = df.ffill()',n:'Siz NaN ni oldingi qiymat bilan to\'ldirdingiz'},
+  {c:'print(natija)',n:'Siz natijani ekranga chiqardingiz'},
+ ]},
+{q:'NaN ni keyingi qiymat bilan to\'ldiring (backward fill).',
+ lines:[
+  {c:'import pandas as pd',n:'Siz pandas kutubxonasini pd nomi bilan yukladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'df = pd.DataFrame({',n:'Siz DataFrame yaratishni boshladingiz'},
+  {c:'  \'Narx\':[None,None,150,200]',n:'Siz Narx ustunini qo\'shdingiz, boshidagi 2 tasi bo\'sh'},
+  {c:'})',n:'Siz DataFrame yaratishni yakunladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'natija = df.bfill()',n:'Siz NaN ni keyingi qiymat bilan to\'ldirdingiz'},
+  {c:'print(natija)',n:'Siz natijani ekranga chiqardingiz'},
+ ]},
+]},
+
+{id:'11.4',f:'pandas_11_4.py',
+plan:['drop_duplicates() — takrorlarni o\'chirish','duplicated() — takrorlarni aniqlash','subset bilan takror tekshirish'],
+terms:[
+  ['drop_duplicates()','Takroriy qatorlarni olib tashlash'],
+  ['duplicated()','Takror qatorlarni True/False ko\'rsatish'],
+  ['subset','Faqat ko\'rsatilgan ustunlar bo\'yicha tekshirish']
+],
+detail:'TAKRORIY MA\'LUMOTLAR QAYERDAN PAYDO BO\'LADI?\n\nReal loyihalarda takrorlanish tez-tez uchraydi: mijoz formani ikki marta yuborgan, ikkita manbadan ma\'lumot birlashtirilganda bir xil yozuv ikki marta kelgan, yoki dastur xatosi tufayli yozuv ikki marta saqlangan.\n\nNEGA MUAMMO? Agar "nechta buyurtma bo\'ldi" deb sanasangiz va takrorlar bo\'lsa, natija noto\'g\'ri chiqadi — 100 ta buyurtma bo\'lsa, takrorlar bilan 120 deb hisoblanishi mumkin. Bu hisobotlarda jiddiy xatolarga olib keladi.\n\nDUPLICATED VA DROP_DUPLICATES FARQI: duplicated() — "tekshiruvchi", hech narsani o\'chirmaydi, faqat qaysi qatorlar takror ekanini ko\'rsatadi. drop_duplicates() — "tozalovchi", haqiqatan takrorlarni olib tashlaydi.\n\nNEGA AVVAL TEKSHIRISH KERAK? Ba\'zan "takror" deb ko\'ringan narsa tasodif bo\'lishi mumkin (ikki xil odamning ismi bir xil bo\'lishi mumkin). Avval duplicated() bilan ko\'rib, keyin qaror qabul qilish to\'g\'ri yondashuv.',
+sim:'>>> df = pd.DataFrame({\n...  \'Shahar\':[\'Toshkent\',\'Samarqand\',\n...           \'Toshkent\',\'Buxoro\']})\n>>> df.duplicated()\n0    False\n1    False\n2     True\n3    False\n>>> df.drop_duplicates()\n      Shahar\n0   Toshkent\n1  Samarqand\n3     Buxoro',
+eskizlar:[
+{q:'Takroriy qatorlar sonini sanang.',
+ lines:[
+  {c:'import pandas as pd',n:'Siz pandas kutubxonasini pd nomi bilan yukladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'df = pd.DataFrame({',n:'Siz DataFrame yaratishni boshladingiz'},
+  {c:'  \'Ism\':[\'Ali\',\'Vali\',\'Ali\']',n:'Siz Ism ustunini qo\'shdingiz, "Ali" ikki marta takrorlandi'},
+  {c:'})',n:'Siz DataFrame yaratishni yakunladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'soni = df.duplicated()',n:'Siz takroriy qatorlarni tekshirishni boshladingiz'},
+  {c:'  .sum()',n:'Siz sum() bilan takroriy qatorlar sonini hisobladingiz'},
+  {c:'print(\'Takror:\', soni)',n:'Siz natijani ekranga chiqardingiz'},
+ ]},
+{q:'Takroriy qatorlarni o\'chiring.',
+ lines:[
+  {c:'import pandas as pd',n:'Siz pandas kutubxonasini pd nomi bilan yukladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'df = pd.DataFrame({',n:'Siz DataFrame yaratishni boshladingiz'},
+  {c:'  \'Shahar\':[\'Toshkent\',',n:'Siz Shahar ustunini qo\'shishni boshladingiz'},
+  {c:'    \'Samarqand\',\'Toshkent\']',n:'Siz qolgan qiymatlarni qo\'shdingiz, "Toshkent" takrorlandi'},
+  {c:'})',n:'Siz DataFrame yaratishni yakunladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'natija = df',n:'Siz tozalashni boshladingiz'},
+  {c:'  .drop_duplicates()',n:'Siz takroriy qatorlarni o\'chirdingiz'},
+  {c:'print(natija)',n:'Siz natijani ekranga chiqardingiz'},
+ ]},
+{q:'Faqat "Ism" ustuni bo\'yicha takrorlarni o\'chiring.',
+ lines:[
+  {c:'import pandas as pd',n:'Siz pandas kutubxonasini pd nomi bilan yukladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'df = pd.DataFrame({',n:'Siz DataFrame yaratishni boshladingiz'},
+  {c:'  \'Ism\':[\'Ali\',\'Vali\',\'Ali\'],',n:'Siz Ism ustunini qo\'shdingiz, "Ali" takrorlandi'},
+  {c:'  \'Yosh\':[20,25,22]',n:'Siz Yosh ustunini qo\'shdingiz, qiymatlar har xil'},
+  {c:'})',n:'Siz DataFrame yaratishni yakunladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'natija = df.drop_duplicates(',n:'Siz subset bilan filtrlashni boshladingiz'},
+  {c:'  subset=[\'Ism\']',n:'Siz faqat Ism ustunini ko\'rsatdingiz'},
+  {c:')',n:'Siz drop_duplicates chaqiruvini yakunladingiz'},
+  {c:'print(natija)',n:'Siz natijani ekranga chiqardingiz'},
+ ]},
+]},
+
+{id:'11.5',f:'pandas_11_5.py',
+plan:['.map() — bitta ustun qiymatlarini almashtirish','Lug\'at bilan almashtirish','Lambda funksiya bilan almashtirish'],
+terms:[
+  ['.map()','Bitta ustundagi qiymatlarni almashtirish'],
+  ['lambda','Bir qatorli anonim funksiya'],
+  ['dict mapping','Lug\'at orqali qiymat belgilash']
+],
+detail:'MAP() QACHON VA NEGA KERAK BO\'LADI?\n\nKo\'p hollarda ma\'lumotlar qisqartma yoki kod bilan saqlanadi: jinsi "M"/"F" deb, mamlakat kodi "UZ"/"RU" deb. Lekin hisobotda bu qisqartmalar noqulay — "Erkak"/"Ayol" deb yozilgani tushunarliroq. Aynan shu yerda map() yordamga keladi.\n\nLUG\'AT BILAN ISHLASH: map({\'M\':\'Erkak\', \'F\':\'Ayol\'}) — "kalit-qiymat" juftliklarini beradi. Pandas har katakchani lug\'atdan qidiradi. MUHIM: lug\'atda yo\'q qiymat uchrasa, natija avtomatik NaN bo\'lib qoladi — bu ko\'pchilik boshlovchilarni hayron qoldiradi.\n\nLAMBDA NEGA KERAK? Ba\'zan oddiy almashtirish yetarli emas, hisoblash kerak: har bir narxga 20% qo\'shish. Lug\'at yozish imkonsiz (cheksiz qiymat bo\'lishi mumkin), shuning uchun "har bir x uchun shu amalni bajar" deb lambda yoziladi.\n\nMAP VA APPLY FARQI: .map() bitta ustun uchun, har elementga alohida ta\'sir qiladi. .apply() butun DataFrame yoki murakkabroq funksiyalar uchun.',
+sim:'>>> df = pd.DataFrame({\n...   \'Jinsi\':[\'M\',\'F\',\'M\']})\n>>> df[\'Jinsi\'].map(\n...   {\'M\':\'Erkak\',\'F\':\'Ayol\'})\n0    Erkak\n1     Ayol\n2    Erkak',
+eskizlar:[
+{q:'"M" va "F" ni "Erkak" va "Ayol" ga almashtiring.',
+ lines:[
+  {c:'import pandas as pd',n:'Siz pandas kutubxonasini pd nomi bilan yukladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'df = pd.DataFrame({',n:'Siz DataFrame yaratishni boshladingiz'},
+  {c:'  \'Jinsi\':[\'M\',\'F\',\'M\']',n:'Siz Jinsi ustunini qisqartma qiymatlar bilan qo\'shdingiz'},
+  {c:'})',n:'Siz DataFrame yaratishni yakunladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'df[\'Jinsi\'] = df[',n:'Siz lug\'at bilan almashtirishni boshladingiz'},
+  {c:'  \'Jinsi\'].map({',n:'Siz map() ga lug\'at berishni boshladingiz'},
+  {c:'  \'M\':\'Erkak\',\'F\':\'Ayol\'',n:'Siz M→Erkak va F→Ayol moslamalarini yozdingiz'},
+  {c:'})',n:'Siz map chaqiruvini yakunladingiz'},
+  {c:'print(df)',n:'Siz natijani ekranga chiqardingiz'},
+ ]},
+{q:'Baholarni harfli bahoga o\'zgartiring: 5→A, 4→B, 3→C.',
+ lines:[
+  {c:'import pandas as pd',n:'Siz pandas kutubxonasini pd nomi bilan yukladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'df = pd.DataFrame({',n:'Siz DataFrame yaratishni boshladingiz'},
+  {c:'  \'Ball\':[5,4,3]',n:'Siz Ball ustunini raqamli baholar bilan qo\'shdingiz'},
+  {c:'})',n:'Siz DataFrame yaratishni yakunladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'df[\'Harf\'] = df[',n:'Siz yangi Harf ustunini yaratishni boshladingiz'},
+  {c:'  \'Ball\'].map({',n:'Siz map() ga lug\'at berishni boshladingiz'},
+  {c:'  5:\'A\',4:\'B\',3:\'C\'',n:'Siz raqamdan harfga moslamalarni yozdingiz'},
+  {c:'})',n:'Siz map chaqiruvini yakunladingiz'},
+  {c:'print(df)',n:'Siz natijani ekranga chiqardingiz'},
+ ]},
+{q:'Narxlarni 2 ga ko\'paytiring (lambda bilan).',
+ lines:[
+  {c:'import pandas as pd',n:'Siz pandas kutubxonasini pd nomi bilan yukladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'df = pd.DataFrame({',n:'Siz DataFrame yaratishni boshladingiz'},
+  {c:'  \'Narx\':[10,20,30]',n:'Siz Narx ustunini qo\'shdingiz'},
+  {c:'})',n:'Siz DataFrame yaratishni yakunladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'df[\'Narx\'] = df[',n:'Siz Narx ustunini yangilashni boshladingiz'},
+  {c:'  \'Narx\'].map(',n:'Siz map() ga funksiya berishni boshladingiz'},
+  {c:'  lambda x: x * 2',n:'Siz har bir qiymatni 2 ga ko\'paytiruvchi lambda yozdingiz'},
+  {c:')',n:'Siz map chaqiruvini yakunladingiz'},
+  {c:'print(df)',n:'Siz natijani ekranga chiqardingiz'},
+ ]},
+]},
+
+{id:'11.6',f:'pandas_11_6.py',
+plan:['.replace() — qiymatlarni almashtirish','.rename() — ustun nomini o\'zgartirish'],
+terms:[
+  ['.replace()','Jadval ichidagi qiymatlarni almashtirish'],
+  ['.rename()','Ustun nomlarini o\'zgartirish'],
+  ['columns={}','rename() da nomlash lug\'ati']
+],
+detail:'REPLACE VA RENAME FARQI NIMADA?\n\nKo\'pchilik bu ikkisini chalkashtiradi, lekin ular boshqa-boshqa narsalarni o\'zgartiradi.\n\nreplace() — JADVAL ICHIDAGI QIYMATLARNI o\'zgartiradi. "Toshkent" yozilgan barcha katakchalarni "Toshkent shahar" ga almashtirish — bu ma\'lumotning o\'zini tozalash va standartlashtirish. Turli manbalardan kelgan ma\'lumotlarda bir xil shahar turlicha yozilgan bo\'lishi mumkin ("Toshkent", "toshkent") — replace() bularni bir xil ko\'rinishga keltiradi.\n\nrename() — USTUN NOMLARINI o\'zgartiradi, ya\'ni jadval "sarlavhalarini". "Yosh" ustun nomini "Age" deb o\'zgartirish — bu ma\'lumotning o\'zini o\'zgartirmaydi, faqat unga murojaat qilish usulini o\'zgartiradi.\n\nQACHON NIMA KERAK? Excel\'dan import qilingan ustun nomlari "Column1", "Column2" kabi bema\'ni nomda bo\'lsa — rename() kerak. Jadval ichida xato yoki nostandart matn bo\'lsa — replace() kerak.\n\nMUHIM: rename() har doim columns={} parametri bilan ishlatiladi (ustunlar uchun) yoki index={} (qatorlar uchun).',
+sim:'>>> df = pd.DataFrame({\n...  \'Shahar\':[\'Toshkent\',\'Buxoro\']})\n>>> df.replace(\n...  \'Toshkent\',\'T.shahar\')\n      Shahar\n0   T.shahar\n1     Buxoro\n>>> df.rename(\n...  columns={\'Shahar\':\'City\'})\n      City\n0 Toshkent\n1   Buxoro',
+eskizlar:[
+{q:'"Toshkent" ni "Toshkent shahar" ga almashtiring.',
+ lines:[
+  {c:'import pandas as pd',n:'Siz pandas kutubxonasini pd nomi bilan yukladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'df = pd.DataFrame({',n:'Siz DataFrame yaratishni boshladingiz'},
+  {c:'  \'Shahar\':[\'Toshkent\',',n:'Siz Shahar ustunini qo\'shishni boshladingiz'},
+  {c:'    \'Samarqand\']',n:'Siz qolgan qiymatni qo\'shdingiz'},
+  {c:'})',n:'Siz DataFrame yaratishni yakunladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'df = df.replace(',n:'Siz qiymat almashtirishni boshladingiz'},
+  {c:'  \'Toshkent\',',n:'Siz qaysi qiymatni qidirishni ko\'rsatdingiz'},
+  {c:'  \'Toshkent shahar\'',n:'Siz uni nimaga almashtirishni ko\'rsatdingiz'},
+  {c:')',n:'Siz replace chaqiruvini yakunladingiz'},
+  {c:'print(df)',n:'Siz natijani ekranga chiqardingiz'},
+ ]},
+{q:'"Yosh" ustun nomini "Age" ga o\'zgartiring.',
+ lines:[
+  {c:'import pandas as pd',n:'Siz pandas kutubxonasini pd nomi bilan yukladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'df = pd.DataFrame({',n:'Siz DataFrame yaratishni boshladingiz'},
+  {c:'  \'Ism\':[\'Ali\'],',n:'Siz Ism ustunini qo\'shdingiz'},
+  {c:'  \'Yosh\':[20]',n:'Siz Yosh ustunini qo\'shdingiz'},
+  {c:'})',n:'Siz DataFrame yaratishni yakunladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'df = df.rename(',n:'Siz ustun nomini o\'zgartirishni boshladingiz'},
+  {c:'  columns={',n:'Siz columns lug\'atini ochdingiz'},
+  {c:'  \'Yosh\':\'Age\'',n:'Siz Yosh nomini Age ga moslashtirdingiz'},
+  {c:'})',n:'Siz rename chaqiruvini yakunladingiz'},
+  {c:'print(df)',n:'Siz natijani ekranga chiqardingiz'},
+ ]},
+{q:'"Ism"→"Name", "Yosh"→"Age" ga bir vaqtda o\'zgartiring.',
+ lines:[
+  {c:'import pandas as pd',n:'Siz pandas kutubxonasini pd nomi bilan yukladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'df = pd.DataFrame({',n:'Siz DataFrame yaratishni boshladingiz'},
+  {c:'  \'Ism\':[\'Ali\'],',n:'Siz Ism ustunini qo\'shdingiz'},
+  {c:'  \'Yosh\':[20]',n:'Siz Yosh ustunini qo\'shdingiz'},
+  {c:'})',n:'Siz DataFrame yaratishni yakunladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'df = df.rename(',n:'Siz ikki ustunni nomlashni boshladingiz'},
+  {c:'  columns={',n:'Siz columns lug\'atini ochdingiz'},
+  {c:'  \'Ism\':\'Name\',',n:'Siz Ism nomini Name ga moslashtirdingiz'},
+  {c:'  \'Yosh\':\'Age\'',n:'Siz Yosh nomini Age ga moslashtirdingiz'},
+  {c:'})',n:'Siz rename chaqiruvini yakunladingiz'},
+  {c:'print(df.columns',n:'Siz ustun nomlarini chiqarishni boshladingiz'},
+  {c:'  .tolist())',n:'Siz tolist() bilan ro\'yxat ko\'rinishida oldingiz'},
+ ]},
+]},
+
+{id:'11.7',f:'pandas_11_7.py',
+plan:['pd.cut() — chegaralar bo\'yicha guruhlash','pd.qcut() — teng miqdorli guruhlash'],
+terms:[
+  ['pd.cut()','Aniq chegaralar bo\'yicha guruhlash'],
+  ['pd.qcut()','Teng miqdordagi guruhlar yaratish'],
+  ['bins','Chegaralar ro\'yxati'],
+  ['value_counts()','Har guruhda nechta element borligi']
+],
+detail:'CUT VA QCUT NEGA IKKALASI HAM KERAK?\n\nIkkalasi ham raqamli ma\'lumotlarni toifalarga bo\'ladi, lekin mantiqi boshqacha.\n\npd.cut() — SIZ chegara belgilaysiz. "0-18 — bolalar, 18-60 — kattalar, 60+ — keksalar" deb aniq chegara qo\'yasiz. Chegaralar real hayotdagi ma\'noga asoslangan. Muammosi: ma\'lumotlar notekis tarqalgan bo\'lsa, bitta guruhga juda ko\'p, boshqasiga kam odam tushib qolishi mumkin.\n\npd.qcut() — PANDAS chegarani hisoblaydi, har guruhda TENG miqdorda element bo\'ladi. "Xodimlarni daromad bo\'yicha 4 ta teng guruhga bo\'l" desangiz, pandas avtomatik chegaralarni topadi.\n\nVALUE_COUNTS() NEGA KERAK? Guruhlashdan keyin "har guruhda nechta element bor" savoli tug\'iladi. value_counts() aynan shu savolga javob beradi — har toifadan nechta uchraganini sanaydi.\n\nQAYSI BIRINI TANLASH KERAK? Tushunarli, qoidaga asoslangan chegara bo\'lsa — cut(). Maqsad "teng guruhlarga" bo\'lib taqqoslash bo\'lsa — qcut().',
+sim:'>>> a = pd.Series([15,35,65,22])\n>>> pd.cut(a,\n...  bins=[0,30,60,100],\n...  labels=[\'Yosh\',\'Orta\',\'Katta\'])\n0     Yosh\n1     Orta\n2    Katta\n3     Yosh',
+eskizlar:[
+{q:'Yoshlarni guruhlang: 0-30→"Yosh", 30-60→"O\'rta", 60-100→"Katta".',
+ lines:[
+  {c:'import pandas as pd',n:'Siz pandas kutubxonasini pd nomi bilan yukladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'df = pd.DataFrame({',n:'Siz DataFrame yaratishni boshladingiz'},
+  {c:'  \'Yosh\':[15,35,65,22]',n:'Siz Yosh ustunini turli qiymatlar bilan qo\'shdingiz'},
+  {c:'})',n:'Siz DataFrame yaratishni yakunladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'df[\'Guruh\'] = pd.cut(',n:'Siz guruhlashni boshladingiz'},
+  {c:'  df[\'Yosh\'],',n:'Siz qaysi ustunni guruhlashni ko\'rsatdingiz'},
+  {c:'  bins=[0,30,60,100],',n:'Siz chegaralarni 0,30,60,100 deb belgiladingiz'},
+  {c:'  labels=[\'Yosh\',',n:'Siz guruh nomlarini yozishni boshladingiz'},
+  {c:'    \'O\'\'rta\',\'Katta\']',n:'Siz qolgan guruh nomlarini yozdingiz'},
+  {c:')',n:'Siz cut chaqiruvini yakunladingiz'},
+  {c:'print(df)',n:'Siz natijani ekranga chiqardingiz'},
+ ]},
+{q:'Narxlarni 4 ta teng guruhga bo\'ling.',
+ lines:[
+  {c:'import pandas as pd',n:'Siz pandas kutubxonasini pd nomi bilan yukladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'df = pd.DataFrame({',n:'Siz DataFrame yaratishni boshladingiz'},
+  {c:'  \'Narx\':[10,25,50,75,100,200]',n:'Siz Narx ustunini turli qiymatlar bilan qo\'shdingiz'},
+  {c:'})',n:'Siz DataFrame yaratishni yakunladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'df[\'Guruh\'] = pd.qcut(',n:'Siz teng guruhlashni boshladingiz'},
+  {c:'  df[\'Narx\'], q=4',n:'Siz 4 ta teng guruh so\'radingiz'},
+  {c:')',n:'Siz qcut chaqiruvini yakunladingiz'},
+  {c:'print(df)',n:'Siz natijani ekranga chiqardingiz'},
+ ]},
+{q:'Har guruhda nechta element borligini ko\'rsating.',
+ lines:[
+  {c:'import pandas as pd',n:'Siz pandas kutubxonasini pd nomi bilan yukladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'df = pd.DataFrame({',n:'Siz DataFrame yaratishni boshladingiz'},
+  {c:'  \'Ball\':[55,70,85,95,62]',n:'Siz Ball ustunini turli qiymatlar bilan qo\'shdingiz'},
+  {c:'})',n:'Siz DataFrame yaratishni yakunladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'df[\'Daraja\'] = pd.cut(',n:'Siz darajalarga bo\'lishni boshladingiz'},
+  {c:'  df[\'Ball\'],',n:'Siz qaysi ustunni guruhlashni ko\'rsatdingiz'},
+  {c:'  bins=[0,60,75,100],',n:'Siz chegaralarni belgiladingiz'},
+  {c:'  labels=[\'Past\',',n:'Siz guruh nomlarini yozishni boshladingiz'},
+  {c:'    \'O\'\'rta\',\'Yuqori\']',n:'Siz qolgan guruh nomlarini yozdingiz'},
+  {c:')',n:'Siz cut chaqiruvini yakunladingiz'},
+  {c:'print(df[\'Daraja\']',n:'Siz har darajadan nechtasi borligini chiqarishni boshladingiz'},
+  {c:'  .value_counts())',n:'Siz value_counts() bilan har guruh sonini sanadingiz'},
+ ]},
+]},
+
+{id:'11.8',f:'pandas_11_8.py',
+plan:['groupby() — guruh bo\'yicha statistika','agg() — bir nechta statistika bir vaqtda'],
+terms:[
+  ['groupby()','Ustun bo\'yicha guruhlash va statistika'],
+  ['agg()','Bir vaqtda ko\'p statistika hisoblash'],
+  ['mean()/count()','Guruh ichida hisoblanadigan statistikalar']
+],
+detail:'GROUPBY() NIMA UCHUN ENG KUCHLI VOSITA HISOBLANADI?\n\ngroupby() — Excel\'dagi "Pivot Table" ning dasturiy ko\'rinishi. Katta ma\'lumotni kichik guruhlarga bo\'lib, har guruh uchun alohida hisob-kitob qiladi.\n\nQANDAY ISHLAYDI? 10000 ta sotuv yozuvi bor, har birida shahar va summa bor. "Har shahar bo\'yicha o\'rtacha sotuv qancha?" — avval barcha yozuvlarni shahar bo\'yicha guruhlarga ajratasiz, keyin har guruh ICHIDA o\'rtachani hisoblaysiz. Shu ikki bosqichli jarayonni groupby() avtomatlashtiradi.\n\nNEGA REAL LOYIHADA MUHIM? Biznes savollarning aksariyati "guruh bo\'yicha" beriladi: "Har oy daromad qancha?", "Har toifa bo\'yicha eng ko\'p sotilgan nima?". Bularning barchasi groupby() bilan bir necha qatorda yechiladi, qo\'lda hisoblash soatlab vaqt oladi.\n\nAGG() NEGA KERAK? Oddiy groupby().mean() faqat bitta statistika beradi. Amalda bir vaqtda bir nechtasi kerak bo\'ladi: o\'rtacha, maksimal, minimal. agg([\'mean\',\'max\',\'min\']) — barchasini bir chaqiruvda beradi.',
+sim:'>>> df = pd.DataFrame({\n...  \'Shahar\':[\'T\',\'S\',\'T\'],\n...  \'Maosh\':[5,3,6]})\n>>> df.groupby(\'Shahar\')\\\n...  [\'Maosh\'].mean()\nShahar\nS    3.0\nT    5.5',
+eskizlar:[
+{q:'Shahar bo\'yicha o\'rtacha maoshni hisoblang.',
+ lines:[
+  {c:'import pandas as pd',n:'Siz pandas kutubxonasini pd nomi bilan yukladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'df = pd.DataFrame({',n:'Siz DataFrame yaratishni boshladingiz'},
+  {c:'  \'Shahar\':[\'T\',\'S\',\'T\'],',n:'Siz Shahar ustunini qo\'shdingiz'},
+  {c:'  \'Maosh\':[5000,3000,6000]',n:'Siz Maosh ustunini qo\'shdingiz'},
+  {c:'})',n:'Siz DataFrame yaratishni yakunladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'natija = df.groupby(',n:'Siz guruhlashni boshladingiz'},
+  {c:'  \'Shahar\')[\'Maosh\']',n:'Siz Shahar bo\'yicha Maosh ustunini tanladingiz'},
+  {c:'  .mean()',n:'Siz mean() bilan o\'rtachani hisobladingiz'},
+  {c:'print(natija)',n:'Siz natijani ekranga chiqardingiz'},
+ ]},
+{q:'Har toifadagi mahsulotlar sonini toping.',
+ lines:[
+  {c:'import pandas as pd',n:'Siz pandas kutubxonasini pd nomi bilan yukladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'df = pd.DataFrame({',n:'Siz DataFrame yaratishni boshladingiz'},
+  {c:'  \'Toifa\':[\'Meva\',\'Sabzi\',\'Meva\'],',n:'Siz Toifa ustunini qo\'shdingiz'},
+  {c:'  \'Nomi\':[\'Olma\',\'Sabzi\',\'Nok\']',n:'Siz Nomi ustunini qo\'shdingiz'},
+  {c:'})',n:'Siz DataFrame yaratishni yakunladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'natija = df.groupby(',n:'Siz guruhlashni boshladingiz'},
+  {c:'  \'Toifa\')[\'Nomi\']',n:'Siz Toifa bo\'yicha Nomi ustunini tanladingiz'},
+  {c:'  .count()',n:'Siz count() bilan har toifada nechtasini sanadingiz'},
+  {c:'print(natija)',n:'Siz natijani ekranga chiqardingiz'},
+ ]},
+{q:'Shahar bo\'yicha mean, max, min — barchasini bir vaqtda hisoblang.',
+ lines:[
+  {c:'import pandas as pd',n:'Siz pandas kutubxonasini pd nomi bilan yukladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'df = pd.DataFrame({',n:'Siz DataFrame yaratishni boshladingiz'},
+  {c:'  \'Shahar\':[\'T\',\'S\',\'T\'],',n:'Siz Shahar ustunini qo\'shdingiz'},
+  {c:'  \'Maosh\':[5000,3000,6000]',n:'Siz Maosh ustunini qo\'shdingiz'},
+  {c:'})',n:'Siz DataFrame yaratishni yakunladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'natija = df.groupby(',n:'Siz agg statistikasini boshladingiz'},
+  {c:'  \'Shahar\')[\'Maosh\']',n:'Siz Shahar bo\'yicha Maosh ustunini tanladingiz'},
+  {c:'  .agg([\'mean\',',n:'Siz agg() ga statistika ro\'yxatini berishni boshladingiz'},
+  {c:'    \'max\',\'min\'])',n:'Siz max va min statistikalarini ham qo\'shdingiz'},
+  {c:'print(natija)',n:'Siz natijani ekranga chiqardingiz'},
+ ]},
+]},
+
+{id:'11.9',f:'pandas_11_9.py',
+plan:['G\'ayritabiiy qiymatlar (outlier) nima','IQR usuli bilan aniqlash','clip() bilan chegaralash','describe() bilan tekshirish'],
+terms:[
+  ['outlier','Boshqalardan keskin farq qiluvchi qiymat'],
+  ['IQR','Kvartillar oralig\'i: Q3 - Q1'],
+  ['clip()','Chegaradan tashqari qiymatlarni kesish'],
+  ['describe()','Statistik xulosa: min, max, mean']
+],
+detail:'OUTLIER NIMA VA NEGA XAVFLI?\n\nOutlier — boshqa qiymatlardan keskin farq qiluvchi yagona qiymat. 10 ta xodimning maoshi 3-5 million bo\'lsa-yu, bittasiniki "50 million" bo\'lsa — bu yoki haqiqatdan noyob holat, yoki ko\'proq ehtimol KIRITISH XATOSI (nol ortiqcha qo\'shilgan).\n\nNEGA STATISTIKANI BUZADI? O\'rtacha (mean) outlierlarga juda sezgir. 9 kishi 4 million, 1 kishi 50 million olsa, "o\'rtacha maosh" haqiqiy holatni aks ettirmaydigan, sun\'iy yuqori raqam beradi. Bu noto\'g\'ri boshqaruv qarorlariga olib kelishi mumkin.\n\nIQR USULI QANDAY ISHLAYDI? Ma\'lumotni 4 qismga (kvartilga) bo\'ladi. Q1 — pastki 25%, Q3 — pastki 75% chegarasi. IQR = Q3-Q1, bu markaziy ma\'lumotlar tarqalishini ko\'rsatadi. Q1-1.5×IQR dan past yoki Q3+1.5×IQR dan baland qiymat — statistik jihatdan g\'ayritabiiy hisoblanadi.\n\nDESCRIBE() NEGA TEZKOR USUL? IQR hisoblashdan oldin, oddiygina describe() chaqirib min, max, o\'rtachani ko\'rish mumkin — agar max qiymat boshqalardan keskin farq qilsa, bu darhol shubha uyg\'otadi.\n\nTOPILGANDA NIMA QILISH KERAK? Uch yo\'l: O\'CHIRISH (aniq xato bo\'lsa), TAHLIL QILISH (muhim signal bo\'lishi mumkin), CHEGARALASH/clip (qiymatni oqilona chegaraga tushirish).',
+sim:'>>> df = pd.DataFrame({\n...  \'Maosh\':[3000,3500,50000,3800]})\n>>> Q1=df[\'Maosh\'].quantile(.25)\n>>> Q3=df[\'Maosh\'].quantile(.75)\n>>> IQR=Q3-Q1\n>>> df[(df[\'Maosh\']<Q1-1.5*IQR)|\n...    (df[\'Maosh\']>Q3+1.5*IQR)]\n   Maosh\n2  50000',
+eskizlar:[
+{q:'IQR usuli bilan outlierlarni toping.',
+ lines:[
+  {c:'import pandas as pd',n:'Siz pandas kutubxonasini pd nomi bilan yukladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'df = pd.DataFrame({',n:'Siz DataFrame yaratishni boshladingiz'},
+  {c:'  \'Maosh\':[3000,3500,',n:'Siz Maosh ustunini qo\'sha boshladingiz'},
+  {c:'    4000,4200,50000,3800]',n:'Siz qolgan qiymatlarni qo\'shdingiz, 50000 — outlier'},
+  {c:'})',n:'Siz DataFrame yaratishni yakunladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'Q1 = df[\'Maosh\']',n:'Siz birinchi kvartilni hisoblashni boshladingiz'},
+  {c:'  .quantile(0.25)',n:'Siz quantile(0.25) bilan Q1 ni hisobladingiz'},
+  {c:'Q3 = df[\'Maosh\']',n:'Siz uchinchi kvartilni hisoblashni boshladingiz'},
+  {c:'  .quantile(0.75)',n:'Siz quantile(0.75) bilan Q3 ni hisobladingiz'},
+  {c:'IQR = Q3 - Q1',n:'Siz kvartillar oralig\'ini hisobladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'outlier = df[',n:'Siz outlierlarni filtrlashni boshladingiz'},
+  {c:'  (df[\'Maosh\']<Q1-1.5*IQR)|',n:'Siz pastki chegara shartini yozdingiz'},
+  {c:'  (df[\'Maosh\']>Q3+1.5*IQR)',n:'Siz yuqori chegara shartini yozdingiz'},
+  {c:']',n:'Siz filtrlashni yakunladingiz'},
+  {c:'print(outlier)',n:'Siz natijani ekranga chiqardingiz'},
+ ]},
+{q:'Outlierlarni clip() bilan chegaralang (0-100 oralig\'ida).',
+ lines:[
+  {c:'import pandas as pd',n:'Siz pandas kutubxonasini pd nomi bilan yukladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'df = pd.DataFrame({',n:'Siz DataFrame yaratishni boshladingiz'},
+  {c:'  \'Ball\':[55,60,500,-50,75]',n:'Siz Ball ustunini qo\'shdingiz, 500 va -50 — outlier'},
+  {c:'})',n:'Siz DataFrame yaratishni yakunladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'df[\'Ball\'] = df[',n:'Siz chegaralashni boshladingiz'},
+  {c:'  \'Ball\'].clip(',n:'Siz clip() chaqirishni boshladingiz'},
+  {c:'  0, 100)',n:'Siz qiymatlarni 0 dan 100 gacha chegaraladingiz'},
+  {c:'print(df)',n:'Siz natijani ekranga chiqardingiz'},
+ ]},
+{q:'describe() bilan statistik xulosa ko\'ring (outlierni topish uchun).',
+ lines:[
+  {c:'import pandas as pd',n:'Siz pandas kutubxonasini pd nomi bilan yukladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'df = pd.DataFrame({',n:'Siz DataFrame yaratishni boshladingiz'},
+  {c:'  \'Yosh\':[25,30,200,28,-5]',n:'Siz Yosh ustunini qo\'shdingiz, 200 va -5 — shubhali'},
+  {c:'})',n:'Siz DataFrame yaratishni yakunladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'print(df[\'Yosh\']',n:'Siz statistik xulosa chiqarishni boshladingiz'},
+  {c:'  .describe())',n:'Siz describe() bilan min, max, mean ni ko\'rdingiz'},
+ ]},
+]},
+
+{id:'11.10',f:'pandas_11_10.py',
+plan:['pd.to_datetime() — sanaga aylantirish','.dt accessor — sana qismlarini olish','Ikki sana orasidagi farq'],
+terms:[
+  ['pd.to_datetime()','Matnni sana ob\'ektiga aylantirish'],
+  ['.dt','Datetime ustunidan qism olish accessor'],
+  ['.dt.year/.month','Sanadan yil yoki oyni olish'],
+  ['.days','Ikki sana farqini kunlarda olish']
+],
+detail:'NEGA SANANI ALOHIDA "DATETIME" TURIGA O\'TKAZISH KERAK?\n\nSana ko\'pincha CSV yoki Excel fayldan oddiy MATN sifatida keladi: "2024-06-15". Tashqi ko\'rinishidan sanaga o\'xshaydi, lekin pandas uchun bu — oddiy harflar ketma-ketligi. "Qaysi oy ko\'proq sotuv bo\'lgan" deb so\'rasangiz, pandas javob berolmaydi, chunki "oy" tushunchasini bu matndan chiqarib ololmaydi.\n\npd.to_datetime() NIMA QILADI? Matnni haqiqiy SANA OB\'EKTIGA aylantiradi — bu pandasga "bu yil, bu oy, bu kun" ekanligini tushunish imkonini beradi. Shundan keyin sana bilan matematik amallar va mantiqiy savollar bera olasiz.\n\n.DT ACCESSOR NIMA UCHUN KERAK? Datetime ustunidan alohida qismlarni ajratib olish kerak bo\'ladi — bu uchun .dt prefiksi ishlatiladi: .dt.year faqat yilni beradi, .dt.month — oyni. Real loyihada bu muhim: "har oy bo\'yicha sotuv tendensiyasi" tahlili uchun avval oy raqamini chiqarib olish, keyin shu oy bo\'yicha groupby() qilish kerak bo\'ladi.\n\nIKKI SANA FARQI NEGA MUHIM? Biznesda "mijoz necha kun avval ro\'yxatdan o\'tgan", "yetkazib berish necha kun ketgan" kabi savollar doim beriladi. Ikki datetime ob\'ektini ayirsangiz, natija avtomatik "necha kun" ko\'rinishida chiqadi (.days bilan).',
+sim:'>>> df = pd.DataFrame({\n...  \'Sana\':[\'2024-01-15\',\n...         \'2024-06-20\']})\n>>> df[\'Sana\']=pd.to_datetime(\n...   df[\'Sana\'])\n>>> df[\'Sana\'].dt.month\n0    1\n1    6',
+eskizlar:[
+{q:'DataFrame "Sana" ustunini datetime turiga o\'tkazing.',
+ lines:[
+  {c:'import pandas as pd',n:'Siz pandas kutubxonasini pd nomi bilan yukladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'df = pd.DataFrame({',n:'Siz DataFrame yaratishni boshladingiz'},
+  {c:'  \'Sana\':[\'2024-01-15\',',n:'Siz Sana ustunini matn ko\'rinishida qo\'sha boshladingiz'},
+  {c:'    \'2024-06-20\']',n:'Siz ikkinchi sanani ham qo\'shdingiz'},
+  {c:'})',n:'Siz DataFrame yaratishni yakunladingiz, Sana hali matn'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'df[\'Sana\'] = pd',n:'Siz sanaga aylantirishni boshladingiz'},
+  {c:'  .to_datetime(',n:'Siz to_datetime() chaqirishni boshladingiz'},
+  {c:'  df[\'Sana\'])',n:'Siz Sana ustunini argument sifatida berdingiz'},
+  {c:'print(df.dtypes)',n:'Siz Sana endi datetime64 turida ekanini ko\'rdingiz'},
+ ]},
+{q:'Sanadan yil va oyni ajratib oling.',
+ lines:[
+  {c:'import pandas as pd',n:'Siz pandas kutubxonasini pd nomi bilan yukladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'df = pd.DataFrame({',n:'Siz DataFrame yaratishni boshladingiz'},
+  {c:'  \'Sana\':pd.to_datetime([',n:'Siz Sana ustunini darhol datetime qilib yaratdingiz'},
+  {c:'    \'2022-05-10\',',n:'Siz birinchi sanani qo\'shdingiz'},
+  {c:'    \'2024-01-15\'])',n:'Siz ikkinchi sanani qo\'shdingiz'},
+  {c:'})',n:'Siz DataFrame yaratishni yakunladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'df[\'Yil\'] = df[',n:'Siz yilni ajratishni boshladingiz'},
+  {c:'  \'Sana\'].dt.year',n:'Siz .dt.year bilan yilni oldingiz'},
+  {c:'df[\'Oy\'] = df[',n:'Siz oyni ajratishni boshladingiz'},
+  {c:'  \'Sana\'].dt.month',n:'Siz .dt.month bilan oyni oldingiz'},
+  {c:'print(df)',n:'Siz natijani ekranga chiqardingiz'},
+ ]},
+{q:'Ikki sana orasidagi kunlar sonini hisoblang.',
+ lines:[
+  {c:'from datetime import datetime',n:'Siz datetime klassini import qildingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'boshlash = datetime(',n:'Siz boshlanish sanasini yaratishni boshladingiz'},
+  {c:'  2024, 1, 1)',n:'Siz 2024-yil 1-yanvar sanasini berdingiz'},
+  {c:'tugatish = datetime(',n:'Siz tugash sanasini yaratishni boshladingiz'},
+  {c:'  2024, 12, 31)',n:'Siz 2024-yil 31-dekabr sanasini berdingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'farq = (tugatish -',n:'Siz sanalar farqini hisoblashni boshladingiz'},
+  {c:'  boshlash).days',n:'Siz .days bilan farqni kunlarga aylantirdingiz'},
+  {c:'print(\'Kunlar:\', farq)',n:'Siz natijani ekranga chiqardingiz'},
+ ]},
+]},
+
+];
+
+var cur = 0;
+var curEskiz = 0;
+var skipOn = false;
+var ghostVisible = true;
+var lineData = [];
+var doneSet = new Set();
+var eskizDoneSet = new Set(); // "topicIdx-eskizIdx" format
+var selectedStar = 0;
+var ratingSubmitted = false;
+var BRIGHT = [0,0.05,0.1,0.2,0.3,0.42,0.55,0.65,0.75,0.85,0.95];
+
+window.onload = function(){
+  buildStars();
+  buildTabs();
+  buildIntro();
+  loadMod(0);
+  if(window.visualViewport){
+    var t = null;
+    window.visualViewport.addEventListener('resize', function(){
+      clearTimeout(t);
+      t = setTimeout(function(){
+        var el = document.activeElement;
+        if(!el || !el.classList.contains('line-input')) return;
+        var blk = el.closest('.line-block');
+        if(!blk) return;
+        var vp = window.visualViewport;
+        var rc = blk.getBoundingClientRect();
+        var tgt = window.scrollY + rc.top + rc.height/2 - (vp.offsetTop + vp.height*0.38);
+        window.scrollTo({top: tgt, behavior:'smooth'});
+      }, 150);
+    });
+  }
+};
+
+function buildIntro(){
+  var h = '<div class="intro-title">'+MODULE_INTRO.title+'</div>';
+  h += '<div class="intro-text">'+esc(MODULE_INTRO.text)+'</div>';
+  h += '<div class="intro-stats">';
+  h += '<div class="intro-stat"><div class="intro-stat-v">'+MODULE_INTRO.count+'</div><div class="intro-stat-l">MAVZU</div></div>';
+  var totalEskiz = M.reduce(function(sum, m){ return sum + m.eskizlar.length; }, 0);
+  h += '<div class="intro-stat"><div class="intro-stat-v">'+totalEskiz+'</div><div class="intro-stat-l">ESKIZ</div></div>';
+  h += '<div class="intro-stat"><div class="intro-stat-v">Pandas</div><div class="intro-stat-l">KUTUBXONA</div></div>';
+  h += '</div>';
+  document.getElementById('introBox').innerHTML = h;
+}
+
+function loadMod(i){
+  cur = i;
+  curEskiz = 0;
+  document.getElementById('detailPanel').classList.remove('show');
+  document.getElementById('resultPanel').classList.remove('show');
+  document.getElementById('badge').className = 'badge';
+  var m = M[i];
+  document.getElementById('topSub').textContent = m.id;
+  document.getElementById('svMod').textContent = (i+1)+'/'+M.length;
+  var th = '<div class="terms-title">📚 Yangi atamalar:</div>';
+  m.terms.forEach(function(t){
+    th += '<div class="term-row"><span class="term-key">'+esc(t[0])+'</span><span class="term-val">'+esc(t[1])+'</span></div>';
+  });
+  document.getElementById('termsBox').innerHTML = th;
+  loadEskiz();
+  buildTabs();
+}
+
+function loadEskiz(){
+  var m = M[cur];
+  var e = m.eskizlar[curEskiz];
+  document.getElementById('detailPanel').classList.remove('show');
+  document.getElementById('resultPanel').classList.remove('show');
+  document.getElementById('badge').className = 'badge';
+  document.getElementById('fname').textContent = m.f.replace('.py', '_'+(curEskiz+1)+'.py');
+  document.getElementById('fhintQ') ; // no-op guard
+  buildEskizDots();
+  buildLines(e);
+  updateStats();
+}
+
+function buildEskizDots(){
+  var existing = document.getElementById('eskizDotsRow');
+  if(existing) existing.remove();
+  var m = M[cur];
+  var row = document.createElement('div');
+  row.id = 'eskizDotsRow';
+  row.style.display = 'flex';
+  row.style.gap = '6px';
+  row.style.justifyContent = 'center';
+  row.style.marginBottom = '10px';
+  m.eskizlar.forEach(function(_, i){
+    var key = cur+'-'+i;
+    var dot = document.createElement('div');
+    dot.style.width = (i===curEskiz ? '40px' : '26px');
+    dot.style.height = '6px';
+    dot.style.borderRadius = '3px';
+    dot.style.cursor = 'pointer';
+    dot.style.background = eskizDoneSet.has(key) ? '#22c55e' : (i===curEskiz ? '#00f0c8' : '#1e3048');
+    dot.onclick = (function(idx){ return function(){ curEskiz = idx; loadEskiz(); }; })(i);
+    row.appendChild(dot);
+  });
+  var qBox = document.getElementById('eskizQBox');
+  if(qBox) qBox.remove();
+  var q = document.createElement('div');
+  q.id = 'eskizQBox';
+  q.style.cssText = 'background:#0d1828;border:1px solid #1e3048;border-left:3px solid #a855f7;border-radius:8px;padding:10px 12px;margin-bottom:10px;font-size:.71rem;line-height:1.8;color:#c4b5fd;white-space:pre-wrap;';
+  q.textContent = 'Eskiz '+(curEskiz+1)+'/'+M[cur].eskizlar.length+' — '+M[cur].eskizlar[curEskiz].q;
+
+  var anchor = document.getElementById('termsBox');
+  anchor.parentNode.insertBefore(row, anchor.nextSibling);
+  anchor.parentNode.insertBefore(q, row.nextSibling);
+}
+
+function buildLines(e){
+  var wrap = document.getElementById('linesWrap');
+  wrap.innerHTML = '';
+  lineData = [];
+  var op = BRIGHT[parseInt(document.getElementById('brightSlider').value)||3];
+  e.lines.forEach(function(ln, i){
+    var trimmed = ln.c.replace(/^\s+/,'');
+    var isCom = trimmed.charAt(0) === '#';
+    var isEmpty = ln.c === '';
+    var endsWithBrace = /[\{\(\[]\s*$/.test(ln.c);
+    var block = document.createElement('div');
+    block.className = 'line-block';
+    block.id = 'block'+i;
+    var row = document.createElement('div');
+    row.className = 'line-row';
+    var num = document.createElement('div');
+    num.className = 'line-num';
+    num.id = 'num'+i;
+    num.textContent = isEmpty ? '' : (i+1);
+    var content = document.createElement('div');
+    content.className = 'line-content';
+    var ghost = document.createElement('div');
+    ghost.className = 'line-ghost' + ((isCom && skipOn) ? ' skip-c' : '');
+    ghost.id = 'ghost'+i;
+    ghost.style.color = ghostVisible ? 'rgba(74,96,128,'+op+')' : 'transparent';
+    ghost.textContent = ln.c || ' ';
+    var colors = document.createElement('div');
+    colors.className = 'line-colors';
+    colors.id = 'clr'+i;
+    var inp = document.createElement('input');
+    inp.type = 'text';
+    inp.className = 'line-input';
+    inp.id = 'inp'+i;
+    inp.setAttribute('spellcheck','false');
+    inp.setAttribute('autocorrect','off');
+    inp.setAttribute('autocapitalize','off');
+    inp.setAttribute('autocomplete','off');
+    if(isEmpty || (isCom && skipOn)) inp.disabled = true;
+    (function(idx, target, noteText, braceTrigger){
+      inp.addEventListener('input', function(){
+        if(!target) return;
+        updateLineClr(idx, target);
+        if(braceTrigger && inp.value.length > 0 && /[\{\(\[]\s*$/.test(inp.value)){
+          showStartNote(idx);
+        }
+        if(inp.value === target && target !== '' && noteText !== ''){
+          showNote(idx);
+        } else if(inp.value !== target) {
+          hideNote(idx);
+        }
+        updateStats();
+      });
+    })(i, ln.c, ln.n, endsWithBrace);
+    content.appendChild(ghost);
+    content.appendChild(colors);
+    content.appendChild(inp);
+    row.appendChild(num);
+    row.appendChild(content);
+    var note = document.createElement('div');
+    note.className = 'line-done-note';
+    note.id = 'note'+i;
+    note.textContent = ln.n ? ('✅ ' + ln.n + '!') : '';
+    block.appendChild(row);
+    if(ln.n) block.appendChild(note);
+    wrap.appendChild(block);
+    lineData.push({inp:inp, target:ln.c, isCom:isCom, isEmpty:isEmpty});
+  });
+}
+
+function updateLineClr(idx, target){
+  var inp = document.getElementById('inp'+idx);
+  var clr = document.getElementById('clr'+idx);
+  if(!inp || !clr) return;
+  var typed = inp.value;
+  var html = '';
+  for(var ci = 0; ci < target.length; ci++){
+    var ch = target[ci];
+    if(ci < typed.length){
+      html += typed[ci] === ch
+        ? '<span style="color:#22c55e">'+esc(ch)+'</span>'
+        : '<span style="color:#f43f5e;text-decoration:underline">'+esc(ch)+'</span>';
+    } else {
+      html += '<span style="color:transparent">'+esc(ch)+'</span>';
+    }
+  }
+  clr.innerHTML = html;
+  var num = document.getElementById('num'+idx);
+  if(num) num.style.color = (typed === target && target !== '') ? '#22c55e' : '';
+}
+
+function showNote(i){ var n=document.getElementById('note'+i); if(n && n.textContent) n.classList.add('show'); }
+function hideNote(i){ var n=document.getElementById('note'+i); if(n) n.classList.remove('show'); }
+function showStartNote(i){ var num=document.getElementById('num'+i); if(num) num.style.color = '#a855f7'; }
+
+function updateStats(){
+  var done = 0, total = 0;
+  lineData.forEach(function(l){
+    if(l.isEmpty || (l.isCom && skipOn)) return;
+    total++;
+    if(l.inp.value === l.target) done++;
+  });
+  var pct = total > 0 ? Math.round(done/total*100) : 0;
+  document.getElementById('svPctV').textContent = done > 0 ? pct+'%' : '—';
+  document.getElementById('svDone').textContent = done+'/'+total;
+  if(done === total && total > 0) doneSet.add(cur);
+  document.getElementById('progressFill').style.width = (doneSet.size/M.length*100)+'%';
+  buildTabs();
+}
+
+function doCheck(){
+  var e = M[cur].eskizlar[curEskiz];
+  var done = 0, total = 0, errors = [];
+  lineData.forEach(function(l, i){
+    if(l.isEmpty || (l.isCom && skipOn)) return;
+    total++;
+    if(l.inp.value === l.target){
+      done++;
+      document.getElementById('num'+i).style.color = '#22c55e';
+      if(e.lines[i].n) showNote(i);
+    } else {
+      errors.push(i+1);
+      document.getElementById('num'+i).style.color = '#f43f5e';
+    }
+  });
+  var pct = total > 0 ? Math.round(done/total*100) : 0;
+  var b = document.getElementById('badge');
+  b.className = 'badge show';
+  if(pct >= 85){
+    b.className += ' g';
+    var key = cur+'-'+curEskiz;
+    eskizDoneSet.add(key);
+    var allDone = M[cur].eskizlar.every(function(_, idx){ return eskizDoneSet.has(cur+'-'+idx); });
+    if(allDone){
+      doneSet.add(cur);
+      b.textContent = '✅ Zo\'r! '+pct+'% — '+M[cur].id+' mavzusi to\'liq tugadi!';
+    } else {
+      b.textContent = '✅ Zo\'r! '+pct+'% ('+done+'/'+total+' qator). Keyingi eskizga o\'ting →';
+    }
+    buildEskizDots();
+    showRating();
+  } else if(pct >= 55){
+    b.className += ' o';
+    b.textContent = '⚡ '+pct+'% — xato qatorlar: '+errors.join(', ')+'-qator';
+  } else {
+    b.className += ' r';
+    b.textContent = '❌ '+pct+'% — qaytadan urinib ko\'ring';
+  }
+  updateStats();
+}
+
+function doClear(){
+  lineData.forEach(function(l, i){
+    l.inp.value = '';
+    var clr = document.getElementById('clr'+i);
+    if(clr) clr.innerHTML = '';
+    var num = document.getElementById('num'+i);
+    if(num) num.style.color = '';
+    hideNote(i);
+  });
+  document.getElementById('badge').className = 'badge';
+  updateStats();
+}
+
+function toggleGhost(){
+  ghostVisible = !ghostVisible;
+  document.querySelectorAll('.line-ghost').forEach(function(g){
+    g.style.visibility = ghostVisible ? 'visible' : 'hidden';
+  });
+  document.getElementById('ghostBtn').textContent = ghostVisible ? '👁️ Yashir' : '👁️ Ko\'rsat';
+}
+
+function toggleSkip(){
+  skipOn = !skipOn;
+  document.getElementById('sw').classList.toggle('on', skipOn);
+  document.getElementById('skipLbl').textContent = skipOn ? 'Kommentlar o\'tkazilmoqda' : '# Kommentlarni o\'tkazib yuboring';
+  buildLines(M[cur].eskizlar[curEskiz]);
+  applyBright();
+  updateStats();
+}
+
+function toggleDetail(){
+  var p = document.getElementById('detailPanel');
+  if(p.classList.contains('show')){
+    p.classList.remove('show');
+  } else {
+    document.getElementById('detailContent').textContent = M[cur].detail;
+    p.classList.add('show');
+  }
+}
+
+function toggleResult(){
+  var p = document.getElementById('resultPanel');
+  if(p.classList.contains('show')){
+    p.classList.remove('show');
+  } else {
+    document.getElementById('simWrap').innerHTML = '<pre>'+esc(M[cur].sim)+'</pre>';
+    p.classList.add('show');
+  }
+}
+
+function setBright(v){
+  document.getElementById('brightVal').textContent = v;
+  applyBright();
+}
+
+function applyBright(){
+  var v = parseInt(document.getElementById('brightSlider').value) || 3;
+  var op = BRIGHT[v];
+  document.querySelectorAll('.line-ghost').forEach(function(g){
+    if(!g.classList.contains('skip-c') && ghostVisible){
+      g.style.color = 'rgba(74,96,128,'+op+')';
+    }
+  });
+}
+
+function buildTabs(){
+  var c = document.getElementById('tabs');
+  c.innerHTML = '';
+  M.forEach(function(m, i){
+    var d = document.createElement('div');
+    d.className = 'tab'+(i===cur?' on':'')+(doneSet.has(i)?' done':'');
+    d.textContent = m.id;
+    d.onclick = (function(n){ return function(){ loadMod(n); }; })(i);
+    c.appendChild(d);
+  });
+}
+
+function buildStars(){
+  var sc = document.getElementById('stars');
+  sc.innerHTML = '';
+  for(var i = 1; i <= 10; i++){
+    var s = document.createElement('span');
+    s.className = 'star';
+    s.textContent = '⭐';
+    s.dataset.v = i;
+    s.onclick = (function(v){
+      return function(){
+        selectedStar = v;
+        document.getElementById('ratingScore').textContent = v+' / 10';
+        document.querySelectorAll('.star').forEach(function(st){
+          st.classList.toggle('on', parseInt(st.dataset.v) <= v);
+        });
+      };
+    })(i);
+    sc.appendChild(s);
+  }
+}
+
+function showRating(){
+  document.getElementById('ratingBox').classList.add('show');
+}
+
+function submitRating(){
+  if(ratingSubmitted) return;
+  if(selectedStar === 0){ alert('Iltimos baho tanlang!'); return; }
+  ratingSubmitted = true;
+  document.getElementById('ratingThanks').style.display = 'block';
+  document.querySelector('.rating-submit').style.display = 'none';
+}
+
+function esc(s){
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Eskiz — 14-Modul. Machine Learning</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:#0a0e1a;color:#dde5f0;font-family:'JetBrains Mono',monospace;font-size:13px;min-height:100vh;}
+.top{background:#0f1520;border-bottom:1px solid #1e3048;padding:8px 14px;display:flex;align-items:center;gap:8px;position:sticky;top:0;z-index:50;}
+.top-t{color:#00f0c8;font-size:.78rem;font-weight:700;}
+.top-s{color:#4a6080;font-size:.65rem;margin-left:auto;}
+.bright-bar{background:#0f1520;border-bottom:1px solid #1e3048;padding:6px 14px;display:flex;align-items:center;gap:10px;position:sticky;top:41px;z-index:49;}
+.bright-lbl{font-size:.65rem;color:#4a6080;flex-shrink:0;}
+.bright-slider{flex:1;-webkit-appearance:none;height:4px;border-radius:2px;background:#1e3048;outline:none;cursor:pointer;}
+.bright-slider::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:#00f0c8;cursor:pointer;}
+.bright-val{font-size:.68rem;color:#00f0c8;font-weight:700;width:20px;text-align:right;flex-shrink:0;}
+.wrap{padding:10px 14px;max-width:540px;margin:0 auto;}
+.tabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;margin-bottom:10px;scrollbar-width:none;}
+.tabs::-webkit-scrollbar{display:none;}
+.tab{flex-shrink:0;padding:6px 12px;border-radius:20px;border:1px solid #1e3048;background:#141e2e;color:#4a6080;font-size:.68rem;cursor:pointer;transition:all .15s;}
+.tab.on{border-color:#00f0c8;color:#00f0c8;background:rgba(0,240,200,.08);}
+.tab.done{border-color:#22c55e;color:#22c55e;background:rgba(34,197,94,.06);}
+.stats{display:flex;gap:8px;margin-bottom:10px;}
+.stat{flex:1;background:#141e2e;border:1px solid #1e3048;border-radius:8px;padding:7px 8px;text-align:center;}
+.sv{font-size:.95rem;font-weight:700;color:#00f0c8;}
+.sl{font-size:.58rem;color:#4a6080;margin-top:2px;}
+.progress-bar{height:3px;background:#1e3048;border-radius:2px;margin-bottom:10px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,#00f0c8,#2563eb);border-radius:2px;transition:width .4s;}
+.intro-box{background:#0d1828;border:1px solid #1e3048;border-left:3px solid #00f0c8;border-radius:10px;padding:14px;margin-bottom:10px;}
+.intro-title{font-size:.8rem;font-weight:700;color:#00f0c8;margin-bottom:8px;}
+.intro-text{font-size:.7rem;line-height:1.85;color:#9fb0c8;white-space:pre-wrap;}
+.intro-stats{display:flex;gap:8px;margin-top:10px;}
+.intro-stat{flex:1;background:#080c14;border:1px solid #1e3048;border-radius:8px;padding:8px;text-align:center;}
+.intro-stat-v{font-size:1.1rem;font-weight:700;color:#00f0c8;}
+.intro-stat-l{font-size:.58rem;color:#4a6080;margin-top:2px;}
+.terms-box{background:#080c14;border:1px solid #1e3048;border-left:3px solid #a855f7;border-radius:8px;padding:10px 12px;margin-bottom:10px;}
+.terms-title{font-size:.68rem;font-weight:700;color:#a855f7;margin-bottom:8px;}
+.term-row{display:flex;gap:6px;margin-bottom:5px;align-items:flex-start;}
+.term-key{font-size:.64rem;color:#fbbf24;font-weight:700;min-width:120px;flex-shrink:0;}
+.term-val{font-size:.63rem;color:#4a6080;line-height:1.6;}
+.detail-panel{display:none;background:#0a1628;border:1px solid #2563eb;border-radius:8px;padding:12px 14px;margin-bottom:10px;font-size:.72rem;line-height:2;color:#93c5fd;white-space:pre-wrap;}
+.detail-panel.show{display:block;}
+.detail-title{color:#60a5fa;font-weight:700;margin-bottom:8px;font-size:.76rem;}
+
+/* TEST PANEL */
+.test-panel{background:#080c14;border:1px solid #1e3048;border-radius:10px;padding:12px;margin-bottom:10px;}
+.test-title{font-size:.72rem;font-weight:700;color:#fbbf24;margin-bottom:12px;}
+.test-q{background:#0d1828;border-left:3px solid #a855f7;border-radius:6px;padding:10px 12px;margin-bottom:10px;}
+.test-qtext{font-size:.71rem;color:#c4b5fd;line-height:1.7;margin-bottom:10px;}
+.test-opts{display:flex;flex-direction:column;gap:6px;}
+.test-opt{padding:8px 12px;border-radius:8px;border:1px solid #1e3048;background:#141e2e;font-size:.68rem;color:#8ba0c0;cursor:pointer;text-align:left;font-family:'JetBrains Mono',monospace;transition:all .15s;}
+.test-opt:active{opacity:.7;}
+.test-opt.correct{border-color:#22c55e;color:#22c55e;background:rgba(34,197,94,.1);}
+.test-opt.wrong{border-color:#f43f5e;color:#f43f5e;background:rgba(244,63,94,.1);}
+.test-opt.show-correct{border-color:#22c55e;color:#22c55e;background:rgba(34,197,94,.05);}
+.test-exp{display:none;font-size:.66rem;line-height:1.7;color:#64748b;padding:8px 0 0 4px;border-top:1px dashed #1e3048;margin-top:8px;}
+.test-exp.show{display:block;}
+.test-score{text-align:center;padding:10px;font-size:.78rem;font-weight:700;color:#00f0c8;display:none;}
+.test-score.show{display:block;}
+.btn-test-check{width:100%;padding:10px;background:#2563eb;color:#fff;font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:700;border:none;border-radius:8px;cursor:pointer;margin-top:8px;}
+
+/* ESKIZ (14.6 uchun) */
+.skip-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;padding:8px 12px;background:#141e2e;border:1px solid #1e3048;border-radius:8px;cursor:pointer;}
+.skip-row span{font-size:.7rem;color:#4a6080;}
+.sw{width:34px;height:18px;background:#1e3048;border-radius:10px;position:relative;transition:background .2s;flex-shrink:0;}
+.sw.on{background:#fbbf24;}
+.sw::after{content:'';position:absolute;top:2px;left:2px;width:14px;height:14px;background:#fff;border-radius:50%;transition:left .2s;}
+.sw.on::after{left:18px;}
+.sim-wrap{width:100%;overflow-x:auto;}
+.sim-wrap pre{font-size:.68rem;line-height:1.9;color:#22c55e;white-space:pre;}
+.result-panel{display:none;background:#080c14;border:1px solid #22c55e;border-radius:10px;padding:12px;margin-bottom:10px;}
+.result-panel.show{display:block;}
+.result-title{color:#22c55e;font-size:.72rem;font-weight:700;margin-bottom:8px;}
+.code-block{border:1px solid #1e3048;border-radius:10px;overflow:hidden;margin-bottom:10px;background:#090d18;}
+.fbar{display:flex;align-items:center;gap:5px;padding:7px 12px;background:#0f1520;border-bottom:1px solid #1e3048;}
+.dot{width:6px;height:6px;border-radius:50%;}
+.dot.r{background:#f43f5e;}.dot.y{background:#fbbf24;}.dot.g{background:#22c55e;}
+.fn{font-size:.65rem;color:#4a6080;margin-left:4px;}
+.fhint{margin-left:auto;font-size:.6rem;color:#00f0c8;opacity:.7;}
+.lines-wrap{padding:4px 0;}
+.line-block{margin:0;}
+.line-row{display:flex;align-items:center;position:relative;min-height:30px;}
+.line-num{width:28px;flex-shrink:0;font-size:.63rem;padding:4px 4px 4px 5px;color:#2a3a50;text-align:right;user-select:none;transition:color .2s;align-self:center;}
+.line-content{flex:1;position:relative;overflow-x:auto;overflow-y:hidden;min-height:30px;}
+.line-content::-webkit-scrollbar{height:2px;}
+.line-content::-webkit-scrollbar-thumb{background:#1e3048;border-radius:1px;}
+.line-ghost{font-size:.76rem;line-height:1.8;padding:4px 8px;white-space:pre;pointer-events:none;min-height:30px;display:block;}
+.line-ghost.skip-c{opacity:.08!important;}
+.line-colors{position:absolute;top:0;left:0;font-size:.76rem;line-height:1.8;padding:4px 8px;white-space:pre;pointer-events:none;z-index:2;min-height:30px;}
+.line-input{position:absolute;top:0;left:0;right:0;bottom:0;width:100%;font-family:'JetBrains Mono',monospace;font-size:.76rem;line-height:1.8;padding:4px 8px;color:transparent;-webkit-text-fill-color:transparent;caret-color:#00f0c8;background:transparent;border:none;outline:none;white-space:pre;overflow:hidden;z-index:10;-webkit-appearance:none;}
+.line-input:disabled{cursor:default;}
+.line-done-note{display:none;font-size:.66rem;line-height:1.6;padding:3px 8px 3px 34px;color:#38bdf8;background:rgba(56,189,248,.06);border-left:2px solid #38bdf8;white-space:pre-wrap;animation:fadeIn .25s ease;}
+.line-done-note.show{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:translateY(0)}}
+.btn-row{display:flex;gap:6px;flex-wrap:wrap;padding:9px 12px;background:#0f1520;border-top:1px solid #1e3048;}
+.btn{padding:8px 11px;border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:.68rem;font-weight:700;border:none;cursor:pointer;flex-shrink:0;transition:opacity .15s;}
+.btn:active{opacity:.7;}
+.btn-chk{background:#00f0c8;color:#080c14;}
+.btn-clr{background:transparent;border:1px solid #1e3048;color:#4a6080;}
+.btn-det{background:#2563eb;color:#fff;}
+.btn-ghost{background:#7c3aed;color:#fff;}
+.btn-res{background:#16a34a;color:#fff;}
+.badge{display:none;margin:0 12px 10px;padding:7px 12px;border-radius:8px;font-size:.7rem;border:1px solid #1e3048;}
+.badge.show{display:block;}
+.badge.g{border-color:#22c55e;color:#22c55e;background:rgba(34,197,94,.07);}
+.badge.o{border-color:#fbbf24;color:#fbbf24;background:rgba(251,191,36,.07);}
+.badge.r{border-color:#f43f5e;color:#f43f5e;background:rgba(244,63,94,.07);}
+.rating-box{background:#0d1828;border:1px solid #fbbf24;border-radius:12px;padding:14px 16px;margin-top:10px;display:none;}
+.rating-box.show{display:block;}
+.rating-title{font-size:.72rem;font-weight:700;color:#fbbf24;text-align:center;margin-bottom:4px;}
+.rating-sub{font-size:.62rem;color:#4a6080;text-align:center;margin-bottom:12px;}
+.stars{display:flex;justify-content:center;gap:4px;margin-bottom:10px;flex-wrap:wrap;}
+.star{font-size:1.5rem;cursor:pointer;filter:grayscale(1);opacity:.35;transition:transform .1s,filter .1s;user-select:none;}
+.star.on{filter:none;opacity:1;}
+.rating-score{text-align:center;font-size:.72rem;color:#fbbf24;font-weight:700;margin-bottom:8px;min-height:18px;}
+.rating-comment{width:100%;background:#141e2e;border:1px solid #1e3048;border-radius:8px;padding:8px 10px;color:#dde5f0;font-family:'JetBrains Mono',monospace;font-size:.68rem;resize:none;outline:none;margin-bottom:8px;}
+.rating-submit{width:100%;padding:10px;background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#080c14;font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:700;border:none;border-radius:8px;cursor:pointer;}
+.rating-thanks{display:none;text-align:center;padding:10px;font-size:.72rem;color:#22c55e;font-weight:700;}
+</style>
+</head>
+<body>
+<div class="top">
+  <div class="top-t">🤖 Machine Learning — 14-Modul</div>
+  <div class="top-s" id="topSub">14.1</div>
+</div>
+<div class="bright-bar">
+  <span class="bright-lbl">👁️ Xiralik:</span>
+  <input type="range" class="bright-slider" id="brightSlider" min="1" max="10" value="3" oninput="setBright(this.value)">
+  <span class="bright-val" id="brightVal">3</span>
+</div>
+<div class="wrap">
+  <div class="stats">
+    <div class="stat"><div class="sv" id="svScore">—</div><div class="sl">TEST BALL</div></div>
+    <div class="stat"><div class="sv" id="svDone">0/0</div><div class="sl">BAJARILDI</div></div>
+    <div class="stat"><div class="sv" id="svMod">1/6</div><div class="sl">MAVZU</div></div>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+  <div class="tabs" id="tabs"></div>
+  <div class="intro-box" id="introBox"></div>
+  <div class="terms-box" id="termsBox"></div>
+  <div class="detail-panel" id="detailPanel">
+    <div class="detail-title">📘 BATAFSIL</div>
+    <div id="detailContent"></div>
+  </div>
+  <div id="mainContent"></div>
+  <div class="rating-box" id="ratingBox">
+    <div class="rating-title">⭐ 14-Modulni baholang</div>
+    <div class="rating-sub">Fikringiz keyingi versiyani yaxshilashga yordam beradi</div>
+    <div class="stars" id="stars"></div>
+    <div class="rating-score" id="ratingScore">Baho tanlang (1–10)</div>
+    <textarea class="rating-comment" id="ratingComment" rows="2" placeholder="Izoh..."></textarea>
+    <button class="rating-submit" onclick="submitRating()">⭐ Yuborish</button>
+    <div class="rating-thanks" id="ratingThanks">✅ Rahmat!</div>
+  </div>
+</div>
+<script>
+var MODULE_INTRO = {
+  title: "🤖 14-Modul haqida",
+  text: "Bu modulda siz Machine Learning asoslari bilan tanishasiz.\n\nMachine Learning (ML) — kompyuterni ma'lumotlardan o'z-o'zidan o'rganishga o'rgatish fani. An'anaviy dasturlashda qoidalarni o'zingiz yozasiz. ML da esa — kompyuterga ko'p misol ko'rsatasiz va u o'zi qoidalarni topadi.\n\nMavzular: ML turlari (supervised, unsupervised, reinforcement), o'qitish jarayoni, modelni baholash usullari, va sklearn kutubxonasi bilan amaliy mashq.\n\nReal hayotda ML: spam filtrlash (pochta), yuz tanish (telefon), tavsiya tizimi (YouTube, Netflix), narx bashorat (uy narxi), tibbiy tashxis — bularning barchasi ML asosida ishlaydi.",
+  count: 6
+};
+
+var M = [
+{id:'14.1', type:'test',
+ title:'Machine Learning nima?',
+ terms:[
+   ['ML','Ma\'lumotlardan o\'rganib, bashorat qiladigan tizim'],
+   ['Model','O\'qitish natijasida olingan matematik funksiya'],
+   ['Feature','Kirish ma\'lumoti (x) — model o\'rganadigan belgi'],
+   ['Label','Chiqish ma\'lumoti (y) — model bashorat qiladigan javob']
+ ],
+ detail:'MACHINE LEARNING NIMA VA AN\'ANAVIY DASTURLASHDAN QANDAY FARQ QILADI?\n\nAn\'anaviy dasturlash: Siz qoidalarni yozasiz → kompyuter ma\'lumotni qayta ishlaydi → natija chiqadi.\n\nMachine Learning: Ma\'lumot + kutilgan natija → kompyuter qoidalarni o\'zi topadi → model chiqadi.\n\nAYNAN SHU O\'ZGARISH HAMMA NARSANI O\'ZGARTIRADI. Masalan spam filtrlash: an\'anaviy usulda har qanday yangi spam so\'zini qo\'lda qoidaga qo\'shish kerak. ML da esa — minglab spam va normal xatlarni ko\'rsatasiz, model o\'zi "spam xatlar qanday ko\'rinishda bo\'ladi" ni tushunadi.\n\nML QACHON KERAK? Qoidalar juda murakkab (yuz tanish), qoidalar vaqt o\'tishi bilan o\'zgaradi (narx bashorat), ma\'lumot juda ko\'p va qo\'lda qayta ishlash mumkin emas (Internet ma\'lumotlari).\n\nML QACHON KERAKSIZ? Oddiy hisob-kitob (kalkulyator), aniq qoidalar mavjud (soliq hisoblash), kichik ma\'lumot va sodda mantiq (agar yosh > 18 bo\'lsa, katta deb hisoblash).\n\nMODEL NIMA? ML da "model" — bu o\'qitish jarayonidan chiqqan matematik funksiya. Uy narxini bashorat qiluvchi model: narx = 500*xona_soni + 1000*maydoni - 200*yoshi + ... Koeffitsientlarni model o\'zi topadi.',
+ tests:[
+   {q:'Machine Learning an\'anaviy dasturlashdan qanday farq qiladi?',
+    opts:['Tezroq ishlaydi','Qoidalarni o\'zi topadi, dasturchi yozmaydi','Faqat rasmlar bilan ishlaydi','Internetga ulanishni talab qiladi'],
+    ans:1,
+    exp:'An\'anaviy dasturlashda dasturchi qoidalarni yozadi. ML da esa kompyuter ma\'lumotlardan o\'rganib, qoidalarni o\'zi topadi.'},
+   {q:'ML da "feature" (xususiyat) nima?',
+    opts:['Model nomi','Kirish ma\'lumoti — model o\'rganadigan belgi','Chiqish natijasi','O\'qitish vaqti'],
+    ans:1,
+    exp:'Feature — bu modelga beriladigan kirish ma\'lumoti (x). Masalan uy narxini bashorat qilishda: xonalar soni, maydoni, joylashuvi — bular feature.'},
+   {q:'Qaysi holat uchun ML ishlatish to\'g\'ri emas?',
+    opts:['Yuz tanish tizimi','Spam filtrlash','2+2 ni hisoblash','Narx bashorat'],
+    ans:2,
+    exp:'2+2 ni hisoblash uchun ML kerak emas — bu oddiy arifmetika. ML murakkab, ko\'p ma\'lumotli, qoidalar o\'zgarib turadigan masalalar uchun.'},
+ ]},
+
+{id:'14.2', type:'test',
+ title:'Supervised Learning',
+ terms:[
+   ['Supervised Learning','Belgilangan (label li) ma\'lumot bilan o\'qitish'],
+   ['Classification','Toifalardan birini tanlash (spam/spam emas)'],
+   ['Regression','Raqamli qiymat bashorat qilish (narx, temperatura)'],
+   ['Training data','Model o\'rganadigan misol ma\'lumotlar']
+ ],
+ detail:'SUPERVISED LEARNING — ENG KO\'P ISHLATILADIGAN ML TURI\n\nSupervised Learning da har bir misol uchun javob (label) berilgan: "Bu xat — SPAM", "Bu uy narxi — 250,000$". Model ana shu juftliklardan o\'rganadi.\n\n"SUPERVISED" (NAZORATLI) NEGA DEYILADI? Chunki o\'qitish jarayonida har bir misol uchun "to\'g\'ri javob" mavjud — o\'qituvchi kabi nazorat qiluvchi bor.\n\nIKKI ASOSIY TUR:\n1. CLASSIFICATION (Tasniflash): Javob toifalardan biri. Masalan: spam/spam emas, kasallik bor/yo\'q, rasm it/mushuk. Model "qaysi toifaga tegishli" degan savolga javob beradi.\n\n2. REGRESSION (Regressiya): Javob raqamli qiymat. Masalan: uy narxi, harorat, aksiya narxi. Model "qanday qiymat bo\'ladi" degan savolga javob beradi.\n\nREAL MISOLLAR:\n- Classification: Email spam filtri, tibbiy tashxis, kredit berish/bermaslik\n- Regression: Uy narxi bashorati, yo\'l qoidabuzarlik jarima miqdori, talabalar GPA bashorati\n\nMASHHUR ALGORITMLAR:\n- Linear/Logistic Regression — oddiy, tushunish oson\n- Decision Tree — qoidalar daraxti kabi\n- Random Forest — ko\'p daraxt birlashtirilgan\n- SVM — chegaraviy chiziq topish\n- Neural Network — eng kuchli, lekin murakkab',
+ tests:[
+   {q:'Supervised Learning ning asosiy xususiyati nima?',
+    opts:['Javobsiz ma\'lumot bilan o\'rganadi','Har bir misol uchun to\'g\'ri javob (label) berilgan','Faqat rasmlar uchun ishlaydi','Internet kerak'],
+    ans:1,
+    exp:'Supervised Learning da har bir misol uchun "to\'g\'ri javob" berilgan — model ana shu juftliklardan o\'rganadi.'},
+   {q:'"Uy narxini bashorat qilish" qaysi turdagi masala?',
+    opts:['Classification','Clustering','Regression','Reinforcement'],
+    ans:2,
+    exp:'Regression — raqamli qiymat bashorat qilish. Narx son bo\'lgani uchun bu Regression masalasi.'},
+   {q:'"Xat spam yoki spam emasligini aniqlash" qaysi turdagi masala?',
+    opts:['Regression','Classification','Clustering','Reinforcement'],
+    ans:1,
+    exp:'Classification — toifalardan birini tanlash. Spam/spam emas — ikki toifa, shuning uchun bu Classification masalasi.'},
+ ]},
+
+{id:'14.3', type:'test',
+ title:'Unsupervised Learning',
+ terms:[
+   ['Unsupervised Learning','Belgilanmagan ma\'lumot bilan o\'qitish — model o\'zi naqsh topadi'],
+   ['Clustering','Ma\'lumotlarni o\'xshashlik asosida guruhlash'],
+   ['K-Means','Eng mashhur clustering algoritmi'],
+   ['Dimensionality Reduction','Ko\'p o\'lchovli ma\'lumotni kamaytirish (PCA)']
+ ],
+ detail:'UNSUPERVISED LEARNING — JAVOBSIZ O\'RGANISH\n\nUnsupervised Learning da ma\'lumotlarda label (javob) yo\'q. Model ma\'lumotlarning o\'zida yashirin naqsh, guruh va tuzilmalarni o\'zi topadi.\n\nNEGA KERAK? Ko\'p holatlarda label yo\'q — masalan, million ta mijozni qo\'lda "bu guruh A, bu guruh B" deb belgilash mumkin emas. Unsupervised Learning o\'zi "o\'xshash mijozlar" ni topadi.\n\nCLUSTERING (KLASTERLASH): Ma\'lumotlarni o\'xshash guruhlarga bo\'lish. Misol: Supermarketda mijozlarni xarid odatiga qarab guruhlash → "tejamkor", "vip", "o\'rta" guruhlar. Buni hech kim oldindan belgilamagan — algoritm o\'zi topgan.\n\nK-MEANS ALGORITMI: Eng oddiy va mashhur clustering. "K" ta markaz belgilab, har bir nuqtani eng yaqin markazga tegishli qiladi, keyin markazlarni qayta hisoblaydi — bu jarayon takrorlanadi.\n\nDIMENSIONALITY REDUCTION: Ko\'p ustunli (o\'lchovli) ma\'lumotni kamroq ustunli ko\'rinishga keltirish — ma\'lumotning asosiy ma\'nosini saqlab. Masalan 100 ta feature ni 2 ta asosiy komponentga keltirish (PCA). Bu visualization uchun yoki ML modelni tezlashtirish uchun ishlatiladi.\n\nSUPERVISED VS UNSUPERVISED:\nSupervised: "Bu rasm it — o\'rgan"\nUnsupervised: "Mana 1000 ta rasm — o\'xshashlarini top"',
+ tests:[
+   {q:'Unsupervised Learning da nima yo\'q?',
+    opts:['Ma\'lumot','Label (belgilangan javob)','Algoritm','Natija'],
+    ans:1,
+    exp:'Unsupervised Learning da label yo\'q — model ma\'lumotlarda o\'zi naqsh va guruh topadi, hech kim javobni oldindan belgilamagan.'},
+   {q:'K-Means qaysi turdagi masala uchun ishlatiladi?',
+    opts:['Regression','Classification','Clustering','Dimensionality Reduction'],
+    ans:2,
+    exp:'K-Means — clustering algoritmi. Ma\'lumotlarni K ta guruhga bo\'ladi.'},
+   {q:'Mijozlarni xarid odatiga qarab guruhlash qaysi turdagi masala?',
+    opts:['Supervised Regression','Supervised Classification','Unsupervised Clustering','Reinforcement Learning'],
+    ans:2,
+    exp:'Guruh nomlari oldindan berilmagan — model o\'zi o\'xshash mijozlarni topadi. Bu Unsupervised Clustering.'},
+ ]},
+
+{id:'14.4', type:'test',
+ title:'Semi-supervised & Reinforcement',
+ terms:[
+   ['Semi-supervised','Bir qismi belgilangan, ko\'p qismi belgilanmagan ma\'lumot'],
+   ['Reinforcement Learning','Mukofot va jazo orqali o\'rganish'],
+   ['Agent','RL da harakat qiluvchi dastur/robot'],
+   ['Reward','RL da to\'g\'ri harakat uchun beriladigan mukofot']
+ ],
+ detail:'SEMI-SUPERVISED VA REINFORCEMENT LEARNING\n\nSEMI-SUPERVISED LEARNING (YARIM NAZORATLI):\nReal hayotda ma\'lumot belgilash (labeling) juda qimmat va vaqt talab qiladi — masalan tibbiy rasmlarni shifokor belgilashi kerak. Semi-supervised da: oz miqdor belgilangan ma\'lumot + ko\'p miqdor belgilanmagan ma\'lumot birga ishlatiladi. Model avval oz belgilangan ma\'lumotdan o\'rganadi, keyin belgilanmagan ma\'lumotlarni ham tahlil qiladi.\n\nMisol: 100 ta belgilangan rasm + 10,000 ta belgilanmagan rasm → model ikkalasidan foydalanadi.\n\nREINFORCEMENT LEARNING (MUSTAHKAMLASH O\'QITISH):\nBu boshqacha paradigma — bu yerda o\'qituvchi ham, belgilangan ma\'lumot ham yo\'q. Agent (dastur) muhit bilan o\'zaro ta\'sir qiladi: harakat qiladi → natijaga qarab mukofot yoki jazo oladi → keyingi safar yaxshiroq harakat qilishga o\'rganadi. Xuddi o\'yin o\'rganish kabi.\n\nRL MISOLLAR:\n- AlphaGo (Go o\'yinida dunyo chempionini yutgan) — million ta o\'yin o\'ynab o\'rganган\n- ChatGPT ning RLHF qismi — inson bahosi asosida yaxshilangan\n- Robot qo\'l — yiqilmasdan yurish o\'rgangan\n- O\'yin AI — video o\'yinlarda odam darajasida o\'ynash\n\nAsosiy tushunchalar: Agent (harakat qiluvchi), Environment (muhit), State (holat), Action (harakat), Reward (mukofot).',
+ tests:[
+   {q:'Semi-supervised learning qaysi ma\'lumot bilan ishlaydi?',
+    opts:['Faqat belgilangan','Faqat belgilanmagan','Oz belgilangan + Ko\'p belgilanmagan','Faqat rasm ma\'lumot'],
+    ans:2,
+    exp:'Semi-supervised: oz belgilangan (labeled) + ko\'p belgilanmagan (unlabeled) ma\'lumot birga ishlatiladi.'},
+   {q:'Reinforcement Learning da model qanday o\'rganadi?',
+    opts:['Belgilangan ma\'lumotdan','Mukofot va jazo orqali','Boshqa modeldan ko\'chirib','Internetdan qidirib'],
+    ans:1,
+    exp:'RL da agent harakat qiladi, to\'g\'ri harakat uchun mukofot, noto\'g\'ri uchun jazo oladi — shu orqali o\'rganadi.'},
+   {q:'AlphaGo qaysi ML turi bilan o\'qitilgan?',
+    opts:['Supervised Learning','Unsupervised Learning','Reinforcement Learning','Semi-supervised'],
+    ans:2,
+    exp:'AlphaGo Reinforcement Learning bilan o\'qitilgan — million ta o\'yin o\'ynab, yutish (mukofot) va yutqazish (jazo) orqali o\'rgangan.'},
+ ]},
+
+{id:'14.5', type:'test',
+ title:'ML o\'qitish jarayoni',
+ terms:[
+   ['Train/Test split','Ma\'lumotni o\'qitish va sinash qismlariga bo\'lish'],
+   ['Overfitting','Model train da yaxshi, test da yomon — haddan oshiq o\'rganib ketgan'],
+   ['Underfitting','Model hatto train da ham yomon — yetarli o\'rganmagan'],
+   ['Validation set','Giperparametrlarni sozlash uchun alohida ajratilgan ma\'lumot']
+ ],
+ detail:'ML O\'QITISH JARAYONI — BATAFSIL\n\nQADAMLAR:\n1. Ma\'lumot yig\'ish va tozalash\n2. Feature engineering (xususiyatlarni tayyorlash)\n3. Train/Test ga bo\'lish\n4. Model tanlash va o\'qitish\n5. Baholash\n6. Sozlash va takrorlash\n\nTRAIN/TEST BO\'LISH NIMA UCHUN MUHIM?\nAgar barcha ma\'lumotni o\'qitishga ishlatib, keyin shu ma\'lumotda sinasangiz — model "yodlab olgan" bo\'lishi mumkin. Test ma\'lumot model hech qachon ko\'rmagan yangi ma\'lumot bo\'lishi kerak — shu orqali real hayotda qanchalik ishlashi bilinadi.\n\nOdatda: 80% train, 20% test. Ba\'zan: 60% train, 20% validation, 20% test.\n\nOVERFITTING (HADDAN OSHIQ O\'RGANISH):\nModel train ma\'lumotni "yodlab" oladi — har bir misol va uning istisnolarini ham. Natija: train da 99% aniqlik, test da 60% aniqlik. Bu yaxshi model emas — yangi ma\'lumotda yomon ishlaydi.\n\nUNDERFITTING (YETARLI O\'RGANMASLIK):\nModel juda sodda — hatto train ma\'lumotdagi asosiy naqshni ham topa olmaydi. Natija: train da ham, test da ham past aniqlik.\n\nMUVOZANAT: Yaxshi model train va test da ham yaqin natija beradi.',
+ tests:[
+   {q:'Nima uchun ma\'lumotni train va test ga bo\'lamiz?',
+    opts:['Kompyuter xotirasini tejash uchun','Model "ko\'rmagan" ma\'lumotda qanchalik ishlashini bilish uchun','Ikkita model o\'qitish uchun','Ma\'lumot ko\'p bo\'lganda'],
+    ans:1,
+    exp:'Test ma\'lumot model o\'qitishda ko\'rmagan yangi ma\'lumot. Bu modelning haqiqiy qobilyatini baholaydi.'},
+   {q:'Overfitting nima?',
+    opts:['Model hech nima o\'rganmagan','Model train da yaxshi, test da yomon — yodlab olgan','Model juda sekin ishlaydi','Ma\'lumot yetarli emas'],
+    ans:1,
+    exp:'Overfitting: model train ma\'lumotni yodlab olgan — train da juda yaxshi, lekin yangi (test) ma\'lumotda yomon ishlaydi.'},
+   {q:'Odatda train va test nisbati qanday?',
+    opts:['50% / 50%','80% / 20%','90% / 10%','70% / 30%'],
+    ans:1,
+    exp:'Eng keng tarqalgan nisbat: 80% train, 20% test. Ba\'zan 70/30 ham ishlatiladi.'},
+ ]},
+
+{id:'14.6', type:'eskiz',
+ title:'Modelni sinash — sklearn',
+ terms:[
+   ['sklearn','Python ning asosiy ML kutubxonasi (scikit-learn)'],
+   ['train_test_split','Ma\'lumotni train va test qismlariga bo\'lish funksiyasi'],
+   ['accuracy_score','To\'g\'ri bashoratlar ulushini hisoblash'],
+   ['confusion_matrix','Haqiqiy va bashorat qilingan natijalarni jadval ko\'rinishida']
+ ],
+ detail:'SKLEARN BILAN AMALIY ML\n\nsklearn (scikit-learn) — Python dagi eng mashhur ML kutubxona. O\'nlab algoritmlar, baholash funksiyalari, ma\'lumot tayyorlash vositalari — barchasi bir joyda.\n\nTRAIN_TEST_SPLIT PARAMETRLARI:\ntest_size=0.2 → 20% test, 80% train\nrandom_state=42 → tasodifiy bo\'lishni qayta takrorlanadigan qilish (har safar bir xil bo\'linish)\nX → features (kirish ma\'lumot)\ny → labels (chiqish, javob)\n\nACCURACY SCORE:\n= To\'g\'ri bashoratlar soni / Jami bashoratlar soni\nMasalan: 5 ta bashoratdan 4 tasi to\'g\'ri → accuracy = 0.8 (80%)\n\nCONFUSION MATRIX:\n[[TN, FP],   TN — to\'g\'ri 0\n [FN, TP]]   TP — to\'g\'ri 1\n              FP — noto\'g\'ri 1 dedi (xato)\n              FN — noto\'g\'ri 0 dedi (xato)\n\nBU NIMA UCHUN MUHIM? Accuracy yetarli emas. Masalan tibbiy tashxisda: 95% bemorlar sog\'lom, 5% kasal. Model hamma narsaga "sog\'lom" desa ham 95% accuracy oladi — lekin bu yomon model! Confusion matrix qaysi xatolar qilinganini aniq ko\'rsatadi.',
+ sim:'>>> from sklearn.model_selection import train_test_split\n>>> from sklearn.metrics import accuracy_score\n>>> X = [[1],[2],[3],[4],[5],[6],[7],[8],[9],[10]]\n>>> y = [0,0,0,0,0,1,1,1,1,1]\n>>> X_train, X_test, y_train, y_test = train_test_split(\n...   X, y, test_size=0.2, random_state=42)\n>>> len(X_train), len(X_test)\n(8, 2)\n>>> y_haqiqiy = [0,1,1,0,1]\n>>> y_bashorat = [0,1,0,0,1]\n>>> accuracy_score(y_haqiqiy, y_bashorat)\n0.8',
+ eskizlar:[
+  {q:'Ma\'lumotni train (80%) va test (20%) ga bo\'ling.',
+   lines:[
+    {c:'from sklearn.model_selection import \\',n:'Siz sklearn dan import qilishni boshladingiz'},
+    {c:'  train_test_split',n:'Siz train_test_split funksiyasini import qildingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'X = [[1],[2],[3],[4],[5],',n:'Siz X (features) ma\'lumotini yaratishni boshladingiz'},
+    {c:'     [6],[7],[8],[9],[10]]',n:'Siz X ma\'lumotini yakunladingiz'},
+    {c:'y = [0,0,0,0,0,1,1,1,1,1]',n:'Siz y (labels) ma\'lumotini yaratdingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'X_train, X_test,\\',n:'Siz bo\'lish natijalarini qabul qilishni boshladingiz'},
+    {c:'y_train, y_test = \\',n:'Siz train va test labellarini ajratdingiz'},
+    {c:'  train_test_split(',n:'Siz train_test_split chaqirishni boshladingiz'},
+    {c:'  X, y,',n:'Siz X va y ma\'lumotini berdingiz'},
+    {c:'  test_size=0.2,',n:'Siz 20% test qilishni belgiladingiz'},
+    {c:'  random_state=42)',n:'Siz tasodifiylikni 42 bilan mahkamladdingiz'},
+    {c:'print(len(X_train), len(X_test))',n:'Siz train va test o\'lchamlarini chiqardingiz'},
+   ]},
+  {q:'accuracy_score bilan model aniqligini hisoblang.',
+   lines:[
+    {c:'from sklearn.metrics import \\',n:'Siz sklearn metrics dan import qilishni boshladingiz'},
+    {c:'  accuracy_score',n:'Siz accuracy_score funksiyasini import qildingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'y_haqiqiy = [0, 1, 1, 0, 1]',n:'Siz haqiqiy (to\'g\'ri) javoblarni yaratdingiz'},
+    {c:'y_bashorat = [0, 1, 0, 0, 1]',n:'Siz model bashoratlarini yaratdingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'aniqlik = accuracy_score(',n:'Siz aniqlikni hisoblashni boshladingiz'},
+    {c:'  y_haqiqiy,',n:'Siz haqiqiy javoblarni berdingiz'},
+    {c:'  y_bashorat)',n:'Siz bashoratlarni berdingiz'},
+    {c:'print(\'Aniqlik:\', aniqlik)',n:'Siz aniqlikni ekranga chiqardingiz'},
+   ]},
+  {q:'confusion_matrix bilan xatolar jadvalini ko\'ring.',
+   lines:[
+    {c:'from sklearn.metrics import \\',n:'Siz sklearn metrics dan import qilishni boshladingiz'},
+    {c:'  confusion_matrix',n:'Siz confusion_matrix funksiyasini import qildingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'y_haqiqiy = [0, 1, 1, 0, 1]',n:'Siz haqiqiy javoblarni yaratdingiz'},
+    {c:'y_bashorat = [0, 1, 0, 0, 1]',n:'Siz model bashoratlarini yaratdingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'cm = confusion_matrix(',n:'Siz confusion matrix hisoblashni boshladingiz'},
+    {c:'  y_haqiqiy,',n:'Siz haqiqiy javoblarni berdingiz'},
+    {c:'  y_bashorat)',n:'Siz bashoratlarni berdingiz'},
+    {c:'print(cm)',n:'Siz xatolar jadvalini ekranga chiqardingiz'},
+   ]},
+ ]
+},
+];
+
+// ═══════ HOLAT ═══════
+var cur=0, curEskiz=0, skipOn=false, ghostVisible=true;
+var lineData=[], doneSet=new Set(), eskizDoneSet=new Set();
+var testAnswers={}, selectedStar=0, ratingSubmitted=false;
+var BRIGHT=[0,0.05,0.1,0.2,0.3,0.42,0.55,0.65,0.75,0.85,0.95];
+
+window.onload=function(){buildStars();buildTabs();buildIntro();loadMod(0);};
+
+function buildIntro(){
+  var h='<div class="intro-title">'+MODULE_INTRO.title+'</div>';
+  h+='<div class="intro-text">'+esc(MODULE_INTRO.text)+'</div>';
+  h+='<div class="intro-stats">';
+  h+='<div class="intro-stat"><div class="intro-stat-v">5</div><div class="intro-stat-l">TEST</div></div>';
+  h+='<div class="intro-stat"><div class="intro-stat-v">3</div><div class="intro-stat-l">ESKIZ</div></div>';
+  h+='<div class="intro-stat"><div class="intro-stat-v">sklearn</div><div class="intro-stat-l">KUTUBXONA</div></div>';
+  h+='</div>';
+  document.getElementById('introBox').innerHTML=h;
+}
+
+function loadMod(i){
+  cur=i; curEskiz=0;
+  document.getElementById('detailPanel').classList.remove('show');
+  document.getElementById('badge') && (document.getElementById('badge').className='badge');
+  var m=M[i];
+  document.getElementById('topSub').textContent=m.id;
+  document.getElementById('svMod').textContent=(i+1)+'/'+M.length;
+  // terms
+  var th='<div class="terms-title">📚 Yangi atamalar:</div>';
+  m.terms.forEach(function(t){
+    th+='<div class="term-row"><span class="term-key">'+esc(t[0])+'</span><span class="term-val">'+esc(t[1])+'</span></div>';
+  });
+  document.getElementById('termsBox').innerHTML=th;
+  // content
+  if(m.type==='test') renderTest(m);
+  else renderEskiz(m);
+  buildTabs(); updateTopStats();
+}
+
+// ═══════ TEST ═══════
+function renderTest(m){
+  if(!testAnswers[cur]) testAnswers[cur]={};
+  var h='<div class="test-panel"><div class="test-title">🧠 '+m.title+' — Test</div>';
+  m.tests.forEach(function(t,qi){
+    h+='<div class="test-q" id="tq'+qi+'">';
+    h+='<div class="test-qtext">'+(qi+1)+'. '+esc(t.q)+'</div>';
+    h+='<div class="test-opts">';
+    var answered = testAnswers[cur][qi] !== undefined;
+    t.opts.forEach(function(o,oi){
+      var cls='test-opt';
+      if(answered){
+        if(oi===t.ans) cls+=' show-correct';
+        else if(oi===testAnswers[cur][qi] && oi!==t.ans) cls+=' wrong';
+      }
+      h+='<button class="'+cls+'" onclick="answerTest('+qi+','+oi+')" '+(answered?'disabled':'')+'>'+esc(o)+'</button>';
+    });
+    h+='</div>';
+    if(answered){
+      var isCorrect = testAnswers[cur][qi]===t.ans;
+      h+='<div class="test-exp show">'+(isCorrect?'✅':'❌')+' '+esc(t.exp)+'</div>';
+    }
+    h+='</div>';
+  });
+  // score
+  var answered=Object.keys(testAnswers[cur]).length;
+  var correct=0;
+  Object.keys(testAnswers[cur]).forEach(function(qi){
+    if(testAnswers[cur][qi]===m.tests[qi].ans) correct++;
+  });
+  if(answered===m.tests.length){
+    h+='<div class="test-score show">Natija: '+correct+'/'+m.tests.length+' ✅</div>';
+    doneSet.add(cur);
+  }
+  h+='</div>';
+  document.getElementById('mainContent').innerHTML=h;
+  document.getElementById('result-panel') && document.getElementById('result-panel').classList.remove('show');
+  updateTopStats();
+}
+
+function answerTest(qi,oi){
+  if(!testAnswers[cur]) testAnswers[cur]={};
+  if(testAnswers[cur][qi]!==undefined) return;
+  testAnswers[cur][qi]=oi;
+  renderTest(M[cur]);
+  buildTabs(); updateTopStats();
+}
+
+// ═══════ ESKIZ (14.6) ═══════
+function renderEskiz(m){
+  var e=m.eskizlar[curEskiz];
+  // eskiz dots
+  var dotsH='<div style="display:flex;gap:6px;justify-content:center;margin-bottom:10px;">';
+  m.eskizlar.forEach(function(_,i){
+    var key=cur+'-'+i;
+    var w=i===curEskiz?'40px':'26px';
+    var bg=eskizDoneSet.has(key)?'#22c55e':(i===curEskiz?'#00f0c8':'#1e3048');
+    dotsH+='<div onclick="jumpEskiz('+i+')" style="width:'+w+';height:6px;border-radius:3px;background:'+bg+';cursor:pointer;transition:all .2s;"></div>';
+  });
+  dotsH+='</div>';
+  // question
+  var qH='<div style="background:#0d1828;border:1px solid #1e3048;border-left:3px solid #a855f7;border-radius:8px;padding:10px 12px;margin-bottom:10px;font-size:.71rem;line-height:1.8;color:#c4b5fd;white-space:pre-wrap;">Eskiz '+(curEskiz+1)+'/'+m.eskizlar.length+' — '+esc(e.q)+'</div>';
+  // skip row
+  var skipH='<div class="skip-row" onclick="toggleSkip()"><div class="sw" id="sw"></div><span id="skipLbl"># Kommentlarni o\'tkazib yuboring</span></div>';
+  // result panel
+  var resH='<div class="result-panel" id="resultPanel"><div class="result-title">📊 NATIJA — SIMULYATSIYA</div><div class="sim-wrap" id="simWrap"></div></div>';
+  // code block
+  var codeH='<div class="code-block"><div class="fbar"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div><div class="fn" id="fname">ml_14_'+(curEskiz+1)+'.py</div><div class="fhint">↔️ suring ✏️ yozing</div></div><div class="lines-wrap" id="linesWrap"></div><div class="btn-row"><button class="btn btn-chk" onclick="doCheck()">✅ Tekshir</button><button class="btn btn-clr" onclick="doClear()">🗑️ Tozala</button><button class="btn btn-ghost" id="ghostBtn" onclick="toggleGhost()">👁️ Yashir</button><button class="btn btn-det" onclick="toggleDetail()">📖 Batafsil</button><button class="btn btn-res" onclick="toggleResult()">📊 Natija</button></div><div class="badge" id="badge"></div></div>';
+  document.getElementById('mainContent').innerHTML=dotsH+qH+skipH+resH+codeH;
+  buildLines(e);
+  // sync skip sw
+  document.getElementById('sw').classList.toggle('on',skipOn);
+  document.getElementById('skipLbl').textContent=skipOn?'Kommentlar o\'tkazilmoqda':'# Kommentlarni o\'tkazib yuboring';
+  applyBright(); updateStats();
+}
+
+function jumpEskiz(i){ curEskiz=i; renderEskiz(M[cur]); }
+
+function buildLines(e){
+  var wrap=document.getElementById('linesWrap');
+  if(!wrap) return;
+  wrap.innerHTML=''; lineData=[];
+  var op=BRIGHT[parseInt(document.getElementById('brightSlider').value)||3];
+  e.lines.forEach(function(ln,i){
+    var isCom=ln.c.replace(/^\s+/,'').charAt(0)==='#';
+    var isEmpty=ln.c==='';
+    var isSlash=ln.c.endsWith('\\');
+    var block=document.createElement('div');
+    block.className='line-block';
+    var row=document.createElement('div');
+    row.className='line-row';
+    var num=document.createElement('div');
+    num.className='line-num'; num.id='num'+i;
+    num.textContent=isEmpty?'':(i+1);
+    var content=document.createElement('div');
+    content.className='line-content';
+    var ghost=document.createElement('div');
+    ghost.className='line-ghost'+((isCom&&skipOn)?' skip-c':'');
+    ghost.id='ghost'+i;
+    ghost.style.color=ghostVisible?'rgba(74,96,128,'+op+')':'transparent';
+    ghost.textContent=ln.c||' ';
+    var colors=document.createElement('div');
+    colors.className='line-colors'; colors.id='clr'+i;
+    var inp=document.createElement('input');
+    inp.type='text'; inp.className='line-input'; inp.id='inp'+i;
+    inp.setAttribute('spellcheck','false'); inp.setAttribute('autocorrect','off');
+    inp.setAttribute('autocapitalize','off'); inp.setAttribute('autocomplete','off');
+    if(isEmpty||(isCom&&skipOn)) inp.disabled=true;
+    (function(idx,target,noteText){
+      inp.addEventListener('input',function(){
+        if(!target) return;
+        updateLineClr(idx,target);
+        if(inp.value===target&&target!==''&&noteText!=='') showNote(idx);
+        else if(inp.value!==target) hideNote(idx);
+        updateStats();
+      });
+    })(i,ln.c,ln.n);
+    content.appendChild(ghost); content.appendChild(colors); content.appendChild(inp);
+    row.appendChild(num); row.appendChild(content);
+    var note=document.createElement('div');
+    note.className='line-done-note'; note.id='note'+i;
+    note.textContent=ln.n?('✅ '+ln.n+'!'):'';
+    block.appendChild(row);
+    if(ln.n) block.appendChild(note);
+    wrap.appendChild(block);
+    lineData.push({inp:inp,target:ln.c,isCom:isCom,isEmpty:isEmpty});
+  });
+}
+
+function updateLineClr(idx,target){
+  var inp=document.getElementById('inp'+idx);
+  var clr=document.getElementById('clr'+idx);
+  if(!inp||!clr) return;
+  var typed=inp.value, html='';
+  for(var ci=0;ci<target.length;ci++){
+    var ch=target[ci];
+    if(ci<typed.length) html+=typed[ci]===ch?'<span style="color:#22c55e">'+esc(ch)+'</span>':'<span style="color:#f43f5e;text-decoration:underline">'+esc(ch)+'</span>';
+    else html+='<span style="color:transparent">'+esc(ch)+'</span>';
+  }
+  clr.innerHTML=html;
+  var num=document.getElementById('num'+idx);
+  if(num) num.style.color=(typed===target&&target!=='')?'#22c55e':'';
+}
+
+function showNote(i){var n=document.getElementById('note'+i);if(n&&n.textContent)n.classList.add('show');}
+function hideNote(i){var n=document.getElementById('note'+i);if(n)n.classList.remove('show');}
+
+function doCheck(){
+  var e=M[cur].eskizlar[curEskiz];
+  var done=0,total=0,errors=[];
+  lineData.forEach(function(l,i){
+    if(l.isEmpty||(l.isCom&&skipOn)) return;
+    total++;
+    if(l.inp.value===l.target){
+      done++; document.getElementById('num'+i).style.color='#22c55e';
+      if(e.lines[i].n) showNote(i);
+    } else {
+      errors.push(i+1); document.getElementById('num'+i).style.color='#f43f5e';
+    }
+  });
+  var pct=total>0?Math.round(done/total*100):0;
+  var b=document.getElementById('badge');
+  if(!b) return;
+  b.className='badge show';
+  if(pct>=85){
+    b.className+=' g';
+    eskizDoneSet.add(cur+'-'+curEskiz);
+    var isLast=curEskiz===M[cur].eskizlar.length-1;
+    if(isLast){ doneSet.add(cur); b.textContent='✅ Zo\'r! '+pct+'% — barcha eskizlar tugadi!'; showRating(); }
+    else { b.textContent='✅ Zo\'r! '+pct+'% — keyingi eskiz →'; setTimeout(function(){curEskiz++;renderEskiz(M[cur]);},900); }
+  } else if(pct>=55){
+    b.className+=' o'; b.textContent='⚡ '+pct+'% — xato qatorlar: '+errors.join(', ')+'-qator';
+  } else {
+    b.className+=' r'; b.textContent='❌ '+pct+'% — qaytadan urinib ko\'ring';
+  }
+  updateStats(); buildTabs();
+}
+
+function doClear(){
+  lineData.forEach(function(l,i){
+    l.inp.value='';
+    var clr=document.getElementById('clr'+i); if(clr) clr.innerHTML='';
+    var num=document.getElementById('num'+i); if(num) num.style.color='';
+    hideNote(i);
+  });
+  var b=document.getElementById('badge'); if(b) b.className='badge';
+  updateStats();
+}
+
+function updateStats(){
+  if(M[cur].type!=='eskiz') return;
+  var done=0,total=0;
+  lineData.forEach(function(l){
+    if(l.isEmpty||(l.isCom&&skipOn)) return;
+    total++;
+    if(l.inp.value===l.target) done++;
+  });
+  var pct=total>0?Math.round(done/total*100):0;
+  document.getElementById('svDone').textContent=done+'/'+total;
+  document.getElementById('svScore').textContent=done>0?pct+'%':'—';
+  document.getElementById('progressFill').style.width=(doneSet.size/M.length*100)+'%';
+}
+
+function updateTopStats(){
+  // test balini hisoblash
+  var totalQ=0, correctQ=0;
+  M.forEach(function(m,mi){
+    if(m.type!=='test') return;
+    m.tests.forEach(function(t,qi){
+      totalQ++;
+      if(testAnswers[mi]&&testAnswers[mi][qi]===t.ans) correctQ++;
+    });
+  });
+  document.getElementById('svScore').textContent=totalQ>0?(correctQ+'/'+totalQ):'—';
+  document.getElementById('svDone').textContent=doneSet.size+'/'+M.length;
+  document.getElementById('progressFill').style.width=(doneSet.size/M.length*100)+'%';
+}
+
+function toggleGhost(){
+  ghostVisible=!ghostVisible;
+  document.querySelectorAll('.line-ghost').forEach(function(g){g.style.visibility=ghostVisible?'visible':'hidden';});
+  var gb=document.getElementById('ghostBtn');
+  if(gb) gb.textContent=ghostVisible?'👁️ Yashir':'👁️ Ko\'rsat';
+}
+
+function toggleSkip(){
+  skipOn=!skipOn;
+  var sw=document.getElementById('sw'); if(sw) sw.classList.toggle('on',skipOn);
+  var sl=document.getElementById('skipLbl'); if(sl) sl.textContent=skipOn?'Kommentlar o\'tkazilmoqda':'# Kommentlarni o\'tkazib yuboring';
+  if(M[cur].type==='eskiz'){ buildLines(M[cur].eskizlar[curEskiz]); applyBright(); updateStats(); }
+}
+
+function toggleDetail(){
+  var p=document.getElementById('detailPanel');
+  if(p.classList.contains('show')){p.classList.remove('show');}
+  else{document.getElementById('detailContent').textContent=M[cur].detail;p.classList.add('show');}
+}
+
+function toggleResult(){
+  var p=document.getElementById('resultPanel');
+  if(!p) return;
+  if(p.classList.contains('show')){p.classList.remove('show');}
+  else{document.getElementById('simWrap').innerHTML='<pre>'+esc(M[cur].sim)+'</pre>';p.classList.add('show');}
+}
+
+function setBright(v){document.getElementById('brightVal').textContent=v;applyBright();}
+
+function applyBright(){
+  var v=parseInt(document.getElementById('brightSlider').value)||3;
+  var op=BRIGHT[v];
+  document.querySelectorAll('.line-ghost').forEach(function(g){
+    if(!g.classList.contains('skip-c')&&ghostVisible) g.style.color='rgba(74,96,128,'+op+')';
+  });
+}
+
+function buildTabs(){
+  var c=document.getElementById('tabs'); c.innerHTML='';
+  M.forEach(function(m,i){
+    var d=document.createElement('div');
+    d.className='tab'+(i===cur?' on':'')+(doneSet.has(i)?' done':'');
+    d.textContent=m.id;
+    d.onclick=(function(n){return function(){loadMod(n);};})(i);
+    c.appendChild(d);
+  });
+}
+
+function buildStars(){
+  var sc=document.getElementById('stars'); sc.innerHTML='';
+  for(var i=1;i<=10;i++){
+    var s=document.createElement('span');
+    s.className='star'; s.textContent='⭐'; s.dataset.v=i;
+    s.onclick=(function(v){return function(){
+      selectedStar=v;
+      document.getElementById('ratingScore').textContent=v+' / 10';
+      document.querySelectorAll('.star').forEach(function(st){st.classList.toggle('on',parseInt(st.dataset.v)<=v);});
+    };})(i);
+    sc.appendChild(s);
+  }
+}
+
+function showRating(){document.getElementById('ratingBox').classList.add('show');}
+
+function submitRating(){
+  if(ratingSubmitted) return;
+  if(selectedStar===0){alert('Baho tanlang!');return;}
+  ratingSubmitted=true;
+  document.getElementById('ratingThanks').style.display='block';
+  document.querySelector('.rating-submit').style.display='none';
+}
+
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+</script>
+</body>
+</html>

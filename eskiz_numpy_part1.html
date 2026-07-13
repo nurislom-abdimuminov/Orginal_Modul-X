@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Eskiz — NumPy 8.1–8.13</title>
+<!-- Google Analytics — GA ID ni o'zingiznikiga almashtiring -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-DLNN5M2C11"></script>
+<script>
+window.dataLayer=window.dataLayer||[];
+function gtag(){dataLayer.push(arguments);}
+gtag('js',new Date());
+gtag('config','G-DLNN5M2C11');
+</script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:#0a0e1a;color:#dde5f0;font-family:'JetBrains Mono',monospace;font-size:13px;min-height:100vh;}
+.top{background:#0f1520;border-bottom:1px solid #1e3048;padding:8px 14px;display:flex;align-items:center;gap:8px;position:sticky;top:0;z-index:50;}
+.top-t{color:#00f0c8;font-size:.78rem;font-weight:700;}
+.top-s{color:#4a6080;font-size:.65rem;margin-left:auto;}
+.bright-bar{background:#0f1520;border-bottom:1px solid #1e3048;padding:6px 14px;display:flex;align-items:center;gap:10px;position:sticky;top:41px;z-index:49;}
+.bright-lbl{font-size:.65rem;color:#4a6080;flex-shrink:0;}
+.bright-slider{flex:1;-webkit-appearance:none;height:4px;border-radius:2px;background:#1e3048;outline:none;cursor:pointer;}
+.bright-slider::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:#00f0c8;cursor:pointer;}
+.bright-val{font-size:.68rem;color:#00f0c8;font-weight:700;width:20px;text-align:right;flex-shrink:0;}
+.wrap{padding:10px 14px;max-width:540px;margin:0 auto;}
+.nav-btns{display:flex;gap:6px;margin-bottom:8px;}
+.nav-btn{flex:1;padding:7px 10px;border-radius:8px;border:1px solid #1e3048;background:#141e2e;color:#4a6080;font-family:'JetBrains Mono',monospace;font-size:.68rem;font-weight:700;cursor:pointer;text-align:center;}
+.nav-btn:active{opacity:.7;}
+.nav-btn.active-part{border-color:#00f0c8;color:#00f0c8;background:rgba(0,240,200,.08);}
+.tabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;margin-bottom:10px;scrollbar-width:none;}
+.tabs::-webkit-scrollbar{display:none;}
+.tab{flex-shrink:0;padding:6px 12px;border-radius:20px;border:1px solid #1e3048;background:#141e2e;color:#4a6080;font-size:.68rem;cursor:pointer;transition:all .15s;}
+.tab.on{border-color:#00f0c8;color:#00f0c8;background:rgba(0,240,200,.08);}
+.tab.done{border-color:#22c55e;color:#22c55e;background:rgba(34,197,94,.06);}
+.skip-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;padding:8px 12px;background:#141e2e;border:1px solid #1e3048;border-radius:8px;cursor:pointer;}
+.skip-row span{font-size:.7rem;color:#4a6080;}
+.sw{width:34px;height:18px;background:#1e3048;border-radius:10px;position:relative;transition:background .2s;flex-shrink:0;}
+.sw.on{background:#fbbf24;}
+.sw::after{content:'';position:absolute;top:2px;left:2px;width:14px;height:14px;background:#fff;border-radius:50%;transition:left .2s;}
+.sw.on::after{left:18px;}
+.stats{display:flex;gap:8px;margin-bottom:10px;}
+.stat{flex:1;background:#141e2e;border:1px solid #1e3048;border-radius:8px;padding:7px 8px;text-align:center;}
+.sv{font-size:.95rem;font-weight:700;color:#00f0c8;}
+.sl{font-size:.58rem;color:#4a6080;margin-top:2px;}
+.progress-bar{height:3px;background:#1e3048;border-radius:2px;margin-bottom:10px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,#00f0c8,#2563eb);border-radius:2px;transition:width .4s;}
+
+/* DARS REJASI */
+.plan-box{background:#0d1828;border:1px solid #1e3048;border-left:3px solid #00f0c8;border-radius:8px;padding:10px 12px;margin-bottom:10px;}
+.plan-title{font-size:.68rem;font-weight:700;color:#00f0c8;margin-bottom:8px;}
+.plan-item{font-size:.67rem;color:#8ba0c0;line-height:1.9;padding-left:4px;}
+.plan-item::before{content:'→ ';color:#00f0c8;}
+
+/* ATAMALAR */
+.terms-box{background:#080c14;border:1px solid #1e3048;border-left:3px solid #a855f7;border-radius:8px;padding:10px 12px;margin-bottom:10px;}
+.terms-title{font-size:.68rem;font-weight:700;color:#a855f7;margin-bottom:8px;}
+.term-row{display:flex;gap:6px;margin-bottom:5px;align-items:flex-start;}
+.term-key{font-size:.64rem;color:#fbbf24;font-weight:700;min-width:90px;flex-shrink:0;}
+.term-val{font-size:.63rem;color:#4a6080;line-height:1.6;}
+
+.info-box{background:#0f1520;border:1px solid #1e3048;border-left:3px solid #00f0c8;border-radius:8px;padding:10px 12px;margin-bottom:10px;font-size:.71rem;line-height:1.8;color:#8ba0c0;white-space:pre-wrap;}
+.detail-panel{display:none;background:#0a1628;border:1px solid #2563eb;border-radius:8px;padding:10px 12px;margin-bottom:10px;font-size:.71rem;line-height:1.9;color:#93c5fd;white-space:pre-wrap;}
+.detail-panel.show{display:block;}
+.detail-title{color:#60a5fa;font-weight:700;margin-bottom:6px;}
+.result-panel{display:none;background:#080c14;border:1px solid #22c55e;border-radius:10px;padding:12px;margin-bottom:10px;}
+.result-panel.show{display:block;}
+.result-title{color:#22c55e;font-size:.72rem;font-weight:700;margin-bottom:8px;}
+.sim-wrap{width:100%;overflow-x:auto;}
+.sim-wrap pre{font-size:.68rem;line-height:1.9;color:#22c55e;white-space:pre;}
+
+/* CODE BLOCK */
+.code-block{border:1px solid #1e3048;border-radius:10px;overflow:hidden;margin-bottom:10px;background:#090d18;}
+.fbar{display:flex;align-items:center;gap:5px;padding:7px 12px;background:#0f1520;border-bottom:1px solid #1e3048;}
+.dot{width:6px;height:6px;border-radius:50%;}
+.dot.r{background:#f43f5e;}.dot.y{background:#fbbf24;}.dot.g{background:#22c55e;}
+.fn{font-size:.65rem;color:#4a6080;margin-left:4px;}
+.fhint{margin-left:auto;font-size:.6rem;color:#00f0c8;opacity:.7;}
+.lines-wrap{padding:4px 0;}
+.line-block{margin:0;}
+.line-row{display:flex;align-items:center;position:relative;min-height:30px;}
+.line-num{width:28px;flex-shrink:0;font-size:.63rem;padding:4px 4px 4px 5px;color:#2a3a50;text-align:right;user-select:none;transition:color .2s;align-self:center;}
+.line-content{flex:1;position:relative;overflow-x:auto;overflow-y:hidden;min-height:30px;}
+.line-content::-webkit-scrollbar{height:2px;}
+.line-content::-webkit-scrollbar-thumb{background:#1e3048;border-radius:1px;}
+.line-ghost{font-size:.76rem;line-height:1.8;padding:4px 8px;white-space:nowrap;pointer-events:none;min-height:30px;display:block;}
+.line-ghost.skip-c{opacity:.08!important;}
+.line-colors{position:absolute;top:0;left:0;font-size:.76rem;line-height:1.8;padding:4px 8px;white-space:nowrap;pointer-events:none;z-index:2;min-height:30px;}
+.line-input{position:absolute;top:0;left:0;right:0;bottom:0;width:100%;font-family:'JetBrains Mono',monospace;font-size:.76rem;line-height:1.8;padding:4px 8px;color:transparent;-webkit-text-fill-color:transparent;caret-color:#00f0c8;background:transparent;border:none;outline:none;white-space:nowrap;overflow:hidden;z-index:10;-webkit-appearance:none;}
+.line-input:disabled{cursor:default;}
+/* KO'K IZOH — V6 MEXANIZMI */
+.line-done-note{display:none;font-size:.66rem;line-height:1.6;padding:3px 8px 3px 34px;color:#38bdf8;background:rgba(56,189,248,.06);border-left:2px solid #38bdf8;white-space:pre-wrap;animation:fadeIn .25s ease;}
+.line-done-note.show{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:translateY(0)}}
+.btn-row{display:flex;gap:6px;flex-wrap:wrap;padding:9px 12px;background:#0f1520;border-top:1px solid #1e3048;}
+.btn{padding:8px 11px;border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:.68rem;font-weight:700;border:none;cursor:pointer;flex-shrink:0;transition:opacity .15s;}
+.btn:active{opacity:.7;}
+.btn-chk{background:#00f0c8;color:#080c14;}
+.btn-clr{background:transparent;border:1px solid #1e3048;color:#4a6080;}
+.btn-det{background:#2563eb;color:#fff;}
+.btn-ghost{background:#7c3aed;color:#fff;}
+.btn-res{background:#16a34a;color:#fff;}
+.badge{display:none;margin:0 12px 10px;padding:7px 12px;border-radius:8px;font-size:.7rem;border:1px solid #1e3048;}
+.badge.show{display:block;}
+.badge.g{border-color:#22c55e;color:#22c55e;background:rgba(34,197,94,.07);}
+.badge.o{border-color:#fbbf24;color:#fbbf24;background:rgba(251,191,36,.07);}
+.badge.r{border-color:#f43f5e;color:#f43f5e;background:rgba(244,63,94,.07);}
+
+/* BAHOLASH */
+.rating-box{background:#0d1828;border:1px solid #fbbf24;border-radius:12px;padding:14px 16px;margin-top:10px;}
+
+.rating-title{font-size:.72rem;font-weight:700;color:#fbbf24;text-align:center;margin-bottom:4px;}
+.rating-sub{font-size:.62rem;color:#4a6080;text-align:center;margin-bottom:12px;}
+.stars{display:flex;justify-content:center;gap:4px;margin-bottom:10px;flex-wrap:wrap;}
+.star{font-size:1.5rem;cursor:pointer;filter:grayscale(1);opacity:.35;transition:transform .1s,filter .1s,opacity .1s;user-select:none;}
+.star.on{filter:none;opacity:1;}
+.star:active{transform:scale(1.3);}
+.rating-score{text-align:center;font-size:.72rem;color:#fbbf24;font-weight:700;margin-bottom:8px;min-height:18px;}
+.rating-comment{width:100%;background:#141e2e;border:1px solid #1e3048;border-radius:8px;padding:8px 10px;color:#dde5f0;font-family:'JetBrains Mono',monospace;font-size:.68rem;resize:none;outline:none;margin-bottom:8px;}
+.rating-comment:focus{border-color:#fbbf24;}
+.rating-submit{width:100%;padding:10px;background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#080c14;font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:700;border:none;border-radius:8px;cursor:pointer;}
+.rating-submit:active{opacity:.8;}
+.rating-thanks{display:none;text-align:center;padding:10px;font-size:.72rem;color:#22c55e;font-weight:700;}
+.footer-nav{display:flex;gap:8px;margin-top:12px;margin-bottom:20px;}
+.footer-link{flex:1;padding:10px;border-radius:10px;border:1px solid #1e3048;background:#141e2e;color:#4a6080;font-size:.68rem;text-align:center;text-decoration:none;font-family:'JetBrains Mono',monospace;}
+.footer-link.next{border-color:#00f0c8;color:#00f0c8;background:rgba(0,240,200,.06);}
+</style>
+</head>
+<body>
+<div class="top">
+  <div class="top-t">✏️ NumPy — 8.1–8.13</div>
+  <div class="top-s" id="topSub">8.1</div>
+</div>
+<div class="bright-bar">
+  <span class="bright-lbl">👁️ Xiralik:</span>
+  <input type="range" class="bright-slider" id="brightSlider" min="1" max="10" value="3" oninput="setBright(this.value)">
+  <span class="bright-val" id="brightVal">3</span>
+</div>
+<div class="wrap">
+  <div class="nav-btns">
+    <div class="nav-btn active-part">📘 8.1–8.13 (1-qism)</div>
+    <a class="nav-btn" href="eskiz_numpy_part2.html">📗 8.14–8.26 (2-qism) →</a>
+  </div>
+  <div class="stats">
+    <div class="stat"><div class="sv" id="svPct">—</div><div class="sl">TO'G'RI</div></div>
+    <div class="stat"><div class="sv" id="svDone">0/0</div><div class="sl">BAJARILDI</div></div>
+    <div class="stat"><div class="sv" id="svMod">1/13</div><div class="sl">MAVZU</div></div>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+  <div class="tabs" id="tabs"></div>
+  <div class="skip-row" onclick="toggleSkip()">
+    <div class="sw" id="sw"></div>
+    <span id="skipLbl"># Kommentlarni o'tkazib yuboring</span>
+  </div>
+  <div class="plan-box" id="planBox"></div>
+  <div class="terms-box" id="termsBox"></div>
+  <div class="info-box" id="infoBox"></div>
+  <div class="detail-panel" id="detailPanel">
+    <div class="detail-title">📘 BATAFSIL</div>
+    <div id="detailContent"></div>
+  </div>
+  <div class="result-panel" id="resultPanel">
+    <div class="result-title">📊 NATIJA — SIMULYATSIYA</div>
+    <div class="sim-wrap" id="simWrap"></div>
+  </div>
+  <div class="code-block">
+    <div class="fbar">
+      <div class="dot r"></div><div class="dot y"></div><div class="dot g"></div>
+      <div class="fn" id="fname">numpy.py</div>
+      <div class="fhint">↔️ suring ✏️ yozing</div>
+    </div>
+    <div class="lines-wrap" id="linesWrap"></div>
+    <div class="btn-row">
+      <button class="btn btn-chk" onclick="doCheck()">✅ Tekshir</button>
+      <button class="btn btn-clr" onclick="doClear()">🗑️ Tozala</button>
+      <button class="btn btn-ghost" id="ghostBtn" onclick="toggleGhost()">👁️ Yashir</button>
+      <button class="btn btn-det" onclick="toggleDetail()">📖 Batafsil</button>
+      <button class="btn btn-res" onclick="toggleResult()">📊 Natija</button>
+    </div>
+    <div class="badge" id="badge"></div>
+  </div>
+  <div class="rating-box" id="ratingBox">
+    <div class="rating-title">⭐ 1-qismni baholang</div>
+    <div class="rating-sub">Fikringiz keyingi versiyani yaxshilashga yordam beradi</div>
+    <div class="stars" id="stars"></div>
+    <div class="rating-score" id="ratingScore">Baho tanlang (1–10)</div>
+    <textarea class="rating-comment" id="ratingComment" rows="2" placeholder="Izoh: nima yoqdi, nima yetishmadi..."></textarea>
+    <button class="rating-submit" onclick="submitRating()">⭐ Yuborish</button>
+    <div class="rating-thanks" id="ratingThanks">✅ Rahmat! Fikringiz qabul qilindi.</div>
+  </div>
+  <div class="footer-nav">
+    <a class="footer-link" href="menu.html">← Bosh menyu</a>
+    <a class="footer-link next" href="eskiz_numpy_part2.html">2-qism (8.14–8.26) →</a>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════
+// DARSLAR MA'LUMOTLARI — 8.1 dan 8.13 gacha
+// ═══════════════════════════════════════════════
+var M = [
+
+// 8.1 ─────────────────────────────────────────
+{id:'8.1 Eskirgan funksiyalar',f:'numpy_8_1.py',
+plan:['NumPy nima va nima uchun kerak','Python list vs NumPy array farqi','Tezlik va xotira afzalliklari','pip install numpy — o\'rnatish'],
+terms:[
+  ['NumPy','Numerical Python — ilmiy hisoblash kutubxonasi'],
+  ['array','Bir turdagi elementlar yig\'indisi'],
+  ['deprecated','Eskirgan — ishlatish tavsiya etilmaydi'],
+  ['ndarray','N-o\'lchamli NumPy massivi']
+],
+info:'8.1 — ESKIRGAN FUNKSIYALAR VA KUTUBXONALAR\n\nNumPy — data science asosi.\nKo\'p eski Python funksiyalari NumPy bilan almashtirildi.\n\nMisol:\n  Python: math.sqrt(16)  → 4.0\n  NumPy:  np.sqrt(16)    → 4.0  (massivlar bilan)\n\nEskirgan (deprecated) funksiyalar:\n  np.bool   → bool  (Python built-in)\n  np.int    → int\n  np.float  → float\n  np.complex→ complex\n\nHamisha yangi versiyadan foydalaning!',
+detail:'8.1 BATAFSIL — DEPRECATED\n\n━━━ NIMA UCHUN ESKIRTIRILDI? ━━━\n\nNumPy 1.20+ versiyadan:\n  np.bool   → o\'chib ketdi (bool ishlating)\n  np.int    → o\'chib ketdi (int ishlating)\n  np.float  → o\'chib ketdi (float ishlating)\n\nTo\'g\'ri ishlatish:\n  np.bool_   → NumPy boolean turi\n  np.int64   → 64-bit butun son\n  np.float64 → 64-bit haqiqiy son\n\n━━━ NUMPY O\'RNATISH ━━━\n\npip install numpy\nconda install numpy\n\n━━━ VERSIYANI TEKSHIRISH ━━━\n\nimport numpy as np\nprint(np.__version__)  # 1.24.x',
+sim:'>>> import numpy as np\n>>> np.__version__\n"1.26.2"\n>>> # Eskirgan — xato beradi:\n>>> # np.bool  # DeprecationWarning!\n>>> # To\'g\'ri:\n>>> np.bool_([1, 0, 1])\narray([ True, False,  True])\n>>> np.float64(3.14)\n3.14',
+lines:[
+  {c:'# NumPy — ilmiy hisoblash kutubxonasi',n:''},
+  {c:'# pip install numpy (terminalda bir marta)',n:''},
+  {c:'',n:''},
+  {c:'import numpy as np',n:'numpy kutubxonasini np nomi bilan yukladingiz'},
+  {c:'',n:''},
+  {c:'# Versiyani ko\'rish',n:''},
+  {c:'print(np.__version__)',n:'o\'rnatilgan NumPy versiyasini ekranga chiqardingiz'},
+  {c:'',n:''},
+  {c:'# Eskirgan o\'rniga to\'g\'ri ishlatish',n:''},
+  {c:'x = np.float64(3.14)',n:'64-bit float turida qiymat yaratdingiz'},
+  {c:'y = np.int64(42)',n:'64-bit integer turida qiymat yaratdingiz'},
+  {c:'print(x, y)',n:'ikki qiymatni ekranga chiqardingiz'}
+]},
+
+// 8.2 ─────────────────────────────────────────
+{id:'8.2 NumPy bilan tanishuv',f:'numpy_8_2.py',
+plan:['import numpy as np — standart import','np.array() — birinchi massiv','type() bilan tekshirish','NumPy va Python list solishtirish'],
+terms:[
+  ['import','Kutubxonani dasturga yuklash'],
+  ['as np','NumPy ga np qisqa nom berish (standart)'],
+  ['np.array()','Python listdan NumPy massiv yaratish'],
+  ['ndarray','NumPy massivining turi nomi']
+],
+info:'8.2 — NUMPY BILAN TANISHUV\n\nHar doim shunday importlang:\n  import numpy as np\n\nBirinchi massiv:\n  a = np.array([1, 2, 3, 4, 5])\n\nFarq:\n  [1,2,3]         → Python list\n  np.array([1,2,3])→ NumPy massiv\n\nNumPy afzalliklari:\n  • 50x tezroq\n  • Matematik amallar oson\n  • Xotira tejamkor',
+detail:'8.2 BATAFSIL — TANISHUV\n\n━━━ NIMA UCHUN "as np"? ━━━\n\nnumpy.array([1,2,3])  → uzoq yozish\nnp.array([1,2,3])     → qisqa, qulay\n\nBarcha data scientistlar np ishlatadi.\n\n━━━ LIST VS ARRAY ━━━\n\nPython list:\n  a = [1, 2, 3]\n  a * 2 → [1,2,3,1,2,3]  (takror!)\n  a + 1 → XATO!\n\nNumPy array:\n  a = np.array([1,2,3])\n  a * 2 → [2, 4, 6]     (matematik)\n  a + 1 → [2, 3, 4]     (ishlaydi!)\n\n━━━ XOTIRA ━━━\n\nPython list — har element alohida ob\'ekt\nNumPy — bir blok, ketma-ket xotira\n→ 3-4x kam xotira, 50x tezroq',
+sim:'>>> import numpy as np\n>>> a = np.array([1, 2, 3, 4, 5])\n>>> type(a)\n<class \'numpy.ndarray\'>\n>>> a * 2\narray([ 2,  4,  6,  8, 10])\n>>> a + 10\narray([11, 12, 13, 14, 15])\n>>> # Python list:\n>>> b = [1, 2, 3]\n>>> b * 2\n[1, 2, 3, 1, 2, 3]  # farq!',
+lines:[
+  {c:'import numpy as np',n:'numpy kutubxonasini np nomi bilan yukladingiz'},
+  {c:'',n:''},
+  {c:'# Birinchi NumPy massiv',n:''},
+  {c:'a = np.array([1, 2, 3, 4, 5])',n:'5 elementli NumPy massiv yaratdingiz'},
+  {c:'',n:''},
+  {c:'print(type(a))',n:'massiv turini tekshirdingiz — numpy.ndarray'},
+  {c:'print(a)',n:'massivni chiqardingiz'},
+  {c:'',n:''},
+  {c:'# Python list bilan farqi',n:''},
+  {c:'lst = [1, 2, 3, 4, 5]',n:'oddiy Python ro\'yxat yaratdingiz'},
+  {c:'print(a * 2)',n:'NumPy: har element 2 ga ko\'paytirildi'},
+  {c:'print(lst * 2)',n:'Python list: ro\'yxat 2 marta takrorlandi'}
+]},
+
+// 8.3 ─────────────────────────────────────────
+{id:'8.3 List va Array',f:'numpy_8_3.py',
+plan:['Tezlik solishtirish — timeit','Xotira solishtirish — sys.getsizeof','Matematik amallar farqi','Qachon list, qachon array ishlatish'],
+terms:[
+  ['timeit','Kod bajarilish vaqtini o\'lchash moduli'],
+  ['sys.getsizeof','Ob\'ekt egallagan xotirani byte da ko\'rsatadi'],
+  ['dtype','Array elementlari ma\'lumot turi'],
+  ['homogeneous','Bir xil turdagi elementlar — NumPy talabi']
+],
+info:'8.3 — LIST VA ARRAY FARQI\n\nXotira:\n  1000 ta int:\n  Python list → ~8056 byte\n  NumPy array → ~8000 byte\n\nTezlik (million element):\n  Python list → ~100ms\n  NumPy array → ~2ms\n  → 50x tezroq!\n\nQachon list:\n  → Har xil turlar: [1, "salom", True]\n  → Kichik ma\'lumotlar\n\nQachon array:\n  → Faqat raqamlar\n  → Ko\'p hisoblash',
+detail:'8.3 BATAFSIL — LIST VS ARRAY\n\n━━━ XOTIRA TUZILISHI ━━━\n\nPython list xotirada:\n  [ptr1, ptr2, ptr3, ...]\n  Har ptr → alohida ob\'ekt (28+ byte)\n\nNumPy array xotirada:\n  [val1, val2, val3, ...]\n  Ketma-ket, int64 = 8 byte/element\n\n━━━ MATEMATIK ━━━\n\nList:\n  [1,2,3] + [4,5,6] → [1,2,3,4,5,6] (birlashtirish)\n  sum([1,2,3]) → 6\n\nNumPy:\n  np.array([1,2,3]) + np.array([4,5,6]) → [5,7,9]\n  np.array([1,2,3]).sum() → 6\n\n━━━ DTYPE ━━━\n\nnp.array([1,2,3]).dtype     → int64\nnp.array([1.0,2.0]).dtype   → float64\nnp.array([True,False]).dtype→ bool',
+sim:'>>> import sys, numpy as np\n>>> lst = list(range(1000))\n>>> arr = np.arange(1000)\n>>> sys.getsizeof(lst)\n8056\n>>> arr.nbytes\n8000\n>>> # Matematik farq:\n>>> [1,2,3] + [4,5,6]\n[1, 2, 3, 4, 5, 6]\n>>> np.array([1,2,3]) + np.array([4,5,6])\narray([5, 7, 9])',
+lines:[
+  {c:'import numpy as np',n:''},
+  {c:'import sys',n:'xotira o\'lchash uchun sys moduli yukladingiz'},
+  {c:'',n:''},
+  {c:'lst = list(range(1000))',n:'1000 elementli Python ro\'yxat yaratdingiz'},
+  {c:'arr = np.arange(1000)',n:'1000 elementli NumPy massiv yaratdingiz'},
+  {c:'',n:''},
+  {c:'print("List xotira:", sys.getsizeof(lst), "byte")',n:'Python ro\'yxat xotira hajmini ko\'rdingiz'},
+  {c:'print("Array xotira:", arr.nbytes, "byte")',n:'NumPy massiv xotira hajmini ko\'rdingiz'},
+  {c:'',n:''},
+  {c:'# Matematik farq',n:''},
+  {c:'a = np.array([1, 2, 3])',n:'3 elementli massiv yaratdingiz'},
+  {c:'b = np.array([4, 5, 6])',n:'yana 3 elementli massiv yaratdingiz'},
+  {c:'print(a + b)',n:'NumPy: element bo\'yicha qo\'shish — [5,7,9]'},
+  {c:'print([1,2,3] + [4,5,6])',n:'Python list: birlashtirish — [1,2,3,4,5,6]'}
+]},
+
+// 8.4 ─────────────────────────────────────────
+{id:'8.4 NumPy Array',f:'numpy_8_4.py',
+plan:['np.array() — asosiy yaratish usuli','shape, ndim, dtype, size atributlari','1D, 2D, 3D massivlar','zeros(), ones(), eye() funksiyalari'],
+terms:[
+  ['shape','Massiv o\'lchamlari: (qatorlar, ustunlar)'],
+  ['ndim','Massiv o\'lchamlari soni: 1D, 2D, 3D'],
+  ['dtype','Elementlar turi: int64, float64, bool'],
+  ['size','Massivdagi jami elementlar soni']
+],
+info:'8.4 — NUMPY ARRAY ATRIBUTLARI\n\nnp.array() — massiv yaratish\n\nAtributlar:\n  a.shape  → (3, 4) — o\'lchamlar\n  a.ndim   → 2 — necha o\'lchamli\n  a.dtype  → float64 — tur\n  a.size   → 12 — elementlar soni\n  a.nbytes → 96 — xotira (byte)\n\nYaratish:\n  np.zeros((3,4))  → nollar\n  np.ones((2,3))   → birlar\n  np.eye(3)        → birlik matritsa',
+detail:'8.4 BATAFSIL — ARRAY ATRIBUTLARI\n\n━━━ 1D, 2D, 3D ━━━\n\n1D — vektor:\n  v = np.array([1, 2, 3, 4])\n  shape: (4,)   ndim: 1\n\n2D — matritsa:\n  m = np.array([[1,2,3],[4,5,6]])\n  shape: (2,3)  ndim: 2\n\n3D — tensor:\n  shape: (2,3,4)  ndim: 3\n\n━━━ ATRIBUTLAR ━━━\n\nm.shape  → (2, 3)\nm.ndim   → 2\nm.dtype  → dtype(\'int64\')\nm.size   → 6\nm.nbytes → 48\n\n━━━ DTYPE TURLARI ━━━\n\nbool, int8/16/32/64\nfloat16/32/64\ncomplex64/128\n\nML da: float32 yoki float64',
+sim:'>>> m = np.array([[1,2,3],[4,5,6]])\n>>> m.shape\n(2, 3)\n>>> m.ndim\n2\n>>> m.dtype\ndtype(\'int64\')\n>>> m.size\n6\n>>> m.nbytes\n48\n>>> np.zeros((2,3))\narray([[0., 0., 0.],\n       [0., 0., 0.]])',
+lines:[
+  {c:'import numpy as np',n:''},
+  {c:'',n:''},
+  {c:'# 2D massiv yaratish',n:''},
+  {c:'m = np.array([[1, 2, 3], [4, 5, 6]])',n:'2 qator 3 ustunli matritsa yaratdingiz'},
+  {c:'',n:''},
+  {c:'print("shape:", m.shape)',n:'o\'lchamlarni chiqardingiz — (2, 3)'},
+  {c:'print("ndim:", m.ndim)',n:'necha o\'lchamli ekanini ko\'rdingiz — 2'},
+  {c:'print("dtype:", m.dtype)',n:'element turini ko\'rdingiz — int64'},
+  {c:'print("size:", m.size)',n:'jami elementlar sonini ko\'rdingiz — 6'},
+  {c:'print("nbytes:", m.nbytes)',n:'xotira hajmini byte da ko\'rdingiz — 48'},
+  {c:'',n:''},
+  {c:'# Tayyor massivlar',n:''},
+  {c:'print(np.zeros((2, 3)))',n:'2x3 nollar massivini chiqardingiz'},
+  {c:'print(np.ones((2, 3)))',n:'2x3 birlar massivini chiqardingiz'},
+  {c:'print(np.eye(3))',n:'3x3 birlik matritsani chiqardingiz'}
+]},
+
+// 8.5 ─────────────────────────────────────────
+{id:'8.5 Test: massiv yaratish',f:'numpy_8_5.py',
+plan:['np.arange() — ketma-ket sonlar','np.linspace() — teng oraliq','np.random funksiyalari','dtype parametri bilan yaratish'],
+terms:[
+  ['arange','range() kabi, NumPy massiv qaytaradi'],
+  ['linspace','Boshlash-tugash oraliqda n ta teng nuqta'],
+  ['random.rand','0-1 orasida teng taqsimlangan tasodifiy'],
+  ['random.seed','Tasodifiy sonlar uchun doimiy natija']
+],
+info:'8.5 — MASSIV YARATISH USULLARI\n\nnp.arange(start, stop, step)\n  arange(0, 10, 2) → [0,2,4,6,8]\n\nnp.linspace(start, stop, num)\n  linspace(0, 1, 5) → [0, .25, .5, .75, 1]\n\nnp.random.rand(3, 4) → 3x4 tasodifiy\nnp.random.randint(0, 10, 5) → butun\nnp.random.randn(3, 3) → normal taqsimlangan\n\nnp.random.seed(42) → takrorlanadigan natija',
+detail:'8.5 BATAFSIL — YARATISH USULLARI\n\n━━━ ARANGE ━━━\n\nnp.arange(10)         → [0..9]\nnp.arange(2, 10)      → [2..9]\nnp.arange(0, 1, 0.1)  → [0.0, 0.1, ..., 0.9]\nnp.arange(10, 0, -1)  → [10,9,...,1]\n\n━━━ LINSPACE ━━━\n\nnp.linspace(0, 2*np.pi, 100)\n→ grafik uchun x o\'qi\n→ 100 ta teng nuqta\n\n━━━ RANDOM ━━━\n\nnp.random.seed(42)   → doimiy natija\nnp.random.rand(3,3)  → [0,1) float\nnp.random.randn(3,3) → normal (Gauss)\nnp.random.randint(1,100,(3,3)) → butun\nnp.random.choice([1,2,3,4,5], 3) → tanlov',
+sim:'>>> np.arange(2, 11, 3)\narray([2, 5, 8])\n>>> np.linspace(0, 1, 5)\narray([0.  , 0.25, 0.5 , 0.75, 1.  ])\n>>> np.random.seed(42)\n>>> np.random.rand(2, 3)\narray([[0.374, 0.951, 0.732],\n       [0.599, 0.156, 0.058]])\n>>> np.random.randint(1, 10, 5)\narray([6, 1, 4, 4, 8])',
+lines:[
+  {c:'import numpy as np',n:''},
+  {c:'',n:''},
+  {c:'# arange — ketma-ket sonlar',n:''},
+  {c:'a = np.arange(2, 11, 3)',n:'2 dan 11 gacha 3 qadam bilan massiv yaratdingiz'},
+  {c:'print("arange:", a)',n:'natijani chiqardingiz — [2, 5, 8]'},
+  {c:'',n:''},
+  {c:'# linspace — teng oraliq',n:''},
+  {c:'b = np.linspace(0, 1, 5)',n:'0 dan 1 gacha 5 ta teng nuqta yaratdingiz'},
+  {c:'print("linspace:", b)',n:''},
+  {c:'',n:''},
+  {c:'# Tasodifiy massivlar',n:''},
+  {c:'np.random.seed(42)',n:'tasodifiy sonlar uchun tokhum o\'rnatdingiz'},
+  {c:'c = np.random.randint(1, 10, (3, 3))',n:'1-10 orasida 3x3 butun tasodifiy massiv yaratdingiz'},
+  {c:'print("random:\\n", c)',n:'tasodifiy matritsani chiqardingiz'}
+]},
+
+// 8.6 ─────────────────────────────────────────
+{id:'8.6 1-amaliyot: Arrays',f:'numpy_8_6.py',
+plan:['Turli usullar bilan massiv yaratish amaliyoti','full(), empty() funksiyalari','reshape() bilan birlashtirish','Amaliy masalalar yechish'],
+terms:[
+  ['full','Berilgan qiymat bilan to\'ldirilgan massiv'],
+  ['empty','Tasodifiy qiymatli (bo\'sh) massiv — tez yaratish'],
+  ['reshape','Massiv shaklini o\'zgartirish'],
+  ['concatenate','Massivlarni birlashtirish']
+],
+info:'8.6 — AMALIYOT: MASSIV YARATISH\n\nnp.full((3,3), 7)     → 7 bilan to\'ldirilgan\nnp.empty((2,4))      → tasodifiy (hali to\'ldirilmagan)\nnp.identity(4)       → birlik matritsa\nnp.tri(3)            → pastki uchburchak\n\nMasala:\n  0 dan 20 gacha juft sonlar massivi\n  3x3 barcha elementlari 5 bo\'lgan matritsa\n  10 ta 0 dan 1 gacha teng oraliq nuqtalar',
+detail:'8.6 BATAFSIL — AMALIYOT\n\n━━━ FULL VA EMPTY ━━━\n\nnp.full((3,4), 7.0)\n→ 3x4, hammasi 7.0\n\nnp.empty((100, 100))\n→ Xotirada joy ajratadi, to\'ldirmaydi\n→ Keyinroq to\'ldirasiz → tezroq\n\n━━━ IDENTITY VS EYE ━━━\n\nnp.eye(3)      → kvadrat emas ham bo\'ladi\nnp.identity(3) → faqat kvadrat\n\n━━━ AMALIY MASALA ━━━\n\nTemperatura o\'lchashlar:\n  temps = np.full(24, 20.0)  # kunlik\n  temps[12:18] = 35.0        # tushdan keyin\n  temps.mean()               # o\'rtacha',
+sim:'>>> np.full((2, 3), 7)\narray([[7, 7, 7],\n       [7, 7, 7]])\n>>> np.arange(0, 21, 2)\narray([ 0,  2,  4,  6,  8, 10, 12, 14, 16, 18, 20])\n>>> np.identity(3)\narray([[1., 0., 0.],\n       [0., 1., 0.],\n       [0., 0., 1.]])',
+lines:[
+  {c:'import numpy as np',n:''},
+  {c:'',n:''},
+  {c:'# 0 dan 20 gacha juft sonlar',n:''},
+  {c:'juft = np.arange(0, 21, 2)',n:'0 dan 20 gacha 2 qadam — juft sonlar'},
+  {c:'print("Juft sonlar:", juft)',n:''},
+  {c:'',n:''},
+  {c:'# 3x3 barcha elementlari 5',n:''},
+  {c:'besh = np.full((3, 3), 5)',n:'3x3 barcha elementlari 5 bo\'lgan matritsa'},
+  {c:'print("full:\\n", besh)',n:''},
+  {c:'',n:''},
+  {c:'# 10 ta teng oraliq nuqta',n:''},
+  {c:'nuqtalar = np.linspace(0, 1, 10)',n:'0 dan 1 gacha 10 ta teng nuqta'},
+  {c:'print("linspace:", np.round(nuqtalar, 2))',n:'2 kasr bilan yaxlitlab chiqardingiz'},
+  {c:'',n:''},
+  {c:'# Birlik matritsa',n:''},
+  {c:'print("identity:\\n", np.identity(3))',n:'3x3 birlik matritsani chiqardingiz'}
+]},
+
+// 8.7 ─────────────────────────────────────────
+{id:'8.7 Ma\'lumotlar turi',f:'numpy_8_7.py',
+plan:['dtype — ma\'lumot turi nima','int8/16/32/64 — butun son turlari','float16/32/64 — haqiqiy son turlari','astype() — turni o\'zgartirish'],
+terms:[
+  ['dtype','Data type — massiv elementlari turi'],
+  ['int64','64-bit butun son: -9.2×10¹⁸ dan +9.2×10¹⁸'],
+  ['float64','64-bit haqiqiy son — standart tur'],
+  ['astype()','Massiv turini yangi turga o\'zgartirish']
+],
+info:'8.7 — MA\'LUMOTLAR TURI (DTYPE)\n\nButun sonlar:\n  int8   → -128 dan 127\n  int16  → -32768 dan 32767\n  int32  → ~2 milliard\n  int64  → ~9.2×10¹⁸ (standart)\n\nHaqiqiy sonlar:\n  float16→ kam aniqlik, tez (GPU)\n  float32→ ML da keng ishlatiladi\n  float64→ yuqori aniqlik (standart)\n\nTurni o\'zgartirish:\n  a.astype(float)\n  a.astype(np.int32)',
+detail:'8.7 BATAFSIL — DTYPE\n\n━━━ NIMA UCHUN MUHIM? ━━━\n\nfloat64 → float32 ga o\'tish:\n  Xotira: 2x kam\n  Tezlik: GPU da 2x tez\n  ML modellar: float32 ishlatadi\n\n━━━ ASTYPE ━━━\n\na = np.array([1.7, 2.9, 3.1])\na.astype(int)   → [1, 2, 3]  (kesib oladi)\na.astype(np.int32)\na.astype(bool)  → [True, True, True]\n\n━━━ QOIDALAR ━━━\n\nfloat → int:  kesib oladi (round emas!)\nint → float:  .0 qo\'shiladi\nint → bool:   0 = False, qolgan = True\nbool → int:   True=1, False=0\n\n━━━ ML DA ━━━\n\nNeural network: float32 yetarli\nStat hisoblash: float64 kerak\nTasvirlar: uint8 (0-255)',
+sim:'>>> a = np.array([1, 2, 3])\n>>> a.dtype\ndtype(\'int64\')\n>>> a.astype(float)\narray([1., 2., 3.])\n>>> b = np.array([1.7, 2.9, 3.1])\n>>> b.astype(int)\narray([1, 2, 3])\n>>> b.astype(bool)\narray([ True,  True,  True])\n>>> np.array([0,1,2]).astype(bool)\narray([False,  True,  True])',
+lines:[
+  {c:'import numpy as np',n:''},
+  {c:'',n:''},
+  {c:'a = np.array([1, 2, 3, 4, 5])',n:'standart int64 massiv yaratdingiz'},
+  {c:'print("asl dtype:", a.dtype)',n:'asl tur int64 ekanini ko\'rdingiz'},
+  {c:'',n:''},
+  {c:'# Turni o\'zgartirish',n:''},
+  {c:'f = a.astype(float)',n:'int64 dan float64 ga o\'zgartirdingiz'},
+  {c:'print("float dtype:", f.dtype)',n:'yangi tur float64 ekanini ko\'rdingiz'},
+  {c:'print("float:", f)',n:'float massivni chiqardingiz — [1. 2. 3. 4. 5.]'},
+  {c:'',n:''},
+  {c:'b = np.array([1.9, 2.7, 3.1])',n:'haqiqiy sonlar massivi yaratdingiz'},
+  {c:'print("int ga:", b.astype(int))',n:'float dan int ga: kesib oladi, yaxlitlamaydi'},
+  {c:'',n:''},
+  {c:'c = np.array([0, 1, 0, 2, 0])',n:'nol va nolmas qiymatlar massivi'},
+  {c:'print("bool ga:", c.astype(bool))',n:'0 = False, qolgan = True bo\'ldi'}
+]},
+
+// 8.8 ─────────────────────────────────────────
+{id:'8.8 Test: ma\'lumot turlari',f:'numpy_8_8.py',
+plan:['Turli dtype bilan massiv yaratish','Xotira hajmini hisoblash','Aralash turlar — avtomatik kengaytirish','Kompleks sonlar — complex128'],
+terms:[
+  ['upcasting','Kichik tur + katta tur → katta turga o\'tish'],
+  ['overflow','Tur chegarasidan chiqish — xato qiymat'],
+  ['complex','Kompleks son: a + bj (j = √-1)'],
+  ['itemsize','Har bir element egallagan byte soni']
+],
+info:'8.8 — TEST: MA\'LUMOT TURLARI\n\nAralash turlar:\n  [1, 2.0, 3] → float64 (upcasting)\n  [1, True, 0] → int64\n\nXotira hisoblash:\n  a.itemsize → bir element byte\n  a.nbytes   → jami = size * itemsize\n\nOverflow xavfi:\n  np.int8(127) + 1 → -128 (overflow!)\n\nKompleks:\n  np.array([1+2j, 3+4j])',
+detail:'8.8 BATAFSIL — DTYPE TEST\n\n━━━ UPCASTING QOIDASI ━━━\n\nnp.array([1, 2.0])  → float64\nnp.array([1, True]) → int64\nnp.array([1.0, 1+2j]) → complex128\n\nHamisha "kattaroq" tur g\'alaba qozonadi.\n\n━━━ OVERFLOW ━━━\n\na = np.array([127], dtype=np.int8)\na + 1  →  [-128]  # overflow!\n\na = np.array([127], dtype=np.int16)\na + 1  →  [128]  # yaxshi\n\n━━━ ITEMSIZE ━━━\n\nint8   → 1 byte\nint16  → 2 byte\nint32  → 4 byte\nint64  → 8 byte\nfloat32→ 4 byte\nfloat64→ 8 byte\n\n━━━ KOMPLEKS ━━━\n\nz = np.array([1+2j, 3-4j])\nz.real → [1., 3.]\nz.imag → [2., -4.]',
+sim:'>>> np.array([1, 2.0, 3]).dtype\ndtype(\'float64\')\n>>> np.array([1, True, 0]).dtype\ndtype(\'int64\')\n>>> a = np.array([1,2,3], dtype=np.int32)\n>>> a.itemsize\n4\n>>> a.nbytes\n12\n>>> np.array([127], dtype=np.int8) + 1\narray([-128], dtype=int8)  # overflow!',
+lines:[
+  {c:'import numpy as np',n:''},
+  {c:'',n:''},
+  {c:'# Aralash tur — upcasting',n:''},
+  {c:'a = np.array([1, 2.0, 3])',n:'aralash: int va float → float64 ga upcasting'},
+  {c:'print("aralash dtype:", a.dtype)',n:'float64 ekanini ko\'rdingiz'},
+  {c:'',n:''},
+  {c:'# Xotira hisoblash',n:''},
+  {c:'b = np.array([1, 2, 3, 4], dtype=np.float32)',n:'float32 dtype bilan massiv yaratdingiz'},
+  {c:'print("itemsize:", b.itemsize, "byte")',n:'har element 4 byte ekanini ko\'rdingiz'},
+  {c:'print("nbytes:", b.nbytes, "byte")',n:'jami 16 byte ekanini ko\'rdingiz'},
+  {c:'',n:''},
+  {c:'# int8 overflow',n:''},
+  {c:'c = np.array([127], dtype=np.int8)',n:'int8 maksimum qiymati 127 ni yaratdingiz'},
+  {c:'print("overflow:", c + 1)',n:'127 + 1 = -128 overflow ko\'rdingiz!'}
+]},
+
+// 8.9 ─────────────────────────────────────────
+{id:'8.9 Indekslash va kesish',f:'numpy_8_9.py',
+plan:['1D indekslash: a[0], a[-1]','Kesish: a[1:4], a[::2], a[::-1]','2D indekslash: m[0,1], m[:,0]','Qism matritsa: m[0:2, 1:3]'],
+terms:[
+  ['indexing','Massivdan indeks orqali element olish: a[i]'],
+  ['slicing','Massiv bo\'lagini olish: a[start:stop:step]'],
+  ['negative index','Oxiridan hisoblash: a[-1] = oxirgi'],
+  ['view','Kesish — yangi massiv emas, ko\'rsatgich']
+],
+info:'8.9 — INDEKSLASH VA KESISH\n\n1D:\n  a[0]     → birinchi\n  a[-1]    → oxirgi\n  a[2:5]   → [2,3,4] indekslar\n  a[::2]   → har ikkinchi\n  a[::-1]  → teskari\n\n2D:\n  m[1, 2]  → 1-qator, 2-ustun\n  m[:, 0]  → barcha qator, 0-ustun\n  m[0, :]  → 0-qator, barcha ustun\n  m[0:2, 1:3] → qism matritsa',
+detail:'8.9 BATAFSIL — INDEKSLASH\n\n━━━ 1D ━━━\n\na = np.array([10,20,30,40,50])\na[0]    → 10\na[-1]   → 50\na[-2]   → 40\na[1:4]  → [20,30,40]\na[:3]   → [10,20,30]\na[2:]   → [30,40,50]\na[::2]  → [10,30,50]\na[::-1] → [50,40,30,20,10]\n\n━━━ 2D ━━━\n\nm = np.array([[1,2,3],[4,5,6],[7,8,9]])\nm[1, 2]     → 6\nm[0, :]     → [1,2,3]  (1-qator)\nm[:, 2]     → [3,6,9]  (3-ustun)\nm[0:2, 1:3] → [[2,3],[5,6]]\n\n━━━ VIEW XAVFI ━━━\n\nb = a[1:4]   → VIEW (nusxa emas!)\nb[0] = 999\nprint(a)     → [10,999,30,40,50] !!!\nb = a[1:4].copy() → xavfsiz nusxa',
+sim:'>>> a = np.array([10,20,30,40,50])\n>>> a[0], a[-1]\n(10, 50)\n>>> a[1:4]\narray([20, 30, 40])\n>>> a[::-1]\narray([50, 40, 30, 20, 10])\n>>> m = np.array([[1,2,3],[4,5,6],[7,8,9]])\n>>> m[1, 2]\n6\n>>> m[:, 1]\narray([2, 5, 8])',
+lines:[
+  {c:'import numpy as np',n:''},
+  {c:'',n:''},
+  {c:'a = np.array([10, 20, 30, 40, 50])',n:'5 elementli massiv yaratdingiz'},
+  {c:'',n:''},
+  {c:'print(a[0], a[-1])',n:'birinchi (10) va oxirgi (50) elementni oldingiz'},
+  {c:'print(a[1:4])',n:'indeks 1 dan 4 gacha kesib oldingiz — [20,30,40]'},
+  {c:'print(a[::2])',n:'har ikkinchi elementni oldingiz — [10,30,50]'},
+  {c:'print(a[::-1])',n:'massivni teskari tartibda chiqardingiz'},
+  {c:'',n:''},
+  {c:'# 2D indekslash',n:''},
+  {c:'m = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]])',n:'3x3 matritsa yaratdingiz'},
+  {c:'print(m[1, 2])',n:'1-qator 2-ustundagi elementni oldingiz — 6'},
+  {c:'print(m[:, 1])',n:'1-ustunning barcha elementlarini oldingiz — [2,5,8]'},
+  {c:'print(m[0:2, 1:3])',n:'qism matritsani kesib oldingiz — [[2,3],[5,6]]'}
+]},
+
+// 8.10 ─────────────────────────────────────────
+{id:'8.10 Boolean indekslash',f:'numpy_8_10.py',
+plan:['Boolean mask — True/False massiv','Shartli filtrlash: a[a > 5]','np.where() — shartli tanlov','Bir nechta shart: & va | operatorlar'],
+terms:[
+  ['boolean mask','True/False massiv — filtr sifatida'],
+  ['fancy indexing','Indekslar ro\'yxati bilan elementlarni tanlash'],
+  ['np.where()','where(shart, a, b) — shartga qarab qiymat'],
+  ['bitwise &, |','Massivlarda AND va OR operatorlar']
+],
+info:'8.10 — BOOLEAN INDEKSLASH\n\nMask yaratish:\n  a > 5       → [F,F,F,T,T,T]\n\nFiltrlash:\n  a[a > 5]    → katta elementlar\n  a[a % 2==0] → juft sonlar\n\nBir nechta shart:\n  a[(a>2) & (a<8)] → 2 dan katta, 8 dan kichik\n  a[(a<2) | (a>8)] → 2 dan kichik YOKI 8 dan katta\n\nnp.where:\n  np.where(a>5, 1, 0) → katta=1, kichik=0',
+detail:'8.10 BATAFSIL — BOOLEAN INDEXING\n\n━━━ MASK MEXANIZMI ━━━\n\na = np.array([1,5,3,8,2,7])\nmask = a > 4\n→ [False, True, False, True, False, True]\na[mask]\n→ [5, 8, 7]\n\n━━━ TO\'G\'RIDAN-TO\'G\'RI ━━━\n\na[a > 4]         → [5, 8, 7]\na[a % 2 == 0]    → [8, 2]  (juft)\na[a != 3]        → [1,5,8,2,7]\n\n━━━ KO\'P SHART ━━━\n\n! Muhim: & va | ishlatiladi (and/or emas)\na[(a>2) & (a<6)] → [5, 3]\na[(a<2) | (a>6)] → [1, 8, 7]\n\n━━━ NP.WHERE ━━━\n\nnp.where(a > 4, \"katta\", \"kichik\")\n→ [\'kichik\',\'katta\',\'kichik\',\'katta\',...]\n\nnp.where(a > 4)   → indekslarni qaytaradi\n→ (array([1, 3, 5]),)',
+sim:'>>> a = np.array([1, 5, 3, 8, 2, 7])\n>>> a > 4\narray([False,  True, False,  True, False,  True])\n>>> a[a > 4]\narray([5, 8, 7])\n>>> a[(a > 2) & (a < 7)]\narray([5, 3])\n>>> np.where(a > 4, 1, 0)\narray([0, 1, 0, 1, 0, 1])',
+lines:[
+  {c:'import numpy as np',n:''},
+  {c:'',n:''},
+  {c:'a = np.array([1, 5, 3, 8, 2, 7, 4, 9])',n:'8 elementli massiv yaratdingiz'},
+  {c:'',n:''},
+  {c:'# Boolean mask',n:''},
+  {c:'mask = a > 4',n:'4 dan katta elementlar uchun True/False mask yaratdingiz'},
+  {c:'print("mask:", mask)',n:''},
+  {c:'print("filtr:", a[mask])',n:'faqat 4 dan katta elementlarni oldingiz'},
+  {c:'',n:''},
+  {c:'# Ko\'p shart',n:''},
+  {c:'print(a[(a > 2) & (a < 7)])',n:'2 dan katta VA 7 dan kichik elementlar'},
+  {c:'print(a[a % 2 == 0])',n:'faqat juft sonlarni filtrlad ingiz'},
+  {c:'',n:''},
+  {c:'# np.where',n:''},
+  {c:'print(np.where(a > 4, 1, 0))',n:'4 dan katta=1, kichik-teng=0 bo\'ldi'}
+]},
+
+// 8.11 ─────────────────────────────────────────
+{id:'8.11 2-amaliyot: Arraylar',f:'numpy_8_11.py',
+plan:['Indekslash va filtrlash amaliyoti','Student ballari bilan ishlash','O\'rtacha ustidan o\'tganlarni topish','Massivni o\'zgartirish va saqlash'],
+terms:[
+  ['boolean indexing','Shart asosida elementlarni tanlash'],
+  ['np.sum()','Massiv elementlari yig\'indisi'],
+  ['np.mean()','Massiv elementlari o\'rtachasi'],
+  ['assignment with mask','Mask orqali qiymatlarni o\'zgartirish']
+],
+info:'8.11 — AMALIYOT: ARRAYLAR\n\nStudent ballari bilan:\n  75 dan ortiq — "O\'tdi"\n  50 dan 75 gacha — "Qoniqarli"\n  50 dan kam — "Yiqildi"\n\nKeraki:\n  → O\'rtachani hisoblash\n  → O\'tganlar sonini topish\n  → Minimal va maksimal ball\n  → Ballarni 0-100 ga normallashtirish',
+detail:'8.11 BATAFSIL — AMALIYOT\n\n━━━ AMALIY MASALA ━━━\n\nballs = np.array([45,72,88,55,91,63,77,82,34,95])\n\n# Statistika:\nballs.mean()  → o\'rtacha\nballs.max()   → eng yuqori\nballs.min()   → eng past\n\n# O\'tganlar (>= 60):\no\'tdi = balls[balls >= 60]\nlen(o\'tdi)  → nechta\n\n# Normalizatsiya:\nnorm = (balls - balls.min()) / (balls.max() - balls.min())\n→ 0 dan 1 gacha\n\n# O\'zgartirish:\nballs[balls < 50] = 50  # minimum ball',
+sim:'>>> balls = np.array([45,72,88,55,91,63,77,82,34,95])\n>>> balls.mean()\n70.2\n>>> balls[balls >= 75]\narray([88, 91, 77, 82, 95])\n>>> np.sum(balls >= 75)\n5\n>>> norm = (balls - balls.min()) / (balls.max() - balls.min())\n>>> np.round(norm, 2)\narray([0.18, 0.62, 0.89, 0.34, 1.  , 0.47, 0.71, 0.79, 0.  , 1.  ])',
+lines:[
+  {c:'import numpy as np',n:''},
+  {c:'',n:''},
+  {c:'balls = np.array([45, 72, 88, 55, 91, 63, 77, 82, 34, 95])',n:'10 ta student ballini yaratdingiz'},
+  {c:'',n:''},
+  {c:'print("O\'rtacha:", balls.mean())',n:'o\'rtacha ballni hisobladingiz'},
+  {c:'print("Max:", balls.max(), "Min:", balls.min())',n:''},
+  {c:'',n:''},
+  {c:'# O\'tganlar (>= 75)',n:''},
+  {c:'otganlar = balls[balls >= 75]',n:'75 va undan yuqori olganlarni filtrlad ingiz'},
+  {c:'print("O\'tdi:", otganlar)',n:''},
+  {c:'print("Soni:", np.sum(balls >= 75))',n:'o\'tganlar sonini hisobladingiz'},
+  {c:'',n:''},
+  {c:'# Normalizatsiya',n:''},
+  {c:'norm = (balls - balls.min()) / (balls.max() - balls.min())',n:'ballarni 0-1 oralig\'iga normalizatsiya qildingiz'},
+  {c:'print("Norm:", np.round(norm, 2))',n:''}
+]},
+
+// 8.12 ─────────────────────────────────────────
+{id:'8.12 Array o\'qlarini almashtirish',f:'numpy_8_12.py',
+plan:['reshape() — massiv shaklini o\'zgartirish','-1 parametri — avtomatik hisoblash','flatten() va ravel() — 1D ga','transpose() va .T — o\'qlarni almashtirish'],
+terms:[
+  ['reshape','Massiv shaklini o\'zgartirish (element soni o\'zgarmaydi)'],
+  ['flatten()','Ko\'p o\'lchamli → 1D ga (nusxa qaytaradi)'],
+  ['ravel()','Ko\'p o\'lchamli → 1D ga (view qaytaradi)'],
+  ['transpose()','Qator va ustunlarni almashtirish: (m,n)→(n,m)']
+],
+info:'8.12 — RESHAPE VA TRANSPOSE\n\nreshape:\n  a.reshape(3, 4)  → 3x4 matritsa\n  a.reshape(-1, 4) → qator avtomatik\n  a.reshape(3, -1) → ustun avtomatik\n\n!!! Element soni o\'zgarmaydi:\n  12 element → (3,4) ✓\n  12 element → (3,5) ✗\n\nTranspozitsiya:\n  m.T        → qisqa yozuv\n  m.transpose() → funksiya\n  (3,4) → (4,3)',
+detail:'8.12 BATAFSIL — RESHAPE\n\n━━━ RESHAPE QOIDASI ━━━\n\na = np.arange(12)\na.reshape(3, 4)   → 3x4\na.reshape(4, 3)   → 4x3\na.reshape(2, 6)   → 2x6\na.reshape(-1, 3)  → (4,3) auto\na.reshape(3, -1)  → (3,4) auto\na.reshape(1, -1)  → (1,12) qator vektor\na.reshape(-1, 1)  → (12,1) ustun vektor\n\n━━━ FLATTEN VS RAVEL ━━━\n\nm = np.array([[1,2],[3,4],[5,6]])\nm.flatten()  → [1,2,3,4,5,6]  NUSXA\nm.ravel()    → [1,2,3,4,5,6]  VIEW (tezroq)\n\n━━━ TRANSPOSE ━━━\n\nm = np.array([[1,2,3],[4,5,6]])  (2,3)\nm.T → [[1,4],[2,5],[3,6]]  (3,2)\n\nML da: W.T @ x — matritsa ko\'paytmasi',
+sim:'>>> a = np.arange(12)\n>>> a.reshape(3, 4)\narray([[ 0,  1,  2,  3],\n       [ 4,  5,  6,  7],\n       [ 8,  9, 10, 11]])\n>>> a.reshape(-1, 3).shape\n(4, 3)\n>>> m = np.array([[1,2,3],[4,5,6]])\n>>> m.T.shape\n(3, 2)\n>>> m.flatten()\narray([1, 2, 3, 4, 5, 6])',
+lines:[
+  {c:'import numpy as np',n:''},
+  {c:'',n:''},
+  {c:'a = np.arange(12)',n:'0 dan 11 gacha 12 ta son yaratdingiz'},
+  {c:'print("asl shape:", a.shape)',n:'asl shakl (12,) ekanini ko\'rdingiz'},
+  {c:'',n:''},
+  {c:'m = a.reshape(3, 4)',n:'3 qator 4 ustunli matritsaga o\'zgartirdingiz'},
+  {c:'print("reshape (3,4):", m.shape)',n:''},
+  {c:'print(m)',n:''},
+  {c:'',n:''},
+  {c:'# -1 avtomatik',n:''},
+  {c:'m2 = a.reshape(-1, 3)',n:'-1: qatorlar avtomatik hisoblanadi → (4,3)'},
+  {c:'print("reshape (-1,3):", m2.shape)',n:''},
+  {c:'',n:''},
+  {c:'# Transpozitsiya',n:''},
+  {c:'print("T shape:", m.T.shape)',n:'(3,4) → (4,3) transpozitsiya'},
+  {c:'print("flatten:", m.flatten())',n:'2D dan 1D ga yassilash'}
+]},
+
+// 8.13 ─────────────────────────────────────────
+{id:'8.13 Universal funksiyalar',f:'numpy_8_13.py',
+plan:['Ufunc — universal funksiyalar nima','np.sqrt(), np.abs(), np.exp(), np.log()','Trigonometrik: sin, cos, tan','Yaxlitlash: round, floor, ceil, trunc'],
+terms:[
+  ['ufunc','Universal funksiya — massivning har elementiga tez amal'],
+  ['vectorization','Tsikl yozmasdan massivga to\'g\'ridan-to\'g\'ri amal'],
+  ['np.pi','π = 3.14159... konstantasi'],
+  ['np.e','e = 2.71828... Eyler soni']
+],
+info:'8.13 — UNIVERSAL FUNKSIYALAR\n\nMatematik:\n  np.sqrt(a)   → kvadrat ildiz\n  np.abs(a)    → mutlaq qiymat\n  np.exp(a)    → e^a\n  np.log(a)    → ln(a)\n  np.log2(a)   → log₂(a)\n  np.log10(a)  → log₁₀(a)\n\nTrigonometrik:\n  np.sin, np.cos, np.tan\n  np.pi = 3.14159...\n\nYaxlitlash:\n  np.round(a, 2) → 2 kasr\n  np.floor(a)   → pastga\n  np.ceil(a)    → tepaga',
+detail:'8.13 BATAFSIL — UFUNC\n\n━━━ NIMA UCHUN TEZROQ? ━━━\n\nUfunc C tilida yozilgan.\nMassivning har elementiga bir vaqtda amal qiladi.\n\nOdatiy Python:\n  [sqrt(x) for x in a]  → loop → sekin\n\nNumPy ufunc:\n  np.sqrt(a)             → vektorlangan → tez\n\n━━━ MATEMATIK ━━━\n\nnp.sqrt([4, 9, 16])  → [2., 3., 4.]\nnp.abs([-1,-2,3])    → [1, 2, 3]\nnp.exp([0,1,2])      → [1., 2.718, 7.389]\nnp.log([1, np.e])    → [0., 1.]\n\n━━━ TRIGONOMETRIK ━━━\n\nRadianda ishlaydi!\nnp.sin(np.pi/2)  → 1.0\nnp.cos(0)        → 1.0\nnp.degrees(np.pi) → 180.0\nnp.radians(180)   → 3.14...\n\n━━━ YAXLITLASH ━━━\n\nnp.round([1.234, 2.678], 2) → [1.23, 2.68]\nnp.floor([1.7, 2.3])  → [1., 2.]\nnp.ceil([1.7, 2.3])   → [2., 3.]\nnp.trunc([1.7, -1.7]) → [1., -1.]',
+sim:'>>> np.sqrt([4, 9, 16, 25])\narray([2., 3., 4., 5.])\n>>> np.abs([-3, -1, 0, 2])\narray([3, 1, 0, 2])\n>>> np.round([1.234, 2.678], 2)\narray([1.23, 2.68])\n>>> np.sin(np.pi / 2)\n1.0\n>>> np.floor([1.7, 2.3, -1.2])\narray([ 1.,  2., -2.])',
+lines:[
+  {c:'import numpy as np',n:''},
+  {c:'',n:''},
+  {c:'a = np.array([4, 9, 16, 25, 36])',n:'kvadratlar massivi yaratdingiz'},
+  {c:'',n:''},
+  {c:'print(np.sqrt(a))',n:'har elementning kvadrat ildizini hisobladingiz'},
+  {c:'print(np.abs([-3, -1, 0, 2, -5]))',n:'har elementning mutlaq qiymatini oldingiz'},
+  {c:'',n:''},
+  {c:'# Trigonometrik',n:''},
+  {c:'angles = np.array([0, np.pi/6, np.pi/4, np.pi/3, np.pi/2])',n:'burchaklar massivi (radianda) yaratdingiz'},
+  {c:'print(np.round(np.sin(angles), 2))',n:'sinuslarni 2 kasr bilan chiqardingiz'},
+  {c:'',n:''},
+  {c:'# Yaxlitlash',n:''},
+  {c:'b = np.array([1.234, 2.678, 3.501, 4.999])',n:'haqiqiy sonlar massivi yaratdingiz'},
+  {c:'print(np.round(b, 2))',n:'2 kasr bilan yaxlitladingiz'},
+  {c:'print(np.floor(b))',n:'pastga yaxlitladingiz'},
+  {c:'print(np.ceil(b))',n:'tepaga yaxlitladingiz'}
+]}
+
+]; // M array end
+
+// ═══════════════════════════════════════════════
+// ASOSIY O'ZGARUVCHILAR
+// ═══════════════════════════════════════════════
+var cur = 0;
+var skipOn = false;
+var ghostVisible = true;
+var lineData = [];
+var doneSet = new Set();
+var selectedStar = 0;
+var ratingSubmitted = false;
+var BRIGHT = [0,0.05,0.1,0.2,0.3,0.42,0.55,0.65,0.75,0.85,0.95];
+
+// ═══════════════════════════════════════════════
+// ISHGA TUSHIRISH
+// ═══════════════════════════════════════════════
+window.onload = function(){
+  buildStars();
+  buildTabs();
+  loadMod(0);
+
+  // Klaviatura scroll fixi (v6 dan olingan)
+  if(window.visualViewport){
+    var t = null;
+    window.visualViewport.addEventListener('resize', function(){
+      clearTimeout(t);
+      t = setTimeout(function(){
+        var el = document.activeElement;
+        if(!el || !el.classList.contains('line-input')) return;
+        var blk = el.closest('.line-block');
+        if(!blk) return;
+        var vp = window.visualViewport;
+        var rc = blk.getBoundingClientRect();
+        var tgt = window.scrollY + rc.top + rc.height/2 - (vp.offsetTop + vp.height*0.38);
+        window.scrollTo({top: tgt, behavior:'smooth'});
+      }, 150);
+    });
+  }
+};
+
+// ═══════════════════════════════════════════════
+// MAVZU YUKLASH
+// ═══════════════════════════════════════════════
+function loadMod(i){
+  cur = i;
+  document.getElementById('detailPanel').classList.remove('show');
+  document.getElementById('resultPanel').classList.remove('show');
+  document.getElementById('badge').className = 'badge';
+
+  var m = M[i];
+  document.getElementById('fname').textContent = m.f;
+  document.getElementById('topSub').textContent = m.id;
+  document.getElementById('svMod').textContent = (i+1)+'/'+M.length;
+
+  // Dars rejasi
+  var ph = '<div class="plan-title">📋 Bu darsda o\'rganasiz:</div>';
+  m.plan.forEach(function(p){ ph += '<div class="plan-item">'+esc(p)+'</div>'; });
+  document.getElementById('planBox').innerHTML = ph;
+
+  // Atamalar
+  var th = '<div class="terms-title">📚 Yangi atamalar:</div>';
+  m.terms.forEach(function(t){
+    th += '<div class="term-row"><span class="term-key">'+esc(t[0])+'</span><span class="term-val">'+esc(t[1])+'</span></div>';
+  });
+  document.getElementById('termsBox').innerHTML = th;
+
+  document.getElementById('infoBox').textContent = m.info;
+  buildLines(m);
+  buildTabs();
+  updateStats();
+  gtag('event','open_lesson',{lesson: m.id});
+}
+
+// ═══════════════════════════════════════════════
+// QATORLARNI QURISH
+// ═══════════════════════════════════════════════
+function buildLines(m){
+  var wrap = document.getElementById('linesWrap');
+  wrap.innerHTML = '';
+  lineData = [];
+  var op = BRIGHT[parseInt(document.getElementById('brightSlider').value)||3];
+
+  m.lines.forEach(function(ln, i){
+    var isCom = ln.c.trimLeft().charAt(0) === '#';
+    var isEmpty = ln.c === '';
+
+    var block = document.createElement('div');
+    block.className = 'line-block';
+    block.id = 'block' + i;
+
+    var row = document.createElement('div');
+    row.className = 'line-row';
+
+    var num = document.createElement('div');
+    num.className = 'line-num';
+    num.id = 'num' + i;
+    num.textContent = isEmpty ? '' : (i+1);
+
+    var content = document.createElement('div');
+    content.className = 'line-content';
+
+    var ghost = document.createElement('div');
+    ghost.className = 'line-ghost' + ((isCom && skipOn) ? ' skip-c' : '');
+    ghost.id = 'ghost' + i;
+    ghost.style.color = ghostVisible ? 'rgba(74,96,128,'+op+')' : 'transparent';
+    ghost.textContent = ln.c || ' ';
+
+    var colors = document.createElement('div');
+    colors.className = 'line-colors';
+    colors.id = 'clr' + i;
+
+    var inp = document.createElement('input');
+    inp.type = 'text';
+    inp.className = 'line-input';
+    inp.id = 'inp' + i;
+    inp.setAttribute('spellcheck','false');
+    inp.setAttribute('autocorrect','off');
+    inp.setAttribute('autocapitalize','off');
+    inp.setAttribute('autocomplete','off');
+    if(isEmpty || (isCom && skipOn)) inp.disabled = true;
+
+    // V6 MEXANIZMI: yozish vaqtida tekshirish va ko'k izoh
+    (function(idx, target, isC, empty, noteText){
+      inp.addEventListener('input', function(){
+        if(empty) return;
+        updateLineClr(idx, target);
+        // TO'G'RI yozilsa — KO'K IZOH DARHOL chiqadi
+        if(inp.value === target && target !== '' && noteText !== ''){
+          showNote(idx);
+        } else {
+          hideNote(idx);
+        }
+        updateStats();
+      });
+    })(i, ln.c, isCom, isEmpty, ln.n);
+
+    content.appendChild(ghost);
+    content.appendChild(colors);
+    content.appendChild(inp);
+    row.appendChild(num);
+    row.appendChild(content);
+
+    // KO'K IZOH elementi
+    var note = document.createElement('div');
+    note.className = 'line-done-note';
+    note.id = 'note' + i;
+    note.textContent = '✅ Siz ' + ln.n + '!';
+
+    block.appendChild(row);
+    if(ln.n) block.appendChild(note); // faqat n bo'lsa qo'sh
+    wrap.appendChild(block);
+
+    lineData.push({inp:inp, target:ln.c, isCom:isCom, isEmpty:isEmpty});
+  });
+}
+
+// ═══════════════════════════════════════════════
+// RANGLAR — V6 MEXANIZMI
+// ═══════════════════════════════════════════════
+function updateLineClr(idx, target){
+  var inp = document.getElementById('inp'+idx);
+  var clr = document.getElementById('clr'+idx);
+  if(!inp || !clr) return;
+  var typed = inp.value;
+  var html = '';
+  for(var ci = 0; ci < target.length; ci++){
+    var ch = target[ci];
+    if(ci < typed.length){
+      html += typed[ci] === ch
+        ? '<span style="color:#22c55e">'+esc(ch)+'</span>'
+        : '<span style="color:#f43f5e;text-decoration:underline">'+esc(ch)+'</span>';
+    } else {
+      html += '<span style="color:transparent">'+esc(ch)+'</span>';
+    }
+  }
+  clr.innerHTML = html;
+  var num = document.getElementById('num'+idx);
+  if(num) num.style.color = (typed === target && target !== '') ? '#22c55e' : '';
+}
+
+function showNote(i){
+  var n = document.getElementById('note'+i);
+  if(n) n.classList.add('show');
+}
+function hideNote(i){
+  var n = document.getElementById('note'+i);
+  if(n) n.classList.remove('show');
+}
+
+// ═══════════════════════════════════════════════
+// STATISTIKA
+// ═══════════════════════════════════════════════
+function updateStats(){
+  var done = 0, total = 0;
+  lineData.forEach(function(l){
+    if(l.isEmpty || (l.isCom && skipOn)) return;
+    total++;
+    if(l.inp.value === l.target) done++;
+  });
+  var pct = total > 0 ? Math.round(done/total*100) : 0;
+  document.getElementById('svPct').textContent = done > 0 ? pct+'%' : '—';
+  document.getElementById('svDone').textContent = done+'/'+total;
+
+  if(done === total && total > 0) doneSet.add(cur);
+  var doneMods = doneSet.size;
+  document.getElementById('progressFill').style.width = (doneMods/M.length*100)+'%';
+  buildTabs();
+}
+
+// ═══════════════════════════════════════════════
+// TEKSHIR TUGMASI
+// ═══════════════════════════════════════════════
+function doCheck(){
+  var done = 0, total = 0, errors = [];
+  lineData.forEach(function(l, i){
+    if(l.isEmpty || (l.isCom && skipOn)) return;
+    total++;
+    if(l.inp.value === l.target){
+      done++;
+      document.getElementById('num'+i).style.color = '#22c55e';
+      if(M[cur].lines[i].n) showNote(i);
+    } else {
+      errors.push(i+1);
+      document.getElementById('num'+i).style.color = '#f43f5e';
+    }
+  });
+  var pct = total > 0 ? Math.round(done/total*100) : 0;
+  var b = document.getElementById('badge');
+  b.className = 'badge show';
+  if(pct >= 85){
+    b.className += ' g';
+    b.textContent = '✅ Zo\'r! '+pct+'% ('+done+'/'+total+' qator to\'g\'ri)';
+    doneSet.add(cur);
+    showRating();  // Har bir dars tugaganda ko'rsatiladi
+  } else if(pct >= 55){
+    b.className += ' o';
+    b.textContent = '⚡ '+pct+'% — xato qatorlar: '+errors.join(', ')+'-qator';
+  } else {
+    b.className += ' r';
+    b.textContent = '❌ '+pct+'% — qaytadan urinib ko\'ring';
+  }
+  updateStats();
+  gtag('event','check',{lesson:M[cur].id, score:pct});
+}
+
+// ═══════════════════════════════════════════════
+// TOZALA
+// ═══════════════════════════════════════════════
+function doClear(){
+  lineData.forEach(function(l, i){
+    l.inp.value = '';
+    var clr = document.getElementById('clr'+i);
+    if(clr) clr.innerHTML = '';
+    var num = document.getElementById('num'+i);
+    if(num) num.style.color = '';
+    hideNote(i);
+  });
+  document.getElementById('badge').className = 'badge';
+  updateStats();
+}
+
+// ═══════════════════════════════════════════════
+// GHOST
+// ═══════════════════════════════════════════════
+function toggleGhost(){
+  ghostVisible = !ghostVisible;
+  document.querySelectorAll('.line-ghost').forEach(function(g){
+    g.style.visibility = ghostVisible ? 'visible' : 'hidden';
+  });
+  document.getElementById('ghostBtn').textContent = ghostVisible ? '👁️ Yashir' : '👁️ Ko\'rsat';
+}
+
+// ═══════════════════════════════════════════════
+// KOMMENT O'TKAZISH
+// ═══════════════════════════════════════════════
+function toggleSkip(){
+  skipOn = !skipOn;
+  document.getElementById('sw').classList.toggle('on', skipOn);
+  document.getElementById('skipLbl').textContent = skipOn ? 'Kommentlar o\'tkazilmoqda' : '# Kommentlarni o\'tkazib yuboring';
+  buildLines(M[cur]);
+  applyBright();
+  updateStats();
+}
+
+// ═══════════════════════════════════════════════
+// BATAFSIL
+// ═══════════════════════════════════════════════
+function toggleDetail(){
+  var p = document.getElementById('detailPanel');
+  if(p.classList.contains('show')){
+    p.classList.remove('show');
+  } else {
+    document.getElementById('detailContent').textContent = M[cur].detail;
+    p.classList.add('show');
+  }
+}
+
+// ═══════════════════════════════════════════════
+// NATIJA
+// ═══════════════════════════════════════════════
+function toggleResult(){
+  var p = document.getElementById('resultPanel');
+  if(p.classList.contains('show')){
+    p.classList.remove('show');
+  } else {
+    document.getElementById('simWrap').innerHTML = '<pre>'+esc(M[cur].sim)+'</pre>';
+    p.classList.add('show');
+  }
+}
+
+// ═══════════════════════════════════════════════
+// XIRALIK
+// ═══════════════════════════════════════════════
+function setBright(v){
+  document.getElementById('brightVal').textContent = v;
+  applyBright();
+}
+function applyBright(){
+  var v = parseInt(document.getElementById('brightSlider').value) || 3;
+  var op = BRIGHT[v];
+  document.querySelectorAll('.line-ghost').forEach(function(g){
+    if(!g.classList.contains('skip-c') && ghostVisible){
+      g.style.color = 'rgba(74,96,128,'+op+')';
+    }
+  });
+}
+
+// ═══════════════════════════════════════════════
+// TABLAR
+// ═══════════════════════════════════════════════
+function buildTabs(){
+  var c = document.getElementById('tabs');
+  c.innerHTML = '';
+  M.forEach(function(m, i){
+    var d = document.createElement('div');
+    d.className = 'tab' + (i===cur?' on':'') + (doneSet.has(i)?' done':'');
+    d.textContent = m.id;
+    d.onclick = (function(n){return function(){loadMod(n);};})(i);
+    c.appendChild(d);
+  });
+}
+
+// ═══════════════════════════════════════════════
+// BAHOLASH TIZIMI
+// ═══════════════════════════════════════════════
+function buildStars(){
+  var sc = document.getElementById('stars');
+  sc.innerHTML = '';
+  for(var i = 1; i <= 10; i++){
+    var s = document.createElement('span');
+    s.className = 'star';
+    s.textContent = '⭐';
+    s.dataset.v = i;
+    s.onclick = (function(v){
+      return function(){
+        selectedStar = v;
+        document.getElementById('ratingScore').textContent = v + ' / 10';
+        document.querySelectorAll('.star').forEach(function(st){
+          st.classList.toggle('on', parseInt(st.dataset.v) <= v);
+        });
+      };
+    })(i);
+    sc.appendChild(s);
+  }
+}
+
+function showRating(){
+  document.getElementById('ratingBox').classList.add('show');
+  gtag('event','rating_shown', {module:'numpy_part1'});
+}
+
+function submitRating(){
+  if(ratingSubmitted) return;
+  if(selectedStar === 0){ alert('Iltimos baho tanlang!'); return; }
+  ratingSubmitted = true;
+  var comment = document.getElementById('ratingComment').value.trim();
+  document.getElementById('ratingThanks').style.display = 'block';
+  document.querySelector('.rating-submit').style.display = 'none';
+  gtag('event','rating_submit',{module:'numpy_part1', score:selectedStar, comment:comment});
+}
+
+function esc(s){
+  return String(s)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;');
+}
+</script>
+</body>
+</html>

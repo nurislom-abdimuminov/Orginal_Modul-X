@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Eskiz — TensorFlow Moduli</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:#0a0e1a;color:#dde5f0;font-family:'JetBrains Mono',monospace;font-size:13px;min-height:100vh;}
+.top{background:#0f1520;border-bottom:1px solid #1e3048;padding:8px 14px;display:flex;align-items:center;gap:8px;position:sticky;top:0;z-index:50;}
+.top-t{color:#00f0c8;font-size:.78rem;font-weight:700;}
+.top-s{color:#4a6080;font-size:.65rem;margin-left:auto;}
+.bright-bar{background:#0f1520;border-bottom:1px solid #1e3048;padding:6px 14px;display:flex;align-items:center;gap:10px;position:sticky;top:41px;z-index:49;}
+.bright-lbl{font-size:.65rem;color:#4a6080;flex-shrink:0;}
+.bright-slider{flex:1;-webkit-appearance:none;height:4px;border-radius:2px;background:#1e3048;outline:none;cursor:pointer;}
+.bright-slider::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:#00f0c8;cursor:pointer;}
+.bright-val{font-size:.68rem;color:#00f0c8;font-weight:700;width:20px;text-align:right;flex-shrink:0;}
+.wrap{padding:10px 14px;max-width:540px;margin:0 auto;}
+.tabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;margin-bottom:10px;scrollbar-width:none;}
+.tabs::-webkit-scrollbar{display:none;}
+.tab{flex-shrink:0;padding:6px 12px;border-radius:20px;border:1px solid #1e3048;background:#141e2e;color:#4a6080;font-size:.68rem;cursor:pointer;transition:all .15s;}
+.tab.on{border-color:#00f0c8;color:#00f0c8;background:rgba(0,240,200,.08);}
+.tab.done{border-color:#22c55e;color:#22c55e;background:rgba(34,197,94,.06);}
+.skip-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;padding:8px 12px;background:#141e2e;border:1px solid #1e3048;border-radius:8px;cursor:pointer;}
+.skip-row span{font-size:.7rem;color:#4a6080;}
+.sw{width:34px;height:18px;background:#1e3048;border-radius:10px;position:relative;transition:background .2s;flex-shrink:0;}
+.sw.on{background:#fbbf24;}
+.sw::after{content:'';position:absolute;top:2px;left:2px;width:14px;height:14px;background:#fff;border-radius:50%;transition:left .2s;}
+.sw.on::after{left:18px;}
+.stats{display:flex;gap:8px;margin-bottom:10px;}
+.stat{flex:1;background:#141e2e;border:1px solid #1e3048;border-radius:8px;padding:7px 8px;text-align:center;}
+.sv{font-size:.95rem;font-weight:700;color:#00f0c8;}
+.sl{font-size:.58rem;color:#4a6080;margin-top:2px;}
+.progress-bar{height:3px;background:#1e3048;border-radius:2px;margin-bottom:10px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,#00f0c8,#2563eb);border-radius:2px;transition:width .4s;}
+.intro-box{background:#0d1828;border:1px solid #1e3048;border-left:3px solid #00f0c8;border-radius:10px;padding:14px;margin-bottom:10px;}
+.intro-title{font-size:.8rem;font-weight:700;color:#00f0c8;margin-bottom:8px;}
+.intro-text{font-size:.7rem;line-height:1.85;color:#9fb0c8;margin-bottom:10px;white-space:pre-wrap;}
+.intro-stats{display:flex;gap:8px;margin-top:10px;}
+.intro-stat{flex:1;background:#080c14;border:1px solid #1e3048;border-radius:8px;padding:8px;text-align:center;}
+.intro-stat-v{font-size:1.1rem;font-weight:700;color:#00f0c8;}
+.intro-stat-l{font-size:.58rem;color:#4a6080;margin-top:2px;}
+.terms-box{background:#080c14;border:1px solid #1e3048;border-left:3px solid #a855f7;border-radius:8px;padding:10px 12px;margin-bottom:10px;}
+.terms-title{font-size:.68rem;font-weight:700;color:#a855f7;margin-bottom:8px;}
+.term-row{display:flex;gap:6px;margin-bottom:5px;align-items:flex-start;}
+.term-key{font-size:.64rem;color:#fbbf24;font-weight:700;min-width:110px;flex-shrink:0;}
+.term-val{font-size:.63rem;color:#4a6080;line-height:1.6;}
+.detail-panel{display:none;background:#0a1628;border:1px solid #2563eb;border-radius:8px;padding:12px 14px;margin-bottom:10px;font-size:.72rem;line-height:2;color:#93c5fd;white-space:pre-wrap;}
+.detail-panel.show{display:block;}
+.detail-title{color:#60a5fa;font-weight:700;margin-bottom:8px;font-size:.76rem;}
+.result-panel{display:none;background:#080c14;border:1px solid #22c55e;border-radius:10px;padding:12px;margin-bottom:10px;}
+.result-panel.show{display:block;}
+.result-title{color:#22c55e;font-size:.72rem;font-weight:700;margin-bottom:8px;}
+.sim-wrap{width:100%;overflow-x:auto;}
+.sim-wrap pre{font-size:.68rem;line-height:1.9;color:#22c55e;white-space:pre;}
+.code-block{border:1px solid #1e3048;border-radius:10px;overflow:hidden;margin-bottom:10px;background:#090d18;}
+.fbar{display:flex;align-items:center;gap:5px;padding:7px 12px;background:#0f1520;border-bottom:1px solid #1e3048;}
+.dot{width:6px;height:6px;border-radius:50%;}
+.dot.r{background:#f43f5e;}.dot.y{background:#fbbf24;}.dot.g{background:#22c55e;}
+.fn{font-size:.65rem;color:#4a6080;margin-left:4px;}
+.fhint{margin-left:auto;font-size:.6rem;color:#00f0c8;opacity:.7;}
+.lines-wrap{padding:4px 0;}
+.line-block{margin:0;}
+.line-row{display:flex;align-items:center;position:relative;min-height:30px;}
+.line-num{width:28px;flex-shrink:0;font-size:.63rem;padding:4px 4px 4px 5px;color:#2a3a50;text-align:right;user-select:none;transition:color .2s;align-self:center;}
+.line-content{flex:1;position:relative;overflow-x:auto;overflow-y:hidden;min-height:30px;}
+.line-content::-webkit-scrollbar{height:2px;}
+.line-content::-webkit-scrollbar-thumb{background:#1e3048;border-radius:1px;}
+.line-ghost{font-size:.76rem;line-height:1.8;padding:4px 8px;white-space:pre;pointer-events:none;min-height:30px;display:block;}
+.line-ghost.skip-c{opacity:.08!important;}
+.line-colors{position:absolute;top:0;left:0;font-size:.76rem;line-height:1.8;padding:4px 8px;white-space:pre;pointer-events:none;z-index:2;min-height:30px;}
+.line-input{position:absolute;top:0;left:0;right:0;bottom:0;width:100%;font-family:'JetBrains Mono',monospace;font-size:.76rem;line-height:1.8;padding:4px 8px;color:transparent;-webkit-text-fill-color:transparent;caret-color:#00f0c8;background:transparent;border:none;outline:none;white-space:pre;overflow:hidden;z-index:10;-webkit-appearance:none;}
+.line-input:disabled{cursor:default;}
+.line-done-note{display:none;font-size:.66rem;line-height:1.6;padding:3px 8px 3px 34px;color:#38bdf8;background:rgba(56,189,248,.06);border-left:2px solid #38bdf8;white-space:pre-wrap;animation:fadeIn .25s ease;}
+.line-done-note.show{display:block;}
+.line-start-note{display:none;font-size:.64rem;line-height:1.6;padding:3px 8px 3px 34px;color:#a855f7;background:rgba(168,85,247,.06);border-left:2px solid #a855f7;white-space:pre-wrap;animation:fadeIn .25s ease;}
+.line-start-note.show{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:translateY(0)}}
+.btn-row{display:flex;gap:6px;flex-wrap:wrap;padding:9px 12px;background:#0f1520;border-top:1px solid #1e3048;}
+.btn{padding:8px 11px;border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:.68rem;font-weight:700;border:none;cursor:pointer;flex-shrink:0;transition:opacity .15s;}
+.btn:active{opacity:.7;}
+.btn-chk{background:#00f0c8;color:#080c14;}
+.btn-clr{background:transparent;border:1px solid #1e3048;color:#4a6080;}
+.btn-det{background:#2563eb;color:#fff;}
+.btn-ghost{background:#7c3aed;color:#fff;}
+.btn-res{background:#16a34a;color:#fff;}
+.badge{display:none;margin:0 12px 10px;padding:7px 12px;border-radius:8px;font-size:.7rem;border:1px solid #1e3048;}
+.badge.show{display:block;}
+.badge.g{border-color:#22c55e;color:#22c55e;background:rgba(34,197,94,.07);}
+.badge.o{border-color:#fbbf24;color:#fbbf24;background:rgba(251,191,36,.07);}
+.badge.r{border-color:#f43f5e;color:#f43f5e;background:rgba(244,63,94,.07);}
+.rating-box{background:#0d1828;border:1px solid #fbbf24;border-radius:12px;padding:14px 16px;margin-top:10px;display:none;}
+.rating-box.show{display:block;}
+.rating-title{font-size:.72rem;font-weight:700;color:#fbbf24;text-align:center;margin-bottom:4px;}
+.rating-sub{font-size:.62rem;color:#4a6080;text-align:center;margin-bottom:12px;}
+.stars{display:flex;justify-content:center;gap:4px;margin-bottom:10px;flex-wrap:wrap;}
+.star{font-size:1.5rem;cursor:pointer;filter:grayscale(1);opacity:.35;transition:transform .1s,filter .1s,opacity .1s;user-select:none;}
+.star.on{filter:none;opacity:1;}
+.star:active{transform:scale(1.3);}
+.rating-score{text-align:center;font-size:.72rem;color:#fbbf24;font-weight:700;margin-bottom:8px;min-height:18px;}
+.rating-comment{width:100%;background:#141e2e;border:1px solid #1e3048;border-radius:8px;padding:8px 10px;color:#dde5f0;font-family:'JetBrains Mono',monospace;font-size:.68rem;resize:none;outline:none;margin-bottom:8px;}
+.rating-comment:focus{border-color:#fbbf24;}
+.rating-submit{width:100%;padding:10px;background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#080c14;font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:700;border:none;border-radius:8px;cursor:pointer;}
+.rating-submit:active{opacity:.8;}
+.rating-thanks{display:none;text-align:center;padding:10px;font-size:.72rem;color:#22c55e;font-weight:700;}
+</style>
+</head>
+<body>
+<div class="top">
+  <div class="top-t">🧠 TensorFlow Moduli</div>
+  <div class="top-s" id="topSub">TF.1</div>
+</div>
+<div class="bright-bar">
+  <span class="bright-lbl">👁️ Xiralik:</span>
+  <input type="range" class="bright-slider" id="brightSlider" min="1" max="10" value="3" oninput="setBright(this.value)">
+  <span class="bright-val" id="brightVal">3</span>
+</div>
+<div class="wrap">
+  <div class="stats">
+    <div class="stat"><div class="sv" id="svPctV">—</div><div class="sl">TO'G'RI</div></div>
+    <div class="stat"><div class="sv" id="svDone">0/0</div><div class="sl">BAJARILDI</div></div>
+    <div class="stat"><div class="sv" id="svMod">1/10</div><div class="sl">MAVZU</div></div>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+  <div class="tabs" id="tabs"></div>
+  <div class="skip-row" onclick="toggleSkip()">
+    <div class="sw" id="sw"></div>
+    <span id="skipLbl"># Kommentlarni o'tkazib yuboring</span>
+  </div>
+
+  <div class="intro-box" id="introBox"></div>
+
+  <div class="terms-box" id="termsBox"></div>
+  <div class="detail-panel" id="detailPanel">
+    <div class="detail-title">📘 BATAFSIL</div>
+    <div id="detailContent"></div>
+  </div>
+  <div class="result-panel" id="resultPanel">
+    <div class="result-title">📊 NATIJA — SIMULYATSIYA</div>
+    <div class="sim-wrap" id="simWrap"></div>
+  </div>
+  <div class="code-block">
+    <div class="fbar">
+      <div class="dot r"></div><div class="dot y"></div><div class="dot g"></div>
+      <div class="fn" id="fname">tensorflow.py</div>
+      <div class="fhint">↔️ suring ✏️ yozing</div>
+    </div>
+    <div class="lines-wrap" id="linesWrap"></div>
+    <div class="btn-row">
+      <button class="btn btn-chk" onclick="doCheck()">✅ Tekshir</button>
+      <button class="btn btn-clr" onclick="doClear()">🗑️ Tozala</button>
+      <button class="btn btn-ghost" id="ghostBtn" onclick="toggleGhost()">👁️ Yashir</button>
+      <button class="btn btn-det" onclick="toggleDetail()">📖 Batafsil</button>
+      <button class="btn btn-res" onclick="toggleResult()">📊 Natija</button>
+    </div>
+    <div class="badge" id="badge"></div>
+  </div>
+  <div class="rating-box" id="ratingBox">
+    <div class="rating-title">⭐ TensorFlow Modulini baholang</div>
+    <div class="rating-sub">Fikringiz keyingi versiyani yaxshilashga yordam beradi</div>
+    <div class="stars" id="stars"></div>
+    <div class="rating-score" id="ratingScore">Baho tanlang (1–10)</div>
+    <textarea class="rating-comment" id="ratingComment" rows="2" placeholder="Izoh: nima yoqdi, nima yetishmadi..."></textarea>
+    <button class="rating-submit" onclick="submitRating()">⭐ Yuborish</button>
+    <div class="rating-thanks" id="ratingThanks">✅ Rahmat! Fikringiz qabul qilindi.</div>
+  </div>
+</div>
+
+<script>
+var MODULE_INTRO = {
+  title: "🧠 TensorFlow Moduli haqida",
+  text: "Bu modulda siz TensorFlow va Keras bilan Deep Learning modellarini noldan qurish, o'qitish va ishlatishni o'rganasiz.\n\n20-modulda (Deep Learning) Keras asoslari bilan tanishgan edingiz. Bu yerda, aynan o'sha kutubxonani — Tensor obyektlari, Sequential API, Dense/Conv2D/LSTM qatlamlar, compile/fit/predict workflow, modelni saqlash va GPU bilan ishlashni — chuqurroq, alohida mavzu sifatida mustahkamlaysiz.\n\nMavzular ketma-ket bog'langan: avval Tensor nima ekanini (TensorFlow ning negizi), keyin Sequential model qurishni, so'ngra compile/fit/evaluate/predict to'liq siklini, keyin CNN va RNN qatlamlarini, va oxirida modelni saqlash/yuklash hamda GPU sozlamalarini o'rganasiz.\n\nReal loyihada bu nima beradi? Rasm klassifikatsiyasi (Conv2D), matn tahlili (LSTM), tabular ma'lumot bashorati (Dense) — barchasi shu modulda o'rgangan workflow asosida quriladi. Modelni saqlash (.save()) — uni keyinchalik qayta o'qitmasdan, to'g'ridan-to'g'ri ishlatish imkonini beradi (production uchun zarur).",
+  count: 10
+};
+
+var M = [
+
+{id:'TF.1',f:'tensorflow_1.py',
+plan:['TensorFlow nima va tf.constant() bilan Tensor yaratish','tf.Variable() — o\'zgaruvchan tensor','Asosiy amallar va NumPy bilan moslik'],
+terms:[
+  ['Tensor','Ko\'p o\'lchovli massiv — TensorFlow ning asosiy ma\'lumot turi'],
+  ['tf.constant()','O\'zgarmas (immutable) tensor yaratish'],
+  ['tf.Variable()','O\'zgaruvchan tensor — og\'irliklar shu turda saqlanadi'],
+  ['.numpy()','Tensor ni numpy massiviga aylantirish']
+],
+detail:'TENSOR — TENSORFLOW NING NEGIZI\n\nTensor — bu, aslida, ko\'p o\'lchovli massiv, numpy array ga juda o\'xshash, lekin GPU da tezroq ishlash va avtomatik gradient hisoblash (autograd) imkoniyatiga ega.\n\nO\'LCHAMLAR (RANK): 0-rank tensor — bitta son (skalyar). 1-rank — vektor (ro\'yxat). 2-rank — matritsa (jadval). 3+ rank — masalan rasm to\'plami (rasm soni, balandlik, kenglik, rang kanallari).\n\nTF.CONSTANT() VA TF.VARIABLE() FARQI: tf.constant() — yaratilgandan keyin QIYMATI O\'ZGARMAYDIGAN tensor, kirish ma\'lumotlari uchun mos. tf.Variable() — qiymati DAVOM ETTIRIB o\'zgartirilishi mumkin bo\'lgan tensor — aynan shu turda, neyron tarmoqning og\'irliklari (weights) saqlanadi, chunki ular o\'qitish davomida doimiy yangilanib turadi.\n\nNUMPY BILAN MOSLIK: .numpy() metodi, tensor ni oddiy numpy massiviga aylantiradi — bu, TensorFlow natijalarini, sizga allaqachon tanish bo\'lgan numpy/pandas/matplotlib vositalari bilan ishlatish imkonini beradi.',
+sim:'>>> import tensorflow as tf\n>>> a = tf.constant([1, 2, 3])\n>>> print(a)\ntf.Tensor([1 2 3], shape=(3,), dtype=int32)\n>>> b = tf.Variable([10.0, 20.0])\n>>> print(b.numpy())\n[10. 20.]\n>>> b.assign([15.0, 25.0])\n>>> print(b.numpy())\n[15. 25.]',
+eskizlar:[
+{q:'TensorFlow ni import qilib, tf.constant() bilan tensor yarating.',
+ lines:[
+  {c:'import tensorflow as tf',n:'Siz TensorFlow kutubxonasini tf nomi bilan yukladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'a = tf.constant([1, 2, 3])',n:'Siz o\'zgarmas tensor yaratdingiz'},
+  {c:'print(a)',n:'Siz tensorni to\'liq ko\'rinishda chiqardingiz'},
+ ]},
+{q:'tf.Variable() yarating va .assign() bilan qiymatini o\'zgartiring.',
+ lines:[
+  {c:'import tensorflow as tf',n:'Siz TensorFlow kutubxonasini yukladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'b = tf.Variable([10.0, 20.0])',n:'Siz o\'zgaruvchan tensor yaratdingiz'},
+  {c:'print(b.numpy())',n:'Siz boshlang\'ich qiymatni numpy ko\'rinishida chiqardingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'b.assign([15.0, 25.0])',n:'Siz tensor qiymatini yangiladingiz'},
+  {c:'print(b.numpy())',n:'Siz yangilangan qiymatni chiqardingiz'},
+ ]},
+]},
+
+{id:'TF.2',f:'tensorflow_2.py',
+plan:['keras.Sequential() bilan model yaratish','Dense qatlam qo\'shish','input_shape va units parametrlari'],
+terms:[
+  ['keras.Sequential()','Qatlamlarni ketma-ket joylashtirib model qurish'],
+  ['Dense','To\'liq bog\'langan qatlam'],
+  ['units','Qatlamdagi neyronlar soni'],
+  ['input_shape','Birinchi qatlamga kirish ma\'lumoti shakli']
+],
+detail:'SEQUENTIAL MODEL — ENG SODDA YO\'L\n\n20-modulda tanish bo\'lgan keras.Sequential() — qatlamlarni RO\'YXAT ko\'rinishida, KETMA-KET joylashtirib model qurish usuli. Bu — boshlang\'ich loyihalar uchun eng tushunarli, sodda yondashuv.\n\nDENSE QATLAM: keras.layers.Dense(units=N, activation=\'...\') — har bir neyron, oldingi qatlamdagi BARCHA neyronlar bilan bog\'langan ("to\'liq bog\'langan"). units — shu qatlamdagi neyronlar sonini belgilaydi.\n\nINPUT_SHAPE: Faqat MODEL ning BIRINCHI qatlamida ko\'rsatiladi — bu, har bir ma\'lumot namunasi NECHTA xususiyatdan (feature) iborat ekanini TensorFlow ga aytadi. Masalan input_shape=(4,) — har bir namuna 4 ta sondan iborat.',
+sim:'>>> from tensorflow import keras\n>>> model = keras.Sequential([\n...     keras.layers.Dense(16, activation=\'relu\', input_shape=(4,)),\n...     keras.layers.Dense(8, activation=\'relu\'),\n...     keras.layers.Dense(1)\n... ])\n>>> model.summary()',
+eskizlar:[
+{q:'Sequential model yaratib, birinchi yashirin qatlamni qo\'shing.',
+ lines:[
+  {c:'from tensorflow import keras',n:'Siz keras modulini import qildingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'model = keras.Sequential([',n:'Siz Sequential model yaratishni boshladingiz'},
+  {c:'    keras.layers.Dense(16, activation=\'relu\', input_shape=(4,)),',n:'Siz 16 neyronli, 4 xususiyatli kirish uchun birinchi qatlamni qo\'shdingiz'},
+ ]},
+{q:'Yana bir yashirin qatlam va yakuniy output qatlamni qo\'shing.',
+ lines:[
+  {c:'    keras.layers.Dense(8, activation=\'relu\'),',n:'Siz 8 neyronli ikkinchi yashirin qatlamni qo\'shdingiz'},
+  {c:'    keras.layers.Dense(1)',n:'Siz 1 neyronli yakuniy output qatlamni qo\'shdingiz'},
+  {c:'])',n:'Siz model ro\'yxatini yopdingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'model.summary()',n:'Siz model strukturasini ekranga chiqardingiz'},
+ ]},
+]},
+
+{id:'TF.3',f:'tensorflow_3.py',
+plan:['model.compile() — optimizer, loss, metrics','Regression vs Classification loss tanlovi','metrics parametri qo\'shish'],
+terms:[
+  ['model.compile()','Modelni o\'qitishga tayyorlash metodi'],
+  ['optimizer','Og\'irliklarni qanday yangilash usuli (masalan Adam)'],
+  ['loss','Xatoni o\'lchaydigan funksiya'],
+  ['metrics','O\'qitish jarayonida kuzatiladigan qo\'shimcha ko\'rsatkichlar']
+],
+detail:'COMPILE — MODELGA "QOIDALARNI" AYTISH\n\nModel qurilgandan keyin (TF.2), u hali "qanday o\'qitilishini" bilmaydi. model.compile() — bu, optimizer, loss va metrics ni belgilash orqali, modelga o\'qitish QOIDALARINI aytish.\n\nOPTIMIZER: og\'irliklarni QANDAY yangilash kerakligini belgilaydi. \'adam\' — deyarli har doim yaxshi standart tanlov (20-modulda batafsil).\n\nLOSS TANLOVI VAZIFAGA BOG\'LIQ: Regression (raqamli bashorat) uchun — \'mse\' (Mean Squared Error). Binary Classification (ikki toifa) uchun — \'binary_crossentropy\'. Multiclass Classification (ko\'p toifa) uchun — \'categorical_crossentropy\' (agar yorliqlar one-hot bo\'lsa) yoki \'sparse_categorical_crossentropy\' (agar yorliqlar oddiy butun son bo\'lsa).\n\nMETRICS: Bu — loss dan FARQLI, faqat KUZATISH uchun (o\'qitishga ta\'sir qilmaydi). metrics=[\'accuracy\'] — har epoch da aniqlikni ham ko\'rsatib boradi, bu loss qiymatidan ko\'ra TUSHUNARLIROQ ko\'rsatkich (masalan "85% to\'g\'ri" tushunarliroq, "loss=0.34" dan ko\'ra).',
+sim:'>>> model.compile(\n...     optimizer=\'adam\',\n...     loss=\'binary_crossentropy\',\n...     metrics=[\'accuracy\']\n... )\n>>> print(\'Model compile qilindi\')\nModel compile qilindi',
+eskizlar:[
+{q:'Regression modeli uchun Adam optimizer va MSE loss bilan compile qiling.',
+ lines:[
+  {c:'model.compile(',n:'Siz modelni compile qilishni boshladingiz'},
+  {c:'    optimizer=\'adam\',',n:'Siz Adam optimizerini tanladingiz'},
+  {c:'    loss=\'mse\')',n:'Siz regression uchun MSE loss tanladingiz'},
+ ]},
+{q:'Binary Classification modeli uchun, accuracy metrikasi bilan compile qiling.',
+ lines:[
+  {c:'model.compile(',n:'Siz modelni compile qilishni boshladingiz'},
+  {c:'    optimizer=\'adam\',',n:'Siz Adam optimizerini tanladingiz'},
+  {c:'    loss=\'binary_crossentropy\',',n:'Siz ikki toifali classification uchun loss tanladingiz'},
+  {c:'    metrics=[\'accuracy\'])',n:'Siz aniqlikni kuzatish uchun metrika qo\'shdingiz'},
+ ]},
+]},
+
+{id:'TF.4',f:'tensorflow_4.py',
+plan:['model.fit() — o\'qitish','epochs va batch_size parametrlari','validation_split bilan sinov ulushini ajratish'],
+terms:[
+  ['model.fit()','Modelni ma\'lumotga o\'qitish metodi'],
+  ['epochs','Butun ma\'lumotdan necha marta o\'tilishi'],
+  ['batch_size','Har bir og\'irlik yangilanishidan oldingi namunalar soni'],
+  ['validation_split','Train ma\'lumotidan avtomatik sinov ulushini ajratish']
+],
+detail:'MODELNI O\'QITISH — FIT() METODI\n\nmodel.fit(X, y, epochs=N, batch_size=M) — haqiqiy o\'qitish jarayonini boshlaydi. Har bir parametr nimani anglatadi:\n\nEPOCHS: butun train ma\'lumotidan NECHA MARTA o\'tilishini belgilaydi (20-moduldan tanish). Ko\'proq epoch — ko\'proq o\'qitish, lekin haddan ortiq ko\'p bo\'lsa, overfitting xavfi (20.19 dan tanish).\n\nBATCH_SIZE: har bir og\'irlik yangilanishidan OLDIN, nechta namuna ko\'rib chiqilishini belgilaydi (20.20 dan tanish). Odatiy qiymatlar: 32, 64, 128.\n\nVALIDATION_SPLIT: model.fit(X, y, epochs=50, validation_split=0.2) — bu, train ma\'lumotining 20% ini AVTOMATIK ravishda sinov (validation) uchun ajratadi, qolgan 80% da o\'qitadi. Har epoch da, ham train, ham validation loss/accuracy ko\'rsatiladi — bu, overfitting boshlanganini DARHOL payqash imkonini beradi (agar train yaxshilanishda davom etsa-yu, validation yomonlasha boshlasa).',
+sim:'>>> history = model.fit(\n...     X_train, y_train,\n...     epochs=50,\n...     batch_size=32,\n...     validation_split=0.2\n... )\nEpoch 1/50\nloss: 0.452 - accuracy: 0.781 - val_loss: 0.398 - val_accuracy: 0.812\n...\nEpoch 50/50\nloss: 0.089 - accuracy: 0.967 - val_loss: 0.112 - val_accuracy: 0.951',
+eskizlar:[
+{q:'Modelni 50 epoch, batch_size=32 bilan o\'qiting.',
+ lines:[
+  {c:'history = model.fit(',n:'Siz o\'qitish jarayonini boshladingiz'},
+  {c:'    X_train, y_train,',n:'Siz train ma\'lumotini berdingiz'},
+  {c:'    epochs=50,',n:'Siz 50 marta butun ma\'lumotdan o\'tishni belgiladingiz'},
+  {c:'    batch_size=32)',n:'Siz har 32 namunadan keyin og\'irlik yangilanishini belgiladingiz'},
+ ]},
+{q:'validation_split=0.2 qo\'shib, sinov ulushini avtomatik ajrating.',
+ lines:[
+  {c:'history = model.fit(',n:'Siz o\'qitish jarayonini boshladingiz'},
+  {c:'    X_train, y_train,',n:'Siz train ma\'lumotini berdingiz'},
+  {c:'    epochs=50,',n:'Siz epoch sonini belgiladingiz'},
+  {c:'    batch_size=32,',n:'Siz batch hajmini belgiladingiz'},
+  {c:'    validation_split=0.2)',n:'Siz ma\'lumotning 20% ini avtomatik sinov uchun ajratdingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'print(\'O\\\'qitish tugadi\')',n:'Siz o\'qitish yakunlanganini bildiruvchi xabar chiqardingiz'},
+ ]},
+]},
+
+{id:'TF.5',f:'tensorflow_5.py',
+plan:['model.evaluate() — test to\'plamida baholash','model.predict() — yangi ma\'lumot uchun bashorat','Natijalarni talqin qilish'],
+terms:[
+  ['model.evaluate()','Test to\'plamida loss va metrikalarni hisoblash'],
+  ['model.predict()','Yangi (ko\'rilmagan) ma\'lumot uchun bashorat qilish'],
+  ['Test to\'plami','O\'qitishda umuman ishlatilmagan, mustaqil baholash uchun ma\'lumot'],
+  ['Bashorat formati','predict() natijasi — ehtimollik yoki xom raqam, vazifaga bog\'liq']
+],
+detail:'MODELNI BAHOLASH VA ISHLATISH\n\nTF.4 da model O\'QITILDI. Endi uni BAHOLASH va ISHLATISH kerak.\n\nMODEL.EVALUATE(): model.evaluate(X_test, y_test) — TEST to\'plamida (validation dan FARQLI, modelni o\'qitish jarayonida UMUMAN ishlatilmagan, mustaqil ma\'lumot) loss va metrikalarni hisoblaydi. Bu — modelning HAQIQIY, real dunyodagi ishlash sifatining eng ishonchli ko\'rsatkichi.\n\nMODEL.PREDICT(): model.predict(X_yangi) — model hali UMUMAN ko\'rmagan, yangi ma\'lumot uchun BASHORAT chiqaradi. Bu — modelni AMALIY ishlatish bosqichi (production), masalan veb-saytda foydalanuvchi ma\'lumotini kiritganda.\n\nNATIJANI TALQIN QILISH: Agar chiqish qatlamida Sigmoid bo\'lsa, predict() 0-1 oralig\'idagi EHTIMOLLIK qaytaradi (masalan 0.87 — "87% ehtimollik bilan musbat"). Bu ehtimollikni YAKUNIY toifaga aylantirish uchun, odatda 0.5 chegara ishlatiladi: (predict() > 0.5).astype(int).',
+sim:'>>> test_loss, test_acc = model.evaluate(X_test, y_test)\nloss: 0.118 - accuracy: 0.943\n>>> bashorat = model.predict(X_yangi)\n>>> print(bashorat)\n[[0.87]]\n>>> toifa = (bashorat > 0.5).astype(int)\n>>> print(toifa)\n[[1]]',
+eskizlar:[
+{q:'Test to\'plamida modelni baholang.',
+ lines:[
+  {c:'test_loss, test_acc = model.evaluate(X_test, y_test)',n:'Siz test to\'plamida loss va accuracy ni hisobladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'print(\'Test loss:\', test_loss)',n:'Siz test loss qiymatini chiqardingiz'},
+  {c:'print(\'Test accuracy:\', test_acc)',n:'Siz test aniqligini chiqardingiz'},
+ ]},
+{q:'Yangi ma\'lumot uchun bashorat qilib, ehtimollikni toifaga aylantiring.',
+ lines:[
+  {c:'bashorat = model.predict(X_yangi)',n:'Siz yangi ma\'lumot uchun ehtimollik oldingiz'},
+  {c:'print(\'Ehtimollik:\', bashorat)',n:'Siz xom ehtimollikni chiqardingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'toifa = (bashorat > 0.5).astype(int)',n:'Siz 0.5 chegara orqali yakuniy toifani oldingiz'},
+  {c:'print(\'Yakuniy toifa:\', toifa)',n:'Siz yakuniy bashorat toifasini chiqardingiz'},
+ ]},
+]},
+
+{id:'TF.6',f:'tensorflow_6.py',
+plan:['Conv2D qatlami — rasm uchun','MaxPooling2D qatlami','Flatten — CNN dan Dense ga o\'tish'],
+terms:[
+  ['Conv2D','Rasm uchun convolution qatlami'],
+  ['filters va kernel_size','Conv2D ning asosiy parametrlari'],
+  ['MaxPooling2D','Feature map ni kichraytirish qatlami'],
+  ['Flatten','Ko\'p o\'lchovli tensor ni 1 o\'lchovli vektorga "yassilash"']
+],
+detail:'CNN QATLAMLARI KERAS DA\n\nM2-modulda (DL Matematikasi) Convolution va Pooling ning to\'liq matematikasini numpy bilan ko\'rgan edingiz. Bu yerda, aynan o\'sha amallarni, Keras qatlamlari orqali, BIR QATORDA chaqirasiz.\n\nCONV2D: keras.layers.Conv2D(filters=32, kernel_size=(3,3), activation=\'relu\') — filters: nechta TURLI kernel (filtr) o\'rganilishini belgilaydi (har biri boshqa naqshni aniqlaydi). kernel_size: filtr o\'lchami (odatda 3x3 yoki 5x5).\n\nMAXPOOLING2D: keras.layers.MaxPooling2D(pool_size=(2,2)) — Max Pooling formulasini, bir qatorda qo\'llaydi, Feature Map ni kichraytiradi.\n\nFLATTEN: Conv2D/MaxPooling2D qatlamlaridan keyin, ma\'lumot hali ham KO\'P O\'LCHOVLI (masalan balandlik x kenglik x kanal) shaklda. Lekin yakuniy Dense (klassifikatsiya) qatlamlari FAQAT 1 O\'LCHOVLI vektor kutadi. keras.layers.Flatten() — ko\'p o\'lchovli tensorni, bitta uzun 1D vektorga "yassilab" beradi.',
+sim:'>>> model = keras.Sequential([\n...     keras.layers.Conv2D(32, (3,3), activation=\'relu\', input_shape=(28,28,1)),\n...     keras.layers.MaxPooling2D((2,2)),\n...     keras.layers.Conv2D(64, (3,3), activation=\'relu\'),\n...     keras.layers.MaxPooling2D((2,2)),\n...     keras.layers.Flatten(),\n...     keras.layers.Dense(64, activation=\'relu\'),\n...     keras.layers.Dense(10, activation=\'softmax\')\n... ])\n>>> model.summary()',
+eskizlar:[
+{q:'Rasm klassifikatsiyasi uchun ikki Conv2D+MaxPooling2D bloki qo\'shing.',
+ lines:[
+  {c:'model = keras.Sequential([',n:'Siz Sequential CNN modelini yaratishni boshladingiz'},
+  {c:'    keras.layers.Conv2D(32, (3,3), activation=\'relu\', input_shape=(28,28,1)),',n:'Siz 32 filtrli birinchi convolution qatlamni qo\'shdingiz'},
+  {c:'    keras.layers.MaxPooling2D((2,2)),',n:'Siz feature map ni kichraytiruvchi pooling qo\'shdingiz'},
+  {c:'    keras.layers.Conv2D(64, (3,3), activation=\'relu\'),',n:'Siz 64 filtrli ikkinchi convolution qatlamni qo\'shdingiz'},
+  {c:'    keras.layers.MaxPooling2D((2,2)),',n:'Siz ikkinchi pooling qatlamini qo\'shdingiz'},
+ ]},
+{q:'Flatten va yakuniy Dense (10 toifali Softmax) qatlamlarini qo\'shing.',
+ lines:[
+  {c:'    keras.layers.Flatten(),',n:'Siz ko\'p o\'lchovli natijani 1D vektorga yassiladingiz'},
+  {c:'    keras.layers.Dense(64, activation=\'relu\'),',n:'Siz 64 neyronli yashirin Dense qatlam qo\'shdingiz'},
+  {c:'    keras.layers.Dense(10, activation=\'softmax\')',n:'Siz 10 toifali yakuniy Softmax qatlamni qo\'shdingiz'},
+  {c:'])',n:'Siz model ro\'yxatini yopdingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'model.summary()',n:'Siz to\'liq CNN strukturasini ekranga chiqardingiz'},
+ ]},
+]},
+
+{id:'TF.7',f:'tensorflow_7.py',
+plan:['LSTM qatlami — ketma-ketlik uchun','return_sequences parametri','Embedding qatlami matn uchun'],
+terms:[
+  ['LSTM qatlami','Ketma-ketlik (matn, vaqt qatori) uchun maxsus RNN qatlami'],
+  ['return_sequences','Har bir vaqt qadami uchun chiqish qaytarish yoki yo\'q'],
+  ['Embedding','So\'zlarni raqamli vektorlarga aylantiruvchi qatlam'],
+  ['Stacked LSTM','Bir nechta LSTM qatlamini ustma-ust qo\'yish']
+],
+detail:'LSTM QATLAMI KERAS DA\n\nM2-modulda LSTM gate larining (Forget, Input, Output) to\'liq matematikasini numpy bilan ko\'rgan edingiz. Keras da, bu BIR QATOR bilan chaqiriladi: keras.layers.LSTM(units=64).\n\nEMBEDDING QATLAMI: Matn bilan ishlashda, so\'zlar avval RAQAMLI vektorlarga aylantirilishi kerak. keras.layers.Embedding(input_dim=VOCAB_SIZE, output_dim=64) — har bir so\'z ID sini, 64-o\'lchamli o\'rganiladigan vektorga aylantiradi (bu — so\'zlar orasidagi ma\'noviy o\'xshashlikni o\'rganishga imkon beradi).\n\nRETURN_SEQUENCES: Standart holatda, LSTM faqat OXIRGI vaqt qadamidagi chiqishni qaytaradi (butun gapning "xulosasi"). Agar return_sequences=True bo\'lsa — HAR BIR vaqt qadami uchun chiqish qaytariladi. Bu, ikkinchi LSTM qatlamini USTIGA qo\'yish kerak bo\'lganda ZARUR (chunki keyingi LSTM, har bir qadam uchun kirish kutadi).\n\nSTACKED LSTM: Bir nechta LSTM qatlamini ustma-ust qo\'yish — birinchi LSTM return_sequences=True bilan, ikkinchisi esa (oxirgi bo\'lsa) standart holatda.',
+sim:'>>> model = keras.Sequential([\n...     keras.layers.Embedding(input_dim=10000, output_dim=64),\n...     keras.layers.LSTM(64, return_sequences=True),\n...     keras.layers.LSTM(32),\n...     keras.layers.Dense(1, activation=\'sigmoid\')\n... ])\n>>> model.summary()',
+eskizlar:[
+{q:'Matn klassifikatsiyasi uchun Embedding va birinchi LSTM qatlamini qo\'shing.',
+ lines:[
+  {c:'model = keras.Sequential([',n:'Siz Sequential modelni yaratishni boshladingiz'},
+  {c:'    keras.layers.Embedding(input_dim=10000, output_dim=64),',n:'Siz 10000 so\'zlik lug\'at uchun Embedding qatlam qo\'shdingiz'},
+  {c:'    keras.layers.LSTM(64, return_sequences=True),',n:'Siz keyingi LSTM uchun barcha qadamlarni qaytaruvchi LSTM qo\'shdingiz'},
+ ]},
+{q:'Ikkinchi LSTM va yakuniy Dense (Sigmoid) qatlamini qo\'shing.',
+ lines:[
+  {c:'    keras.layers.LSTM(32),',n:'Siz oxirgi qadamni qaytaruvchi ikkinchi LSTM qo\'shdingiz'},
+  {c:'    keras.layers.Dense(1, activation=\'sigmoid\')',n:'Siz binary classification uchun yakuniy qatlamni qo\'shdingiz'},
+  {c:'])',n:'Siz model ro\'yxatini yopdingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'model.summary()',n:'Siz to\'liq LSTM model strukturasini chiqardingiz'},
+ ]},
+]},
+
+{id:'TF.8',f:'tensorflow_8.py',
+plan:['Dropout qatlami — overfitting oldini olish','EarlyStopping callback','ModelCheckpoint callback'],
+terms:[
+  ['Dropout qatlami','keras.layers.Dropout(rate) — tasodifiy neyronlarni o\'chirish'],
+  ['Callback','O\'qitish davomida avtomatik ishga tushadigan funksiya'],
+  ['EarlyStopping','Overfitting boshlanganda o\'qitishni avtomatik to\'xtatish'],
+  ['ModelCheckpoint','Eng yaxshi natijali modelni avtomatik saqlash']
+],
+detail:'OVERFITTING NI BOSHQARISH VOSITALARI\n\n20-modulda Dropout va Early Stopping g\'oyalarini nazariy ko\'rgan edingiz. Bu yerda, ularni Keras da QANDAY QO\'LLASHNI ko\'rasiz.\n\nDROPOUT QATLAMI: keras.layers.Dropout(0.3) — modelga, BOSHQA qatlamlar qatorida, oddiy QATLAM sifatida qo\'shiladi. U, o\'qitish PAYTIDA, 30% neyronlarni tasodifiy "o\'chiradi" (test/predict paytida esa BARCHA neyronlar ishlaydi).\n\nCALLBACK NIMA? Callback — model.fit() jarayoni davomida, MA\'LUM bir SHART bajarilganda, AVTOMATIK ishga tushadigan funksiya.\n\nEARLYSTOPPING: keras.callbacks.EarlyStopping(monitor=\'val_loss\', patience=5) — agar validation loss, 5 epoch davomida YAXSHILANMASA, o\'qitish AVTOMATIK to\'xtatiladi.\n\nMODELCHECKPOINT: keras.callbacks.ModelCheckpoint(\'best_model.h5\', save_best_only=True) — o\'qitish davomida, ENG YAXSHI natija ko\'rsatgan modelni, avtomatik faylga SAQLAYDI — bu, agar oxirgi epoch eng yaxshisi bo\'lmasa ham, ENG YAXSHI versiyani yo\'qotmaslik imkonini beradi.',
+sim:'>>> from tensorflow import keras\n>>> early_stop = keras.callbacks.EarlyStopping(\n...     monitor=\'val_loss\', patience=5)\n>>> checkpoint = keras.callbacks.ModelCheckpoint(\n...     \'best_model.h5\', save_best_only=True)\n>>> model.fit(X_train, y_train, epochs=100,\n...     validation_split=0.2,\n...     callbacks=[early_stop, checkpoint])',
+eskizlar:[
+{q:'Modelga Dropout qatlami qo\'shib, overfitting xavfini kamaytiring.',
+ lines:[
+  {c:'model = keras.Sequential([',n:'Siz Sequential modelni yaratishni boshladingiz'},
+  {c:'    keras.layers.Dense(64, activation=\'relu\', input_shape=(10,)),',n:'Siz birinchi yashirin qatlamni qo\'shdingiz'},
+  {c:'    keras.layers.Dropout(0.3),',n:'Siz 30% neyronlarni tasodifiy o\'chiruvchi Dropout qo\'shdingiz'},
+  {c:'    keras.layers.Dense(1, activation=\'sigmoid\')',n:'Siz yakuniy qatlamni qo\'shdingiz'},
+  {c:'])',n:'Siz model ro\'yxatini yopdingiz'},
+ ]},
+{q:'EarlyStopping va ModelCheckpoint callback larni yaratib, fit() ga bering.',
+ lines:[
+  {c:'early_stop = keras.callbacks.EarlyStopping(',n:'Siz EarlyStopping callback yaratishni boshladingiz'},
+  {c:'    monitor=\'val_loss\', patience=5)',n:'Siz 5 epoch yaxshilanmasa to\'xtatishni belgiladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'checkpoint = keras.callbacks.ModelCheckpoint(',n:'Siz ModelCheckpoint callback yaratishni boshladingiz'},
+  {c:'    \'best_model.h5\', save_best_only=True)',n:'Siz faqat eng yaxshi modelni saqlashni belgiladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'model.fit(X_train, y_train, epochs=100,',n:'Siz o\'qitishni boshladingiz'},
+  {c:'    validation_split=0.2,',n:'Siz sinov ulushini ajratdingiz'},
+  {c:'    callbacks=[early_stop, checkpoint])',n:'Siz ikkala callback ni o\'qitish jarayoniga uladingiz'},
+ ]},
+]},
+
+{id:'TF.9',f:'tensorflow_9.py',
+plan:['model.save() — to\'liq modelni saqlash','keras.models.load_model() — yuklash','Saqlangan model bilan to\'g\'ridan-to\'g\'ri predict qilish'],
+terms:[
+  ['model.save()','Modelni (struktura + og\'irliklar) faylga saqlash'],
+  ['.keras formati','Zamonaviy, tavsiya etiladigan model fayl formati'],
+  ['keras.models.load_model()','Saqlangan modelni qaytadan yuklash'],
+  ['Production uchun ahamiyati','Qayta o\'qitmasdan, to\'g\'ridan-to\'g\'ri ishlatish imkoniyati']
+],
+detail:'MODELNI SAQLASH VA QAYTA YUKLASH\n\nO\'qitish (TF.4) — vaqt va hisoblash resurslarini talab qiladigan jarayon. model.save() orqali, O\'QITILGAN modelni (butun struktura, barcha og\'irliklar, hatto optimizer holati) BIR FAYLGA saqlash mumkin — bu, modelni QAYTA-QAYTA o\'qitmasdan, istalgan vaqtda ISHLATISH imkonini beradi.\n\nSAQLASH: model.save(\'mening_modelim.keras\') — .keras kengaytmasi, TensorFlow ning zamonaviy, tavsiya etiladigan formati (eski .h5 formati ham hali qo\'llab-quvvatlanadi).\n\nYUKLASH: yangi_model = keras.models.load_model(\'mening_modelim.keras\') — bu, saqlangan modelni, XUDDI ASL holatidagi kabi (compile qilingan, o\'qitilgan holatda) qaytaradi — DARHOL .predict() chaqirish mumkin, qayta compile/fit qilish SHART EMAS.\n\nNEGA BU PRODUCTION UCHUN MUHIM? Real loyihada, model BIR MARTA (masalan serverda, kuchli GPU bilan) o\'qitiladi, keyin saqlanadi, va veb-sayt/mobil ilova kabi BOSHQA joylarda, FAQAT load_model() + predict() orqali ISHLATILADI — qayta o\'qitish SHART emas.',
+sim:'>>> model.save(\'mening_modelim.keras\')\n>>> print(\'Model saqlandi\')\nModel saqlandi\n>>> from tensorflow import keras\n>>> yangi_model = keras.models.load_model(\'mening_modelim.keras\')\n>>> bashorat = yangi_model.predict(X_yangi)\n>>> print(bashorat)',
+eskizlar:[
+{q:'O\'qitilgan modelni .keras formatida saqlang.',
+ lines:[
+  {c:'model.save(\'mening_modelim.keras\')',n:'Siz to\'liq modelni (struktura+og\'irliklar) faylga saqladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'print(\'Model muvaffaqiyatli saqlandi\')',n:'Siz saqlash tugaganini bildiruvchi xabar chiqardingiz'},
+ ]},
+{q:'Saqlangan modelni qayta yuklab, darhol predict qiling.',
+ lines:[
+  {c:'from tensorflow import keras',n:'Siz keras modulini import qildingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'yangi_model = keras.models.load_model(\'mening_modelim.keras\')',n:'Siz saqlangan modelni to\'liq holatda qayta yukladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'bashorat = yangi_model.predict(X_yangi)',n:'Siz yuklangan model bilan, qayta o\'qitmasdan, bashorat qildingiz'},
+  {c:'print(bashorat)',n:'Siz bashoratni ekranga chiqardingiz'},
+ ]},
+]},
+
+{id:'TF.10',f:'tensorflow_10.py',
+plan:['tf.config.list_physical_devices() — GPU borligini tekshirish','GPU avtomatik ishlatilishi','CPU/GPU orasida tanlov qilish'],
+terms:[
+  ['GPU (Graphics Processing Unit)','Parallel hisoblashga mos, DL ni tezlashtiruvchi protsessor'],
+  ['tf.config.list_physical_devices()','Mavjud hisoblash qurilmalarini ro\'yxatlash'],
+  ['Avtomatik GPU ishlatish','TensorFlow, agar GPU mavjud bo\'lsa, uni avtomatik ishlatadi'],
+  ['with tf.device():','Hisoblashni aniq qurilmaga (CPU/GPU) majburlash']
+],
+detail:'GPU BILAN ISHLASH — NEGA MUHIM?\n\n20-modulda GPU ning Deep Learning rivojiga qo\'shgan hissasi haqida o\'rgangan edingiz — parallel hisoblash, matritsa amallarini sezilarli tezlashtiradi.\n\nGPU BORLIGINI TEKSHIRISH: tf.config.list_physical_devices(\'GPU\') — bu, joriy muhitda (masalan Google Colab, Kaggle Notebook) GPU mavjudligini va NECHTA GPU borligini ko\'rsatadi. Agar bo\'sh ro\'yxat qaytsa — faqat CPU mavjud.\n\nAVTOMATIK ISHLATISH: ENG MUHIM narsa — agar GPU mavjud bo\'lsa, TensorFlow uni AVTOMATIK ravishda ishlatadi, hech qanday qo\'shimcha kod yozish SHART EMAS! model.fit() chaqirilganda, TensorFlow o\'zi, mavjud bo\'lsa, hisoblashni GPU ga yo\'naltiradi.\n\nMAJBURIY TANLOV: Ba\'zan, aniq bir qurilmani MAJBURAN tanlash kerak bo\'ladi (masalan debugging uchun, yoki bir nechta GPU orasida tanlov qilish uchun): with tf.device(\'/GPU:0\'): ... — bu blok ICHIDAGI barcha amallar, KO\'RSATILGAN qurilmada bajariladi.\n\nGOOGLE COLAB / KAGGLE DA: Sizning ishlash muhitingizda (Samsung A11, Colab/Kaggle orqali), GPU ni Runtime sozlamalaridan YOQISH kerak — standart holatda, ko\'pincha CPU rejimi tanlangan bo\'ladi.',
+sim:'>>> import tensorflow as tf\n>>> gpus = tf.config.list_physical_devices(\'GPU\')\n>>> print(\'GPU soni:\', len(gpus))\nGPU soni: 1\n>>> print(gpus)\n[PhysicalDevice(name=\'/physical_device:GPU:0\', device_type=\'GPU\')]',
+eskizlar:[
+{q:'Joriy muhitda mavjud GPU larni tekshiring.',
+ lines:[
+  {c:'import tensorflow as tf',n:'Siz TensorFlow kutubxonasini import qildingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'gpus = tf.config.list_physical_devices(\'GPU\')',n:'Siz mavjud GPU qurilmalarini ro\'yxatladingiz'},
+  {c:'print(\'Mavjud GPU soni:\', len(gpus))',n:'Siz topilgan GPU sonini chiqardingiz'},
+  {c:'print(gpus)',n:'Siz GPU qurilmalari haqida to\'liq ma\'lumotni chiqardingiz'},
+ ]},
+{q:'with tf.device() bilan, hisoblashni aniq qurilmaga majburlang.',
+ lines:[
+  {c:'with tf.device(\'/CPU:0\'):',n:'Siz keyingi amallarni majburan CPU da bajarishni belgiladingiz'},
+  {c:'    a = tf.constant([1.0, 2.0, 3.0])',n:'Siz CPU da tensor yaratdingiz'},
+  {c:'    b = tf.constant([4.0, 5.0, 6.0])',n:'Siz yana bir tensor yaratdingiz'},
+  {c:'    natija = a + b',n:'Siz CPU da qo\'shish amalini bajardingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'print(natija.numpy())',n:'Siz natijani numpy ko\'rinishida chiqardingiz'},
+ ]},
+]},
+
+];
+
+var cur = 0;
+var curEskiz = 0;
+var skipOn = false;
+var ghostVisible = true;
+var lineData = [];
+var doneSet = new Set();
+var eskizDoneSet = new Set(); // "topicIdx-eskizIdx" format
+var selectedStar = 0;
+var ratingSubmitted = false;
+var BRIGHT = [0,0.05,0.1,0.2,0.3,0.42,0.55,0.65,0.75,0.85,0.95];
+
+window.onload = function(){
+  buildStars();
+  buildTabs();
+  buildIntro();
+  loadMod(0);
+  if(window.visualViewport){
+    var t = null;
+    window.visualViewport.addEventListener('resize', function(){
+      clearTimeout(t);
+      t = setTimeout(function(){
+        var el = document.activeElement;
+        if(!el || !el.classList.contains('line-input')) return;
+        var blk = el.closest('.line-block');
+        if(!blk) return;
+        var vp = window.visualViewport;
+        var rc = blk.getBoundingClientRect();
+        var tgt = window.scrollY + rc.top + rc.height/2 - (vp.offsetTop + vp.height*0.38);
+        window.scrollTo({top: tgt, behavior:'smooth'});
+      }, 150);
+    });
+  }
+};
+
+function buildIntro(){
+  var h = '<div class="intro-title">'+MODULE_INTRO.title+'</div>';
+  h += '<div class="intro-text">'+esc(MODULE_INTRO.text)+'</div>';
+  h += '<div class="intro-stats">';
+  h += '<div class="intro-stat"><div class="intro-stat-v">'+MODULE_INTRO.count+'</div><div class="intro-stat-l">MAVZU</div></div>';
+  var totalEskiz = M.reduce(function(sum, m){ return sum + m.eskizlar.length; }, 0);
+  h += '<div class="intro-stat"><div class="intro-stat-v">'+totalEskiz+'</div><div class="intro-stat-l">ESKIZ</div></div>';
+  h += '<div class="intro-stat"><div class="intro-stat-v">TensorFlow</div><div class="intro-stat-l">KUTUBXONA</div></div>';
+  h += '</div>';
+  document.getElementById('introBox').innerHTML = h;
+}
+
+function loadMod(i){
+  cur = i;
+  curEskiz = 0;
+  document.getElementById('detailPanel').classList.remove('show');
+  document.getElementById('resultPanel').classList.remove('show');
+  document.getElementById('badge').className = 'badge';
+  var m = M[i];
+  document.getElementById('topSub').textContent = m.id;
+  document.getElementById('svMod').textContent = (i+1)+'/'+M.length;
+  var th = '<div class="terms-title">📚 Yangi atamalar:</div>';
+  m.terms.forEach(function(t){
+    th += '<div class="term-row"><span class="term-key">'+esc(t[0])+'</span><span class="term-val">'+esc(t[1])+'</span></div>';
+  });
+  document.getElementById('termsBox').innerHTML = th;
+  loadEskiz();
+  buildTabs();
+}
+
+function loadEskiz(){
+  var m = M[cur];
+  var e = m.eskizlar[curEskiz];
+  document.getElementById('detailPanel').classList.remove('show');
+  document.getElementById('resultPanel').classList.remove('show');
+  document.getElementById('badge').className = 'badge';
+  document.getElementById('fname').textContent = m.f.replace('.py', '_'+(curEskiz+1)+'.py');
+  document.getElementById('fhintQ') ; // no-op guard
+  buildEskizDots();
+  buildLines(e);
+  updateStats();
+}
+
+function buildEskizDots(){
+  var existing = document.getElementById('eskizDotsRow');
+  if(existing) existing.remove();
+  var m = M[cur];
+  var row = document.createElement('div');
+  row.id = 'eskizDotsRow';
+  row.style.display = 'flex';
+  row.style.gap = '6px';
+  row.style.justifyContent = 'center';
+  row.style.marginBottom = '10px';
+  m.eskizlar.forEach(function(_, i){
+    var key = cur+'-'+i;
+    var dot = document.createElement('div');
+    dot.style.width = (i===curEskiz ? '40px' : '26px');
+    dot.style.height = '6px';
+    dot.style.borderRadius = '3px';
+    dot.style.cursor = 'pointer';
+    dot.style.background = eskizDoneSet.has(key) ? '#22c55e' : (i===curEskiz ? '#00f0c8' : '#1e3048');
+    dot.onclick = (function(idx){ return function(){ curEskiz = idx; loadEskiz(); }; })(i);
+    row.appendChild(dot);
+  });
+  var qBox = document.getElementById('eskizQBox');
+  if(qBox) qBox.remove();
+  var q = document.createElement('div');
+  q.id = 'eskizQBox';
+  q.style.cssText = 'background:#0d1828;border:1px solid #1e3048;border-left:3px solid #a855f7;border-radius:8px;padding:10px 12px;margin-bottom:10px;font-size:.71rem;line-height:1.8;color:#c4b5fd;white-space:pre-wrap;';
+  q.textContent = 'Eskiz '+(curEskiz+1)+'/'+M[cur].eskizlar.length+' — '+M[cur].eskizlar[curEskiz].q;
+
+  var anchor = document.getElementById('termsBox');
+  anchor.parentNode.insertBefore(row, anchor.nextSibling);
+  anchor.parentNode.insertBefore(q, row.nextSibling);
+}
+
+function buildLines(e){
+  var wrap = document.getElementById('linesWrap');
+  wrap.innerHTML = '';
+  lineData = [];
+  var op = BRIGHT[parseInt(document.getElementById('brightSlider').value)||3];
+  e.lines.forEach(function(ln, i){
+    var trimmed = ln.c.replace(/^\s+/,'');
+    var isCom = trimmed.charAt(0) === '#';
+    var isEmpty = ln.c === '';
+    var endsWithBrace = /[\{\(\[]\s*$/.test(ln.c);
+    var block = document.createElement('div');
+    block.className = 'line-block';
+    block.id = 'block'+i;
+    var row = document.createElement('div');
+    row.className = 'line-row';
+    var num = document.createElement('div');
+    num.className = 'line-num';
+    num.id = 'num'+i;
+    num.textContent = isEmpty ? '' : (i+1);
+    var content = document.createElement('div');
+    content.className = 'line-content';
+    var ghost = document.createElement('div');
+    ghost.className = 'line-ghost' + ((isCom && skipOn) ? ' skip-c' : '');
+    ghost.id = 'ghost'+i;
+    ghost.style.color = ghostVisible ? 'rgba(74,96,128,'+op+')' : 'transparent';
+    ghost.textContent = ln.c || ' ';
+    var colors = document.createElement('div');
+    colors.className = 'line-colors';
+    colors.id = 'clr'+i;
+    var inp = document.createElement('input');
+    inp.type = 'text';
+    inp.className = 'line-input';
+    inp.id = 'inp'+i;
+    inp.setAttribute('spellcheck','false');
+    inp.setAttribute('autocorrect','off');
+    inp.setAttribute('autocapitalize','off');
+    inp.setAttribute('autocomplete','off');
+    if(isEmpty || (isCom && skipOn)) inp.disabled = true;
+    (function(idx, target, noteText, braceTrigger){
+      inp.addEventListener('input', function(){
+        if(!target) return;
+        updateLineClr(idx, target);
+        if(braceTrigger && inp.value.length > 0 && /[\{\(\[]\s*$/.test(inp.value)){
+          showStartNote(idx);
+        }
+        if(inp.value === target && target !== '' && noteText !== ''){
+          showNote(idx);
+        } else if(inp.value !== target) {
+          hideNote(idx);
+        }
+        updateStats();
+      });
+    })(i, ln.c, ln.n, endsWithBrace);
+    content.appendChild(ghost);
+    content.appendChild(colors);
+    content.appendChild(inp);
+    row.appendChild(num);
+    row.appendChild(content);
+    var note = document.createElement('div');
+    note.className = 'line-done-note';
+    note.id = 'note'+i;
+    note.textContent = ln.n ? ('✅ ' + ln.n + '!') : '';
+    block.appendChild(row);
+    if(ln.n) block.appendChild(note);
+    wrap.appendChild(block);
+    lineData.push({inp:inp, target:ln.c, isCom:isCom, isEmpty:isEmpty});
+  });
+}
+
+function updateLineClr(idx, target){
+  var inp = document.getElementById('inp'+idx);
+  var clr = document.getElementById('clr'+idx);
+  if(!inp || !clr) return;
+  var typed = inp.value;
+  var html = '';
+  for(var ci = 0; ci < target.length; ci++){
+    var ch = target[ci];
+    if(ci < typed.length){
+      html += typed[ci] === ch
+        ? '<span style="color:#22c55e">'+esc(ch)+'</span>'
+        : '<span style="color:#f43f5e;text-decoration:underline">'+esc(ch)+'</span>';
+    } else {
+      html += '<span style="color:transparent">'+esc(ch)+'</span>';
+    }
+  }
+  clr.innerHTML = html;
+  var num = document.getElementById('num'+idx);
+  if(num) num.style.color = (typed === target && target !== '') ? '#22c55e' : '';
+}
+
+function showNote(i){ var n=document.getElementById('note'+i); if(n && n.textContent) n.classList.add('show'); }
+function hideNote(i){ var n=document.getElementById('note'+i); if(n) n.classList.remove('show'); }
+function showStartNote(i){ var num=document.getElementById('num'+i); if(num) num.style.color = '#a855f7'; }
+
+function updateStats(){
+  var done = 0, total = 0;
+  lineData.forEach(function(l){
+    if(l.isEmpty || (l.isCom && skipOn)) return;
+    total++;
+    if(l.inp.value === l.target) done++;
+  });
+  var pct = total > 0 ? Math.round(done/total*100) : 0;
+  document.getElementById('svPctV').textContent = done > 0 ? pct+'%' : '—';
+  document.getElementById('svDone').textContent = done+'/'+total;
+  if(done === total && total > 0) doneSet.add(cur);
+  document.getElementById('progressFill').style.width = (doneSet.size/M.length*100)+'%';
+  buildTabs();
+}
+
+function doCheck(){
+  var e = M[cur].eskizlar[curEskiz];
+  var done = 0, total = 0, errors = [];
+  lineData.forEach(function(l, i){
+    if(l.isEmpty || (l.isCom && skipOn)) return;
+    total++;
+    if(l.inp.value === l.target){
+      done++;
+      document.getElementById('num'+i).style.color = '#22c55e';
+      if(e.lines[i].n) showNote(i);
+    } else {
+      errors.push(i+1);
+      document.getElementById('num'+i).style.color = '#f43f5e';
+    }
+  });
+  var pct = total > 0 ? Math.round(done/total*100) : 0;
+  var b = document.getElementById('badge');
+  b.className = 'badge show';
+  if(pct >= 85){
+    b.className += ' g';
+    var key = cur+'-'+curEskiz;
+    eskizDoneSet.add(key);
+    var allDone = M[cur].eskizlar.every(function(_, idx){ return eskizDoneSet.has(cur+'-'+idx); });
+    if(allDone){
+      doneSet.add(cur);
+      b.textContent = '✅ Zo\'r! '+pct+'% — '+M[cur].id+' mavzusi to\'liq tugadi!';
+    } else {
+      b.textContent = '✅ Zo\'r! '+pct+'% ('+done+'/'+total+' qator). Keyingi eskizga o\'ting →';
+    }
+    buildEskizDots();
+    showRating();
+  } else if(pct >= 55){
+    b.className += ' o';
+    b.textContent = '⚡ '+pct+'% — xato qatorlar: '+errors.join(', ')+'-qator';
+  } else {
+    b.className += ' r';
+    b.textContent = '❌ '+pct+'% — qaytadan urinib ko\'ring';
+  }
+  updateStats();
+}
+
+function doClear(){
+  lineData.forEach(function(l, i){
+    l.inp.value = '';
+    var clr = document.getElementById('clr'+i);
+    if(clr) clr.innerHTML = '';
+    var num = document.getElementById('num'+i);
+    if(num) num.style.color = '';
+    hideNote(i);
+  });
+  document.getElementById('badge').className = 'badge';
+  updateStats();
+}
+
+function toggleGhost(){
+  ghostVisible = !ghostVisible;
+  document.querySelectorAll('.line-ghost').forEach(function(g){
+    g.style.visibility = ghostVisible ? 'visible' : 'hidden';
+  });
+  document.getElementById('ghostBtn').textContent = ghostVisible ? '👁️ Yashir' : '👁️ Ko\'rsat';
+}
+
+function toggleSkip(){
+  skipOn = !skipOn;
+  document.getElementById('sw').classList.toggle('on', skipOn);
+  document.getElementById('skipLbl').textContent = skipOn ? 'Kommentlar o\'tkazilmoqda' : '# Kommentlarni o\'tkazib yuboring';
+  buildLines(M[cur].eskizlar[curEskiz]);
+  applyBright();
+  updateStats();
+}
+
+function toggleDetail(){
+  var p = document.getElementById('detailPanel');
+  if(p.classList.contains('show')){
+    p.classList.remove('show');
+  } else {
+    document.getElementById('detailContent').textContent = M[cur].detail;
+    p.classList.add('show');
+  }
+}
+
+function toggleResult(){
+  var p = document.getElementById('resultPanel');
+  if(p.classList.contains('show')){
+    p.classList.remove('show');
+  } else {
+    document.getElementById('simWrap').innerHTML = '<pre>'+esc(M[cur].sim)+'</pre>';
+    p.classList.add('show');
+  }
+}
+
+function setBright(v){
+  document.getElementById('brightVal').textContent = v;
+  applyBright();
+}
+
+function applyBright(){
+  var v = parseInt(document.getElementById('brightSlider').value) || 3;
+  var op = BRIGHT[v];
+  document.querySelectorAll('.line-ghost').forEach(function(g){
+    if(!g.classList.contains('skip-c') && ghostVisible){
+      g.style.color = 'rgba(74,96,128,'+op+')';
+    }
+  });
+}
+
+function buildTabs(){
+  var c = document.getElementById('tabs');
+  c.innerHTML = '';
+  M.forEach(function(m, i){
+    var d = document.createElement('div');
+    d.className = 'tab'+(i===cur?' on':'')+(doneSet.has(i)?' done':'');
+    d.textContent = m.id;
+    d.onclick = (function(n){ return function(){ loadMod(n); }; })(i);
+    c.appendChild(d);
+  });
+}
+
+function buildStars(){
+  var sc = document.getElementById('stars');
+  sc.innerHTML = '';
+  for(var i = 1; i <= 10; i++){
+    var s = document.createElement('span');
+    s.className = 'star';
+    s.textContent = '⭐';
+    s.dataset.v = i;
+    s.onclick = (function(v){
+      return function(){
+        selectedStar = v;
+        document.getElementById('ratingScore').textContent = v+' / 10';
+        document.querySelectorAll('.star').forEach(function(st){
+          st.classList.toggle('on', parseInt(st.dataset.v) <= v);
+        });
+      };
+    })(i);
+    sc.appendChild(s);
+  }
+}
+
+function showRating(){
+  document.getElementById('ratingBox').classList.add('show');
+}
+
+function submitRating(){
+  if(ratingSubmitted) return;
+  if(selectedStar === 0){ alert('Iltimos baho tanlang!'); return; }
+  ratingSubmitted = true;
+  document.getElementById('ratingThanks').style.display = 'block';
+  document.querySelector('.rating-submit').style.display = 'none';
+}
+
+function esc(s){
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+</script>
+</body>
+</html>

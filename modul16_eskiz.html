@@ -1,0 +1,996 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Eskiz — 16-Modul. Regressiya (Regression)</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:#0a0e1a;color:#dde5f0;font-family:'JetBrains Mono',monospace;font-size:13px;min-height:100vh;}
+.top{background:#0f1520;border-bottom:1px solid #1e3048;padding:8px 14px;display:flex;align-items:center;gap:8px;position:sticky;top:0;z-index:50;}
+.top-t{color:#00f0c8;font-size:.78rem;font-weight:700;}
+.top-s{color:#4a6080;font-size:.65rem;margin-left:auto;}
+.bright-bar{background:#0f1520;border-bottom:1px solid #1e3048;padding:6px 14px;display:flex;align-items:center;gap:10px;position:sticky;top:41px;z-index:49;}
+.bright-lbl{font-size:.65rem;color:#4a6080;flex-shrink:0;}
+.bright-slider{flex:1;-webkit-appearance:none;height:4px;border-radius:2px;background:#1e3048;outline:none;cursor:pointer;}
+.bright-slider::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:#00f0c8;cursor:pointer;}
+.bright-val{font-size:.68rem;color:#00f0c8;font-weight:700;width:20px;text-align:right;flex-shrink:0;}
+.wrap{padding:10px 14px;max-width:540px;margin:0 auto;}
+.tabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;margin-bottom:10px;scrollbar-width:none;}
+.tabs::-webkit-scrollbar{display:none;}
+.tab{flex-shrink:0;padding:6px 12px;border-radius:20px;border:1px solid #1e3048;background:#141e2e;color:#4a6080;font-size:.68rem;cursor:pointer;transition:all .15s;}
+.tab.on{border-color:#00f0c8;color:#00f0c8;background:rgba(0,240,200,.08);}
+.tab.done{border-color:#22c55e;color:#22c55e;background:rgba(34,197,94,.06);}
+.stats{display:flex;gap:8px;margin-bottom:10px;}
+.stat{flex:1;background:#141e2e;border:1px solid #1e3048;border-radius:8px;padding:7px 8px;text-align:center;}
+.sv{font-size:.95rem;font-weight:700;color:#00f0c8;}
+.sl{font-size:.58rem;color:#4a6080;margin-top:2px;}
+.progress-bar{height:3px;background:#1e3048;border-radius:2px;margin-bottom:10px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,#00f0c8,#2563eb);border-radius:2px;transition:width .4s;}
+.intro-box{background:#0d1828;border:1px solid #1e3048;border-left:3px solid #00f0c8;border-radius:10px;padding:14px;margin-bottom:10px;}
+.intro-title{font-size:.8rem;font-weight:700;color:#00f0c8;margin-bottom:8px;}
+.intro-text{font-size:.7rem;line-height:1.85;color:#9fb0c8;white-space:pre-wrap;}
+.intro-stats{display:flex;gap:8px;margin-top:10px;}
+.intro-stat{flex:1;background:#080c14;border:1px solid #1e3048;border-radius:8px;padding:8px;text-align:center;}
+.intro-stat-v{font-size:1.1rem;font-weight:700;color:#00f0c8;}
+.intro-stat-l{font-size:.58rem;color:#4a6080;margin-top:2px;}
+.terms-box{background:#080c14;border:1px solid #1e3048;border-left:3px solid #a855f7;border-radius:8px;padding:10px 12px;margin-bottom:10px;}
+.terms-title{font-size:.68rem;font-weight:700;color:#a855f7;margin-bottom:8px;}
+.term-row{display:flex;gap:6px;margin-bottom:5px;align-items:flex-start;}
+.term-key{font-size:.64rem;color:#fbbf24;font-weight:700;min-width:120px;flex-shrink:0;}
+.term-val{font-size:.63rem;color:#4a6080;line-height:1.6;}
+.detail-panel{display:none;background:#0a1628;border:1px solid #2563eb;border-radius:8px;padding:12px 14px;margin-bottom:10px;font-size:.72rem;line-height:2;color:#93c5fd;white-space:pre-wrap;}
+.detail-panel.show{display:block;}
+.detail-title{color:#60a5fa;font-weight:700;margin-bottom:8px;font-size:.76rem;}
+
+/* TEST PANEL */
+.test-panel{background:#080c14;border:1px solid #1e3048;border-radius:10px;padding:12px;margin-bottom:10px;}
+.test-title{font-size:.72rem;font-weight:700;color:#fbbf24;margin-bottom:12px;}
+.test-q{background:#0d1828;border-left:3px solid #a855f7;border-radius:6px;padding:10px 12px;margin-bottom:10px;}
+.test-qtext{font-size:.71rem;color:#c4b5fd;line-height:1.7;margin-bottom:10px;}
+.test-opts{display:flex;flex-direction:column;gap:6px;}
+.test-opt{padding:8px 12px;border-radius:8px;border:1px solid #1e3048;background:#141e2e;font-size:.68rem;color:#8ba0c0;cursor:pointer;text-align:left;font-family:'JetBrains Mono',monospace;transition:all .15s;}
+.test-opt:active{opacity:.7;}
+.test-opt.correct{border-color:#22c55e;color:#22c55e;background:rgba(34,197,94,.1);}
+.test-opt.wrong{border-color:#f43f5e;color:#f43f5e;background:rgba(244,63,94,.1);}
+.test-opt.show-correct{border-color:#22c55e;color:#22c55e;background:rgba(34,197,94,.05);}
+.test-exp{display:none;font-size:.66rem;line-height:1.7;color:#64748b;padding:8px 0 0 4px;border-top:1px dashed #1e3048;margin-top:8px;}
+.test-exp.show{display:block;}
+.test-score{text-align:center;padding:10px;font-size:.78rem;font-weight:700;color:#00f0c8;display:none;}
+.test-score.show{display:block;}
+.btn-test-check{width:100%;padding:10px;background:#2563eb;color:#fff;font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:700;border:none;border-radius:8px;cursor:pointer;margin-top:8px;}
+
+/* ESKIZ (kod yozish mavzulari uchun) */
+.skip-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;padding:8px 12px;background:#141e2e;border:1px solid #1e3048;border-radius:8px;cursor:pointer;}
+.skip-row span{font-size:.7rem;color:#4a6080;}
+.sw{width:34px;height:18px;background:#1e3048;border-radius:10px;position:relative;transition:background .2s;flex-shrink:0;}
+.sw.on{background:#fbbf24;}
+.sw::after{content:'';position:absolute;top:2px;left:2px;width:14px;height:14px;background:#fff;border-radius:50%;transition:left .2s;}
+.sw.on::after{left:18px;}
+.sim-wrap{width:100%;overflow-x:auto;}
+.sim-wrap pre{font-size:.68rem;line-height:1.9;color:#22c55e;white-space:pre;}
+.result-panel{display:none;background:#080c14;border:1px solid #22c55e;border-radius:10px;padding:12px;margin-bottom:10px;}
+.result-panel.show{display:block;}
+.result-title{color:#22c55e;font-size:.72rem;font-weight:700;margin-bottom:8px;}
+.code-block{border:1px solid #1e3048;border-radius:10px;overflow:hidden;margin-bottom:10px;background:#090d18;}
+.fbar{display:flex;align-items:center;gap:5px;padding:7px 12px;background:#0f1520;border-bottom:1px solid #1e3048;}
+.dot{width:6px;height:6px;border-radius:50%;}
+.dot.r{background:#f43f5e;}.dot.y{background:#fbbf24;}.dot.g{background:#22c55e;}
+.fn{font-size:.65rem;color:#4a6080;margin-left:4px;}
+.fhint{margin-left:auto;font-size:.6rem;color:#00f0c8;opacity:.7;}
+.lines-wrap{padding:4px 0;}
+.line-block{margin:0;}
+.line-row{display:flex;align-items:center;position:relative;min-height:30px;}
+.line-num{width:28px;flex-shrink:0;font-size:.63rem;padding:4px 4px 4px 5px;color:#2a3a50;text-align:right;user-select:none;transition:color .2s;align-self:center;}
+.line-content{flex:1;position:relative;overflow-x:auto;overflow-y:hidden;min-height:30px;}
+.line-content::-webkit-scrollbar{height:2px;}
+.line-content::-webkit-scrollbar-thumb{background:#1e3048;border-radius:1px;}
+.line-ghost{font-size:.76rem;line-height:1.8;padding:4px 8px;white-space:pre;pointer-events:none;min-height:30px;display:block;}
+.line-ghost.skip-c{opacity:.08!important;}
+.line-colors{position:absolute;top:0;left:0;font-size:.76rem;line-height:1.8;padding:4px 8px;white-space:pre;pointer-events:none;z-index:2;min-height:30px;}
+.line-input{position:absolute;top:0;left:0;right:0;bottom:0;width:100%;font-family:'JetBrains Mono',monospace;font-size:.76rem;line-height:1.8;padding:4px 8px;color:transparent;-webkit-text-fill-color:transparent;caret-color:#00f0c8;background:transparent;border:none;outline:none;white-space:pre;overflow:hidden;z-index:10;-webkit-appearance:none;}
+.line-input:disabled{cursor:default;}
+.line-done-note{display:none;font-size:.66rem;line-height:1.6;padding:3px 8px 3px 34px;color:#38bdf8;background:rgba(56,189,248,.06);border-left:2px solid #38bdf8;white-space:pre-wrap;animation:fadeIn .25s ease;}
+.line-done-note.show{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:translateY(0)}}
+.btn-row{display:flex;gap:6px;flex-wrap:wrap;padding:9px 12px;background:#0f1520;border-top:1px solid #1e3048;}
+.btn{padding:8px 11px;border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:.68rem;font-weight:700;border:none;cursor:pointer;flex-shrink:0;transition:opacity .15s;}
+.btn:active{opacity:.7;}
+.btn-chk{background:#00f0c8;color:#080c14;}
+.btn-clr{background:transparent;border:1px solid #1e3048;color:#4a6080;}
+.btn-det{background:#2563eb;color:#fff;}
+.btn-ghost{background:#7c3aed;color:#fff;}
+.btn-res{background:#16a34a;color:#fff;}
+.badge{display:none;margin:0 12px 10px;padding:7px 12px;border-radius:8px;font-size:.7rem;border:1px solid #1e3048;}
+.badge.show{display:block;}
+.badge.g{border-color:#22c55e;color:#22c55e;background:rgba(34,197,94,.07);}
+.badge.o{border-color:#fbbf24;color:#fbbf24;background:rgba(251,191,36,.07);}
+.badge.r{border-color:#f43f5e;color:#f43f5e;background:rgba(244,63,94,.07);}
+.rating-box{background:#0d1828;border:1px solid #fbbf24;border-radius:12px;padding:14px 16px;margin-top:10px;display:none;}
+.rating-box.show{display:block;}
+.rating-title{font-size:.72rem;font-weight:700;color:#fbbf24;text-align:center;margin-bottom:4px;}
+.rating-sub{font-size:.62rem;color:#4a6080;text-align:center;margin-bottom:12px;}
+.stars{display:flex;justify-content:center;gap:4px;margin-bottom:10px;flex-wrap:wrap;}
+.star{font-size:1.5rem;cursor:pointer;filter:grayscale(1);opacity:.35;transition:transform .1s,filter .1s;user-select:none;}
+.star.on{filter:none;opacity:1;}
+.rating-score{text-align:center;font-size:.72rem;color:#fbbf24;font-weight:700;margin-bottom:8px;min-height:18px;}
+.rating-comment{width:100%;background:#141e2e;border:1px solid #1e3048;border-radius:8px;padding:8px 10px;color:#dde5f0;font-family:'JetBrains Mono',monospace;font-size:.68rem;resize:none;outline:none;margin-bottom:8px;}
+.rating-submit{width:100%;padding:10px;background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#080c14;font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:700;border:none;border-radius:8px;cursor:pointer;}
+.rating-thanks{display:none;text-align:center;padding:10px;font-size:.72rem;color:#22c55e;font-weight:700;}
+</style>
+</head>
+<body>
+<div class="top">
+  <div class="top-t">📈 Regressiya — 16-Modul</div>
+  <div class="top-s" id="topSub">16.1</div>
+</div>
+<div class="bright-bar">
+  <span class="bright-lbl">👁️ Xiralik:</span>
+  <input type="range" class="bright-slider" id="brightSlider" min="1" max="10" value="3" oninput="setBright(this.value)">
+  <span class="bright-val" id="brightVal">3</span>
+</div>
+<div class="wrap">
+  <div class="stats">
+    <div class="stat"><div class="sv" id="svScore">—</div><div class="sl">TEST BALL</div></div>
+    <div class="stat"><div class="sv" id="svDone">0/0</div><div class="sl">BAJARILDI</div></div>
+    <div class="stat"><div class="sv" id="svMod">1/16</div><div class="sl">MAVZU</div></div>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+  <div class="tabs" id="tabs"></div>
+  <div class="intro-box" id="introBox"></div>
+  <div class="terms-box" id="termsBox"></div>
+  <div class="detail-panel" id="detailPanel">
+    <div class="detail-title">📘 BATAFSIL</div>
+    <div id="detailContent"></div>
+  </div>
+  <div id="mainContent"></div>
+  <div class="rating-box" id="ratingBox">
+    <div class="rating-title">⭐ 16-Modulni baholang</div>
+    <div class="rating-sub">Fikringiz keyingi versiyani yaxshilashga yordam beradi</div>
+    <div class="stars" id="stars"></div>
+    <div class="rating-score" id="ratingScore">Baho tanlang (1–10)</div>
+    <textarea class="rating-comment" id="ratingComment" rows="2" placeholder="Izoh..."></textarea>
+    <button class="rating-submit" onclick="submitRating()">⭐ Yuborish</button>
+    <div class="rating-thanks" id="ratingThanks">✅ Rahmat!</div>
+  </div>
+</div>
+<script>
+var MODULE_INTRO = {
+  title: "📈 16-Modul haqida",
+  text: "Bu modulda siz Regressiya — raqamli qiymatlarni bashorat qilish usullarini chuqur o'rganasiz.\n\nSimple Linear Regression dan boshlab, formula bilan qo'lda hisoblashni, keyin scikit-learn bilan tezroq ishlashni, so'ngra Multiple va Non-linear Regression turlarini, va nihoyat Underfitting/Overfitting muvozanatini o'rganasiz.\n\nBu modul — Machine Learning ning eng ko'p ishlatiladigan qismi: uy narxi, savdo bashorati, harorat, aksiya narxi — bularning barchasi regressiya orqali bashorat qilinadi.",
+  count: 16
+};
+
+var M = [
+
+{id:'16.1', type:'test',
+ title:'Kirish — Regressiya nima?',
+ terms:[
+   ['Regressiya','Raqamli (uzluksiz) qiymatni bashorat qiluvchi ML usuli'],
+   ['Bog\'liq o\'zgaruvchi (Y)','Bashorat qilinayotgan natija'],
+   ['Bog\'liqsiz o\'zgaruvchi (X)','Bashorat uchun ishlatiladigan kirish ma\'lumoti'],
+   ['Korrelyatsiya','X va Y orasidagi chiziqli bog\'liqlik kuchi (-1 dan +1 gacha)']
+ ],
+ detail:'REGRESSIYA NIMA?\n\nRegressiya — Supervised Learning ning bir turi, lekin Classification dan farqli o\'laroq, u toifa emas, RAQAMLI qiymat bashorat qiladi. Masalan: "bu email spam yoki yo\'q" — Classification. "Bu uy qancha turadi" — Regressiya.\n\nX VA Y NIMA?\nX (feature, xususiyat) — modelga beriladigan kirish ma\'lumot. Y (label, natija) — model bashorat qilishi kerak bo\'lgan qiymat. Masalan uy narxini bashorat qilishda: X = xonalar soni, maydon, joylashuv; Y = narx.\n\nKORRELYATSIYA NEGA MUHIM?\nRegressiya modelini qurishdan oldin, X va Y orasida bog\'liqlik bor-yo\'qligini tekshirish kerak. Korrelyatsiya koeffitsienti +1 ga yaqin bo\'lsa — kuchli musbat bog\'liqlik (X oshganda Y ham oshadi). -1 ga yaqin — kuchli manfiy bog\'liqlik. 0 ga yaqin — bog\'liqlik kuchsiz, regressiya yaxshi natija bermasligi mumkin.\n\nREAL HAYOTDA REGRESSIYA:\nUy-joy narxini bashorat qilish, ob-havo haroratini bashorat qilish, kompaniya savdosini bashorat qilish, talaba bahosini bashorat qilish, aksiya narxini tahlil qilish — bularning barchasi regressiya masalalari.',
+ tests:[
+   {q:'Regressiya nima narsani bashorat qiladi?',
+    opts:['Toifa (masalan spam/spam emas)','Raqamli (uzluksiz) qiymat','Rasm ichidagi obyektni','Matn tilini'],
+    ans:1,
+    exp:'Regressiya raqamli (uzluksiz) qiymatlarni bashorat qiladi — masalan narx, harorat, ball. Toifalarni Classification bashorat qiladi.'},
+   {q:'X va Y orasida kuchli musbat korrelyatsiya bo\'lsa, bu nimani bildiradi?',
+    opts:['X va Y bog\'liq emas','X oshganda Y kamayadi','X oshganda Y ham oshish tendensiyasida','Y har doim X dan katta'],
+    ans:2,
+    exp:'Musbat korrelyatsiya — X oshganda Y ham oshadi degan tendensiyani bildiradi. Bu regressiya uchun yaxshi belgi.'},
+   {q:'Quyidagilardan qaysi biri Regressiya masalasiga misol?',
+    opts:['Email spam yoki spam emasligini aniqlash','Rasmda it yoki mushuk borligini aniqlash','Uy narxini bashorat qilish','Mijozlarni guruhlarga ajratish'],
+    ans:2,
+    exp:'Uy narxi — raqamli qiymat, shuning uchun bu Regressiya masalasi. Qolganlari Classification yoki Clustering ga misol.'}
+ ]},
+
+{id:'16.2', type:'test',
+ title:'Simple Linear Regression',
+ terms:[
+   ['Simple Linear Regression','Bitta X asosida Y ni bashorat qiluvchi chiziqli model'],
+   ['y = mx + b','Chiziqli regressiya formulasi'],
+   ['Least Squares','Eng kichik kvadratlar usuli — optimal chiziqni topish usuli'],
+   ['Residual','Haqiqiy va bashorat qilingan Y orasidagi farq']
+ ],
+ detail:'SIMPLE LINEAR REGRESSION FORMULASI\n\ny = mx + b\n\nBu yerda: m — slope (og\'ish koeffitsienti, chiziq qanchalik tik), b — intercept (X=0 bo\'lganda Y qiymati), x — kirish qiymati, y — bashorat qilingan natija.\n\nENG YAXSHI CHIZIQ QANDAY TOPILADI?\nMa\'lumotlar nuqtalar bulutini hosil qiladi. Maqsad — shu nuqtalarga "eng yaqin" to\'g\'ri chiziqni topish. "Eng yaqin" qanday o\'lchanadi? LEAST SQUARES usuli orqali: har bir nuqta uchun residual (haqiqiy Y - bashorat Y) hisoblanadi, bu residuallar kvadratga ko\'tariladi va yig\'iladi. Eng kichik yig\'indini beradigan m va b qiymatlari — "eng yaxshi chiziq".\n\nNEGA KVADRATGA KO\'TARILADI?\nIkki sabab bor: birinchi, manfiy va musbat residuallar bir-birini "yo\'qotib qo\'ymasin" uchun (kvadrat har doim musbat). Ikkinchi, katta xatolarni kichik xatolarga qaraganda kuchliroq jazolash uchun — bu modelni katta xatolardan qochishga undaydi.\n\nRESIDUAL NIMA?\nResidual = haqiqiy qiymat - bashorat qilingan qiymat. Agar uy haqiqatda 100 million, model 95 million deb bashorat qilsa, residual = 5 million. Yaxshi model — residuallari kichik bo\'lgan model.',
+ tests:[
+   {q:'Simple Linear Regression formulasi y = mx + b da "m" nimani bildiradi?',
+    opts:['X ning o\'zi','Slope (og\'ish koeffitsienti)','Intercept','Residual'],
+    ans:1,
+    exp:'"m" — slope, chiziqning og\'ish darajasini bildiradi. Katta m — tikroq chiziq.'},
+   {q:'Least Squares usuli nimani minimallashtiradi?',
+    opts:['X qiymatlarini','Residuallar kvadratlari yig\'indisini','Model tezligini','Ma\'lumot sonini'],
+    ans:1,
+    exp:'Least Squares — barcha nuqtalar uchun residuallar (xatolar) kvadratga ko\'tarilgan yig\'indisini eng kichik qiladigan chiziqni topadi.'},
+   {q:'"b" (intercept) qaysi holatdagi Y qiymatini bildiradi?',
+    opts:['X eng katta bo\'lganda','X=0 bo\'lganda','Y eng kichik bo\'lganda','X manfiy bo\'lganda'],
+    ans:1,
+    exp:'Intercept (b) — X=0 bo\'lganda chiziq Y o\'qini kesib o\'tadigan nuqta, ya\'ni boshlang\'ich qiymat.'}
+ ]},
+
+{id:'16.3', type:'eskiz',
+ title:'Simple Linear Regression. Vazifa',
+ terms:[
+   ['Variance (Dispersiya)','Qiymatlarning o\'rtachadan necha og\'ishini ko\'rsatadi'],
+   ['Covariance (Kovariatsiya)','Ikki o\'zgaruvchi birgalikda qanday o\'zgarishini ko\'rsatadi'],
+   ['np.mean()','NumPy da o\'rtacha qiymatni hisoblash funksiyasi'],
+   ['np.polyfit()','NumPy da chiziqli koeffitsientlarni avtomatik topish funksiyasi']
+ ],
+ detail:'QO\'LDA HISOBLASH FORMULASI\n\nslope (m) = sum((x - x_o\'rtacha) * (y - y_o\'rtacha)) / sum((x - x_o\'rtacha)^2)\nintercept (b) = y_o\'rtacha - m * x_o\'rtacha\n\nBu formula aslida COVARIANCE / VARIANCE nisbatidan iborat — x va y birgalikda qanchalik o\'zgarishini (covariance) x ning o\'z ichidagi o\'zgarishiga (variance) bo\'lish.\n\nNUMPY BILAN TEZ YO\'L: np.polyfit(x, y, 1) — bu funksiya darajasi 1 (chiziqli) bo\'lgan eng mos koeffitsientlarni avtomatik qaytaradi: natija [slope, intercept] ko\'rinishida keladi. Bu qo\'lda formula yozishning qisqartirilgan yo\'li, ammo formulani tushunish muhim — chunki bu barcha regressiya algoritmlarining negizi.',
+ sim:'>>> import numpy as np\n>>> x = np.array([1, 2, 3, 4, 5])\n>>> y = np.array([2, 4, 5, 4, 5])\n>>> x_o = np.mean(x)\n>>> y_o = np.mean(y)\n>>> slope = np.sum((x-x_o)*(y-y_o)) / np.sum((x-x_o)**2)\n>>> intercept = y_o - slope*x_o\n>>> print(slope, intercept)\n0.6 2.2\n\n>>> # tezroq yo\'l:\n>>> np.polyfit(x, y, 1)\narray([0.6, 2.2])',
+ eskizlar:[
+  {q:'numpy bilan x, y massivlarini yaratib, o\'rtachalarini hisoblang.',
+   lines:[
+    {c:'import numpy as np',n:'Siz numpy kutubxonasini np nomi bilan yukladingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'x = np.array([1, 2, 3, 4, 5])',n:'Siz x massivini yaratdingiz'},
+    {c:'y = np.array([2, 4, 5, 4, 5])',n:'Siz y massivini yaratdingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'x_o = np.mean(x)',n:'Siz x ning o\'rtacha qiymatini hisobladingiz'},
+    {c:'y_o = np.mean(y)',n:'Siz y ning o\'rtacha qiymatini hisobladingiz'},
+    {c:'print(x_o, y_o)',n:'Siz o\'rtacha qiymatlarni ekranga chiqardingiz'},
+   ]},
+  {q:'np.polyfit() yordamida slope va intercept ni avtomatik toping.',
+   lines:[
+    {c:'import numpy as np',n:'Siz numpy kutubxonasini yukladingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'x = np.array([1, 2, 3, 4, 5])',n:'Siz x massivini yaratdingiz'},
+    {c:'y = np.array([2, 4, 5, 4, 5])',n:'Siz y massivini yaratdingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'natija = np.polyfit(x, y, 1)',n:'Siz polyfit bilan chiziqli koeffitsientlarni topdingiz'},
+    {c:'slope = natija[0]',n:'Siz slope qiymatini ajratdingiz'},
+    {c:'intercept = natija[1]',n:'Siz intercept qiymatini ajratdingiz'},
+    {c:'print(\'slope:\', slope, \'intercept:\', intercept)',n:'Siz natijalarni ekranga chiqardingiz'},
+   ]},
+ ]},
+
+{id:'16.4', type:'eskiz',
+ title:'Amaliyot. Simple Linear Regression',
+ terms:[
+   ['Bashorat (Prediction)','Formula yordamida yangi X uchun Y topish'],
+   ['slope * x + intercept','O\'rganilgan model bilan bashorat formulasi'],
+   ['Xatolik (Error)','Haqiqiy va bashorat qiymat orasidagi farq'],
+   ['Yangi qiymat','Model hali ko\'rmagan X qiymati']
+ ],
+ detail:'FORMULA BILAN BASHORAT QILISH\n\n16.3 da topilgan slope va intercept qiymatlaridan foydalanib, model hali ko\'rmagan YANGI X qiymati uchun Y ni bashorat qilish mumkin: y_bashorat = slope * x_yangi + intercept.\n\nBU NEGA MUHIM? Modelni "o\'qitish" — bu shunchaki slope va intercept sonlarini topish. Modelni "ishlatish" — bu topilgan sonlarni formula sifatida yangi holatlarga qo\'llash. Aynan shu — Machine Learning ning mohiyati: o\'tmish ma\'lumotidan formula chiqarib, kelajakni bashorat qilish.\n\nXATONI TEKSHIRISH: Agar X qiymati uchun haqiqiy Y ma\'lum bo\'lsa (masalan sinov uchun), bashorat va haqiqiy qiymat orasidagi farqni hisoblab, model qanchalik aniq ekanini ko\'rish mumkin.',
+ sim:'>>> slope, intercept = 0.6, 2.2\n>>> x_yangi = 6\n>>> y_bashorat = slope * x_yangi + intercept\n>>> print(y_bashorat)\n5.8\n\n>>> y_haqiqiy = 6\n>>> xato = y_haqiqiy - y_bashorat\n>>> print(xato)\n0.2',
+ eskizlar:[
+  {q:'Topilgan slope va intercept bilan yangi X uchun bashorat qiling.',
+   lines:[
+    {c:'slope = 0.6',n:'Siz slope qiymatini berdingiz'},
+    {c:'intercept = 2.2',n:'Siz intercept qiymatini berdingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'x_yangi = 6',n:'Siz yangi X qiymatini yaratdingiz'},
+    {c:'y_bashorat = slope * x_yangi + intercept',n:'Siz formula yordamida Y ni bashorat qildingiz'},
+    {c:'print(\'Bashorat:\', y_bashorat)',n:'Siz bashoratni ekranga chiqardingiz'},
+   ]},
+  {q:'Bashorat va haqiqiy qiymat orasidagi xatoni hisoblang.',
+   lines:[
+    {c:'slope = 0.6',n:'Siz slope qiymatini berdingiz'},
+    {c:'intercept = 2.2',n:'Siz intercept qiymatini berdingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'x_yangi = 6',n:'Siz yangi X qiymatini yaratdingiz'},
+    {c:'y_haqiqiy = 6',n:'Siz haqiqiy Y qiymatini yaratdingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'y_bashorat = slope * x_yangi + intercept',n:'Siz Y ni bashorat qildingiz'},
+    {c:'xato = y_haqiqiy - y_bashorat',n:'Siz xatoni hisobladingiz'},
+    {c:'print(\'Xato:\', xato)',n:'Siz xatoni ekranga chiqardingiz'},
+   ]},
+ ]},
+
+{id:'16.5', type:'test',
+ title:'Simple LR. scikit-learn',
+ terms:[
+   ['LinearRegression()','sklearn dagi chiziqli regressiya klassi'],
+   ['.fit(X, y)','Modelni ma\'lumotga o\'qitish metodi'],
+   ['.coef_','O\'qitilgan model koeffitsientlari (slope)'],
+   ['.intercept_','O\'qitilgan model intercept qiymati']
+ ],
+ detail:'NEGA QO\'LDA FORMULA EMAS, SKLEARN?\n\nQo\'lda formula yozish — tushunish uchun zarur, lekin amalda sklearn ishlatiladi: kamroq kod, xatoga kamroq joy, va eng muhimi — bir xil .fit()/.predict() API barcha modellar uchun ishlaydi (LinearRegression, LogisticRegression, RandomForest — hammasi shu metodlarga ega).\n\nASOSIY QADAMLAR:\n1. from sklearn.linear_model import LinearRegression\n2. model = LinearRegression()\n3. model.fit(X, y) — o\'qitish\n4. model.predict(X_yangi) — bashorat\n\nMUHIM TUZOQ: X 2D FORMATDA BO\'LISHI KERAK!\nsklearn har doim X ni 2D massiv (qator x ustun) deb kutadi — chunki u ko\'p xususiyatli holatlar uchun mo\'ljallangan. Agar X bitta xususiyatli oddiy ro\'yxat bo\'lsa (masalan [1,2,3,4,5]), uni reshape(-1, 1) bilan 2D ustunga aylantirish kerak, aks holda xato chiqadi. Bu eng ko\'p uchraydigan boshlang\'ich xato.\n\n.COEF_ VA .INTERCEPT_: model.fit() dan keyin, model.coef_ — o\'qitilgan slope(lar)ni, model.intercept_ — intercept qiymatini qaytaradi. Bular qo\'lda hisoblangan m va b bilan bir xil mantiqqa ega.',
+ tests:[
+   {q:'sklearn da modelni ma\'lumotga o\'qitish uchun qaysi metod ishlatiladi?',
+    opts:['.train()','.fit()','.learn()','.run()'],
+    ans:1,
+    exp:'.fit(X, y) — sklearn dagi barcha modellarni o\'qitish uchun standart metod.'},
+   {q:'Simple LR da X massivi nima uchun 2D (masalan reshape(-1,1)) bo\'lishi kerak?',
+    opts:['Tezroq ishlashi uchun','sklearn har doim 2D (qator x ustun) formatni kutadi','Xotira tejash uchun','Bu majburiy emas'],
+    ans:1,
+    exp:'sklearn barcha modellari X ni 2D format deb kutadi, chunki API ko\'p xususiyatli holatlar uchun universal qilingan.'},
+   {q:'model.fit(X, y) dan keyin model.coef_ nimani qaytaradi?',
+    opts:['Ma\'lumotlar sonini','O\'qitilgan slope (koeffitsient) qiymatini','X massivining o\'zini','Xato xabarini'],
+    ans:1,
+    exp:'.coef_ — model o\'qitilganidan keyin topilgan slope qiymati(lari)ni qaytaradi.'}
+ ]},
+
+{id:'16.6', type:'eskiz',
+ title:'Jupyter Notebook. Simple Linear Regression',
+ terms:[
+   ['reshape(-1, 1)','1D massivni 2D ustun shakliga o\'tkazish'],
+   ['.predict()','O\'qitilgan model bilan bashorat qilish metodi'],
+   ['.score()','Modelning R² aniqlik ko\'rsatkichini qaytaradi'],
+   ['from sklearn.linear_model import','LinearRegression klassini yuklash yo\'li']
+ ],
+ detail:'TO\'LIQ SKLEARN WORKFLOW\n\nBu mashqda siz Simple Linear Regression ni boshidan oxirigacha sklearn bilan amalga oshirasiz: import qilish, X ni to\'g\'ri formatga keltirish, o\'qitish, bashorat qilish va aniqlikni baholash.\n\n.SCORE() NIMA? model.score(X, y) — R² (R-squared) qiymatini qaytaradi: model qancha foiz o\'zgarishni tushuntira olishini ko\'rsatadi. 1.0 — mukammal mos, 0.0 — model o\'rtachadan yaxshiroq emas.',
+ sim:'>>> from sklearn.linear_model import LinearRegression\n>>> import numpy as np\n>>> x = np.array([1,2,3,4,5]).reshape(-1,1)\n>>> y = np.array([2,4,5,4,5])\n>>> model = LinearRegression()\n>>> model.fit(x, y)\n>>> model.predict([[6]])\narray([5.8])\n>>> model.score(x, y)\n0.6',
+ eskizlar:[
+  {q:'LinearRegression klassini import qilib, X ni reshape qilib, modelni o\'qiting.',
+   lines:[
+    {c:'from sklearn.linear_model import LinearRegression',n:'Siz LinearRegression klassini import qildingiz'},
+    {c:'import numpy as np',n:'Siz numpy kutubxonasini yukladingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'x = np.array([1, 2, 3, 4, 5]).reshape(-1, 1)',n:'Siz X ni 2D ustun shakliga o\'tkazdingiz'},
+    {c:'y = np.array([2, 4, 5, 4, 5])',n:'Siz y massivini yaratdingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'model = LinearRegression()',n:'Siz LinearRegression obyektini yaratdingiz'},
+    {c:'model.fit(x, y)',n:'Siz modelni ma\'lumotga o\'qitdingiz'},
+   ]},
+  {q:'predict() va score() metodlarini ishlatib, modelni sinab ko\'ring.',
+   lines:[
+    {c:'from sklearn.linear_model import LinearRegression',n:'Siz LinearRegression klassini import qildingiz'},
+    {c:'import numpy as np',n:'Siz numpy kutubxonasini yukladingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'x = np.array([1, 2, 3, 4, 5]).reshape(-1, 1)',n:'Siz X ni tayyorladingiz'},
+    {c:'y = np.array([2, 4, 5, 4, 5])',n:'Siz y massivini yaratdingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'model = LinearRegression()',n:'Siz modelni yaratdingiz'},
+    {c:'model.fit(x, y)',n:'Siz modelni o\'qitdingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'bashorat = model.predict([[6]])',n:'Siz X=6 uchun bashorat qildingiz'},
+    {c:'aniqlik = model.score(x, y)',n:'Siz model aniqligini (R²) hisobladingiz'},
+    {c:'print(bashorat, aniqlik)',n:'Siz natijalarni ekranga chiqardingiz'},
+   ]},
+ ]},
+
+{id:'16.7', type:'eskiz',
+ title:'Amaliyot. scikit-learn Simple LR',
+ terms:[
+   ['Tajriba (experience)','Mustaqil o\'zgaruvchi misoli — necha yillik tajriba'],
+   ['Maosh (salary)','Bog\'liq o\'zgaruvchi misoli — bashorat qilinadigan natija'],
+   ['Koeffitsientni talqin qilish','coef_ qiymatini real ma\'noda tushuntirish'],
+   ['Yangi holat uchun bashorat','O\'qitilgan modelni ilgari ko\'rilmagan holatga qo\'llash']
+ ],
+ detail:'REAL STSENARIY: TAJRIBA VA MAOSH\n\nBu mashqda X = ish tajribasi (yil), Y = maosh (mln so\'m) bo\'lgan oddiy real-hayot stsenariysi ko\'rib chiqiladi.\n\nKOEFFITSIENTNI TALQIN QILISH: Agar model.coef_ = 1.2 chiqsa, bu "har bir qo\'shimcha tajriba yili maoshni o\'rtacha 1.2 mln so\'mga oshiradi" degan ma\'noni beradi. Koeffitsientlarni shunday real ma\'noda tushunish — modelni "qora quti" emas, balki tushunarli vosita qiladi.',
+ sim:'>>> from sklearn.linear_model import LinearRegression\n>>> import numpy as np\n>>> tajriba = np.array([1,2,3,4,5]).reshape(-1,1)\n>>> maosh = np.array([5,6,8,9,11])\n>>> model = LinearRegression()\n>>> model.fit(tajriba, maosh)\n>>> model.coef_\narray([1.5])\n>>> model.predict([[6]])\narray([12.5])',
+ eskizlar:[
+  {q:'Tajriba va maosh ma\'lumotidan Simple LR modelini o\'qiting.',
+   lines:[
+    {c:'from sklearn.linear_model import LinearRegression',n:'Siz LinearRegression klassini import qildingiz'},
+    {c:'import numpy as np',n:'Siz numpy kutubxonasini yukladingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'tajriba = np.array([1, 2, 3, 4, 5]).reshape(-1, 1)',n:'Siz tajriba yillarini tayyorladingiz'},
+    {c:'maosh = np.array([5, 6, 8, 9, 11])',n:'Siz maosh qiymatlarini yaratdingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'model = LinearRegression()',n:'Siz modelni yaratdingiz'},
+    {c:'model.fit(tajriba, maosh)',n:'Siz modelni o\'qitdingiz'},
+   ]},
+  {q:'Yangi tajriba yili uchun maosh bashorat qilib, coef_ ni chiqaring.',
+   lines:[
+    {c:'from sklearn.linear_model import LinearRegression',n:'Siz LinearRegression klassini import qildingiz'},
+    {c:'import numpy as np',n:'Siz numpy kutubxonasini yukladingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'tajriba = np.array([1, 2, 3, 4, 5]).reshape(-1, 1)',n:'Siz tajriba yillarini tayyorladingiz'},
+    {c:'maosh = np.array([5, 6, 8, 9, 11])',n:'Siz maosh qiymatlarini yaratdingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'model = LinearRegression()',n:'Siz modelni yaratdingiz'},
+    {c:'model.fit(tajriba, maosh)',n:'Siz modelni o\'qitdingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'yangi_maosh = model.predict([[6]])',n:'Siz 6 yillik tajriba uchun maosh bashorat qildingiz'},
+    {c:'print(\'Bashorat:\', yangi_maosh, \'Koeffitsient:\', model.coef_)',n:'Siz bashorat va koeffitsientni chiqardingiz'},
+   ]},
+ ]},
+
+{id:'16.8', type:'eskiz',
+ title:'Jupyter Notebook. Amaliyot',
+ terms:[
+   ['To\'liq workflow','Ma\'lumotdan bashoratgacha bo\'lgan barcha qadamlar'],
+   ['Train/Test ajratish','Modelni adolatli sinash uchun ma\'lumotni bo\'lish'],
+   ['r2_score','Model sifatini baholaydigan metrika'],
+   ['Yakuniy model','Barcha qadamlardan keyin tayyor bo\'lgan, sinaludigan model']
+ ],
+ detail:'YAKUNIY AMALIYOT — HAMMASINI BIRLASHTIRISH\n\nBu mashqda Simple Linear Regression ning to\'liq jarayoni birlashtiriladi: train_test_split bilan ma\'lumotni bo\'lish, faqat train qismida o\'qitish, test qismida bashorat qilish va r2_score bilan baholash.\n\nNEGA TEST QISMIDA BAHOLASH MUHIM? Agar model.score() ni xuddi shu o\'qitilgan ma\'lumotda chaqirsangiz, natija haqiqatdan yaxshiroq ko\'rinishi mumkin (model "yodlab olgan" bo\'lishi mumkin). Test qismida baholash — modelning haqiqiy, ko\'rmagan ma\'lumotdagi kuchini ko\'rsatadi.',
+ sim:'>>> from sklearn.model_selection import train_test_split\n>>> from sklearn.linear_model import LinearRegression\n>>> from sklearn.metrics import r2_score\n>>> X_train, X_test, y_train, y_test = train_test_split(\n...   X, y, test_size=0.2, random_state=42)\n>>> model = LinearRegression()\n>>> model.fit(X_train, y_train)\n>>> bashorat = model.predict(X_test)\n>>> r2_score(y_test, bashorat)\n0.87',
+ eskizlar:[
+  {q:'train_test_split bilan ma\'lumotni bo\'lib, modelni o\'qiting.',
+   lines:[
+    {c:'from sklearn.model_selection import train_test_split',n:'Siz train_test_split funksiyasini import qildingiz'},
+    {c:'from sklearn.linear_model import LinearRegression',n:'Siz LinearRegression klassini import qildingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'X_train, X_test, y_train, y_test = train_test_split(',n:'Siz ma\'lumotni bo\'lishni boshladingiz'},
+    {c:'  X, y, test_size=0.2, random_state=42)',n:'Siz 20% test va random_state berdingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'model = LinearRegression()',n:'Siz modelni yaratdingiz'},
+    {c:'model.fit(X_train, y_train)',n:'Siz modelni faqat train qismida o\'qitdingiz'},
+   ]},
+  {q:'Test to\'plamida bashorat qilib, r2_score bilan baholang.',
+   lines:[
+    {c:'from sklearn.metrics import r2_score',n:'Siz r2_score funksiyasini import qildingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'bashorat = model.predict(X_test)',n:'Siz test qismida bashorat qildingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'natija = r2_score(y_test, bashorat)',n:'Siz R² qiymatini hisobladingiz'},
+    {c:'print(\'R2 score:\', natija)',n:'Siz natijani ekranga chiqardingiz'},
+   ]},
+ ]},
+
+{id:'16.9', type:'test',
+ title:'Multiple Linear Regression',
+ terms:[
+   ['Multiple Linear Regression','Bir nechta X asosida Y ni bashorat qiluvchi model'],
+   ['y = w1x1 + w2x2 + ... + b','Ko\'p o\'zgaruvchili chiziqli formula'],
+   ['Feature (xususiyat)','Modelga kirish sifatida beriladigan har bir ustun'],
+   ['Koeffitsientlar vektori','Har bir xususiyat uchun alohida og\'irlik qiymati']
+ ],
+ detail:'SIMPLE DAN MULTIPLE GA\n\nKo\'pchilik real masalalarda natija faqat bitta omilga bog\'liq emas. Uy narxi nafaqat maydonga, balki xonalar soniga, qurilgan yiliga, joylashuviga ham bog\'liq. Multiple Linear Regression aynan shu — bir nechta X (xususiyat) asosida Y ni bashorat qiladi:\n\ny = w1*x1 + w2*x2 + w3*x3 + ... + b\n\nHar bir xususiyat (x1, x2, x3...) o\'zining alohida og\'irligiga (w1, w2, w3...) ega. Model o\'qitilganda, har bir xususiyat uchun mos og\'irlikni topadi.\n\nKOEFFITSIENTLARNI TALQIN QILISH QIYINLASHADI: Simple LR da bitta coef_ bor edi. Multiple LR da coef_ — massiv (har bir xususiyat uchun bitta son). Bularni talqin qilishda "boshqa xususiyatlar o\'zgarmas qolganda" degan shart bilan o\'qish kerak — masalan "xonalar soni bir birlik oshganda, narx w1 ga oshadi, AGAR maydon va joylashuv o\'zgarmasa".\n\nMUHIM ESLATMA: Xususiyatlar soni ko\'paysa, model murakkablashadi va overfitting xavfi oshadi (16.16 da batafsil ko\'riladi).',
+ tests:[
+   {q:'Multiple Linear Regression Simple LR dan nimasi bilan farq qiladi?',
+    opts:['Boshqa dasturlash tilida yoziladi','Bir nechta X (xususiyat) ishlatadi','Faqat rasm bilan ishlaydi','Y raqamli emas, toifaviy bo\'ladi'],
+    ans:1,
+    exp:'Multiple LR bir nechta xususiyat (X1, X2, X3...) asosida bitta Y ni bashorat qiladi, Simple LR esa faqat bitta X ishlatadi.'},
+   {q:'Multiple LR da model.coef_ nimani qaytaradi?',
+    opts:['Bitta son','Har bir xususiyat uchun alohida koeffitsientlar massivi','Faqat intercept qiymatini','Ma\'lumotlar sonini'],
+    ans:1,
+    exp:'Multiple LR da coef_ — har bir xususiyat (feature) uchun alohida og\'irlik qiymatlaridan iborat massiv bo\'ladi.'},
+   {q:'Uy narxini xonalar soni, maydon va joylashuv asosida bashorat qilish — bu qaysi model?',
+    opts:['Simple Linear Regression','Multiple Linear Regression','Classification','Clustering'],
+    ans:1,
+    exp:'Bir nechta xususiyat (xonalar soni, maydon, joylashuv) ishlatilgani uchun bu Multiple Linear Regression.'}
+ ]},
+
+{id:'16.10', type:'eskiz',
+ title:'Multiple Linear Regression. Scikit-learn',
+ terms:[
+   ['X (DataFrame)','Bir nechta ustunli kirish ma\'lumoti'],
+   ['Bir nechta ustunni tanlash','df[[\'ustun1\',\'ustun2\']] sintaksisi'],
+   ['Koeffitsientlarni talqin qilish','Har bir xususiyat ta\'sirini tushunish'],
+   ['Bir xil API','sklearn da Simple va Multiple LR kodi deyarli bir xil']
+ ],
+ detail:'KODDA FARQ JUDA KICHIK\n\nsklearn ning eng kuchli tomoni — Simple LR dan Multiple LR ga o\'tish uchun kod deyarli o\'zgarmaydi! Faqat X endi bir nechta ustunli DataFrame bo\'ladi (masalan df[[\'xona\',\'maydon\']]), qolgan barcha qadamlar (.fit, .predict, .score) bir xil qoladi.\n\nDIQQAT: pandas da bir nechta ustunni tanlashda IKKITA qavs ishlatiladi: df[[\'ustun1\', \'ustun2\']] — ichki qavs ustunlar ro\'yxati, tashqi qavs DataFrame dan tanlash uchun.',
+ sim:'>>> import pandas as pd\n>>> from sklearn.linear_model import LinearRegression\n>>> df = pd.DataFrame({\n...   \'xona\':[2,3,3,4,5],\n...   \'maydon\':[50,70,75,90,120],\n...   \'narx\':[300,420,440,510,650]})\n>>> X = df[[\'xona\',\'maydon\']]\n>>> y = df[\'narx\']\n>>> model = LinearRegression()\n>>> model.fit(X, y)\n>>> model.coef_\narray([12.5, 4.8])',
+ eskizlar:[
+  {q:'DataFrame yaratib, bir nechta xususiyatni X qilib tanlang va modelni o\'qiting.',
+   lines:[
+    {c:'import pandas as pd',n:'Siz pandas kutubxonasini yukladingiz'},
+    {c:'from sklearn.linear_model import LinearRegression',n:'Siz LinearRegression klassini import qildingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'df = pd.DataFrame({',n:'Siz DataFrame yaratishni boshladingiz'},
+    {c:'  \'xona\':[2,3,3,4,5],',n:'Siz xona ustunini qo\'shdingiz'},
+    {c:'  \'maydon\':[50,70,75,90,120],',n:'Siz maydon ustunini qo\'shdingiz'},
+    {c:'  \'narx\':[300,420,440,510,650]',n:'Siz narx ustunini qo\'shdingiz'},
+    {c:'})',n:'Siz DataFrame yaratishni yakunladingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'X = df[[\'xona\', \'maydon\']]',n:'Siz ikki xususiyatni X qilib tanladingiz'},
+    {c:'y = df[\'narx\']',n:'Siz narx ustunini y qilib tanladingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'model = LinearRegression()',n:'Siz modelni yaratdingiz'},
+    {c:'model.fit(X, y)',n:'Siz modelni ikki xususiyat asosida o\'qitdingiz'},
+   ]},
+  {q:'coef_ va intercept_ ni chiqarib, har birini talqin qiling.',
+   lines:[
+    {c:'koeffitsientlar = model.coef_',n:'Siz har bir xususiyat koeffitsientini oldingiz'},
+    {c:'intercept = model.intercept_',n:'Siz intercept qiymatini oldingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'print(\'Xona koeffitsienti:\', koeffitsientlar[0])',n:'Siz xona ustuni ta\'sirini chiqardingiz'},
+    {c:'print(\'Maydon koeffitsienti:\', koeffitsientlar[1])',n:'Siz maydon ustuni ta\'sirini chiqardingiz'},
+    {c:'print(\'Intercept:\', intercept)',n:'Siz intercept qiymatini chiqardingiz'},
+   ]},
+ ]},
+
+{id:'16.11', type:'eskiz',
+ title:'Jupyter Notebook. Multiple Linear Regression',
+ terms:[
+   ['Real dataset','Bir nechta ustunli haqiqiy ma\'lumotlar jadvali'],
+   ['Yangi qator uchun bashorat','Bir nechta qiymat bilan predict() chaqirish'],
+   ['2D ro\'yxat','predict() ga berish uchun [[qiymat1, qiymat2]] formati'],
+   ['Xususiyatlar ta\'siri','Qaysi xususiyat natijaga ko\'proq ta\'sir qilishini ko\'rish']
+ ],
+ detail:'TO\'LIQ MULTIPLE LR NOTEBOOK MASHG\'ULOTI\n\nBu mashqda uy narxi datasetidan (xonalar soni, maydon, qurilgan yili) to\'liq Multiple LR modelini o\'qitib, yangi (hali ko\'rilmagan) uy uchun narx bashorat qilinadi.\n\nPREDICT() GA BIR NECHTA QIYMAT BERISH: Multiple LR da predict() ga ham 2D format kerak, lekin endi har bir ichki ro\'yxat bir nechta xususiyat qiymatini o\'z ichiga oladi: model.predict([[3, 80, 2015]]) — bu yerda 3=xona, 80=maydon, 2015=qurilgan yil.',
+ sim:'>>> import pandas as pd\n>>> from sklearn.linear_model import LinearRegression\n>>> df = pd.DataFrame({\n...   \'xona\':[2,3,3,4,5],\'maydon\':[50,70,75,90,120],\n...   \'yil\':[2010,2015,2012,2018,2020],\n...   \'narx\':[300,420,440,510,650]})\n>>> X = df[[\'xona\',\'maydon\',\'yil\']]\n>>> y = df[\'narx\']\n>>> model = LinearRegression()\n>>> model.fit(X, y)\n>>> model.predict([[3, 80, 2019]])\narray([465.3])',
+ eskizlar:[
+  {q:'Uy narxi datasetidan (xona, maydon, yil) Multiple LR modelini o\'qiting.',
+   lines:[
+    {c:'import pandas as pd',n:'Siz pandas kutubxonasini yukladingiz'},
+    {c:'from sklearn.linear_model import LinearRegression',n:'Siz LinearRegression klassini import qildingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'df = pd.DataFrame({',n:'Siz DataFrame yaratishni boshladingiz'},
+    {c:'  \'xona\':[2,3,3,4,5],',n:'Siz xona ustunini qo\'shdingiz'},
+    {c:'  \'maydon\':[50,70,75,90,120],',n:'Siz maydon ustunini qo\'shdingiz'},
+    {c:'  \'yil\':[2010,2015,2012,2018,2020],',n:'Siz qurilgan yil ustunini qo\'shdingiz'},
+    {c:'  \'narx\':[300,420,440,510,650]',n:'Siz narx ustunini qo\'shdingiz'},
+    {c:'})',n:'Siz DataFrame yaratishni yakunladingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'X = df[[\'xona\', \'maydon\', \'yil\']]',n:'Siz uch xususiyatni X qilib tanladingiz'},
+    {c:'y = df[\'narx\']',n:'Siz narx ustunini y qilib tanladingiz'},
+    {c:'model = LinearRegression()',n:'Siz modelni yaratdingiz'},
+    {c:'model.fit(X, y)',n:'Siz modelni o\'qitdingiz'},
+   ]},
+  {q:'Yangi uy uchun (3 xona, 80 m², 2019 yil) narxni bashorat qiling.',
+   lines:[
+    {c:'yangi_uy = [[3, 80, 2019]]',n:'Siz yangi uy xususiyatlarini 2D ro\'yxat qilib yaratdingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'bashorat = model.predict(yangi_uy)',n:'Siz yangi uy uchun narxni bashorat qildingiz'},
+    {c:'print(\'Bashorat qilingan narx:\', bashorat)',n:'Siz bashoratni ekranga chiqardingiz'},
+   ]},
+ ]},
+
+{id:'16.12', type:'test',
+ title:'Non-linear Regression',
+ terms:[
+   ['Non-linear Regression','To\'g\'ri chiziq bilan ifodalanmaydigan bog\'liqlik modeli'],
+   ['Egri chiziq (Curve)','X oshganda Y notekis o\'zgaradigan shakl'],
+   ['Chiziqli model yetarli emas','Ba\'zi ma\'lumotlarda to\'g\'ri chiziq mos kelmaydi'],
+   ['Transformatsiya','Ma\'lumotni boshqa shaklga keltirib chiziqli qilish usuli']
+ ],
+ detail:'QACHON CHIZIQ YETARLI EMAS?\n\nBa\'zi real bog\'liqliklar chiziq emas, egri shaklga ega: aholi o\'sishi (exponential), dori ta\'siri vaqt bo\'yicha (logarithmic), fizik jarayonlar (kvadratik). Bunday hollarda Simple/Multiple Linear Regression yaxshi natija bermaydi — chiziq ma\'lumotning markazidan o\'tadi, lekin chekkalarida katta xatoga ega bo\'ladi.\n\nQANDAY BILISH MUMKIN CHIZIQ YETARLI EMASLIGINI? Ma\'lumotni scatter plot orqali chizib ko\'rish — agar nuqtalar aniq egri shakl hosil qilsa (U-shakl, S-shakl va h.k.), chiziqli model mos emas. Yoki: chiziqli model o\'qitilgandan keyin past R² va katta residuallar ko\'rinsa, bu signal.\n\nYECHIM YO\'LLARI: Polynomial Regression (X ning darajalarini qo\'shish), maxsus funksiyalarga moslashtirish (curve_fit), yoki butunlay boshqa model turini tanlash (Decision Tree, Random Forest — bular tabiatan non-linear).',
+ tests:[
+   {q:'Qachon Non-linear Regression kerak bo\'ladi?',
+    opts:['Ma\'lumot juda kichik bo\'lganda','Ma\'lumot to\'g\'ri chiziq bilan yaxshi mos kelmaganda','Faqat bitta X bo\'lganda','Hech qachon kerak emas'],
+    ans:1,
+    exp:'Agar ma\'lumotlar egri shakl hosil qilsa va chiziqli model katta xato bersa, Non-linear Regression kerak bo\'ladi.'},
+   {q:'Aholi o\'sishi (exponential growth) qanday bog\'liqlik turiga misol?',
+    opts:['Chiziqli','Non-linear','Tasodifiy','Doimiy'],
+    ans:1,
+    exp:'Aholi o\'sishi vaqt o\'tishi bilan tezlashib boradi — bu chiziqli emas, balki egri (exponential) shaklga ega, ya\'ni non-linear.'},
+   {q:'Chiziqli modelni egri ma\'lumotga majburan qo\'llash natijasi qanday bo\'ladi?',
+    opts:['Har doim mukammal mos keladi','Past R², katta xatolik','Model tezroq ishlaydi','Hech qanday farq bo\'lmaydi'],
+    ans:1,
+    exp:'Mos kelmagan model turi past R² va katta residuallar (xatolar) bilan natija beradi, ayniqsa ma\'lumot chekkalarida.'}
+ ]},
+
+{id:'16.13', type:'test',
+ title:'Polynomial Regression',
+ terms:[
+   ['Polynomial Regression','X ning darajalarini (x², x³...) qo\'shib egri chiziq hosil qilish'],
+   ['Degree (daraja)','Polinomning eng yuqori darajasi'],
+   ['PolynomialFeatures','sklearn da yangi daraja ustunlarini yaratuvchi klass'],
+   ['Overfitting xavfi','Daraja juda yuqori bo\'lsa, model ma\'lumotni yodlab oladi']
+ ],
+ detail:'POLYNOMIAL REGRESSION QANDAY ISHLAYDI?\n\nAjoyib tomoni: Polynomial Regression aslida hali ham LINEAR REGRESSION! Faqat X ustuniga yangi ustunlar (x², x³, ...) qo\'shiladi, va Linear Regression bu YANGI kengaytirilgan xususiyatlar to\'plamiga qo\'llaniladi. Koeffitsientlar bo\'yicha model hali ham chiziqli — faqat kirish xususiyatlari endi egri shaklni ifodalaydi.\n\nPOLYNOMIALFEATURES: sklearn.preprocessing.PolynomialFeatures(degree=2) — X dan avtomatik x² ustunini yaratadi. degree=3 bo\'lsa, x² va x³ qo\'shiladi. Bu transformatsiyadan keyin oddiy LinearRegression qo\'llanadi.\n\nDEGREE TANLASH — MUVOZANAT MASALASI:\ndegree=1 — oddiy chiziq (agar ma\'lumot egri bo\'lsa, underfitting).\ndegree=2-3 — odatda yetarli, ko\'pchilik real egri shakllarni yaxshi tutadi.\ndegree=10+ — model har bir nuqtadan "burama" o\'tadi, train da mukammal, lekin yangi ma\'lumotda juda yomon (overfitting). Bu 16.16 da chuqurroq ko\'riladi.',
+ tests:[
+   {q:'Polynomial Regression aslida qaysi modelni transformatsiyalangan xususiyatlarga qo\'llaydi?',
+    opts:['Decision Tree','Logistic Regression','Linear Regression','K-Means'],
+    ans:2,
+    exp:'Polynomial Regression — X ga x², x³ kabi yangi ustunlar qo\'shilgandan keyin, hali ham Linear Regression qo\'llaniladi.'},
+   {q:'Degree (daraja) juda yuqori tanlansa, qanday xavf bor?',
+    opts:['Model juda tez ishlaydi','Underfitting','Overfitting (ma\'lumotni yodlab olish)','Hech qanday xavf yo\'q'],
+    ans:2,
+    exp:'Juda yuqori daraja model har bir nuqtadan "burama" o\'tishiga olib keladi — bu train da yaxshi, lekin yangi ma\'lumotda yomon ishlaydi (overfitting).'},
+   {q:'PolynomialFeatures klassi nima qiladi?',
+    opts:['Ma\'lumotni normalizatsiya qiladi','X ustunidan x², x³ kabi yangi ustunlar yaratadi','Ma\'lumotni tasodifiy aralashtiradi','Modelni o\'qitadi'],
+    ans:1,
+    exp:'PolynomialFeatures mavjud X ustunidan yuqori darajali (x², x³...) yangi ustunlar yaratadi, keyin bu kengaytirilgan X ga Linear Regression qo\'llanadi.'}
+ ]},
+
+{id:'16.14', type:'eskiz',
+ title:'Curve_fit',
+ terms:[
+   ['scipy.optimize.curve_fit','O\'zingiz belgilagan funksiyaga ma\'lumotni moslashtirish vositasi'],
+   ['Maxsus funksiya (custom function)','def orqali yozilgan matematik formula'],
+   ['Parametrlarni topish','curve_fit eng mos parametr qiymatlarini qaytaradi'],
+   ['popt','curve_fit natijasidagi optimal parametrlar massivi']
+ ],
+ detail:'CURVE_FIT — ISTALGAN SHAKLGA MOSLASHTIRISH\n\nPolynomialFeatures faqat polinomial shakllarga (x², x³) mos keladi. Lekin ba\'zi real jarayonlar boshqa shaklga ega: exponential (a*e^(b*x)), logarithmic (a*log(x)+b) va h.k. scipy.optimize.curve_fit — siz BELGILAGAN ISTALGAN funksiyaga ma\'lumotni moslashtiradi.\n\nQANDAY ISHLATILADI?\n1. def func(x, a, b): return a * np.exp(b * x) — o\'zingiz funksiya shaklini belgilaysiz\n2. popt, pcov = curve_fit(func, x, y) — curve_fit eng mos a va b qiymatlarini topadi\n3. popt — topilgan optimal parametrlar (masalan [a_qiymat, b_qiymat])\n\npcov (covariance matrix) — parametrlarning ishonchlilik darajasini ko\'rsatadi, bu murakkabroq mavzu, hozircha popt bilan ishlash yetarli.',
+ sim:'>>> from scipy.optimize import curve_fit\n>>> import numpy as np\n>>> def func(x, a, b):\n...     return a * np.exp(b * x)\n>>> x = np.array([1,2,3,4,5])\n>>> y = np.array([2.7, 7.4, 20, 54, 148])\n>>> popt, pcov = curve_fit(func, x, y)\n>>> print(popt)\n[1.0, 1.0]',
+ eskizlar:[
+  {q:'Exponential funksiya ta\'riflab, curve_fit chaqiring.',
+   lines:[
+    {c:'from scipy.optimize import curve_fit',n:'Siz curve_fit funksiyasini import qildingiz'},
+    {c:'import numpy as np',n:'Siz numpy kutubxonasini yukladingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'def func(x, a, b):',n:'Siz maxsus exponential funksiya ta\'rifini boshladingiz'},
+    {c:'    return a * np.exp(b * x)',n:'Siz funksiya formulasini yozdingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'x = np.array([1, 2, 3, 4, 5])',n:'Siz x massivini yaratdingiz'},
+    {c:'y = np.array([2.7, 7.4, 20, 54, 148])',n:'Siz y massivini yaratdingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'popt, pcov = curve_fit(func, x, y)',n:'Siz eng mos parametrlarni topdingiz'},
+   ]},
+  {q:'popt orqali topilgan parametrlarni chiqarib, ulardan bashorat qiling.',
+   lines:[
+    {c:'a, b = popt',n:'Siz popt dan a va b qiymatlarini ajratdingiz'},
+    {c:'print(\'a:\', a, \'b:\', b)',n:'Siz topilgan parametrlarni chiqardingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'x_yangi = 6',n:'Siz yangi x qiymatini yaratdingiz'},
+    {c:'y_bashorat = func(x_yangi, a, b)',n:'Siz topilgan parametrlar bilan bashorat qildingiz'},
+    {c:'print(\'Bashorat:\', y_bashorat)',n:'Siz bashoratni ekranga chiqardingiz'},
+   ]},
+ ]},
+
+{id:'16.15', type:'eskiz',
+ title:'Jupyter Notebook. Non-linear regression',
+ terms:[
+   ['PolynomialFeatures + LinearRegression','Polinomial regressiya uchun ikki bosqichli pipeline'],
+   ['fit_transform()','Xususiyatlarni o\'zgartirib, shu zahoti natijani qaytarish'],
+   ['Egri chiziqli bashorat','Polinomial model bilan predict qilish'],
+   ['Daraja tanlash','Turli degree qiymatlarini sinab, eng mosini topish']
+ ],
+ detail:'POLYNOMIAL REGRESSION TO\'LIQ PIPELINE\n\nBu mashqda PolynomialFeatures va LinearRegression birgalikda ishlatiladi — bu ikki bosqichli pipeline: avval X transformatsiya qilinadi (fit_transform), keyin transformatsiyalangan X ga LinearRegression qo\'llaniladi.\n\nFIT_TRANSFORM() NIMA? .fit() (qoidani o\'rganish) va .transform() (qoidani qo\'llash) ni bitta chaqiriqda birlashtiradi — PolynomialFeatures uchun bu shunchaki X dan x² ustunini hisoblab qo\'shib beradi.',
+ sim:'>>> from sklearn.preprocessing import PolynomialFeatures\n>>> from sklearn.linear_model import LinearRegression\n>>> import numpy as np\n>>> x = np.array([1,2,3,4,5]).reshape(-1,1)\n>>> y = np.array([1,4,9,16,25])\n>>> poly = PolynomialFeatures(degree=2)\n>>> x_poly = poly.fit_transform(x)\n>>> model = LinearRegression()\n>>> model.fit(x_poly, y)\n>>> model.predict(poly.transform([[6]]))\narray([36.])',
+ eskizlar:[
+  {q:'PolynomialFeatures bilan X ni transformatsiya qiling (degree=2).',
+   lines:[
+    {c:'from sklearn.preprocessing import PolynomialFeatures',n:'Siz PolynomialFeatures klassini import qildingiz'},
+    {c:'import numpy as np',n:'Siz numpy kutubxonasini yukladingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'x = np.array([1, 2, 3, 4, 5]).reshape(-1, 1)',n:'Siz X ni 2D shaklga keltirdingiz'},
+    {c:'y = np.array([1, 4, 9, 16, 25])',n:'Siz y massivini yaratdingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'poly = PolynomialFeatures(degree=2)',n:'Siz 2-darajali transformator yaratdingiz'},
+    {c:'x_poly = poly.fit_transform(x)',n:'Siz X ni x² ustuni bilan kengaytirdingiz'},
+   ]},
+  {q:'Transformatsiyalangan X bilan LinearRegression o\'qitib, bashorat qiling.',
+   lines:[
+    {c:'from sklearn.linear_model import LinearRegression',n:'Siz LinearRegression klassini import qildingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'model = LinearRegression()',n:'Siz modelni yaratdingiz'},
+    {c:'model.fit(x_poly, y)',n:'Siz modelni kengaytirilgan X bilan o\'qitdingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'x_yangi = poly.transform([[6]])',n:'Siz yangi X ni ham xuddi shu tarzda transformatsiya qildingiz'},
+    {c:'bashorat = model.predict(x_yangi)',n:'Siz egri chiziq bo\'yicha bashorat qildingiz'},
+    {c:'print(\'Bashorat:\', bashorat)',n:'Siz natijani ekranga chiqardingiz'},
+   ]},
+ ]},
+
+{id:'16.16', type:'test',
+ title:'Underfitting va Overfitting',
+ terms:[
+   ['Underfitting','Model juda sodda — ma\'lumotdagi naqshni topa olmaydi'],
+   ['Overfitting','Model juda murakkab — shovqinni ham yodlab oladi'],
+   ['Bias-Variance Tradeoff','Sodda va murakkab model orasidagi muvozanat'],
+   ['Train/Test farqi','Ikkisi orasidagi katta farq — overfitting belgisi']
+ ],
+ detail:'IKKI XATO TURI\n\nUNDERFITTING: Model juda sodda — hatto train ma\'lumotdagi asosiy naqshni ham topa olmaydi. Misol: egri (curve) shakldagi ma\'lumotga degree=1 (oddiy chiziq) qo\'llash. Natija: train da ham, test da ham past aniqlik.\n\nOVERFITTING: Model juda murakkab — train ma\'lumotni "yodlab" oladi, hatto tasodifiy shovqinni ham. Misol: degree=15 polinomial regressiya kichik datasetga. Natija: train da deyarli 100% aniqlik, lekin test da juda past — model yangi ma\'lumotda umuman ishlamaydi.\n\nBIAS-VARIANCE TRADEOFF: Bias — model qanchalik sodda taxminlar qiladi (yuqori bias = underfitting). Variance — model ma\'lumot o\'zgarishiga qanchalik sezgir (yuqori variance = overfitting). Yaxshi model — bu ikkisi orasidagi muvozanat nuqtasi.\n\nQANDAY ANIQLASH MUMKIN? Train va test natijalarini solishtirish: ikkisi ham past — underfitting. Train juda yuqori, test past — overfitting. Ikkisi yaqin va yetarlicha yuqori — yaxshi muvozanat.\n\nYECHIMLAR: Underfitting uchun — murakkabroq model yoki ko\'proq xususiyat. Overfitting uchun — Regularization (Ridge/Lasso), kamroq daraja, ko\'proq ma\'lumot, yoki Cross-Validation bilan eng mos murakkablikni tanlash.',
+ tests:[
+   {q:'Overfitting holatida train va test natijalari odatda qanday bo\'ladi?',
+    opts:['Ikkisi ham past','Train da yaxshi, test da yomon','Ikkisi ham juda yuqori va teng','Test train dan yaxshiroq bo\'ladi'],
+    ans:1,
+    exp:'Overfitting — model train ma\'lumotni yodlab olgani uchun u yerda juda yaxshi, lekin yangi (test) ma\'lumotda yomon ishlaydi.'},
+   {q:'Egri (curve) shakldagi ma\'lumotga degree=1 (oddiy chiziq) qo\'llansa va natija past bo\'lsa, bu qaysi muammo?',
+    opts:['Overfitting','Underfitting','Data leakage','Multicollinearity'],
+    ans:1,
+    exp:'Model juda sodda (faqat chiziq) bo\'lgani uchun egri naqshni topa olmaydi — bu underfitting, va natija train da ham past bo\'ladi.'},
+   {q:'Bias-Variance Tradeoff nimani anglatadi?',
+    opts:['Modelni tezlashtirish usulini','Sodda va murakkab model orasidagi muvozanatni topishni','Ma\'lumotni tozalash jarayonini','Train/test ni bo\'lish nisbatini'],
+    ans:1,
+    exp:'Bias-Variance Tradeoff — model qanchalik sodda (underfitting xavfi) yoki murakkab (overfitting xavfi) bo\'lishi orasidagi muvozanatni anglatadi.'}
+ ]},
+
+];
+
+// ═══════ HOLAT ═══════
+var cur=0, curEskiz=0, skipOn=false, ghostVisible=true;
+var lineData=[], doneSet=new Set(), eskizDoneSet=new Set();
+var testAnswers={}, selectedStar=0, ratingSubmitted=false;
+var BRIGHT=[0,0.05,0.1,0.2,0.3,0.42,0.55,0.65,0.75,0.85,0.95];
+
+window.onload=function(){buildStars();buildTabs();buildIntro();loadMod(0);};
+
+function buildIntro(){
+  var testTopics=M.filter(function(m){return m.type==='test';}).length;
+  var eskizCount=M.reduce(function(s,m){return s+(m.type==='eskiz'?m.eskizlar.length:0);},0);
+  var h='<div class="intro-title">'+MODULE_INTRO.title+'</div>';
+  h+='<div class="intro-text">'+esc(MODULE_INTRO.text)+'</div>';
+  h+='<div class="intro-stats">';
+  h+='<div class="intro-stat"><div class="intro-stat-v">'+testTopics+'</div><div class="intro-stat-l">TEST</div></div>';
+  h+='<div class="intro-stat"><div class="intro-stat-v">'+eskizCount+'</div><div class="intro-stat-l">ESKIZ</div></div>';
+  h+='<div class="intro-stat"><div class="intro-stat-v">sklearn</div><div class="intro-stat-l">KUTUBXONA</div></div>';
+  h+='</div>';
+  document.getElementById('introBox').innerHTML=h;
+}
+
+function loadMod(i){
+  cur=i; curEskiz=0;
+  document.getElementById('detailPanel').classList.remove('show');
+  document.getElementById('badge') && (document.getElementById('badge').className='badge');
+  var m=M[i];
+  document.getElementById('topSub').textContent=m.id;
+  document.getElementById('svMod').textContent=(i+1)+'/'+M.length;
+  // terms
+  var th='<div class="terms-title">📚 Yangi atamalar:</div>';
+  m.terms.forEach(function(t){
+    th+='<div class="term-row"><span class="term-key">'+esc(t[0])+'</span><span class="term-val">'+esc(t[1])+'</span></div>';
+  });
+  document.getElementById('termsBox').innerHTML=th;
+  // content
+  if(m.type==='test') renderTest(m);
+  else renderEskiz(m);
+  buildTabs(); updateTopStats();
+}
+
+// ═══════ TEST ═══════
+function renderTest(m){
+  if(!testAnswers[cur]) testAnswers[cur]={};
+  var h='<div class="test-panel"><div class="test-title">🧠 '+m.title+' — Test</div>';
+  m.tests.forEach(function(t,qi){
+    h+='<div class="test-q" id="tq'+qi+'">';
+    h+='<div class="test-qtext">'+(qi+1)+'. '+esc(t.q)+'</div>';
+    h+='<div class="test-opts">';
+    var answered = testAnswers[cur][qi] !== undefined;
+    t.opts.forEach(function(o,oi){
+      var cls='test-opt';
+      if(answered){
+        if(oi===t.ans) cls+=' show-correct';
+        else if(oi===testAnswers[cur][qi] && oi!==t.ans) cls+=' wrong';
+      }
+      h+='<button class="'+cls+'" onclick="answerTest('+qi+','+oi+')" '+(answered?'disabled':'')+'>'+esc(o)+'</button>';
+    });
+    h+='</div>';
+    if(answered){
+      var isCorrect = testAnswers[cur][qi]===t.ans;
+      h+='<div class="test-exp show">'+(isCorrect?'✅':'❌')+' '+esc(t.exp)+'</div>';
+    }
+    h+='</div>';
+  });
+  // score
+  var answered=Object.keys(testAnswers[cur]).length;
+  var correct=0;
+  Object.keys(testAnswers[cur]).forEach(function(qi){
+    if(testAnswers[cur][qi]===m.tests[qi].ans) correct++;
+  });
+  if(answered===m.tests.length){
+    h+='<div class="test-score show">Natija: '+correct+'/'+m.tests.length+' ✅</div>';
+    doneSet.add(cur);
+  }
+  h+='</div>';
+  document.getElementById('mainContent').innerHTML=h;
+  document.getElementById('result-panel') && document.getElementById('result-panel').classList.remove('show');
+  updateTopStats();
+}
+
+function answerTest(qi,oi){
+  if(!testAnswers[cur]) testAnswers[cur]={};
+  if(testAnswers[cur][qi]!==undefined) return;
+  testAnswers[cur][qi]=oi;
+  renderTest(M[cur]);
+  buildTabs(); updateTopStats();
+}
+
+// ═══════ ESKIZ (kod yozish mavzulari) ═══════
+function renderEskiz(m){
+  var e=m.eskizlar[curEskiz];
+  // eskiz dots
+  var dotsH='<div style="display:flex;gap:6px;justify-content:center;margin-bottom:10px;">';
+  m.eskizlar.forEach(function(_,i){
+    var key=cur+'-'+i;
+    var w=i===curEskiz?'40px':'26px';
+    var bg=eskizDoneSet.has(key)?'#22c55e':(i===curEskiz?'#00f0c8':'#1e3048');
+    dotsH+='<div onclick="jumpEskiz('+i+')" style="width:'+w+';height:6px;border-radius:3px;background:'+bg+';cursor:pointer;transition:all .2s;"></div>';
+  });
+  dotsH+='</div>';
+  // question
+  var qH='<div style="background:#0d1828;border:1px solid #1e3048;border-left:3px solid #a855f7;border-radius:8px;padding:10px 12px;margin-bottom:10px;font-size:.71rem;line-height:1.8;color:#c4b5fd;white-space:pre-wrap;">Eskiz '+(curEskiz+1)+'/'+m.eskizlar.length+' — '+esc(e.q)+'</div>';
+  // skip row
+  var skipH='<div class="skip-row" onclick="toggleSkip()"><div class="sw" id="sw"></div><span id="skipLbl"># Kommentlarni o\'tkazib yuboring</span></div>';
+  // result panel
+  var resH='<div class="result-panel" id="resultPanel"><div class="result-title">📊 NATIJA — SIMULYATSIYA</div><div class="sim-wrap" id="simWrap"></div></div>';
+  // code block
+  var codeH='<div class="code-block"><div class="fbar"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div><div class="fn" id="fname">reg_16_'+(curEskiz+1)+'.py</div><div class="fhint">↔️ suring ✏️ yozing</div></div><div class="lines-wrap" id="linesWrap"></div><div class="btn-row"><button class="btn btn-chk" onclick="doCheck()">✅ Tekshir</button><button class="btn btn-clr" onclick="doClear()">🗑️ Tozala</button><button class="btn btn-ghost" id="ghostBtn" onclick="toggleGhost()">👁️ Yashir</button><button class="btn btn-det" onclick="toggleDetail()">📖 Batafsil</button><button class="btn btn-res" onclick="toggleResult()">📊 Natija</button></div><div class="badge" id="badge"></div></div>';
+  document.getElementById('mainContent').innerHTML=dotsH+qH+skipH+resH+codeH;
+  buildLines(e);
+  // sync skip sw
+  document.getElementById('sw').classList.toggle('on',skipOn);
+  document.getElementById('skipLbl').textContent=skipOn?'Kommentlar o\'tkazilmoqda':'# Kommentlarni o\'tkazib yuboring';
+  applyBright(); updateStats();
+}
+
+function jumpEskiz(i){ curEskiz=i; renderEskiz(M[cur]); }
+
+function buildLines(e){
+  var wrap=document.getElementById('linesWrap');
+  if(!wrap) return;
+  wrap.innerHTML=''; lineData=[];
+  var op=BRIGHT[parseInt(document.getElementById('brightSlider').value)||3];
+  e.lines.forEach(function(ln,i){
+    var isCom=ln.c.replace(/^\s+/,'').charAt(0)==='#';
+    var isEmpty=ln.c==='';
+    var isSlash=ln.c.endsWith('\\');
+    var block=document.createElement('div');
+    block.className='line-block';
+    var row=document.createElement('div');
+    row.className='line-row';
+    var num=document.createElement('div');
+    num.className='line-num'; num.id='num'+i;
+    num.textContent=isEmpty?'':(i+1);
+    var content=document.createElement('div');
+    content.className='line-content';
+    var ghost=document.createElement('div');
+    ghost.className='line-ghost'+((isCom&&skipOn)?' skip-c':'');
+    ghost.id='ghost'+i;
+    ghost.style.color=ghostVisible?'rgba(74,96,128,'+op+')':'transparent';
+    ghost.textContent=ln.c||' ';
+    var colors=document.createElement('div');
+    colors.className='line-colors'; colors.id='clr'+i;
+    var inp=document.createElement('input');
+    inp.type='text'; inp.className='line-input'; inp.id='inp'+i;
+    inp.setAttribute('spellcheck','false'); inp.setAttribute('autocorrect','off');
+    inp.setAttribute('autocapitalize','off'); inp.setAttribute('autocomplete','off');
+    if(isEmpty||(isCom&&skipOn)) inp.disabled=true;
+    (function(idx,target,noteText){
+      inp.addEventListener('input',function(){
+        if(!target) return;
+        updateLineClr(idx,target);
+        if(inp.value===target&&target!==''&&noteText!=='') showNote(idx);
+        else if(inp.value!==target) hideNote(idx);
+        updateStats();
+      });
+    })(i,ln.c,ln.n);
+    content.appendChild(ghost); content.appendChild(colors); content.appendChild(inp);
+    row.appendChild(num); row.appendChild(content);
+    var note=document.createElement('div');
+    note.className='line-done-note'; note.id='note'+i;
+    note.textContent=ln.n?('✅ '+ln.n+'!'):'';
+    block.appendChild(row);
+    if(ln.n) block.appendChild(note);
+    wrap.appendChild(block);
+    lineData.push({inp:inp,target:ln.c,isCom:isCom,isEmpty:isEmpty});
+  });
+}
+
+function updateLineClr(idx,target){
+  var inp=document.getElementById('inp'+idx);
+  var clr=document.getElementById('clr'+idx);
+  if(!inp||!clr) return;
+  var typed=inp.value, html='';
+  for(var ci=0;ci<target.length;ci++){
+    var ch=target[ci];
+    if(ci<typed.length) html+=typed[ci]===ch?'<span style="color:#22c55e">'+esc(ch)+'</span>':'<span style="color:#f43f5e;text-decoration:underline">'+esc(ch)+'</span>';
+    else html+='<span style="color:transparent">'+esc(ch)+'</span>';
+  }
+  clr.innerHTML=html;
+  var num=document.getElementById('num'+idx);
+  if(num) num.style.color=(typed===target&&target!=='')?'#22c55e':'';
+}
+
+function showNote(i){var n=document.getElementById('note'+i);if(n&&n.textContent)n.classList.add('show');}
+function hideNote(i){var n=document.getElementById('note'+i);if(n)n.classList.remove('show');}
+
+function doCheck(){
+  var e=M[cur].eskizlar[curEskiz];
+  var done=0,total=0,errors=[];
+  lineData.forEach(function(l,i){
+    if(l.isEmpty||(l.isCom&&skipOn)) return;
+    total++;
+    if(l.inp.value===l.target){
+      done++; document.getElementById('num'+i).style.color='#22c55e';
+      if(e.lines[i].n) showNote(i);
+    } else {
+      errors.push(i+1); document.getElementById('num'+i).style.color='#f43f5e';
+    }
+  });
+  var pct=total>0?Math.round(done/total*100):0;
+  var b=document.getElementById('badge');
+  if(!b) return;
+  b.className='badge show';
+  if(pct>=85){
+    b.className+=' g';
+    eskizDoneSet.add(cur+'-'+curEskiz);
+    var isLast=curEskiz===M[cur].eskizlar.length-1;
+    if(isLast){ doneSet.add(cur); b.textContent='✅ Zo\'r! '+pct+'% — barcha eskizlar tugadi!'; showRating(); }
+    else { b.textContent='✅ Zo\'r! '+pct+'% — keyingi eskiz →'; setTimeout(function(){curEskiz++;renderEskiz(M[cur]);},900); }
+  } else if(pct>=55){
+    b.className+=' o'; b.textContent='⚡ '+pct+'% — xato qatorlar: '+errors.join(', ')+'-qator';
+  } else {
+    b.className+=' r'; b.textContent='❌ '+pct+'% — qaytadan urinib ko\'ring';
+  }
+  updateStats(); buildTabs();
+}
+
+function doClear(){
+  lineData.forEach(function(l,i){
+    l.inp.value='';
+    var clr=document.getElementById('clr'+i); if(clr) clr.innerHTML='';
+    var num=document.getElementById('num'+i); if(num) num.style.color='';
+    hideNote(i);
+  });
+  var b=document.getElementById('badge'); if(b) b.className='badge';
+  updateStats();
+}
+
+function updateStats(){
+  if(M[cur].type!=='eskiz') return;
+  var done=0,total=0;
+  lineData.forEach(function(l){
+    if(l.isEmpty||(l.isCom&&skipOn)) return;
+    total++;
+    if(l.inp.value===l.target) done++;
+  });
+  var pct=total>0?Math.round(done/total*100):0;
+  document.getElementById('svDone').textContent=done+'/'+total;
+  document.getElementById('svScore').textContent=done>0?pct+'%':'—';
+  document.getElementById('progressFill').style.width=(doneSet.size/M.length*100)+'%';
+}
+
+function updateTopStats(){
+  // test balini hisoblash
+  var totalQ=0, correctQ=0;
+  M.forEach(function(m,mi){
+    if(m.type!=='test') return;
+    m.tests.forEach(function(t,qi){
+      totalQ++;
+      if(testAnswers[mi]&&testAnswers[mi][qi]===t.ans) correctQ++;
+    });
+  });
+  document.getElementById('svScore').textContent=totalQ>0?(correctQ+'/'+totalQ):'—';
+  document.getElementById('svDone').textContent=doneSet.size+'/'+M.length;
+  document.getElementById('progressFill').style.width=(doneSet.size/M.length*100)+'%';
+}
+
+function toggleGhost(){
+  ghostVisible=!ghostVisible;
+  document.querySelectorAll('.line-ghost').forEach(function(g){g.style.visibility=ghostVisible?'visible':'hidden';});
+  var gb=document.getElementById('ghostBtn');
+  if(gb) gb.textContent=ghostVisible?'👁️ Yashir':'👁️ Ko\'rsat';
+}
+
+function toggleSkip(){
+  skipOn=!skipOn;
+  var sw=document.getElementById('sw'); if(sw) sw.classList.toggle('on',skipOn);
+  var sl=document.getElementById('skipLbl'); if(sl) sl.textContent=skipOn?'Kommentlar o\'tkazilmoqda':'# Kommentlarni o\'tkazib yuboring';
+  if(M[cur].type==='eskiz'){ buildLines(M[cur].eskizlar[curEskiz]); applyBright(); updateStats(); }
+}
+
+function toggleDetail(){
+  var p=document.getElementById('detailPanel');
+  if(p.classList.contains('show')){p.classList.remove('show');}
+  else{document.getElementById('detailContent').textContent=M[cur].detail;p.classList.add('show');}
+}
+
+function toggleResult(){
+  var p=document.getElementById('resultPanel');
+  if(!p) return;
+  if(p.classList.contains('show')){p.classList.remove('show');}
+  else{document.getElementById('simWrap').innerHTML='<pre>'+esc(M[cur].sim)+'</pre>';p.classList.add('show');}
+}
+
+function setBright(v){document.getElementById('brightVal').textContent=v;applyBright();}
+
+function applyBright(){
+  var v=parseInt(document.getElementById('brightSlider').value)||3;
+  var op=BRIGHT[v];
+  document.querySelectorAll('.line-ghost').forEach(function(g){
+    if(!g.classList.contains('skip-c')&&ghostVisible) g.style.color='rgba(74,96,128,'+op+')';
+  });
+}
+
+function buildTabs(){
+  var c=document.getElementById('tabs'); c.innerHTML='';
+  M.forEach(function(m,i){
+    var d=document.createElement('div');
+    d.className='tab'+(i===cur?' on':'')+(doneSet.has(i)?' done':'');
+    d.textContent=m.id;
+    d.onclick=(function(n){return function(){loadMod(n);};})(i);
+    c.appendChild(d);
+  });
+}
+
+function buildStars(){
+  var sc=document.getElementById('stars'); sc.innerHTML='';
+  for(var i=1;i<=10;i++){
+    var s=document.createElement('span');
+    s.className='star'; s.textContent='⭐'; s.dataset.v=i;
+    s.onclick=(function(v){return function(){
+      selectedStar=v;
+      document.getElementById('ratingScore').textContent=v+' / 10';
+      document.querySelectorAll('.star').forEach(function(st){st.classList.toggle('on',parseInt(st.dataset.v)<=v);});
+    };})(i);
+    sc.appendChild(s);
+  }
+}
+
+function showRating(){document.getElementById('ratingBox').classList.add('show');}
+
+function submitRating(){
+  if(ratingSubmitted) return;
+  if(selectedStar===0){alert('Baho tanlang!');return;}
+  ratingSubmitted=true;
+  document.getElementById('ratingThanks').style.display='block';
+  document.querySelector('.rating-submit').style.display='none';
+}
+
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+</script>
+</body>
+</html>

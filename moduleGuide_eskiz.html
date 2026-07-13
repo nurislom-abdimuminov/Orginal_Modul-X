@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Eskiz — Platformadan Foydalanish Qo'llanmasi</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:#0a0e1a;color:#dde5f0;font-family:'JetBrains Mono',monospace;font-size:13px;min-height:100vh;}
+.top{background:#0f1520;border-bottom:1px solid #1e3048;padding:8px 14px;display:flex;align-items:center;gap:8px;position:sticky;top:0;z-index:50;}
+.top-t{color:#00f0c8;font-size:.78rem;font-weight:700;}
+.top-s{color:#4a6080;font-size:.65rem;margin-left:auto;}
+.bright-bar{background:#0f1520;border-bottom:1px solid #1e3048;padding:6px 14px;display:flex;align-items:center;gap:10px;position:sticky;top:41px;z-index:49;}
+.bright-lbl{font-size:.65rem;color:#4a6080;flex-shrink:0;}
+.bright-slider{flex:1;-webkit-appearance:none;height:4px;border-radius:2px;background:#1e3048;outline:none;cursor:pointer;}
+.bright-slider::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:#00f0c8;cursor:pointer;}
+.bright-val{font-size:.68rem;color:#00f0c8;font-weight:700;width:20px;text-align:right;flex-shrink:0;}
+.wrap{padding:10px 14px;max-width:540px;margin:0 auto;}
+.tabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;margin-bottom:10px;scrollbar-width:none;}
+.tabs::-webkit-scrollbar{display:none;}
+.tab{flex-shrink:0;padding:6px 12px;border-radius:20px;border:1px solid #1e3048;background:#141e2e;color:#4a6080;font-size:.68rem;cursor:pointer;transition:all .15s;}
+.tab.on{border-color:#00f0c8;color:#00f0c8;background:rgba(0,240,200,.08);}
+.tab.done{border-color:#22c55e;color:#22c55e;background:rgba(34,197,94,.06);}
+.stats{display:flex;gap:8px;margin-bottom:10px;}
+.stat{flex:1;background:#141e2e;border:1px solid #1e3048;border-radius:8px;padding:7px 8px;text-align:center;}
+.sv{font-size:.95rem;font-weight:700;color:#00f0c8;}
+.sl{font-size:.58rem;color:#4a6080;margin-top:2px;}
+.progress-bar{height:3px;background:#1e3048;border-radius:2px;margin-bottom:10px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,#00f0c8,#2563eb);border-radius:2px;transition:width .4s;}
+.intro-box{background:#0d1828;border:1px solid #1e3048;border-left:3px solid #00f0c8;border-radius:10px;padding:14px;margin-bottom:10px;}
+.intro-title{font-size:.8rem;font-weight:700;color:#00f0c8;margin-bottom:8px;}
+.intro-text{font-size:.7rem;line-height:1.85;color:#9fb0c8;white-space:pre-wrap;}
+.intro-stats{display:flex;gap:8px;margin-top:10px;}
+.intro-stat{flex:1;background:#080c14;border:1px solid #1e3048;border-radius:8px;padding:8px;text-align:center;}
+.intro-stat-v{font-size:1.1rem;font-weight:700;color:#00f0c8;}
+.intro-stat-l{font-size:.58rem;color:#4a6080;margin-top:2px;}
+.terms-box{background:#080c14;border:1px solid #1e3048;border-left:3px solid #a855f7;border-radius:8px;padding:10px 12px;margin-bottom:10px;}
+.terms-title{font-size:.68rem;font-weight:700;color:#a855f7;margin-bottom:8px;}
+.term-row{display:flex;gap:6px;margin-bottom:5px;align-items:flex-start;}
+.term-key{font-size:.64rem;color:#fbbf24;font-weight:700;min-width:120px;flex-shrink:0;}
+.term-val{font-size:.63rem;color:#4a6080;line-height:1.6;}
+.detail-panel{display:none;background:#0a1628;border:1px solid #2563eb;border-radius:8px;padding:12px 14px;margin-bottom:10px;font-size:.72rem;line-height:2;color:#93c5fd;white-space:pre-wrap;}
+.detail-panel.show{display:block;}
+.detail-title{color:#60a5fa;font-weight:700;margin-bottom:8px;font-size:.76rem;}
+
+/* TEST PANEL */
+.test-panel{background:#080c14;border:1px solid #1e3048;border-radius:10px;padding:12px;margin-bottom:10px;}
+.test-title{font-size:.72rem;font-weight:700;color:#fbbf24;margin-bottom:12px;}
+.test-q{background:#0d1828;border-left:3px solid #a855f7;border-radius:6px;padding:10px 12px;margin-bottom:10px;}
+.test-qtext{font-size:.71rem;color:#c4b5fd;line-height:1.7;margin-bottom:10px;}
+.test-opts{display:flex;flex-direction:column;gap:6px;}
+.test-opt{padding:8px 12px;border-radius:8px;border:1px solid #1e3048;background:#141e2e;font-size:.68rem;color:#8ba0c0;cursor:pointer;text-align:left;font-family:'JetBrains Mono',monospace;transition:all .15s;}
+.test-opt:active{opacity:.7;}
+.test-opt.correct{border-color:#22c55e;color:#22c55e;background:rgba(34,197,94,.1);}
+.test-opt.wrong{border-color:#f43f5e;color:#f43f5e;background:rgba(244,63,94,.1);}
+.test-opt.show-correct{border-color:#22c55e;color:#22c55e;background:rgba(34,197,94,.05);}
+.test-exp{display:none;font-size:.66rem;line-height:1.7;color:#64748b;padding:8px 0 0 4px;border-top:1px dashed #1e3048;margin-top:8px;}
+.test-exp.show{display:block;}
+.test-score{text-align:center;padding:10px;font-size:.78rem;font-weight:700;color:#00f0c8;display:none;}
+.test-score.show{display:block;}
+.btn-test-check{width:100%;padding:10px;background:#2563eb;color:#fff;font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:700;border:none;border-radius:8px;cursor:pointer;margin-top:8px;}
+
+/* ESKIZ (kod yozish mavzulari uchun) */
+.skip-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;padding:8px 12px;background:#141e2e;border:1px solid #1e3048;border-radius:8px;cursor:pointer;}
+.skip-row span{font-size:.7rem;color:#4a6080;}
+.sw{width:34px;height:18px;background:#1e3048;border-radius:10px;position:relative;transition:background .2s;flex-shrink:0;}
+.sw.on{background:#fbbf24;}
+.sw::after{content:'';position:absolute;top:2px;left:2px;width:14px;height:14px;background:#fff;border-radius:50%;transition:left .2s;}
+.sw.on::after{left:18px;}
+.sim-wrap{width:100%;overflow-x:auto;}
+.sim-wrap pre{font-size:.68rem;line-height:1.9;color:#22c55e;white-space:pre;}
+.result-panel{display:none;background:#080c14;border:1px solid #22c55e;border-radius:10px;padding:12px;margin-bottom:10px;}
+.result-panel.show{display:block;}
+.result-title{color:#22c55e;font-size:.72rem;font-weight:700;margin-bottom:8px;}
+.code-block{border:1px solid #1e3048;border-radius:10px;overflow:hidden;margin-bottom:10px;background:#090d18;}
+.fbar{display:flex;align-items:center;gap:5px;padding:7px 12px;background:#0f1520;border-bottom:1px solid #1e3048;}
+.dot{width:6px;height:6px;border-radius:50%;}
+.dot.r{background:#f43f5e;}.dot.y{background:#fbbf24;}.dot.g{background:#22c55e;}
+.fn{font-size:.65rem;color:#4a6080;margin-left:4px;}
+.fhint{margin-left:auto;font-size:.6rem;color:#00f0c8;opacity:.7;}
+.lines-wrap{padding:4px 0;}
+.line-block{margin:0;}
+.line-row{display:flex;align-items:center;position:relative;min-height:30px;}
+.line-num{width:28px;flex-shrink:0;font-size:.63rem;padding:4px 4px 4px 5px;color:#2a3a50;text-align:right;user-select:none;transition:color .2s;align-self:center;}
+.line-content{flex:1;position:relative;overflow-x:auto;overflow-y:hidden;min-height:30px;}
+.line-content::-webkit-scrollbar{height:2px;}
+.line-content::-webkit-scrollbar-thumb{background:#1e3048;border-radius:1px;}
+.line-ghost{font-size:.76rem;line-height:1.8;padding:4px 8px;white-space:pre;pointer-events:none;min-height:30px;display:block;}
+.line-ghost.skip-c{opacity:.08!important;}
+.line-colors{position:absolute;top:0;left:0;font-size:.76rem;line-height:1.8;padding:4px 8px;white-space:pre;pointer-events:none;z-index:2;min-height:30px;}
+.line-input{position:absolute;top:0;left:0;right:0;bottom:0;width:100%;font-family:'JetBrains Mono',monospace;font-size:.76rem;line-height:1.8;padding:4px 8px;color:transparent;-webkit-text-fill-color:transparent;caret-color:#00f0c8;background:transparent;border:none;outline:none;white-space:pre;overflow:hidden;z-index:10;-webkit-appearance:none;}
+.line-input:disabled{cursor:default;}
+.line-done-note{display:none;font-size:.66rem;line-height:1.6;padding:3px 8px 3px 34px;color:#38bdf8;background:rgba(56,189,248,.06);border-left:2px solid #38bdf8;white-space:pre-wrap;animation:fadeIn .25s ease;}
+.line-done-note.show{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:translateY(0)}}
+.btn-row{display:flex;gap:6px;flex-wrap:wrap;padding:9px 12px;background:#0f1520;border-top:1px solid #1e3048;}
+.btn{padding:8px 11px;border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:.68rem;font-weight:700;border:none;cursor:pointer;flex-shrink:0;transition:opacity .15s;}
+.btn:active{opacity:.7;}
+.btn-chk{background:#00f0c8;color:#080c14;}
+.btn-clr{background:transparent;border:1px solid #1e3048;color:#4a6080;}
+.btn-det{background:#2563eb;color:#fff;}
+.btn-ghost{background:#7c3aed;color:#fff;}
+.btn-res{background:#16a34a;color:#fff;}
+.badge{display:none;margin:0 12px 10px;padding:7px 12px;border-radius:8px;font-size:.7rem;border:1px solid #1e3048;}
+.badge.show{display:block;}
+.badge.g{border-color:#22c55e;color:#22c55e;background:rgba(34,197,94,.07);}
+.badge.o{border-color:#fbbf24;color:#fbbf24;background:rgba(251,191,36,.07);}
+.badge.r{border-color:#f43f5e;color:#f43f5e;background:rgba(244,63,94,.07);}
+.rating-box{background:#0d1828;border:1px solid #fbbf24;border-radius:12px;padding:14px 16px;margin-top:10px;display:none;}
+.rating-box.show{display:block;}
+.rating-title{font-size:.72rem;font-weight:700;color:#fbbf24;text-align:center;margin-bottom:4px;}
+.rating-sub{font-size:.62rem;color:#4a6080;text-align:center;margin-bottom:12px;}
+.stars{display:flex;justify-content:center;gap:4px;margin-bottom:10px;flex-wrap:wrap;}
+.star{font-size:1.5rem;cursor:pointer;filter:grayscale(1);opacity:.35;transition:transform .1s,filter .1s;user-select:none;}
+.star.on{filter:none;opacity:1;}
+.rating-score{text-align:center;font-size:.72rem;color:#fbbf24;font-weight:700;margin-bottom:8px;min-height:18px;}
+.rating-comment{width:100%;background:#141e2e;border:1px solid #1e3048;border-radius:8px;padding:8px 10px;color:#dde5f0;font-family:'JetBrains Mono',monospace;font-size:.68rem;resize:none;outline:none;margin-bottom:8px;}
+.rating-submit{width:100%;padding:10px;background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#080c14;font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:700;border:none;border-radius:8px;cursor:pointer;}
+.rating-thanks{display:none;text-align:center;padding:10px;font-size:.72rem;color:#22c55e;font-weight:700;}
+</style>
+</head>
+<body>
+<div class="top">
+  <div class="top-t">🎓 Eskiz — Qo'llanma va Menu</div>
+  <div class="top-s" id="topSub">G.1</div>
+</div>
+<div class="bright-bar">
+  <span class="bright-lbl">👁️ Xiralik:</span>
+  <input type="range" class="bright-slider" id="brightSlider" min="1" max="10" value="3" oninput="setBright(this.value)">
+  <span class="bright-val" id="brightVal">3</span>
+</div>
+<div class="wrap">
+  <div class="stats">
+    <div class="stat"><div class="sv" id="svScore">—</div><div class="sl">TEST BALL</div></div>
+    <div class="stat"><div class="sv" id="svDone">0/0</div><div class="sl">BAJARILDI</div></div>
+    <div class="stat"><div class="sv" id="svMod">1/8</div><div class="sl">MAVZU</div></div>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+  <div class="tabs" id="tabs"></div>
+  <div class="intro-box" id="introBox"></div>
+  <div class="terms-box" id="termsBox"></div>
+  <div class="detail-panel" id="detailPanel">
+    <div class="detail-title">📘 BATAFSIL</div>
+    <div id="detailContent"></div>
+  </div>
+  <div id="mainContent"></div>
+  <div class="rating-box" id="ratingBox">
+    <div class="rating-title">⭐ Qo'llanmani baholang</div>
+    <div class="rating-sub">Fikringiz keyingi versiyani yaxshilashga yordam beradi</div>
+    <div class="stars" id="stars"></div>
+    <div class="rating-score" id="ratingScore">Baho tanlang (1–10)</div>
+    <textarea class="rating-comment" id="ratingComment" rows="2" placeholder="Izoh..."></textarea>
+    <button class="rating-submit" onclick="submitRating()">⭐ Yuborish</button>
+    <div class="rating-thanks" id="ratingThanks">✅ Rahmat!</div>
+  </div>
+</div>
+<script>
+var MODULE_INTRO = {
+  title: "🎓 Eskiz Platformasiga Xush Kelibsiz!",
+  text: "Bu modul — Eskiz platformasini to'liq o'rganish uchun qo'llanma.\n\nBu yerda siz platformaning barcha imkoniyatlarini — test formatini, kod yozish (eskiz) mashqlarini, batafsil tushuntirish panelini, simulyatsiya (sim) panelini, va modullar yo'l xaritasini o'rganasiz.\n\nBu modulni birinchi navbatda o'qib chiqishingizni tavsiya qilamiz — platformadan to'liq foydalanish uchun barcha kerakli bilimlar shu yerda.",
+  count: 8
+};
+
+var M = [
+
+{id:'G.1', type:'test',
+ title:'Eskiz platformasi nima?',
+ terms:[
+   ['Eskiz','O\'zbek tilidagi interaktiv kod o\'rganish platformasi'],
+   ['Test formati','Savolga to\'g\'ri javobni 4 variantdan tanlash'],
+   ['Eskiz (kod) formati','Kod satrlarini tartib bilan yozish mashqi'],
+   ['Modullar','Mavzular bo\'yicha guruhlangan o\'quv birliklarining to\'plami']
+ ],
+ detail:'ESKIZ PLATFOMASI HAQIDA\n\nEskiz — O\'zbek tilidagi interaktiv Data Science va Machine Learning o\'rganish platformasi. Har bir mavzu ikki formatda o\'rgatiladi:\n\n1. TEST FORMAT: Nazariy bilimlarni tekshirish uchun — savol va 4 ta javob varianti. To\'g\'ri javob tanlanganda yashil rang, noto\'g\'ri bo\'lsa izoh ko\'rsatiladi.\n\n2. ESKIZ (KOD) FORMAT: Amaliy ko\'nikmalar uchun — kod satrlarini qo\'lda yozish mashqi. Har bir satr yozilganda, u to\'g\'ri ekanini tizim tekshiradi va qisqacha izoh ko\'rsatadi.\n\nMODULLAR: Har bir modul bir mavzuni (masalan Regressiya, TensorFlow, PyTorch) qamrab oladi. Modullar, odatda, avvalgi modullar bilimiga tayanadi — shuning uchun ketma-ketlikda o\'qish tavsiya etiladi.\n\nMARRAL: Har bir mavzuni 100% ga yetkazish — barcha test va eskiz mashqlarini muvaffaqiyatli tugatish. Bu, mavzudagi barcha kontentni o\'rganganing belgisi.',
+ tests:[
+   {q:'Eskiz platformasida "eskiz" (kod) formati nima?',
+    opts:['Rasmga qarab kod yozish','Kod satrlarini tartib bilan, qo\'lda yozish mashqi','Test savollariga javob berish','Video dars ko\'rish'],
+    ans:1,
+    exp:'Eskiz (kod) formati — kod satrlarini qo\'lda, tartib bilan yozib, tizim tekshiradigan amaliy mashq.'},
+   {q:'Modullarni qanday tartibda o\'qish tavsiya etiladi?',
+    opts:['Tasodifiy tartibda, xohlaganini','Oxiridan boshlab','Ketma-ketlikda — har bir modul avvalgisiga tayanadi','Faqat test formatdagilarini'],
+    ans:2,
+    exp:'Modullar ketma-ketlikda o\'qilishi tavsiya etiladi, chunki har bir yangi modul, avvalgi modullar bilimini asosga oladi.'},
+   {q:'Mavzuni 100% ga yetkazish nima degani?',
+    opts:['Faqat test savollarini to\'g\'ri javoblash','Barcha test va eskiz mashqlarini muvaffaqiyatli tugatish','Modulni 3 marta takrorlash','Faqat eskiz mashqlarini bajarish'],
+    ans:1,
+    exp:'100% — o\'sha mavzudagi barcha test savollari va eskiz mashqlarini muvaffaqiyatli tugataganingizni bildiradi.'}
+ ]},
+
+{id:'G.2', type:'test',
+ title:'Test formatidan qanday foydalanish',
+ terms:[
+   ['Savol matni','Ekranning yuqori qismida ko\'rinadigan asosiy savol'],
+   ['4 ta variant','A, B, C, D ko\'rinishidagi javob tanlovlari'],
+   ['Izoh (Explanation)','To\'g\'ri javob tanlanganida ko\'rinadigan tushuntirish'],
+   ['Mavzuga o\'tish','Pastdagi nuqtalar orqali boshqa mavzuga o\'tish']
+ ],
+ detail:'TEST FORMATIDAN FOYDALANISH — QADAM-BAQADAM\n\n1. SAVOLNI O\'QING: Ekranning asosiy qismida test savoli ko\'rinadi. Savolni diqqat bilan o\'qing.\n\n2. JAVOB TANLANG: 4 ta variant ichidan TO\'G\'RI deb hisoblagan javobni bosing. Variantlardan birini bosgandan keyin:\n   - To\'g\'ri bo\'lsa — yashil rang bilan belgilanadi va izoh ko\'rsatiladi\n   - Noto\'g\'ri bo\'lsa — qizil rang bilan belgilanadi va to\'g\'ri javob ko\'rsatiladi\n\n3. IZOHNI O\'QING: Har bir to\'g\'ri javobning pastida, NEGA to\'g\'ri ekanligini tushuntiradigan izoh bor. Bu izohlarni o\'qish — oddiy javob tanlashdan KO\'RA KO\'PROQ narsani o\'rgatadi.\n\n4. KEYINGI SAVOLGA O\'TING: Javob tanlanganidan keyin, keyingi savol avtomatik ko\'rinadi.\n\n5. MAVZULAR ORASIDA O\'TISH: Ekran pastidagi kichik nuqtalar — bu mavzu ichidagi savollar/mashqlar. Ularni bosib, istalgan savolga o\'tish mumkin. Yashil — tugallangan, kul rang — hali bajarilmagan.',
+ tests:[
+   {q:'Test formatida javob tanlaganingizdan keyin nima sodir bo\'ladi?',
+    opts:['Hech narsa o\'zgarmaydi','Yashil (to\'g\'ri) yoki qizil (noto\'g\'ri) rang va izoh ko\'rinadi','Modul avtomatik yopiladi','Boshqa savolga o\'tib ketadi'],
+    ans:1,
+    exp:'Javob tanlanganida, tizim uni tekshiradi va natijaga qarab yashil yoki qizil rang ko\'rsatadi, hamda to\'g\'ri javobning izohini taqdim etadi.'},
+   {q:'Ekran pastidagi kichik nuqtalar nima vazifani bajaradi?',
+    opts:['Faqat dekorativ element','Mavzu ichidagi savollar/mashqlar orasida o\'tish navigatsiyasi','Reyting berish tugmasi','Modulni yopish tugmasi'],
+    ans:1,
+    exp:'Pastdagi nuqtalar — mavzu ichidagi barcha savollar/mashqlarga to\'g\'ridan-to\'g\'ri o\'tish imkonini beruvchi navigatsiya.'},
+   {q:'Nima uchun faqat to\'g\'ri javobni bilish emas, izohlarni ham o\'qish muhim?',
+    opts:['Izohlar faqat vaqt isrof qiladi','Izohlar NEGA to\'g\'ri ekanligini tushuntirib, chuqurroq o\'rganishga yordam beradi','Izohlarni o\'qish majburiy, aks holda davom etib bo\'lmaydi','Izohlar faqat ingliz tilida'],
+    ans:1,
+    exp:'Izohlar — nima to\'g\'ri ekanini emas, NEGA to\'g\'ri ekanini tushuntiradi. Bu, oddiy javob yodlashdan ko\'ra, haqiqiy tushunish uchun zarur.'}
+ ]},
+
+{id:'G.3', type:'eskiz',
+ title:'Eskiz (kod) formatidan qanday foydalanish',
+ terms:[
+   ['Kod paneli','Qorong\'i fonda ko\'rinadigan kod yozish maydoni'],
+   ['Yashil izoh','Satr to\'g\'ri yozilganda paydo bo\'ladigan tasdiq xabari'],
+   ['Tekshir tugmasi','Yozilgan kodni tekshirishni ishga tushiruvchi tugma'],
+   ['Sim (Simulyatsiya)','Kutilayotgan natijani oldindan ko\'rsatuvchi panel']
+ ],
+ detail:'ESKIZ (KOD) FORMATIDAN FOYDALANISH\n\nEskiz mashqida, siz REAL Python kodini — harfma-harf, satr-satr, QO\'LDA yozasiz. Tizim, yozgan kodingizni, to\'g\'ri kod bilan SOLISHTIRADI va natijani ko\'rsatadi.\n\nQADAM-BAQADAM:\n\n1. MAVZU VA SAVOLNI O\'QING: Ekran yuqorisida, siz nima yozishingiz kerakligini tushuntiradigan savol bor. Avval uni o\'qing.\n\n2. KODINGIZNI YOZING: Qorong\'i kod paneliga kliklab, yoza boshlang. Har bir satr uchun, ENTER bosib keyingi satrga o\'ting.\n\n3. TEKSHIR TUGMASINI BOSING: Kodingiz tayyor bo\'lgach, "Tekshir" tugmasini bosing — tizim har bir satrni tekshirib, to\'g\'ri/noto\'g\'ri ekanini ko\'rsatadi.\n\n4. YASHIL IZOH: Har bir to\'g\'ri satr yonida, "Siz ... qildingiz" ko\'rinishidagi qisqacha yashil izoh paydo bo\'ladi. Bu izohlar — kodingiz nima ish bajarayotganini real vaqtda tushuntiradi.\n\n5. SIM (SIMULYATSIYA) PANELI: "📖 Batafsil" va "📊 Natija" tugmalari orqali — batafsil tushuntirish va kutilayotgan natijani (simulyatsiya) ko\'rish mumkin. Ular sizga, kod yozishdan OLDIN, nima bo\'lishi kerakligini tushunishda yordam beradi.',
+ sim:'# Bu - Eskiz mashqi simulyatsiyasi\n# Siz quyidagi kodni yozasiz:\n\nimport pandas as pd\nprint("Salom, Eskiz!")\n\n# Natija:\nSalom, Eskiz!',
+ eskizlar:[
+  {q:'Birinchi Eskiz mashqingiz: o\'zingizni tanishtiring (print bilan).',
+   lines:[
+    {c:'print("Salom! Men Eskiz platformasini o\'rganmoqdaman.")',n:'Siz birinchi Eskiz mashqingizni muvaffaqiyatli yakunladingiz!'},
+   ]},
+  {q:'Ikkinchi mashq: o\'zingiz haqida o\'zgaruvchi yaratib chiqaring.',
+   lines:[
+    {c:'ism = "Nurislom"',n:'Siz ism o\'zgaruvchisini yaratdingiz'},
+    {c:'print("Mening ismim:", ism)',n:'Siz ismingizni ekranga chiqardingiz'},
+   ]},
+ ]},
+
+{id:'G.4', type:'test',
+ title:'Batafsil va Sim panellari',
+ terms:[
+   ['📖 Batafsil tugmasi','Mavzu bo\'yicha to\'liq nazariy tushuntirishni ochish'],
+   ['📊 Natija tugmasi','Simulyatsiya (kutilayotgan natija) ni ko\'rsatuvchi panel'],
+   ['Detail panel','Nazariy tushuntirish joylashgan panel'],
+   ['Sim panel','Kod qanday ishlashini ko\'rsatuvchi simulyatsiya paneli']
+ ],
+ detail:'BATAFSIL VA SIM PANELLARI — QACHON ISHLATILADI?\n\nHar bir eskiz mavzusida, asosiy kod yozish paneliga QO\'SHIMCHA ravishda, ikkita yordamchi panel bor:\n\n📖 BATAFSIL PANEL: "📖 Batafsil" tugmasini bosganizda, joriy mavzu bo\'yicha TO\'LIQ nazariy tushuntirish ko\'rinadi — atamalar, formulalar, nima uchun bu kod ishlashini tushuntiruvchi izohlar. Bu panel, kod yozishdan OLDIN o\'qib chiqish uchun juda foydali — ayniqsa biror tushuncha noaniq bo\'lib qolsa.\n\n📊 SIM (SIMULYATSIYA) PANEL: "📊 Natija" tugmasini bosganizda, kodning KUTILAYOTGAN NATIJASI ko\'rinadi — ya\'ni, agar kodni to\'g\'ri yozsangiz, Python interpreter qanday natija chiqarishini ko\'rasiz. Bu panel, kod yozishdan OLDIN nima kutilayotganini tushunish uchun, va yozgandan KEYIN natijani solishtirish uchun foydali.\n\nQANDAY KOMBINATSIYADA ISHLATISH KERAK?\nEng samarali usul: avval Batafsil o\'qing (tushuncha) → keyin Sim ko\'ring (natija) → keyin mustaqil kod yozing (amaliyot). Bu ketma-ketlik, faqat "nusxa ko\'chirish" emas, balki HAQIQIY o\'rganishni ta\'minlaydi.',
+ tests:[
+   {q:'"📖 Batafsil" tugmasi nima ko\'rsatadi?',
+    opts:['Faqat kod namunasini','Mavzu bo\'yicha to\'liq nazariy tushuntirish va izohlarni','Boshqa foydalanuvchilar natijalarini','Modullar ro\'yxatini'],
+    ans:1,
+    exp:'Batafsil panel — joriy mavzu bo\'yicha to\'liq nazariy tushuntirish, atamalar va izohlarni o\'z ichiga oladi.'},
+   {q:'Sim (simulyatsiya) paneli nima ko\'rsatadi?',
+    opts:['Video darsni','Kodning kutilayotgan natijasini (agar to\'g\'ri yozilsa nima chiqishini)','Boshqa o\'quvchilar kodini','Xato xabarlarini'],
+    ans:1,
+    exp:'Sim panel — kodni to\'g\'ri yozsangiz, Python qanday natija chiqarishini oldindan ko\'rsatadi.'},
+   {q:'Eng samarali o\'rganish ketma-ketligi qaysi?',
+    opts:['Avval kod yozing, keyin Batafsil o\'qing','Faqat Sim ni ko\'ring va nusxa ko\'chiring','Avval Batafsil o\'qing → Sim ko\'ring → mustaqil kod yozing','Faqat test savollariga javob bering'],
+    ans:2,
+    exp:'Avval Batafsil (tushuncha) → Sim (natija) → mustaqil kod yozish — bu ketma-ketlik haqiqiy o\'rganishni ta\'minlaydi, oddiy nusxa ko\'chirishdan farqli.'}
+ ]},
+
+{id:'G.5', type:'test',
+ title:'Modullar yo\'l xaritasi',
+ terms:[
+   ['Asosiy yo\'l','Python → NumPy → Pandas → Vizualizatsiya → ML → DL'],
+   ['M seriyasi','Deep Learning matematikasi (M1, M2, M3)'],
+   ['Kutubxona modullari','TensorFlow va PyTorch alohida amaliy modullar'],
+   ['Progressni kuzatish','Har bir modul uchun % ko\'rsatkich']
+ ],
+ detail:'MODULLAR YO\'L XARITASI\n\nEskiz platformasidagi barcha modullar, KETMA-KET o\'rganish uchun mo\'ljallangan:\n\nASOS MODULLARI (1-13):\n1-Modul: Python asoslari\n2-Modul: Python funksiyalari\n3-Modul: NumPy\n4-Modul: Pandas\n...va hokazo\n11-Modul: Ma\'lumotlarni tayyorlash\n13-Modul: Vizualizatsiya\n\nML MODULLARI (14-19):\n14-Modul: Machine Learning kirish\n15-Modul: ML loyiha qadamlari\n16-Modul: Regressiya\n17-Modul: Klassifikatsiya\n18-Modul: Customer Churn (Amaliyot)\n19-Modul: Clustering\n\nDEEP LEARNING MODULLARI (20a-d):\n20a: DL Asoslari (Keras)\n20b: CNN va RNN (Keras)\n20c: NLP va Transformer (Keras)\n20d: Hugging Face va Deployment\n\nMATEMATIKA MODULLARI (M1-M3):\nM1: Backpropagation matematikasi\nM2: CNN/RNN matematikasi\nM3: Transformer matematikasi\n\nKUTUBXONA MODULLARI:\nTensorFlow Moduli — Keras chuqur amaliyot\nPyTorch Moduli — Training loop va autograd\n\nTAVSIYA: Agar siz boshlang\'ich bo\'lsangiz — 1-moduldan boshlang. Agar ML/DL ga tayyor bo\'lsangiz — 14-moduldan boshlang. Agar matematikani chuqur o\'rganmoqchi bo\'lsangiz — M seriyasidan boshlang.',
+ tests:[
+   {q:'M1, M2, M3 modullari nima haqida?',
+    opts:['Python asoslari haqida','Deep Learning ning matematik asoslari haqida','Pandas va NumPy haqida','Veb dasturlash haqida'],
+    ans:1,
+    exp:'M seriyasi — Deep Learning arxitekturalarining matematik asoslarini (Backpropagation, CNN/RNN matematikasi, Transformer) chuqur o\'rgatadi.'},
+   {q:'TensorFlow va PyTorch modullari qaysi modullardan keyin o\'qilishi tavsiya etiladi?',
+    opts:['Birinchi modul sifatida','Python modullaridan keyin, ML modullardan oldin','20-modul (Deep Learning) dan keyin','Faqat matematik modullarda'],
+    ans:2,
+    exp:'TensorFlow va PyTorch modullari, 20-modul (Deep Learning asoslari Keras bilan) o\'rganilgandan keyin o\'qilishi tavsiya etiladi — ular o\'sha bilimlarni chuqurlashtiradi.'},
+   {q:'Boshlang\'ich o\'quvchi qaysi moduldan boshlashi kerak?',
+    opts:['M1 (Matematika) dan','20a (Deep Learning) dan','1-Moduldan (Python asoslari)','PyTorch Modulidan'],
+    ans:2,
+    exp:'Boshlang\'ich o\'quvchi 1-Moduldan — Python asoslaridan boshlashi kerak. Har bir modul avvalgilariga tayanadi.'}
+ ]},
+
+{id:'G.6', type:'test',
+ title:'Platforma imkoniyatlari va maslahatlar',
+ terms:[
+   ['⭐ Reyting tizimi','10 yulduzli baholash tizimi (har modul uchun)'],
+   ['Progressni saqlash','LocalStorage orqali brauzerda saqlanadi'],
+   ['Samsung mobil qurilma','Aqlli tirnoq muammosi va uning yechimi'],
+   ['Repeat (takror) tugmasi','Modulni qaytadan boshlash imkoniyati']
+ ],
+ detail:'FOYDALI MASLAHATLAR VA IMKONIYATLAR\n\nREYTING TIZIMI: Har bir modul oxirida, ⭐ yulduzlar bilan baholash imkoniyati bor (1 dan 10 gacha). Sizning reytingingiz, platformani yaxshilashga yordam beradi.\n\nMOBIL QURILMADA YOZISH (MUHIM!): Agar Samsung yoki boshqa Android qurilmada kodni yozayotgan bo\'lsangiz, klaviatura ba\'zan AQLLI TIRNOQ (\u201c\u201d o\'rniga \'\') yozishi mumkin. Bu, Python kodida XATOGA olib keladi. Yechim: agar kod to\'g\'ri ko\'rinsa-yu, tizim noto\'g\'ri desa — tirnoq belgilarini o\'chirib, qayta yozing yoki klaviatura sozlamalarida aqlli tirnoqni o\'chiring.\n\nPROGRESS SAQLASH: Sizning progressingiz (qaysi mavzular tugallangani) brauzer xotirasida (LocalStorage) saqlanadi. Agar boshqa brauzerda ochsangiz yoki brauzer tarixini tozalasangiz — progress o\'chishi mumkin. Shuning uchun, muhim modullarni bir brauzerda tugatish tavsiya etiladi.\n\nTAKROR TUGMASI: Modulni qaytadan o\'tish kerak bo\'lsa — mavzu sarlavhasining yonidagi aylana (↺) tugmasini bosing. Bu, faqat shu mavzuni qayta boshlaydi, butun modul progressini o\'chirmasdan.',
+ tests:[
+   {q:'Samsung qurilmada kod yozayotganda, "aqlli tirnoq" muammosi nima?',
+    opts:['Kod juda kichik ko\'rinadi','Klaviatura to\'g\'ri tirnoq o\'rniga aqlli tirnoq yozib, Python kodi xato chiqaradi','Internet ulanmaydi','Ekran o\'chib ketadi'],
+    ans:1,
+    exp:'Ba\'zi Android klaviaturalari aqlli tirnoq (\u201c\u201d) yozadi, lekin Python faqat oddiy tirnoq (\'\' yoki "") qabul qiladi — bu xatoga olib keladi.'},
+   {q:'Progress qayerda saqlanadi va qanday yo\'qolishi mumkin?',
+    opts:['Serverda, hech qachon yo\'qolmaydi','Brauzer xotirasida (LocalStorage) — boshqa brauzer yoki tarixni tozalash bilan yo\'qolishi mumkin','Foydalanuvchi akkauntida','Telefon xotirasida'],
+    ans:1,
+    exp:'Progress LocalStorage da saqlanadi — bu faqat joriy brauzer xotirasida bo\'ladi, shuning uchun bir xil brauzerda ishlash tavsiya etiladi.'},
+   {q:'Faqat bitta mavzuni (butun modulni emas) qayta boshlash uchun nima qilish kerak?',
+    opts:['Butun sahifani yangilash (F5)','Mavzu sarlavhasi yonidagi aylana (↺) tugmasini bosish','Modulni yopib qayta ochish','Bu imkonsiz'],
+    ans:1,
+    exp:'Mavzu yonidagi ↺ tugmasi faqat shu mavzuni qayta boshlaydi, boshqa mavzular progressiga ta\'sir qilmaydi.'}
+ ]},
+
+{id:'G.7', type:'eskiz',
+ title:'Amaliy mashq: birinchi Python kod',
+ terms:[
+   ['Kod satrlarini tartibda yozish','Har bir satr to\'g\'ri bo\'lishi uchun tartibga rioya qiling'],
+   ['O\'zgaruvchi','Ma\'lumot saqlovchi konteyner — ism = "qiymat"'],
+   ['print()','Ekranga matn chiqaruvchi funksiya'],
+   ['Izohni o\'qish','Har bir yashil izoh sizga nima qilganingizni aytadi']
+ ],
+ detail:'BIRINCHI AMALIY MASHQ\n\nBu mashqda siz Eskiz formatining asosiy mexanizmini — kod satrlarini tartibda yozishni — birinchi marta sinab ko\'rasiz.\n\nESLATMA: Har bir satr yozilgandan keyin, pastdagi "Tekshir" tugmasini bosing. Satr to\'g\'ri bo\'lsa, yonida yashil izoh paydo bo\'ladi. Agar xato bo\'lsa, satrni yana bir bor tekshiring.\n\nMOBIL FOYDALANUVCHILAR UCHUN: Kodni yozishda, klaviatura tirnoq belgilarini aqlli shaklga o\'zgartirmasligi uchun — agar xato chiqsa, tirnoqlarni o\'chirib oddiy klaviatura rejimida qayta yozing.',
+ sim:'>>> ism = "Eskiz"\n>>> yil = 2024\n>>> print("Platformaga xush kelibsiz!")\nPlatformaga xush kelibsiz!\n>>> print("Ism:", ism, "| Yil:", yil)\nIsm: Eskiz | Yil: 2024',
+ eskizlar:[
+  {q:'O\'zgaruvchilar yaratib, ularni print bilan chiqaring.',
+   lines:[
+    {c:'ism = "Eskiz"',n:'Siz ism o\'zgaruvchisini yaratdingiz'},
+    {c:'yil = 2024',n:'Siz yil o\'zgaruvchisini yaratdingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'print("Platformaga xush kelibsiz!")',n:'Siz xush kelibsiz xabarini chiqardingiz'},
+    {c:'print("Ism:", ism, "| Yil:", yil)',n:'Siz o\'zgaruvchilar qiymatlarini chiqardingiz'},
+   ]},
+  {q:'Ro\'yxat yaratib, uzunligini va birinchi elementini chiqaring.',
+   lines:[
+    {c:'modullar = ["Python", "NumPy", "Pandas", "ML", "DL"]',n:'Siz o\'quv modullar ro\'yxatini yaratdingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'print("Modullar soni:", len(modullar))',n:'Siz ro\'yxat uzunligini chiqardingiz'},
+    {c:'print("Birinchi modul:", modullar[0])',n:'Siz ro\'yxatning birinchi elementini chiqardingiz'},
+   ]},
+ ]},
+
+{id:'G.8', type:'test',
+ title:'Yakuniy nazorat — Eskiz platformasi',
+ terms:[
+   ['To\'liq bilim','Test + Eskiz + Batafsil + Sim — barchasini birlashtirish'],
+   ['O\'rganish strategiyasi','Batafsil → Sim → Mustaqil kod yozish'],
+   ['Modullar ketma-ketligi','1-moduldan boshlab, ketma-ket davom etish'],
+   ['Samarali foydalanish','Har bir mavzuni 100% ga yetkazib, keyingisiga o\'tish']
+ ],
+ detail:'YAKUNIY XULOSA — PLATFORMADAN SAMARALI FOYDALANISH\n\nEskiz platformasidan MAKSIMAL foyda olish uchun:\n\n1. KETMA-KETLIK: Modullarni tartibda o\'ting. Har bir modul oldingilariga tayanadi.\n\n2. 100% GA YETKAZING: Har bir mavzuni tugatmasdan keyingisiga o\'tmang — 100% belgisi, o\'sha mavzudagi barcha materiallarni qamrab olganingizni bildiradi.\n\n3. BATAFSIL + SIM: Kod yozishdan avval, Batafsil panelni o\'qib, Sim (natija) ni ko\'ring. Shundan keyin mustaqil yozish — haqiqiy o\'rganish.\n\n4. XATO QO\'RQMANG: Noto\'g\'ri javob yoki noto\'g\'ri kod — bu jarayon bir qismi. Izohlarni o\'qib, nima xato bo\'lganini tushunish — o\'rganishning eng muhim qismi.\n\n5. TAKRORLANG: Biror mavzu tushunarsiz bo\'lsa — ↺ tugmasi bilan qayta boshlang. Matematika va dasturlashda, takrorlash — ustunlikning asosi.',
+ tests:[
+   {q:'Platformadan samarali foydalanish uchun eng to\'g\'ri strategiya qaysi?',
+    opts:['Tezroq o\'tish uchun, faqat Sim (natija) ni ko\'rib nusxa ko\'chirish','Ketma-ketlikda, har mavzuni 100% ga yetkazib, Batafsil+Sim dan keyin mustaqil kod yozish','Faqat test savollariga javob berib, eskiz mashqlarini o\'tkazib yuborish','Oxirgi modullardan boshlash'],
+    ans:1,
+    exp:'Ketma-ketlikda o\'tish, har mavzuni to\'liq tugatish, va Batafsil+Sim dan keyin mustaqil kod yozish — eng samarali o\'rganish strategiyasi.'},
+   {q:'Noto\'g\'ri javob yoki kod yozganda nima qilish kerak?',
+    opts:['Darhol modulni yopib ketish','Izohni o\'qib, nima xato bo\'lganini tushunib, qayta urinish','Bir xil javobni takror-takror bosish','Boshqa mavzuga o\'tib ketish'],
+    ans:1,
+    exp:'Xato — o\'rganish jarayonining bir qismi. Izohni o\'qib tushunish va qayta urinish — eng to\'g\'ri yondashuv.'},
+   {q:'Eskiz platformasi kimlar uchun mo\'ljallangan?',
+    opts:['Faqat professional dasturchilar uchun','Faqat matematika bilimlari kuchlilari uchun','O\'zbek tilida Data Science va ML o\'rganmoqchi bo\'lgan har bir kishi uchun','Faqat universitet talabalari uchun'],
+    ans:2,
+    exp:'Eskiz — O\'zbek tilida Data Science va ML o\'rganmoqchi bo\'lgan har bir kishi uchun mo\'ljallangan, boshlang\'ichdan ilg\'orgacha.'}
+ ]},
+
+];
+
+// ═══════ HOLAT ═══════
+var cur=0, curEskiz=0, skipOn=false, ghostVisible=true;
+var lineData=[], doneSet=new Set(), eskizDoneSet=new Set();
+var testAnswers={}, selectedStar=0, ratingSubmitted=false;
+var BRIGHT=[0,0.05,0.1,0.2,0.3,0.42,0.55,0.65,0.75,0.85,0.95];
+
+window.onload=function(){buildStars();buildTabs();buildIntro();loadMod(0);};
+
+function buildIntro(){
+  var testTopics=M.filter(function(m){return m.type==='test';}).length;
+  var eskizCount=M.reduce(function(s,m){return s+(m.type==='eskiz'?m.eskizlar.length:0);},0);
+  var h='<div class="intro-title">'+MODULE_INTRO.title+'</div>';
+  h+='<div class="intro-text">'+esc(MODULE_INTRO.text)+'</div>';
+  h+='<div class="intro-stats">';
+  h+='<div class="intro-stat"><div class="intro-stat-v">'+testTopics+'</div><div class="intro-stat-l">TEST</div></div>';
+  h+='<div class="intro-stat"><div class="intro-stat-v">'+eskizCount+'</div><div class="intro-stat-l">ESKIZ</div></div>';
+  h+='<div class="intro-stat"><div class="intro-stat-v">8</div><div class="intro-stat-l">MAVZU</div></div>';
+  h+='</div>';
+  document.getElementById('introBox').innerHTML=h;
+}
+
+function loadMod(i){
+  cur=i; curEskiz=0;
+  document.getElementById('detailPanel').classList.remove('show');
+  document.getElementById('badge') && (document.getElementById('badge').className='badge');
+  var m=M[i];
+  document.getElementById('topSub').textContent=m.id;
+  document.getElementById('svMod').textContent=(i+1)+'/'+M.length;
+  // terms
+  var th='<div class="terms-title">📚 Yangi atamalar:</div>';
+  m.terms.forEach(function(t){
+    th+='<div class="term-row"><span class="term-key">'+esc(t[0])+'</span><span class="term-val">'+esc(t[1])+'</span></div>';
+  });
+  document.getElementById('termsBox').innerHTML=th;
+  // content
+  if(m.type==='test') renderTest(m);
+  else renderEskiz(m);
+  buildTabs(); updateTopStats();
+}
+
+// ═══════ TEST ═══════
+function renderTest(m){
+  if(!testAnswers[cur]) testAnswers[cur]={};
+  var h='<div class="test-panel"><div class="test-title">🧠 '+m.title+' — Test</div>';
+  m.tests.forEach(function(t,qi){
+    h+='<div class="test-q" id="tq'+qi+'">';
+    h+='<div class="test-qtext">'+(qi+1)+'. '+esc(t.q)+'</div>';
+    h+='<div class="test-opts">';
+    var answered = testAnswers[cur][qi] !== undefined;
+    t.opts.forEach(function(o,oi){
+      var cls='test-opt';
+      if(answered){
+        if(oi===t.ans) cls+=' show-correct';
+        else if(oi===testAnswers[cur][qi] && oi!==t.ans) cls+=' wrong';
+      }
+      h+='<button class="'+cls+'" onclick="answerTest('+qi+','+oi+')" '+(answered?'disabled':'')+'>'+esc(o)+'</button>';
+    });
+    h+='</div>';
+    if(answered){
+      var isCorrect = testAnswers[cur][qi]===t.ans;
+      h+='<div class="test-exp show">'+(isCorrect?'✅':'❌')+' '+esc(t.exp)+'</div>';
+    }
+    h+='</div>';
+  });
+  // score
+  var answered=Object.keys(testAnswers[cur]).length;
+  var correct=0;
+  Object.keys(testAnswers[cur]).forEach(function(qi){
+    if(testAnswers[cur][qi]===m.tests[qi].ans) correct++;
+  });
+  if(answered===m.tests.length){
+    h+='<div class="test-score show">Natija: '+correct+'/'+m.tests.length+' ✅</div>';
+    doneSet.add(cur);
+  }
+  h+='</div>';
+  document.getElementById('mainContent').innerHTML=h;
+  document.getElementById('result-panel') && document.getElementById('result-panel').classList.remove('show');
+  updateTopStats();
+}
+
+function answerTest(qi,oi){
+  if(!testAnswers[cur]) testAnswers[cur]={};
+  if(testAnswers[cur][qi]!==undefined) return;
+  testAnswers[cur][qi]=oi;
+  renderTest(M[cur]);
+  buildTabs(); updateTopStats();
+}
+
+// ═══════ ESKIZ (kod yozish mavzulari) ═══════
+function renderEskiz(m){
+  var e=m.eskizlar[curEskiz];
+  // eskiz dots
+  var dotsH='<div style="display:flex;gap:6px;justify-content:center;margin-bottom:10px;">';
+  m.eskizlar.forEach(function(_,i){
+    var key=cur+'-'+i;
+    var w=i===curEskiz?'40px':'26px';
+    var bg=eskizDoneSet.has(key)?'#22c55e':(i===curEskiz?'#00f0c8':'#1e3048');
+    dotsH+='<div onclick="jumpEskiz('+i+')" style="width:'+w+';height:6px;border-radius:3px;background:'+bg+';cursor:pointer;transition:all .2s;"></div>';
+  });
+  dotsH+='</div>';
+  // question
+  var qH='<div style="background:#0d1828;border:1px solid #1e3048;border-left:3px solid #a855f7;border-radius:8px;padding:10px 12px;margin-bottom:10px;font-size:.71rem;line-height:1.8;color:#c4b5fd;white-space:pre-wrap;">Eskiz '+(curEskiz+1)+'/'+m.eskizlar.length+' — '+esc(e.q)+'</div>';
+  // skip row
+  var skipH='<div class="skip-row" onclick="toggleSkip()"><div class="sw" id="sw"></div><span id="skipLbl"># Kommentlarni o\'tkazib yuboring</span></div>';
+  // result panel
+  var resH='<div class="result-panel" id="resultPanel"><div class="result-title">📊 NATIJA — SIMULYATSIYA</div><div class="sim-wrap" id="simWrap"></div></div>';
+  // code block
+  var codeH='<div class="code-block"><div class="fbar"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div><div class="fn" id="fname">guide_'+(curEskiz+1)+'.py</div><div class="fhint">↔️ suring ✏️ yozing</div></div><div class="lines-wrap" id="linesWrap"></div><div class="btn-row"><button class="btn btn-chk" onclick="doCheck()">✅ Tekshir</button><button class="btn btn-clr" onclick="doClear()">🗑️ Tozala</button><button class="btn btn-ghost" id="ghostBtn" onclick="toggleGhost()">👁️ Yashir</button><button class="btn btn-det" onclick="toggleDetail()">📖 Batafsil</button><button class="btn btn-res" onclick="toggleResult()">📊 Natija</button></div><div class="badge" id="badge"></div></div>';
+  document.getElementById('mainContent').innerHTML=dotsH+qH+skipH+resH+codeH;
+  buildLines(e);
+  // sync skip sw
+  document.getElementById('sw').classList.toggle('on',skipOn);
+  document.getElementById('skipLbl').textContent=skipOn?'Kommentlar o\'tkazilmoqda':'# Kommentlarni o\'tkazib yuboring';
+  applyBright(); updateStats();
+}
+
+function jumpEskiz(i){ curEskiz=i; renderEskiz(M[cur]); }
+
+function buildLines(e){
+  var wrap=document.getElementById('linesWrap');
+  if(!wrap) return;
+  wrap.innerHTML=''; lineData=[];
+  var op=BRIGHT[parseInt(document.getElementById('brightSlider').value)||3];
+  e.lines.forEach(function(ln,i){
+    var isCom=ln.c.replace(/^\s+/,'').charAt(0)==='#';
+    var isEmpty=ln.c==='';
+    var isSlash=ln.c.endsWith('\\');
+    var block=document.createElement('div');
+    block.className='line-block';
+    var row=document.createElement('div');
+    row.className='line-row';
+    var num=document.createElement('div');
+    num.className='line-num'; num.id='num'+i;
+    num.textContent=isEmpty?'':(i+1);
+    var content=document.createElement('div');
+    content.className='line-content';
+    var ghost=document.createElement('div');
+    ghost.className='line-ghost'+((isCom&&skipOn)?' skip-c':'');
+    ghost.id='ghost'+i;
+    ghost.style.color=ghostVisible?'rgba(74,96,128,'+op+')':'transparent';
+    ghost.textContent=ln.c||' ';
+    var colors=document.createElement('div');
+    colors.className='line-colors'; colors.id='clr'+i;
+    var inp=document.createElement('input');
+    inp.type='text'; inp.className='line-input'; inp.id='inp'+i;
+    inp.setAttribute('spellcheck','false'); inp.setAttribute('autocorrect','off');
+    inp.setAttribute('autocapitalize','off'); inp.setAttribute('autocomplete','off');
+    if(isEmpty||(isCom&&skipOn)) inp.disabled=true;
+    (function(idx,target,noteText){
+      inp.addEventListener('input',function(){
+        if(!target) return;
+        updateLineClr(idx,target);
+        if(inp.value===target&&target!==''&&noteText!=='') showNote(idx);
+        else if(inp.value!==target) hideNote(idx);
+        updateStats();
+      });
+    })(i,ln.c,ln.n);
+    content.appendChild(ghost); content.appendChild(colors); content.appendChild(inp);
+    row.appendChild(num); row.appendChild(content);
+    var note=document.createElement('div');
+    note.className='line-done-note'; note.id='note'+i;
+    note.textContent=ln.n?('✅ '+ln.n+'!'):'';
+    block.appendChild(row);
+    if(ln.n) block.appendChild(note);
+    wrap.appendChild(block);
+    lineData.push({inp:inp,target:ln.c,isCom:isCom,isEmpty:isEmpty});
+  });
+}
+
+function updateLineClr(idx,target){
+  var inp=document.getElementById('inp'+idx);
+  var clr=document.getElementById('clr'+idx);
+  if(!inp||!clr) return;
+  var typed=inp.value, html='';
+  for(var ci=0;ci<target.length;ci++){
+    var ch=target[ci];
+    if(ci<typed.length) html+=typed[ci]===ch?'<span style="color:#22c55e">'+esc(ch)+'</span>':'<span style="color:#f43f5e;text-decoration:underline">'+esc(ch)+'</span>';
+    else html+='<span style="color:transparent">'+esc(ch)+'</span>';
+  }
+  clr.innerHTML=html;
+  var num=document.getElementById('num'+idx);
+  if(num) num.style.color=(typed===target&&target!=='')?'#22c55e':'';
+}
+
+function showNote(i){var n=document.getElementById('note'+i);if(n&&n.textContent)n.classList.add('show');}
+function hideNote(i){var n=document.getElementById('note'+i);if(n)n.classList.remove('show');}
+
+function doCheck(){
+  var e=M[cur].eskizlar[curEskiz];
+  var done=0,total=0,errors=[];
+  lineData.forEach(function(l,i){
+    if(l.isEmpty||(l.isCom&&skipOn)) return;
+    total++;
+    if(l.inp.value===l.target){
+      done++; document.getElementById('num'+i).style.color='#22c55e';
+      if(e.lines[i].n) showNote(i);
+    } else {
+      errors.push(i+1); document.getElementById('num'+i).style.color='#f43f5e';
+    }
+  });
+  var pct=total>0?Math.round(done/total*100):0;
+  var b=document.getElementById('badge');
+  if(!b) return;
+  b.className='badge show';
+  if(pct>=85){
+    b.className+=' g';
+    eskizDoneSet.add(cur+'-'+curEskiz);
+    var isLast=curEskiz===M[cur].eskizlar.length-1;
+    if(isLast){ doneSet.add(cur); b.textContent='✅ Zo\'r! '+pct+'% — barcha eskizlar tugadi!'; showRating(); }
+    else { b.textContent='✅ Zo\'r! '+pct+'% — keyingi eskiz →'; setTimeout(function(){curEskiz++;renderEskiz(M[cur]);},900); }
+  } else if(pct>=55){
+    b.className+=' o'; b.textContent='⚡ '+pct+'% — xato qatorlar: '+errors.join(', ')+'-qator';
+  } else {
+    b.className+=' r'; b.textContent='❌ '+pct+'% — qaytadan urinib ko\'ring';
+  }
+  updateStats(); buildTabs();
+}
+
+function doClear(){
+  lineData.forEach(function(l,i){
+    l.inp.value='';
+    var clr=document.getElementById('clr'+i); if(clr) clr.innerHTML='';
+    var num=document.getElementById('num'+i); if(num) num.style.color='';
+    hideNote(i);
+  });
+  var b=document.getElementById('badge'); if(b) b.className='badge';
+  updateStats();
+}
+
+function updateStats(){
+  if(M[cur].type!=='eskiz') return;
+  var done=0,total=0;
+  lineData.forEach(function(l){
+    if(l.isEmpty||(l.isCom&&skipOn)) return;
+    total++;
+    if(l.inp.value===l.target) done++;
+  });
+  var pct=total>0?Math.round(done/total*100):0;
+  document.getElementById('svDone').textContent=done+'/'+total;
+  document.getElementById('svScore').textContent=done>0?pct+'%':'—';
+  document.getElementById('progressFill').style.width=(doneSet.size/M.length*100)+'%';
+}
+
+function updateTopStats(){
+  // test balini hisoblash
+  var totalQ=0, correctQ=0;
+  M.forEach(function(m,mi){
+    if(m.type!=='test') return;
+    m.tests.forEach(function(t,qi){
+      totalQ++;
+      if(testAnswers[mi]&&testAnswers[mi][qi]===t.ans) correctQ++;
+    });
+  });
+  document.getElementById('svScore').textContent=totalQ>0?(correctQ+'/'+totalQ):'—';
+  document.getElementById('svDone').textContent=doneSet.size+'/'+M.length;
+  document.getElementById('progressFill').style.width=(doneSet.size/M.length*100)+'%';
+}
+
+function toggleGhost(){
+  ghostVisible=!ghostVisible;
+  document.querySelectorAll('.line-ghost').forEach(function(g){g.style.visibility=ghostVisible?'visible':'hidden';});
+  var gb=document.getElementById('ghostBtn');
+  if(gb) gb.textContent=ghostVisible?'👁️ Yashir':'👁️ Ko\'rsat';
+}
+
+function toggleSkip(){
+  skipOn=!skipOn;
+  var sw=document.getElementById('sw'); if(sw) sw.classList.toggle('on',skipOn);
+  var sl=document.getElementById('skipLbl'); if(sl) sl.textContent=skipOn?'Kommentlar o\'tkazilmoqda':'# Kommentlarni o\'tkazib yuboring';
+  if(M[cur].type==='eskiz'){ buildLines(M[cur].eskizlar[curEskiz]); applyBright(); updateStats(); }
+}
+
+function toggleDetail(){
+  var p=document.getElementById('detailPanel');
+  if(p.classList.contains('show')){p.classList.remove('show');}
+  else{document.getElementById('detailContent').textContent=M[cur].detail;p.classList.add('show');}
+}
+
+function toggleResult(){
+  var p=document.getElementById('resultPanel');
+  if(!p) return;
+  if(p.classList.contains('show')){p.classList.remove('show');}
+  else{document.getElementById('simWrap').innerHTML='<pre>'+esc(M[cur].sim)+'</pre>';p.classList.add('show');}
+}
+
+function setBright(v){document.getElementById('brightVal').textContent=v;applyBright();}
+
+function applyBright(){
+  var v=parseInt(document.getElementById('brightSlider').value)||3;
+  var op=BRIGHT[v];
+  document.querySelectorAll('.line-ghost').forEach(function(g){
+    if(!g.classList.contains('skip-c')&&ghostVisible) g.style.color='rgba(74,96,128,'+op+')';
+  });
+}
+
+function buildTabs(){
+  var c=document.getElementById('tabs'); c.innerHTML='';
+  M.forEach(function(m,i){
+    var d=document.createElement('div');
+    d.className='tab'+(i===cur?' on':'')+(doneSet.has(i)?' done':'');
+    d.textContent=m.id;
+    d.onclick=(function(n){return function(){loadMod(n);};})(i);
+    c.appendChild(d);
+  });
+}
+
+function buildStars(){
+  var sc=document.getElementById('stars'); sc.innerHTML='';
+  for(var i=1;i<=10;i++){
+    var s=document.createElement('span');
+    s.className='star'; s.textContent='⭐'; s.dataset.v=i;
+    s.onclick=(function(v){return function(){
+      selectedStar=v;
+      document.getElementById('ratingScore').textContent=v+' / 10';
+      document.querySelectorAll('.star').forEach(function(st){st.classList.toggle('on',parseInt(st.dataset.v)<=v);});
+    };})(i);
+    sc.appendChild(s);
+  }
+}
+
+function showRating(){document.getElementById('ratingBox').classList.add('show');}
+
+function submitRating(){
+  if(ratingSubmitted) return;
+  if(selectedStar===0){alert('Baho tanlang!');return;}
+  ratingSubmitted=true;
+  document.getElementById('ratingThanks').style.display='block';
+  document.querySelector('.rating-submit').style.display='none';
+}
+
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+</script>
+</body>
+</html>

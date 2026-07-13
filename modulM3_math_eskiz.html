@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Eskiz — Deep Learning Matematikasi (3-qism). Transformer</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:#0a0e1a;color:#dde5f0;font-family:'JetBrains Mono',monospace;font-size:13px;min-height:100vh;}
+.top{background:#0f1520;border-bottom:1px solid #1e3048;padding:8px 14px;display:flex;align-items:center;gap:8px;position:sticky;top:0;z-index:50;}
+.top-t{color:#00f0c8;font-size:.78rem;font-weight:700;}
+.top-s{color:#4a6080;font-size:.65rem;margin-left:auto;}
+.bright-bar{background:#0f1520;border-bottom:1px solid #1e3048;padding:6px 14px;display:flex;align-items:center;gap:10px;position:sticky;top:41px;z-index:49;}
+.bright-lbl{font-size:.65rem;color:#4a6080;flex-shrink:0;}
+.bright-slider{flex:1;-webkit-appearance:none;height:4px;border-radius:2px;background:#1e3048;outline:none;cursor:pointer;}
+.bright-slider::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:#00f0c8;cursor:pointer;}
+.bright-val{font-size:.68rem;color:#00f0c8;font-weight:700;width:20px;text-align:right;flex-shrink:0;}
+.wrap{padding:10px 14px;max-width:540px;margin:0 auto;}
+.tabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;margin-bottom:10px;scrollbar-width:none;}
+.tabs::-webkit-scrollbar{display:none;}
+.tab{flex-shrink:0;padding:6px 12px;border-radius:20px;border:1px solid #1e3048;background:#141e2e;color:#4a6080;font-size:.68rem;cursor:pointer;transition:all .15s;}
+.tab.on{border-color:#00f0c8;color:#00f0c8;background:rgba(0,240,200,.08);}
+.tab.done{border-color:#22c55e;color:#22c55e;background:rgba(34,197,94,.06);}
+.stats{display:flex;gap:8px;margin-bottom:10px;}
+.stat{flex:1;background:#141e2e;border:1px solid #1e3048;border-radius:8px;padding:7px 8px;text-align:center;}
+.sv{font-size:.95rem;font-weight:700;color:#00f0c8;}
+.sl{font-size:.58rem;color:#4a6080;margin-top:2px;}
+.progress-bar{height:3px;background:#1e3048;border-radius:2px;margin-bottom:10px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,#00f0c8,#2563eb);border-radius:2px;transition:width .4s;}
+.intro-box{background:#0d1828;border:1px solid #1e3048;border-left:3px solid #00f0c8;border-radius:10px;padding:14px;margin-bottom:10px;}
+.intro-title{font-size:.8rem;font-weight:700;color:#00f0c8;margin-bottom:8px;}
+.intro-text{font-size:.7rem;line-height:1.85;color:#9fb0c8;white-space:pre-wrap;}
+.intro-stats{display:flex;gap:8px;margin-top:10px;}
+.intro-stat{flex:1;background:#080c14;border:1px solid #1e3048;border-radius:8px;padding:8px;text-align:center;}
+.intro-stat-v{font-size:1.1rem;font-weight:700;color:#00f0c8;}
+.intro-stat-l{font-size:.58rem;color:#4a6080;margin-top:2px;}
+.terms-box{background:#080c14;border:1px solid #1e3048;border-left:3px solid #a855f7;border-radius:8px;padding:10px 12px;margin-bottom:10px;}
+.terms-title{font-size:.68rem;font-weight:700;color:#a855f7;margin-bottom:8px;}
+.term-row{display:flex;gap:6px;margin-bottom:5px;align-items:flex-start;}
+.term-key{font-size:.64rem;color:#fbbf24;font-weight:700;min-width:120px;flex-shrink:0;}
+.term-val{font-size:.63rem;color:#4a6080;line-height:1.6;}
+.detail-panel{display:none;background:#0a1628;border:1px solid #2563eb;border-radius:8px;padding:12px 14px;margin-bottom:10px;font-size:.72rem;line-height:2;color:#93c5fd;white-space:pre-wrap;}
+.detail-panel.show{display:block;}
+.detail-title{color:#60a5fa;font-weight:700;margin-bottom:8px;font-size:.76rem;}
+
+/* TEST PANEL */
+.test-panel{background:#080c14;border:1px solid #1e3048;border-radius:10px;padding:12px;margin-bottom:10px;}
+.test-title{font-size:.72rem;font-weight:700;color:#fbbf24;margin-bottom:12px;}
+.test-q{background:#0d1828;border-left:3px solid #a855f7;border-radius:6px;padding:10px 12px;margin-bottom:10px;}
+.test-qtext{font-size:.71rem;color:#c4b5fd;line-height:1.7;margin-bottom:10px;}
+.test-opts{display:flex;flex-direction:column;gap:6px;}
+.test-opt{padding:8px 12px;border-radius:8px;border:1px solid #1e3048;background:#141e2e;font-size:.68rem;color:#8ba0c0;cursor:pointer;text-align:left;font-family:'JetBrains Mono',monospace;transition:all .15s;}
+.test-opt:active{opacity:.7;}
+.test-opt.correct{border-color:#22c55e;color:#22c55e;background:rgba(34,197,94,.1);}
+.test-opt.wrong{border-color:#f43f5e;color:#f43f5e;background:rgba(244,63,94,.1);}
+.test-opt.show-correct{border-color:#22c55e;color:#22c55e;background:rgba(34,197,94,.05);}
+.test-exp{display:none;font-size:.66rem;line-height:1.7;color:#64748b;padding:8px 0 0 4px;border-top:1px dashed #1e3048;margin-top:8px;}
+.test-exp.show{display:block;}
+.test-score{text-align:center;padding:10px;font-size:.78rem;font-weight:700;color:#00f0c8;display:none;}
+.test-score.show{display:block;}
+.btn-test-check{width:100%;padding:10px;background:#2563eb;color:#fff;font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:700;border:none;border-radius:8px;cursor:pointer;margin-top:8px;}
+
+/* ESKIZ (kod yozish mavzulari uchun) */
+.skip-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;padding:8px 12px;background:#141e2e;border:1px solid #1e3048;border-radius:8px;cursor:pointer;}
+.skip-row span{font-size:.7rem;color:#4a6080;}
+.sw{width:34px;height:18px;background:#1e3048;border-radius:10px;position:relative;transition:background .2s;flex-shrink:0;}
+.sw.on{background:#fbbf24;}
+.sw::after{content:'';position:absolute;top:2px;left:2px;width:14px;height:14px;background:#fff;border-radius:50%;transition:left .2s;}
+.sw.on::after{left:18px;}
+.sim-wrap{width:100%;overflow-x:auto;}
+.sim-wrap pre{font-size:.68rem;line-height:1.9;color:#22c55e;white-space:pre;}
+.result-panel{display:none;background:#080c14;border:1px solid #22c55e;border-radius:10px;padding:12px;margin-bottom:10px;}
+.result-panel.show{display:block;}
+.result-title{color:#22c55e;font-size:.72rem;font-weight:700;margin-bottom:8px;}
+.code-block{border:1px solid #1e3048;border-radius:10px;overflow:hidden;margin-bottom:10px;background:#090d18;}
+.fbar{display:flex;align-items:center;gap:5px;padding:7px 12px;background:#0f1520;border-bottom:1px solid #1e3048;}
+.dot{width:6px;height:6px;border-radius:50%;}
+.dot.r{background:#f43f5e;}.dot.y{background:#fbbf24;}.dot.g{background:#22c55e;}
+.fn{font-size:.65rem;color:#4a6080;margin-left:4px;}
+.fhint{margin-left:auto;font-size:.6rem;color:#00f0c8;opacity:.7;}
+.lines-wrap{padding:4px 0;}
+.line-block{margin:0;}
+.line-row{display:flex;align-items:center;position:relative;min-height:30px;}
+.line-num{width:28px;flex-shrink:0;font-size:.63rem;padding:4px 4px 4px 5px;color:#2a3a50;text-align:right;user-select:none;transition:color .2s;align-self:center;}
+.line-content{flex:1;position:relative;overflow-x:auto;overflow-y:hidden;min-height:30px;}
+.line-content::-webkit-scrollbar{height:2px;}
+.line-content::-webkit-scrollbar-thumb{background:#1e3048;border-radius:1px;}
+.line-ghost{font-size:.76rem;line-height:1.8;padding:4px 8px;white-space:pre;pointer-events:none;min-height:30px;display:block;}
+.line-ghost.skip-c{opacity:.08!important;}
+.line-colors{position:absolute;top:0;left:0;font-size:.76rem;line-height:1.8;padding:4px 8px;white-space:pre;pointer-events:none;z-index:2;min-height:30px;}
+.line-input{position:absolute;top:0;left:0;right:0;bottom:0;width:100%;font-family:'JetBrains Mono',monospace;font-size:.76rem;line-height:1.8;padding:4px 8px;color:transparent;-webkit-text-fill-color:transparent;caret-color:#00f0c8;background:transparent;border:none;outline:none;white-space:pre;overflow:hidden;z-index:10;-webkit-appearance:none;}
+.line-input:disabled{cursor:default;}
+.line-done-note{display:none;font-size:.66rem;line-height:1.6;padding:3px 8px 3px 34px;color:#38bdf8;background:rgba(56,189,248,.06);border-left:2px solid #38bdf8;white-space:pre-wrap;animation:fadeIn .25s ease;}
+.line-done-note.show{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:translateY(0)}}
+.btn-row{display:flex;gap:6px;flex-wrap:wrap;padding:9px 12px;background:#0f1520;border-top:1px solid #1e3048;}
+.btn{padding:8px 11px;border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:.68rem;font-weight:700;border:none;cursor:pointer;flex-shrink:0;transition:opacity .15s;}
+.btn:active{opacity:.7;}
+.btn-chk{background:#00f0c8;color:#080c14;}
+.btn-clr{background:transparent;border:1px solid #1e3048;color:#4a6080;}
+.btn-det{background:#2563eb;color:#fff;}
+.btn-ghost{background:#7c3aed;color:#fff;}
+.btn-res{background:#16a34a;color:#fff;}
+.badge{display:none;margin:0 12px 10px;padding:7px 12px;border-radius:8px;font-size:.7rem;border:1px solid #1e3048;}
+.badge.show{display:block;}
+.badge.g{border-color:#22c55e;color:#22c55e;background:rgba(34,197,94,.07);}
+.badge.o{border-color:#fbbf24;color:#fbbf24;background:rgba(251,191,36,.07);}
+.badge.r{border-color:#f43f5e;color:#f43f5e;background:rgba(244,63,94,.07);}
+.rating-box{background:#0d1828;border:1px solid #fbbf24;border-radius:12px;padding:14px 16px;margin-top:10px;display:none;}
+.rating-box.show{display:block;}
+.rating-title{font-size:.72rem;font-weight:700;color:#fbbf24;text-align:center;margin-bottom:4px;}
+.rating-sub{font-size:.62rem;color:#4a6080;text-align:center;margin-bottom:12px;}
+.stars{display:flex;justify-content:center;gap:4px;margin-bottom:10px;flex-wrap:wrap;}
+.star{font-size:1.5rem;cursor:pointer;filter:grayscale(1);opacity:.35;transition:transform .1s,filter .1s;user-select:none;}
+.star.on{filter:none;opacity:1;}
+.rating-score{text-align:center;font-size:.72rem;color:#fbbf24;font-weight:700;margin-bottom:8px;min-height:18px;}
+.rating-comment{width:100%;background:#141e2e;border:1px solid #1e3048;border-radius:8px;padding:8px 10px;color:#dde5f0;font-family:'JetBrains Mono',monospace;font-size:.68rem;resize:none;outline:none;margin-bottom:8px;}
+.rating-submit{width:100%;padding:10px;background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#080c14;font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:700;border:none;border-radius:8px;cursor:pointer;}
+.rating-thanks{display:none;text-align:center;padding:10px;font-size:.72rem;color:#22c55e;font-weight:700;}
+.katex{font-size:1.05em !important;color:#fbbf24;}
+.katex-display{margin:.6em 0 !important;overflow-x:auto;overflow-y:hidden;padding:4px 0;}
+.term-val .katex,.test-qtext .katex,.test-opt .katex,.test-exp .katex{color:inherit;font-size:1em !important;}
+</style>
+</head>
+<body>
+<div class="top">
+  <div class="top-t">🔬 DL Matematika (3/3) — Transformer</div>
+  <div class="top-s" id="topSub">M3.1</div>
+</div>
+<div class="bright-bar">
+  <span class="bright-lbl">👁️ Xiralik:</span>
+  <input type="range" class="bright-slider" id="brightSlider" min="1" max="10" value="3" oninput="setBright(this.value)">
+  <span class="bright-val" id="brightVal">3</span>
+</div>
+<div class="wrap">
+  <div class="stats">
+    <div class="stat"><div class="sv" id="svScore">—</div><div class="sl">TEST BALL</div></div>
+    <div class="stat"><div class="sv" id="svDone">0/0</div><div class="sl">BAJARILDI</div></div>
+    <div class="stat"><div class="sv" id="svMod">1/12</div><div class="sl">MAVZU</div></div>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+  <div class="tabs" id="tabs"></div>
+  <div class="intro-box" id="introBox"></div>
+  <div class="terms-box" id="termsBox"></div>
+  <div class="detail-panel" id="detailPanel">
+    <div class="detail-title">📘 BATAFSIL</div>
+    <div id="detailContent"></div>
+  </div>
+  <div id="mainContent"></div>
+  <div class="rating-box" id="ratingBox">
+    <div class="rating-title">⭐ DL Matematika (3-qism)ni baholang</div>
+    <div class="rating-sub">Fikringiz keyingi versiyani yaxshilashga yordam beradi</div>
+    <div class="stars" id="stars"></div>
+    <div class="rating-score" id="ratingScore">Baho tanlang (1–10)</div>
+    <textarea class="rating-comment" id="ratingComment" rows="2" placeholder="Izoh..."></textarea>
+    <button class="rating-submit" onclick="submitRating()">⭐ Yuborish</button>
+    <div class="rating-thanks" id="ratingThanks">✅ Rahmat!</div>
+  </div>
+</div>
+<script>
+var MODULE_INTRO = {
+  title: "🔬 Deep Learning — Matematika (3-qism)",
+  text: "M1-2 qismlarda Backpropagation, CNN va RNN matematikasini, jumladan RNN ning vanishing gradient muammosini ko'rdingiz.\n\nBu yakuniy 3-qismda — Transformer arxitekturasi, ya'ni zamonaviy til modellarining (jumladan Claude kabi) negizini tashkil etuvchi Self-Attention mexanizmining to'liq matematikasini o'rganasiz: Q,K,V matritsalari, scaled dot-product formula, Multi-Head Attention, va Positional Encoding.\n\nBu — RNN ning ketma-ket (sekin) hisoblashisiz, UZOQ MUDDATLI bog'liqliklarni PARALEL ravishda o'rganish imkonini bergan inqilobiy g'oya.",
+  count: 12
+};
+
+var M = [
+
+{id:'M3.1', type:'test',
+ title:'Nega Attention kerak — RNN dan Transformerga',
+ terms:[
+   ['Ketma-ket hisoblash (Sequential)','RNN da $h_t$ faqat $h_{t-1}$ tayyor bo\'lgandan keyin hisoblanishi'],
+   ['Uzoq muddatli bog\'liqlik','Gap boshidagi so\'z, gap oxiridagi ma\'noga ta\'sir qilishi kerak bo\'lgan holat'],
+   ['Parallellashtirish','Barcha pozitsiyalarni BIR VAQTDA hisoblash imkoniyati'],
+   ['Attention','Har bir so\'zning, BOSHQA barcha so\'zlarga "qancha e\'tibor berishi" kerakligini hisoblash mexanizmi']
+ ],
+ detail:'RNN NING IKKI ASOSIY KAMCHILIGI\n\nM2.10 da RNN ning Vanishing Gradient muammosini ko\'rdik — LSTM (M2.11-12) bu muammoni QISMAN yengillashtiradi, lekin IKKI muhim kamchilik qoladi:\n\n1. KETMA-KET HISOBLASH: RNN da, $h_t$ ni hisoblash uchun, $h_{t-1}$ TAYYOR bo\'lishi SHART (formula: $h_t=\\tanh(W_{hh}h_{t-1}+...)$ — $h_{t-1}$ siz $h_t$ ni hisoblab bo\'lmaydi). Bu degani — 100 so\'zli gapni qayta ishlash uchun, 100 marta KETMA-KET (parallel emas) hisoblash kerak. GPU lar PARALEL hisoblashda kuchli, lekin RNN bu kuchdan FOYDALANA OLMAYDI.\n\n2. UZOQ MASOFADAGI BOG\'LIQLIK: Hatto LSTM bilan ham, gap boshidagi so\'z va gap oxiridagi so\'z orasidagi bog\'liqlik, KO\'P oraliq qadamlar orqali "o\'tishi" kerak — ma\'lumot yo\'lda qisman yo\'qolishi mumkin.\n\nATTENTION G\'OYASI (2017, "Attention is All You Need" maqolasi): Nima uchun har bir so\'z, FAQAT oldingi qadamdan emas, balki TO\'G\'RIDAN-TO\'G\'RI, BARCHA boshqa so\'zlardan kerakli ma\'lumotni "tortib olmasin"? Bu g\'oya — RNN ning ketma-ketlik zanjirini BUTUNLAY OLIB TASHLAYDI: endi har bir pozitsiya, BOSHQA barcha pozitsiyalarga, ularning AHAMIYATI (attention weight) asosida to\'g\'ridan-to\'g\'ri "qaraydi" — bu BIR QADAMDA, PARALEL ravishda amalga oshiriladi.\n\nNATIJA: Transformer, RNN dagi kabi T marta ketma-ket hisoblash o\'rniga, BIR marta, BARCHA pozitsiyalar uchun PARALEL hisoblaydi — bu GPU larni TO\'LIQ ishlatish, va o\'qitishni SEZILARLI tezlashtirish imkonini berdi. Bu — 20.43 da "nega transformerlar hammasini o\'zgartirib yubordi" degan savolning MATEMATIK javobi.',
+ tests:[
+   {q:'RNN ning ketma-ket (sequential) hisoblash xususiyati nima uchun kamchilik hisoblanadi?',
+    opts:['Chunki u juda aniq natija beradi','Chunki GPU larning parallel hisoblash kuchidan foydalanib bo\'lmaydi, har qadam oldingisini kutishi kerak','Chunki u juda ko\'p xotira talab qiladi','Bu hech qanday kamchilik emas'],
+    ans:1,
+    exp:'$h_t$ hisoblash uchun $h_{t-1}$ tayyor bo\'lishi SHART bo\'lgani uchun, barcha qadamlarni PARALEL hisoblab bo\'lmaydi — bu GPU ning asosiy kuchidan (parallellik) foydalanishga to\'sqinlik qiladi.'},
+   {q:'Attention mexanizmining asosiy g\'oyasi nima?',
+    opts:['Faqat oldingi so\'zga qarash','Har bir so\'z BOSHQA barcha so\'zlarga, ularning ahamiyati asosida, to\'g\'ridan-to\'g\'ri "qarashi"','Faqat birinchi so\'zga e\'tibor berish','So\'zlarni tasodifiy tartibda qayta ishlash'],
+    ans:1,
+    exp:'Attention — har bir pozitsiyaning, ketma-ket zanjir orqali emas, balki TO\'G\'RIDAN-TO\'G\'RI, barcha boshqa pozitsiyalarga (ularning ahamiyati bo\'yicha) "qarashi" mexanizmi.'},
+   {q:'Transformer ning RNN ga nisbatan asosiy AFZALLIGI nima?',
+    opts:['Kamroq parametrga ega','Barcha pozitsiyalarni PARALEL hisoblay oladi, bu o\'qitishni sezilarli tezlashtiradi','Hech qachon xato qilmaydi','Faqat qisqa gaplar bilan ishlaydi'],
+    ans:1,
+    exp:'Transformer, ketma-ket zanjirsiz, barcha pozitsiyalarni BIR vaqtda (parallel) hisoblay oladi — bu GPU kuchidan to\'liq foydalanish va tezroq o\'qitish imkonini beradi.'}
+ ]},
+
+{id:'M3.2', type:'test',
+ title:'Query, Key, Value matritsalari',
+ terms:[
+   ['Query (Q)','"Men nima qidirayapman" — joriy so\'zning so\'rovi'],
+   ['Key (K)','"Men nimani taklif qila olaman" — har bir so\'zning belgisi'],
+   ['Value (V)','"Agar tanlansam, qaysi ma\'lumotni beraman" — har bir so\'zning haqiqiy mazmuni'],
+   ['$Q=XW_Q,\\ K=XW_K,\\ V=XW_V$','Kirish $X$ dan uch xil proyeksiya orqali olinadi']
+ ],
+ detail:'Q, K, V — KUTUBXONADAGI QIDIRUV TIZIMI KABI\n\nAttention ni tushunish uchun ENG yaxshi o\'xshatish — KUTUBXONA QIDIRUV TIZIMI:\n\n- QUERY (Q) — sizning QIDIRUV SO\'ROVINGIZ ("menga romantik kitoblar haqida ma\'lumot kerak")\n- KEY (K) — har bir KITOB ustidagi YORLIQ/teglar ("bu kitob — romantik", "bu kitob — fantastika")\n- VALUE (V) — kitobning O\'ZI, HAQIQIY MAZMUNI (agar siz uni tanlasangiz, o\'qiydigan narsa)\n\nQIDIRUV JARAYONI: Sizning so\'rovingiz (Q), HAR BIR kitobning yorlig\'i (K) bilan SOLISHTIRILADI — qanchalik MOS kelsa, shuncha "ahamiyat" (attention weight) beriladi. Keyin, BARCHA kitoblarning MAZMUNI (V), shu ahamiyat darajalari bo\'yicha O\'RTACHALANIB, sizga natija beriladi (ko\'proq mos kelgan kitoblar ko\'proq "vazn"ga ega).\n\nMATEMATIK JIHATDAN QANDAY OLINADI?\n\nHar bir so\'z, dastlab, EMBEDDING (raqamli vektor, $X$) ko\'rinishida keladi. Bu BIR XIL $X$ dan, UCHTA TURLI og\'irlik matritsasi ($W_Q, W_K, W_V$) orqali, UCHTA TURLI proyeksiya olinadi:\n\n$$Q = XW_Q, \\quad K = XW_K, \\quad V = XW_V$$\n\nDiqqat qiling — $W_Q$, $W_K$, $W_V$ — BU O\'QITILADIGAN PARAMETRLAR (xuddi Dense qatlam og\'irliklari kabi, Backpropagation orqali o\'rganiladi). Tarmoq, qaysi proyeksiya so\'rov sifatida, qaysi belgi sifatida, qaysi mazmun sifatida ENG FOYDALI ekanini, ma\'lumotdan O\'ZI o\'rganadi.',
+ tests:[
+   {q:'Query (Q) kutubxona qidiruv o\'xshatishida nimaga mos keladi?',
+    opts:['Kitobning yorlig\'i','Sizning qidiruv so\'rovingiz','Kitobning haqiqiy mazmuni','Kutubxonaning o\'zi'],
+    ans:1,
+    exp:'Query — "men nima qidirayapman" degan so\'rovni ifodalaydi, bu kutubxona misolida sizning qidiruv so\'rovingizga mos keladi.'},
+   {q:'$Q, K, V$ qanday olinadi?',
+    opts:['Ular tasodifiy tanlanadi','Bir xil kirish $X$ dan, uch xil o\'qitiladigan og\'irlik matritsasi ($W_Q,W_K,W_V$) orqali','Faqat $Q$ o\'qitiladi, $K$ va $V$ doimiy','Ular foydalanuvchi tomonidan qo\'lda kiritiladi'],
+    ans:1,
+    exp:'$Q=XW_Q$, $K=XW_K$, $V=XW_V$ — bir xil kirish $X$ dan, uchta ALOHIDA, o\'qitiladigan og\'irlik matritsasi orqali uch xil proyeksiya olinadi.'},
+   {q:'Value (V) nimani ifodalaydi?',
+    opts:['Qidiruv so\'rovini','Solishtirish uchun yorliqni','Agar tanlansa, taqdim etiladigan haqiqiy mazmunni','Hech narsani'],
+    ans:2,
+    exp:'Value — agar shu so\'z (pozitsiya) "tanlansa" (yuqori attention weight olsa), natijaga qo\'shiladigan HAQIQIY ma\'lumot/mazmunni ifodalaydi.'}
+ ]},
+
+{id:'M3.3', type:'test',
+ title:'Scaled Dot-Product Attention formulasi',
+ terms:[
+   ['Attention formulasi','$\\text{Attention}(Q,K,V)=\\text{softmax}\\left(\\dfrac{QK^\\top}{\\sqrt{d_k}}\\right)V$'],
+   ['$QK^\\top$','Query va Key orasidagi o\'xshashlikni (dot product orqali) hisoblash'],
+   ['$\\sqrt{d_k}$ ga bo\'lish','Kattalashib ketgan qiymatlarni "sovutish" (scaling)'],
+   ['Attention weights','Softmax dan keyin, yig\'indisi 1 ga teng bo\'lgan ahamiyat darajalari']
+ ],
+ detail:'TO\'LIQ FORMULA — QADAM-BAQADAM CHIQARISH\n\n$$\\text{Attention}(Q,K,V) = \\text{softmax}\\left(\\frac{QK^\\top}{\\sqrt{d_k}}\\right)V$$\n\nBu yerda $d_k$ — Key vektorining o\'lchami (dimensiyasi). Keling, har bir qadamni alohida ko\'rib chiqamiz:\n\nQADAM 1 — O\'XSHASHLIKNI HISOBLASH ($QK^\\top$): Har bir Query vektori, HAR BIR Key vektori bilan DOT PRODUCT orqali "solishtiriladi". Dot product — ikki vektor qanchalik "bir xil yo\'nalishda" ekanini o\'lchaydi (M3.2 dagi kutubxona misolida — so\'rov va yorliq qanchalik MOS kelishi). Natija — $n\\times n$ o\'lchamli matritsa ($n$ — so\'zlar soni), har bir katakcha — bitta so\'z juftligining o\'xshashlik balli.\n\nQADAM 2 — SCALING ($/\\sqrt{d_k}$): $d_k$ katta bo\'lganda (masalan $512$), dot product natijalari JUDA KATTA sonlarga aylanishi mumkin. Katta sonlar, Softmax ichida (eksponensial orqali) "portlab ketishi" yoki gradientni "tekislab qo\'yishi" mumkin (M1.9 dagi Softmax muammosiga o\'xshash). $\\sqrt{d_k}$ ga bo\'lish — bu qiymatlarni "boshqariladigan" oraliqqa qaytaradi, statistik jihatdan o\'xshashlik ballarining dispersiyasini barqarorlashtiradi.\n\nQADAM 3 — SOFTMAX: M1.9 dan tanish Softmax, har bir qatorni (har bir so\'z uchun, BOSHQA barcha so\'zlarga nisbatan) EHTIMOLLIK taqsimotiga aylantiradi — yig\'indisi $1$ ga teng. Bu — "ATTENTION WEIGHTS": har bir so\'z, boshqa har bir so\'zga QANCHA "e\'tibor" berishini ko\'rsatadi.\n\nQADAM 4 — VALUE BILAN KO\'PAYTIRISH ($\\times V$): Yakuniy natija — har bir so\'z uchun, BOSHQA barcha so\'zlarning Value vektorlarining, Attention Weights bo\'yicha O\'RTACHALANGAN YIG\'INDISI. Bu — har bir so\'zning YANGI, KONTEKSTGA BOY tasviri (representation) — endi u nafaqat O\'ZINI, balki GAPDAGI BOSHQA MUHIM so\'zlarning ma\'lumotini ham "o\'z ichiga oladi".',
+ tests:[
+   {q:'$QK^\\top$ amali nimani hisoblaydi?',
+    opts:['Har bir so\'zning uzunligini','Query va Key vektorlari orasidagi o\'xshashlikni (dot product orqali)','Faqat Value vektorini','Loss qiymatini'],
+    ans:1,
+    exp:'$QK^\\top$ — har bir Query va har bir Key orasidagi dot product, ya\'ni ular qanchalik "mos kelishi"ni hisoblaydi.'},
+   {q:'Nima uchun $\\sqrt{d_k}$ ga bo\'lish (scaling) kerak?',
+    opts:['Hisoblashni sekinlashtirish uchun','Katta $d_k$ da dot product natijalari juda kattalashib, Softmax ni beqarorlashtirmasligi uchun','Bu shart emas, faqat estetik','Faqat kichik datasetlar uchun kerak'],
+    ans:1,
+    exp:'Scaling, dot product natijalarini "boshqariladigan" oraliqda ushlab turadi — bu Softmax ning barqaror ishlashini va gradientning "tekislashmasligini" ta\'minlaydi.'},
+   {q:'Softmax dan keyin olingan Attention Weights ning yig\'indisi nimaga teng?',
+    opts:['$0$','$1$','$d_k$','O\'zgaruvchan, hech qachon bir xil emas'],
+    ans:1,
+    exp:'Softmax har doim ehtimollik taqsimoti hosil qiladi — har bir qatorning (so\'zning) barcha attention weight lari yig\'indisi aniq $1$ ga teng.'}
+ ]},
+
+{id:'M3.4', type:'eskiz',
+ title:'Self-Attention ni numpy bilan implement qilish',
+ terms:[
+   ['scaled_dot_product_attention()','To\'liq Attention formulasini funksiya sifatida yozish'],
+   ['np.matmul yoki @','Matritsa ko\'paytirish operatori'],
+   ['Softmax qatorlar bo\'yicha','Har bir qator (so\'z) o\'z ichida mustaqil ehtimollikka aylantiriladi'],
+   ['Attention weights vizualizatsiyasi','Qaysi so\'z qaysi so\'zga ko\'proq "qaragani"ni ko\'rish']
+ ],
+ detail:'TO\'LIQ ATTENTION NI NOLDAN YOZISH\n\nBu — M3 qismining ENG MUHIM amaliy mashqi: M3.3 formulasini, to\'liq, ishlaydigan numpy kodiga aylantirasiz. Bu — har qanday zamonaviy til modeli (GPT, BERT, va h.k.) ICHIDA, MILLIARDLAB marta bajariladigan, ASOSIY hisoblash bloki.\n\nDIQQAT: Bu yerda Softmax, M1.10 dagidan FARQLI — u BUTUN vektor uchun emas, balki HAR BIR QATOR uchun ALOHIDA qo\'llanadi (chunki har bir so\'z, o\'z attention taqsimotiga ega bo\'lishi kerak). Buning uchun `axis=-1` parametri va qatorlar bo\'yicha normalizatsiya kerak.',
+ sim:'>>> import numpy as np\n>>> def softmax(x, axis=-1):\n...     x_safe = x - np.max(x, axis=axis, keepdims=True)\n...     exp_x = np.exp(x_safe)\n...     return exp_x / np.sum(exp_x, axis=axis, keepdims=True)\n>>> def scaled_dot_product_attention(Q, K, V):\n...     d_k = K.shape[-1]\n...     scores = Q @ K.T / np.sqrt(d_k)\n...     weights = softmax(scores)\n...     output = weights @ V\n...     return output, weights\n>>> np.random.seed(1)\n>>> X = np.random.randn(4, 8)\n>>> Q = K = V = X\n>>> out, w = scaled_dot_product_attention(Q, K, V)\n>>> print(w.shape)\n(4, 4)',
+ eskizlar:[
+  {q:'Qatorlar bo\'yicha ishlaydigan softmax funksiyasini yozing.',
+   lines:[
+    {c:'import numpy as np',n:'Siz numpy kutubxonasini import qildingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'def softmax(x, axis=-1):',n:'Siz softmax funksiyasini ta\'riflashni boshladingiz'},
+    {c:'    x_safe = x - np.max(x, axis=axis, keepdims=True)',n:'Siz har bir qator bo\'yicha maksimalni ayirib, xavfsizlik ta\'minladingiz'},
+    {c:'    exp_x = np.exp(x_safe)',n:'Siz eksponensiallarni hisobladingiz'},
+    {c:'    return exp_x / np.sum(exp_x, axis=axis, keepdims=True)',n:'Siz har bir qatorni o\'z yig\'indisiga bo\'lib, ehtimollik oldingiz'},
+   ]},
+  {q:'scaled_dot_product_attention funksiyasini to\'liq yozing.',
+   lines:[
+    {c:'def scaled_dot_product_attention(Q, K, V):',n:'Siz Attention funksiyasini ta\'riflashni boshladingiz'},
+    {c:'    d_k = K.shape[-1]',n:'Siz Key vektorining o\'lchamini oldingiz'},
+    {c:'    scores = Q @ K.T / np.sqrt(d_k)',n:'Siz $QK^\\top/\\sqrt{d_k}$ formulasini qo\'lladingiz'},
+    {c:'    weights = softmax(scores)',n:'Siz scorelarni attention weight\'larga aylantirdingiz'},
+    {c:'    output = weights @ V',n:'Siz weight\'lar bilan Value ni ko\'paytirib, yakuniy natijani oldingiz'},
+    {c:'    return output, weights',n:'Siz natija va weight\'larni qaytardingiz'},
+   ]},
+  {q:'4 so\'zlik oddiy misolda Attention ni sinab ko\'ring va weight shaklini tekshiring.',
+   lines:[
+    {c:'np.random.seed(1)',n:'Siz tasodifiy sonlar generatorini sobitlаdingiz'},
+    {c:'X = np.random.randn(4, 8)',n:'Siz 4 so\'zli, 8-o\'lchamli embedding yaratdingiz'},
+    {c:'Q = K = V = X',n:'Siz soddalashtirish uchun Q,K,V ni bir xil qildingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'out, w = scaled_dot_product_attention(Q, K, V)',n:'Siz Attention ni hisobladingiz'},
+    {c:'print(\'Weights shakli:\', w.shape)',n:'Siz attention weight matritsasi o\'lchamini chiqardingiz (4x4 bo\'lishi kerak)'},
+   ]},
+ ]},
+
+{id:'M3.5', type:'test',
+ title:'Multi-Head Attention matematikasi',
+ terms:[
+   ['Multi-Head Attention','Attention ni BIR MARTA o\'rniga, BIR NECHA "bosh" bilan parallel bajarish'],
+   ['$h$ (head soni)','Odatda $8$ yoki $16$ — har biri o\'z $W_Q,W_K,W_V$ ga ega'],
+   ['Concatenate + Linear','Barcha boshlar natijasini birlashtirib, yakuniy proyeksiya qilish'],
+   ['$\\text{MultiHead}(Q,K,V)=\\text{Concat}(head_1,...,head_h)W_O$','Yakuniy formula']
+ ],
+ detail:'NEGA BITTA ATTENTION YETARLI EMAS?\n\nM3.4 dagi BITTA Attention hisoblashi — bu BIR XIL turdagi bog\'liqlikni qidiradi (bitta $W_Q,W_K,W_V$ to\'plami orqali). Lekin til juda XILMA-XIL bog\'liqliklarga ega: bitta munosabat GRAMMATIK (masalan fe\'l-ega bog\'liqligi) bo\'lishi mumkin, boshqasi — MA\'NOVIY (masalan sinonim so\'zlar), yana boshqasi — POZITSION (yaqin turgan so\'zlar).\n\nMULTI-HEAD YECHIMI: Attention ni BIR MARTA o\'rniga, $h$ MARTA (odatda $h=8$ yoki $16$), HAR BIRI O\'ZINING ALOHIDA $W_Q^{(i)}, W_K^{(i)}, W_V^{(i)}$ matritsalari bilan, PARALEL bajariladi:\n\n$$\\text{head}_i = \\text{Attention}(QW_Q^{(i)},\\,KW_K^{(i)},\\,VW_V^{(i)})$$\n\nHar bir "bosh" (head), O\'QITISH davomida, BOSHQA-BOSHQA turdagi bog\'liqlikni "ixtisoslashtirib" o\'rganishga moyil bo\'ladi (bitta bosh grammatikaga, boshqasi ma\'noga e\'tibor berishi mumkin) — bu, AYNAN tarmoqning O\'ZI, ma\'lumotdan o\'rganadigan narsa, oldindan dasturlashtirilmaydi.\n\nYAKUNIY BIRLASHTIRISH: Barcha $h$ ta boshning natijalari YONMA-YON birlashtiriladi (concatenate), va YAKUNIY og\'irlik matritsasi ($W_O$) orqali, asl o\'lchamga qaytariladi:\n\n$$\\text{MultiHead}(Q,K,V) = \\text{Concat}(\\text{head}_1,...,\\text{head}_h)\\,W_O$$\n\nBu — Transformer blokining (20.44-50 da tanish) ASOSIY hisoblash qismi.',
+ tests:[
+   {q:'Multi-Head Attention nima uchun BITTA Attention dan ko\'proq qo\'llaniladi?',
+    opts:['Faqat hisoblashni sekinlashtirish uchun','Til turli xil (grammatik, ma\'noviy, pozitsion) bog\'liqliklarga ega, har bir "bosh" boshqa turdagi bog\'liqlikni o\'rganishi mumkin','Bu majburiy qoida, sababsiz','Faqat katta datasetlar uchun kerak'],
+    ans:1,
+    exp:'Bir nechta "bosh" (head), har biri o\'z og\'irliklari bilan, turli xil bog\'liqlik turlarini (grammatik, ma\'noviy va h.k.) parallel ravishda o\'rganishga imkon beradi.'},
+   {q:'Har bir "head" o\'zining nimasiga ega?',
+    opts:['Faqat bitta umumiy og\'irlik, boshqalar bilan baham ko\'radi','Alohida $W_Q, W_K, W_V$ og\'irlik matritsalari','Hech qanday alohida parametr yo\'q','Faqat Value matritsasiga ega'],
+    ans:1,
+    exp:'Har bir head, o\'zining ALOHIDA $W_Q^{(i)}, W_K^{(i)}, W_V^{(i)}$ og\'irlik to\'plamiga ega, bu ularga turlicha bog\'liqlikni o\'rganish imkonini beradi.'},
+   {q:'Barcha headlarning natijalari qanday birlashtiriladi?',
+    opts:['Ular yig\'indisi olinadi','Ular yonma-yon birlashtirilib (concatenate), $W_O$ orqali yakuniy proyeksiya qilinadi','Faqat eng yaxshi head tanlanadi','Ular o\'zaro ko\'paytiriladi'],
+    ans:1,
+    exp:'$\\text{Concat}(\\text{head}_1,...,\\text{head}_h)W_O$ — barcha headlar natijasi yonma-yon qo\'yiladi, keyin yakuniy og\'irlik matritsasi orqali asl o\'lchamga qaytariladi.'}
+ ]},
+
+{id:'M3.6', type:'eskiz',
+ title:'Multi-Head Attention ni numpy bilan implement qilish',
+ terms:[
+   ['split_heads()','Bitta katta vektorni h ta kichik "bosh"ga bo\'lish'],
+   ['reshape va transpose','Multi-head uchun matritsa shaklini moslashtirish'],
+   ['Har bir head uchun Attention','M3.4 dagi funksiyani h marta qo\'llash'],
+   ['concatenate_heads()','Barcha headlarni qaytadan birlashtirish']
+ ],
+ detail:'MULTI-HEAD NI NOLDAN YOZISH\n\nBu mashqda, M3.4 dagi bitta-bosh Attention funksiyasidan foydalanib, uni $h$ marta (turli "bosh"lar uchun) qo\'llab, natijalarni birlashtirasiz — bu, M3.5 formulasining to\'liq amaliy ko\'rinishi.',
+ sim:'>>> import numpy as np\n>>> def multi_head_attention(X, num_heads, d_model):\n...     d_k = d_model // num_heads\n...     outputs = []\n...     for i in range(num_heads):\n...         Wq = np.random.randn(d_model, d_k) * 0.1\n...         Wk = np.random.randn(d_model, d_k) * 0.1\n...         Wv = np.random.randn(d_model, d_k) * 0.1\n...         Q, K, V = X@Wq, X@Wk, X@Wv\n...         out, _ = scaled_dot_product_attention(Q, K, V)\n...         outputs.append(out)\n...     return np.concatenate(outputs, axis=-1)\n>>> X = np.random.randn(4, 8)\n>>> result = multi_head_attention(X, num_heads=2, d_model=8)\n>>> print(result.shape)\n(4, 8)',
+ eskizlar:[
+  {q:'multi_head_attention funksiyasini boshlang - har bir head uchun og\'irlik yarating.',
+   lines:[
+    {c:'import numpy as np',n:'Siz numpy kutubxonasini import qildingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'def multi_head_attention(X, num_heads, d_model):',n:'Siz Multi-Head Attention funksiyasini ta\'riflashni boshladingiz'},
+    {c:'    d_k = d_model // num_heads',n:'Siz har bir head uchun o\'lchamni hisobladingiz'},
+    {c:'    outputs = []',n:'Siz har bir head natijasini saqlash uchun ro\'yxat yaratdingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'    for i in range(num_heads):',n:'Siz har bir head bo\'yicha sikl boshladingiz'},
+    {c:'        Wq = np.random.randn(d_model, d_k) * 0.1',n:'Siz shu head uchun Query og\'irligini yaratdingiz'},
+    {c:'        Wk = np.random.randn(d_model, d_k) * 0.1',n:'Siz shu head uchun Key og\'irligini yaratdingiz'},
+    {c:'        Wv = np.random.randn(d_model, d_k) * 0.1',n:'Siz shu head uchun Value og\'irligini yaratdingiz'},
+   ]},
+  {q:'Har bir head uchun Attention hisoblab, natijalarni birlashtiring.',
+   lines:[
+    {c:'        Q, K, V = X@Wq, X@Wk, X@Wv',n:'Siz Q, K, V proyeksiyalarini hisobladingiz'},
+    {c:'        out, _ = scaled_dot_product_attention(Q, K, V)',n:'Siz shu head uchun Attention natijasini oldingiz'},
+    {c:'        outputs.append(out)',n:'Siz natijani ro\'yxatga qo\'shdingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'    return np.concatenate(outputs, axis=-1)',n:'Siz barcha headlarni yonma-yon birlashtirib qaytardingiz'},
+   ]},
+ ]},
+
+{id:'M3.7', type:'test',
+ title:'Positional Encoding matematikasi',
+ terms:[
+   ['Permutation invariance muammosi','Attention, so\'zlar TARTIBINI o\'zi "bilmaydi"'],
+   ['Positional Encoding formulasi','$PE_{(pos,2i)}=\\sin(pos/10000^{2i/d}),\\ PE_{(pos,2i+1)}=\\cos(pos/10000^{2i/d})$'],
+   ['Sinus/Kosinus tanlovi','Har xil chastotada, har xil pozitsiya naqshini kodlash'],
+   ['Embedding + Positional Encoding','Ikkisi ELEMENT-BO\'YICHA qo\'shiladi']
+ ],
+ detail:'MUAMMO — ATTENTION SO\'ZLAR TARTIBINI "BILMAYDI"\n\nM3.3 dagi Attention formulasiga diqqat qiling: u, HAR BIR so\'z juftligi orasidagi o\'xshashlikni hisoblaydi, lekin FORMULADA so\'zlarning POZITSIYASI (1-so\'z, 2-so\'z, ...) HECH QAYERDA ishlatilmagan! Agar siz gapdagi so\'zlarni ARALASHTIRSANGIZ, Attention natijasi (to\'plam sifatida) BIR XIL bo\'lib qoladi — bu "permutation invariance" deyiladi, va BU JUDA YOMON, chunki "it odamni tishladi" va "odam itni tishladi" — TARTIB MUHIM!\n\nRNN da bu muammo YO\'Q EDI (chunki $h_t$, $h_{t-1}$ ga ketma-ket bog\'liq, tartib formulada "ichkilashtirilgan"). Transformer da, tartib haqidagi MA\'LUMOTNI alohida QO\'SHISH kerak.\n\nPOSITIONAL ENCODING FORMULASI:\n\n$$PE_{(pos,2i)} = \\sin\\left(\\frac{pos}{10000^{2i/d}}\\right), \\qquad PE_{(pos,2i+1)} = \\cos\\left(\\frac{pos}{10000^{2i/d}}\\right)$$\n\nBu yerda $pos$ — so\'zning gapdagi pozitsiyasi ($0,1,2,...$), $i$ — embedding vektoridagi o\'lcham indeksi, $d$ — embedding o\'lchami (masalan $512$).\n\nNEGA SINUS/KOSINUS? Har bir $i$ uchun, FORMULADA boshqacha CHASTOTA hosil bo\'ladi ($10000^{2i/d}$ maxrajda) — past $i$ larda tez o\'zgaruvchi (yuqori chastota) to\'lqin, yuqori $i$ larda sekin o\'zgaruvchi (past chastota) to\'lqin. Bu, RADIO TO\'LQINLARI kabi — turli chastotalar BIRGALIKDA, har bir pozitsiya uchun NOYOB "barmoq izi" (signature) hosil qiladi, va MUHIMI — yaqin pozitsiyalar, YAQIN signature larga ega bo\'ladi (uzluksizlik xususiyati).\n\nQO\'SHISH (NA KO\'PAYTIRISH): Positional Encoding, so\'z embedding\'iga ELEMENT-BO\'YICHA QO\'SHILADI (ko\'paytirilmaydi): $X_{yakuniy} = X_{embedding} + PE$. Bu, tarmoqqa, "bu so\'z NIMA" (embedding) va "bu so\'z QAYERDA" (positional) ma\'lumotini BIRGALIKDA, lekin ALOHIDA-AJRATILGAN holda taqdim etadi.',
+ tests:[
+   {q:'Attention mexanizmi, qo\'shimcha yordamisiz, nima haqida "bilmaydi"?',
+    opts:['So\'zlarning ma\'nosi haqida','So\'zlarning gapdagi TARTIBI (pozitsiyasi) haqida','So\'zlar soni haqida','Hech narsa, u hammasini biladi'],
+    ans:1,
+    exp:'Attention formulasi so\'zlar orasidagi o\'xshashlikni hisoblaydi, lekin ularning POZITSIYASINI (tartibini) o\'z ichiga olmaydi — bu alohida Positional Encoding orqali qo\'shiladi.'},
+   {q:'Positional Encoding formulasida nima uchun Sinus VA Kosinus (turli chastotalarda) ishlatiladi?',
+    opts:['Faqat estetik sabablarga ko\'ra','Har bir pozitsiya uchun NOYOB "barmoq izi" hosil qilish, va yaqin pozitsiyalarni yaqin signature bilan ifodalash uchun','Bu hisoblashni sekinlashtirish uchun','Ular hech qanday matematik ahamiyatga ega emas'],
+    ans:1,
+    exp:'Turli chastotadagi sinus/kosinus to\'lqinlari birikmasi, har bir pozitsiya uchun noyob, lekin yaqin pozitsiyalar uchun "yaqin" signature yaratadi.'},
+   {q:'Positional Encoding, so\'z embedding\'iga qanday qo\'shiladi?',
+    opts:['Ko\'paytirish orqali','Element-bo\'yicha qo\'shish orqali ($X+PE$)','Ular hech qachon birlashtirilmaydi','Faqat oxirgi so\'zga qo\'shiladi'],
+    ans:1,
+    exp:'$X_{yakuniy}=X_{embedding}+PE$ — Positional Encoding, embedding vektoriga element-bo\'yicha QO\'SHILADI, bu ikki turdagi ma\'lumotni birgalikda taqdim etadi.'}
+ ]},
+
+{id:'M3.8', type:'eskiz',
+ title:'Positional Encoding ni numpy bilan implement qilish',
+ terms:[
+   ['positional_encoding()','Formulani to\'liq matritsa sifatida hisoblash'],
+   ['np.sin(), np.cos()','Sinus va kosinus funksiyalarini hisoblash'],
+   ['Juft/toq indekslar','2i pozitsiyalarda sin, 2i+1 pozitsiyalarda cos'],
+   ['Embedding bilan qo\'shish','Yakuniy X+PE ni hisoblash']
+ ],
+ detail:'POSITIONAL ENCODING NI NOLDAN YOZISH\n\nBu mashqda, M3.7 formulasini, BARCHA pozitsiyalar va BARCHA o\'lchamlar uchun, bitta matritsa sifatida hisoblaysiz — bu, har qanday Transformer modelining KIRISH qismida, BIR MARTA (har bir gap uchun) bajariladigan hisoblash.',
+ sim:'>>> import numpy as np\n>>> def positional_encoding(seq_len, d_model):\n...     PE = np.zeros((seq_len, d_model))\n...     for pos in range(seq_len):\n...         for i in range(0, d_model, 2):\n...             angle = pos / (10000 ** (i/d_model))\n...             PE[pos, i] = np.sin(angle)\n...             PE[pos, i+1] = np.cos(angle)\n...     return PE\n>>> PE = positional_encoding(seq_len=4, d_model=6)\n>>> print(PE.shape)\n(4, 6)',
+ eskizlar:[
+  {q:'positional_encoding funksiyasini yarating - bo\'sh matritsa va tashqi sikl.',
+   lines:[
+    {c:'import numpy as np',n:'Siz numpy kutubxonasini import qildingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'def positional_encoding(seq_len, d_model):',n:'Siz positional_encoding funksiyasini ta\'riflashni boshladingiz'},
+    {c:'    PE = np.zeros((seq_len, d_model))',n:'Siz natija uchun bo\'sh matritsa yaratdingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'    for pos in range(seq_len):',n:'Siz har bir pozitsiya bo\'yicha sikl boshladingiz'},
+   ]},
+  {q:'Har bir o\'lcham indeksi uchun sin/cos qiymatlarini hisoblang.',
+   lines:[
+    {c:'        for i in range(0, d_model, 2):',n:'Siz juft indekslar bo\'yicha sikl boshladingiz'},
+    {c:'            angle = pos / (10000 ** (i/d_model))',n:'Siz burchak (chastota) qiymatini hisobladingiz'},
+    {c:'            PE[pos, i] = np.sin(angle)',n:'Siz juft pozitsiyaga sinus qo\'ydingiz'},
+    {c:'            PE[pos, i+1] = np.cos(angle)',n:'Siz toq pozitsiyaga kosinus qo\'ydingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'    return PE',n:'Siz to\'liq Positional Encoding matritsasini qaytardingiz'},
+   ]},
+ ]},
+
+{id:'M3.9', type:'test',
+ title:'Transformer blokining to\'liq tuzilishi',
+ terms:[
+   ['Residual Connection','Qatlam kirishini, qatlam chiqishiga to\'g\'ridan-to\'g\'ri qo\'shish'],
+   ['Layer Normalization','Har bir qatlamdan keyin qiymatlarni normallashtirish'],
+   ['Feed-Forward qatlam','Attention dan keyin qo\'llaniladigan oddiy Dense qatlam'],
+   ['$\\text{LayerNorm}(x+\\text{Sublayer}(x))$','Transformer blokining umumiy formulasi']
+ ],
+ detail:'BITTA TRANSFORMER BLOKI — BARCHA QISMLAR BIRGALIKDA\n\nM3.1-8 da Attention ning ICHKI matematikasini ko\'rdik. Endi, bularning BARCHASI, qanday qilib BITTA "Transformer bloki" (20.44-50 da Encoder/Decoder qismi sifatida tanish) ichida birlashtirilishini ko\'ramiz.\n\nRESIDUAL CONNECTION (Qoldiq ulanish): Har bir qism (Attention, Feed-Forward) atrofida, KIRISH to\'g\'ridan-to\'g\'ri CHIQISHGA QO\'SHILADI:\n\n$$\\text{Output} = x + \\text{Sublayer}(x)$$\n\nBU NEGA MUHIM? M2.10 dagi vanishing gradient muammosini ESLANG — chuqur tarmoqda, gradient ko\'p marta ko\'paytirilib, "yo\'qolishi" mumkin. Residual Connection, M2.11 dagi LSTM ning ADDITIVE Cell State yangilanishiga JUDA O\'XSHASH g\'oya: gradient, $\\text{Sublayer}(x)$ ning murakkab ichki hisoblashlaridan O\'TMASDAN, to\'g\'ridan-to\'g\'ri $x$ ga "QISQA YO\'L" orqali o\'tishi mumkin (chunki $\\partial \\text{Output}/\\partial x$ ifodasida, kamida $1$ doim mavjud). Bu, O\'NLAB Transformer qatlamlarini chuqur qilib qurish imkonini beradi, vanishing gradient muammosisiz.\n\nLAYER NORMALIZATION: Har bir Residual qo\'shilishidan KEYIN, natija normallashtiriladi (o\'rtacha $0$, standart og\'ish $1$ ga keltiriladi) — bu, o\'qitishni barqarorlashtiradi, xuddi M1.6 dagi ma\'lumotni standartlashtirish g\'oyasiga o\'xshash, lekin endi har bir qatlamdan keyin amalga oshiriladi.\n\nTO\'LIQ BLOK FORMULASI:\n$$x_1 = \\text{LayerNorm}(x + \\text{MultiHeadAttention}(x))$$\n$$x_2 = \\text{LayerNorm}(x_1 + \\text{FeedForward}(x_1))$$\n\nBu ikki qadam — BITTA Transformer blokini tashkil etadi. Zamonaviy katta til modellari, BUNDAY BLOKLARNI O\'NLAB-YUZLAB marta ustma-ust qo\'yadi.',
+ tests:[
+   {q:'Residual Connection ($x+\\text{Sublayer}(x)$) ning asosiy matematik foydasi nima?',
+    opts:['Hisoblashni sekinlashtirish','Gradientga "qisqa yo\'l" berib, chuqur tarmoqlarda vanishing gradient muammosini kamaytirish','Faqat parametrlar sonini ko\'paytirish','Hech qanday foydasi yo\'q'],
+    ans:1,
+    exp:'Residual Connection, LSTM ning additive yangilanishiga o\'xshab, gradientga to\'g\'ridan-to\'g\'ri "qisqa yo\'l" beradi — bu o\'nlab qatlamli chuqur tarmoqlarda gradientning "yo\'qolib qolmasligini" ta\'minlaydi.'},
+   {q:'Layer Normalization qachon qo\'llaniladi?',
+    opts:['Faqat eng boshida, bir marta','Har bir Residual qo\'shilishidan keyin, har qatlamda','Faqat oxirgi qatlamda','Hech qachon qo\'llanilmaydi'],
+    ans:1,
+    exp:'Layer Normalization, har bir Sublayer (Attention yoki Feed-Forward) natijasi Residual orqali qo\'shilgandan KEYIN, qiymatlarni barqarorlashtirish uchun qo\'llaniladi.'},
+   {q:'Bitta Transformer bloki necha asosiy qismdan (sublayer) iborat?',
+    opts:['Faqat 1 ta (Attention)','2 ta (Multi-Head Attention va Feed-Forward), har biri Residual+LayerNorm bilan','5 ta','10 ta'],
+    ans:1,
+    exp:'Bitta standart Transformer bloki — Multi-Head Attention va Feed-Forward qatlamlaridan iborat, har biri o\'z Residual Connection va Layer Normalization siga ega.'}
+ ]},
+
+{id:'M3.10', type:'test',
+ title:'Masked Attention (Decoder uchun)',
+ terms:[
+   ['Causal Mask (Kelajakni yopish)','Decoder, hali "aytilmagan" so\'zlarni ko\'rmasligi kerak'],
+   ['Mask qo\'llash usuli','Kelajak pozitsiyalarga $-\\infty$ qo\'yish, Softmax dan oldin'],
+   ['Autoregressive generatsiya','Har bir so\'z, faqat OLDINGI so\'zlar asosida bashorat qilinishi'],
+   ['Encoder vs Decoder Attention','Encoder hammasini ko\'radi, Decoder faqat o\'tmishni']
+ ],
+ detail:'NEGA "MASK" (NIQOB) KERAK?\n\n20.44-50 da Encoder-Decoder farqini eslang. ENCODER (masalan, butun gapni "tushunish" uchun) — BUTUN kirish ketma-ketligini, BARCHA pozitsiyalarni bir vaqtda ko\'rishi MUMKIN va KERAK.\n\nLekin DECODER (masalan, matn GENERATSIYA qilish, xuddi Claude javob yozayotganda so\'zma-so\'z generatsiya qilgani kabi) — HAR BIR so\'zni, FAQAT undan OLDINGI so\'zlar asosida bashorat qilishi KERAK. Agar Decoder, hali "yozilmagan" KELAJAK so\'zlarni Attention orqali "ko\'rib qolsa" — bu "firibgarlik" bo\'lardi (o\'qitishda yuqori aniqlik ko\'rsatadi, lekin REAL generatsiya paytida bu kelajak ma\'lumot MAVJUD EMAS, chunki siz hali generatsiya qilmoqdasiz!).\n\nCAUSAL MASK QANDAY QO\'LLANILADI? M3.3 formulasidagi $QK^\\top/\\sqrt{d_k}$ natijasiga, Softmax dan OLDIN, KELAJAK pozitsiyalarga mos keladigan barcha katakchalarga $-\\infty$ (amalda, juda katta manfiy son, masalan $-10^9$) QO\'YILADI:\n\n$$\\text{MaskedScores}(i,j) = \\begin{cases} \\text{scores}(i,j) & j\\leq i \\\\ -\\infty & j>i \\end{cases}$$\n\nNEGA $-\\infty$? Chunki Softmax formulasida $e^{-\\infty}=0$ — bu pozitsiyalar, Softmax dan KEYIN, ANIQ $0$ ATTENTION WEIGHT oladi, ya\'ni ular YAKUNIY natijaga UMUMAN ta\'sir qilmaydi, xuddi ular MAVJUD bo\'lmaganidek.\n\nBU NEGA "AUTOREGRESSIVE" DEYILADI? Chunki har bir yangi so\'z, FAQAT o\'zidan OLDINGI (o\'z-o\'zidan, "auto") so\'zlarga REGRESSIYA qilingan holda (bog\'liq holda) generatsiya qilinadi — bu, aynan, til modellarining (jumladan Claude kabi) MATN GENERATSIYA qilish jarayonining matematik asosi.',
+ tests:[
+   {q:'Decoder da Causal Mask nima uchun zarur?',
+    opts:['Hisoblashni tezlashtirish uchun','Decoder, hali generatsiya qilinmagan KELAJAK so\'zlarni "ko\'rib qolmasligi" uchun','Faqat estetik sabablarga ko\'ra','Bu Encoder uchun zarur, Decoder uchun emas'],
+    ans:1,
+    exp:'Mask, Decoder ning real generatsiya vaqtida mavjud bo\'lmagan kelajak ma\'lumotni "firibgarlik" yo\'li bilan ko\'rib qolishining oldini oladi.'},
+   {q:'Causal Mask qanday qo\'llaniladi (texnik jihatdan)?',
+    opts:['Kelajak pozitsiyalar butunlay o\'chiriladi','Kelajak pozitsiyalarga, Softmax dan OLDIN, juda katta manfiy son ($-\\infty$) qo\'yiladi','Faqat oxirgi so\'z o\'chiriladi','Mask hech qachon raqamli qo\'llanilmaydi'],
+    ans:1,
+    exp:'Scores matritsasidagi kelajak pozitsiyalarga $-\\infty$ qo\'yiladi, shunda Softmax dan keyin ular aniq $0$ attention weight oladi.'},
+   {q:'Nima uchun $-\\infty$ (yoki juda katta manfiy son) ishlatiladi, $0$ emas?',
+    opts:['Chunki $0$ qo\'yish ishlamaydi','Chunki Softmax oldidan $0$ qo\'yish hali ham musbat attention weight beradi, lekin $e^{-\\infty}=0$ aniq nolni kafolatlaydi','Bu farq qilmaydi','Faqat dasturlash qulayligi uchun'],
+    ans:1,
+    exp:'Softmax Scores ustida ishlaydi, scores=0 ham ba\'zan musbat ehtimollik berishi mumkin; $-\\infty$ esa $e^{-\\infty}=0$ orqali ANIQ va to\'liq nol ehtimollikni kafolatlaydi.'}
+ ]},
+
+{id:'M3.11', type:'eskiz',
+ title:'Causal Mask ni numpy bilan implement qilish',
+ terms:[
+   ['np.triu() / np.tril()','Yuqori/quyi uchburchak matritsa yaratish funksiyalari'],
+   ['Mask matritsasi','0 va 1 (yoki -inf) lardan iborat, qaysi pozitsiya ko\'rinishi mumkinligini belgilaydi'],
+   ['masked_attention()','M3.4 funksiyasini mask bilan kengaytirish'],
+   ['Decoder uchun to\'liq tayyor funksiya','Avtoregressiv generatsiya uchun zarur blok']
+ ],
+ detail:'CAUSAL MASK NI NOLDAN YOZISH\n\nBu — M3 qismining YAKUNIY amaliy mashqi: M3.4 dagi Attention funksiyasini, M3.10 formulasidagi Causal Mask bilan to\'liq kengaytirasiz — bu, har qanday zamonaviy GENERATIV til modelining (jumladan, Claude kabi yordamchilarning matn generatsiya qilish jarayoni) ASOSIY qurilish blokidir.',
+ sim:'>>> import numpy as np\n>>> def create_causal_mask(seq_len):\n...     mask = np.triu(np.ones((seq_len, seq_len)), k=1)\n...     return mask * -1e9\n>>> def masked_attention(Q, K, V):\n...     d_k = K.shape[-1]\n...     scores = Q @ K.T / np.sqrt(d_k)\n...     mask = create_causal_mask(Q.shape[0])\n...     scores = scores + mask\n...     weights = softmax(scores)\n...     return weights @ V, weights\n>>> mask = create_causal_mask(4)\n>>> print(mask)\n[[ 0. -1e9 -1e9 -1e9]\n [ 0.  0. -1e9 -1e9]\n [ 0.  0.  0. -1e9]\n [ 0.  0.  0.  0.]]',
+ eskizlar:[
+  {q:'create_causal_mask funksiyasini np.triu() bilan yozing.',
+   lines:[
+    {c:'import numpy as np',n:'Siz numpy kutubxonasini import qildingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'def create_causal_mask(seq_len):',n:'Siz mask yaratish funksiyasini ta\'riflashni boshladingiz'},
+    {c:'    mask = np.triu(np.ones((seq_len, seq_len)), k=1)',n:'Siz diagonal ustidagi (kelajak) pozitsiyalarni 1 bilan belgiladingiz'},
+    {c:'    return mask * -1e9',n:'Siz 1 larni juda katta manfiy songa aylantirdingiz'},
+   ]},
+  {q:'masked_attention funksiyasini yozib, mask ni scores ga qo\'shing.',
+   lines:[
+    {c:'def masked_attention(Q, K, V):',n:'Siz masked_attention funksiyasini ta\'riflashni boshladingiz'},
+    {c:'    d_k = K.shape[-1]',n:'Siz Key o\'lchamini oldingiz'},
+    {c:'    scores = Q @ K.T / np.sqrt(d_k)',n:'Siz oddiy attention scores ni hisobladingiz'},
+    {c:'    mask = create_causal_mask(Q.shape[0])',n:'Siz causal mask yaratdingiz'},
+    {c:'    scores = scores + mask',n:'Siz mask ni scores ga qo\'shib, kelajakni "yopdingiz"'},
+    {c:'    weights = softmax(scores)',n:'Siz yopilgan scores dan attention weight olding'},
+    {c:'    return weights @ V, weights',n:'Siz yakuniy natija va weight\'larni qaytardingiz'},
+   ]},
+ ]},
+
+{id:'M3.12', type:'test',
+ title:'3-qism yakuniy nazorat — Transformer matematikasi xulosasi',
+ terms:[
+   ['Self-Attention','$\\text{softmax}(QK^\\top/\\sqrt{d_k})V$ — barcha so\'zlar orasidagi bog\'liqlikni parallel hisoblash'],
+   ['Multi-Head','Bir nechta Attention ni parallel, turli bog\'liqlik turlari uchun'],
+   ['Positional Encoding','Sin/Cos orqali, so\'z tartibini Attention ga "kiritish"'],
+   ['Residual + LayerNorm + Causal Mask','Chuqur, barqaror, va Decoder uchun avtoregressiv qurilish']
+ ],
+ detail:'3-QISM VA BUTUN MATEMATIKA MODULINING YAKUNI\n\nUch qismda, siz Deep Learning ning BUTUN matematik zanjirini ko\'rib chiqdingiz:\n\nM1: Aktivlashtirish hosilalari, Loss gradienti, va ENG MUHIMI — Zanjir qoidasi orqali Backpropagation ning to\'liq chiqarilishi.\n\nM2: Bu asosning CNN (Convolution, weight sharing fazoda) va RNN (recurrence, weight sharing vaqtda, BPTT) ga qo\'llanilishi, va RNN ning vanishing gradient muammosi — buni LSTM qanday additive Cell State orqali yengillashtirgani.\n\nM3: RNN ning ketma-ket hisoblash cheklovini BUTUNLAY OLIB TASHLAGAN Self-Attention — Q,K,V orqali barcha so\'zlar bog\'liqligini PARALEL hisoblash, Multi-Head orqali turli bog\'liqlik turlarini, Positional Encoding orqali tartib ma\'lumotini, va Residual+LayerNorm orqali O\'NLAB qatlamni barqaror qurish.\n\nBU NEGA AMALIY AHAMIYATGA EGA? 20a-d qismlarda Keras orqali bu arxitekturalarni "ishlatishni" o\'rgangansiz. Endi, ULAR ICHIDA NIMA SODIR BO\'LAYOTGANINI matematik darajada tushunasiz — bu, modelni debugging qilishda (masalan gradient portlashi/yo\'qolishi ro\'y berganda SABABNI tushunish), yangi arxitektura g\'oyalarini BAHOLASHDA, va ilmiy maqolalarni O\'QIB TUSHUNISHDA hal qiluvchi ahamiyatga ega.\n\nKEYINGI QADAM: Endi siz PyTorch va TensorFlow ni ALOHIDA, chuqur o\'rganishga TAYYORSIZ — chunki bu kutubxonalar, AYNAN shu matematikani, sizning o\'rningizdan, samarali bajarib beradi.',
+ tests:[
+   {q:'Self-Attention, RNN ga nisbatan, qaysi ASOSIY cheklovni olib tashlaydi?',
+    opts:['Parametrlar sonini','Ketma-ket (sequential) hisoblash zarurligini, barcha pozitsiyalarni parallel hisoblash orqali','Loss function zarurligini','Aktivlashtirish funksiyasi zarurligini'],
+    ans:1,
+    exp:'Self-Attention, RNN dagi $h_{t-1}\\to h_t$ ketma-ket zanjirini olib tashlaydi — barcha pozitsiyalar BIR VAQTDA, parallel hisoblanadi.'},
+   {q:'LSTM dagi additive Cell State va Transformer dagi Residual Connection orasida qanday MATEMATIK o\'xshashlik bor?',
+    opts:['Hech qanday o\'xshashlik yo\'q','Ikkisi ham gradientga "qisqa yo\'l" berib, chuqur tarmoqlarda vanishing gradient muammosini kamaytiradi','Ular faqat nom jihatidan o\'xshash','Ikkisi ham faqat CNN da ishlatiladi'],
+    ans:1,
+    exp:'Ikkisi ham ADDITIVE (qo\'shish) mexanizmi orqali, gradientni murakkab ichki hisoblashlardan "chetlab", to\'g\'ridan-to\'g\'ri o\'tkazish g\'oyasiga asoslangan.'},
+   {q:'M1-M2-M3 qismlarini tugatgandan keyin, mantiqiy KEYINGI qadam nima?',
+    opts:['Hech narsa, bu yetarli','PyTorch va TensorFlow ni alohida, amaliy modullarda chuqur o\'rganish','Qaytadan M1 ga qaytish','Faqat nazariy bilim bilan to\'xtash'],
+    ans:1,
+    exp:'Endi matematik asos mustahkam bo\'lgani uchun, PyTorch/TensorFlow kabi amaliy kutubxonalarni chuqur o\'rganish, ular ICHIDA nima sodir bo\'layotganini tushungan holda, ANCHA samarali bo\'ladi.'}
+ ]},
+
+];
+
+// ═══════ HOLAT ═══════
+var cur=0, curEskiz=0, skipOn=false, ghostVisible=true;
+var lineData=[], doneSet=new Set(), eskizDoneSet=new Set();
+var testAnswers={}, selectedStar=0, ratingSubmitted=false;
+var BRIGHT=[0,0.05,0.1,0.2,0.3,0.42,0.55,0.65,0.75,0.85,0.95];
+
+window.onload=function(){buildStars();buildTabs();buildIntro();loadMod(0);};
+
+function buildIntro(){
+  var testTopics=M.filter(function(m){return m.type==='test';}).length;
+  var eskizCount=M.reduce(function(s,m){return s+(m.type==='eskiz'?m.eskizlar.length:0);},0);
+  var h='<div class="intro-title">'+MODULE_INTRO.title+'</div>';
+  h+='<div class="intro-text">'+esc(MODULE_INTRO.text)+'</div>';
+  h+='<div class="intro-stats">';
+  h+='<div class="intro-stat"><div class="intro-stat-v">'+testTopics+'</div><div class="intro-stat-l">TEST</div></div>';
+  h+='<div class="intro-stat"><div class="intro-stat-v">'+eskizCount+'</div><div class="intro-stat-l">ESKIZ</div></div>';
+  h+='<div class="intro-stat"><div class="intro-stat-v">numpy</div><div class="intro-stat-l">KUTUBXONA</div></div>';
+  h+='</div>';
+  document.getElementById('introBox').innerHTML=h;
+  renderMath('introBox');
+}
+
+function loadMod(i){
+  cur=i; curEskiz=0;
+  document.getElementById('detailPanel').classList.remove('show');
+  document.getElementById('badge') && (document.getElementById('badge').className='badge');
+  var m=M[i];
+  document.getElementById('topSub').textContent=m.id;
+  document.getElementById('svMod').textContent=(i+1)+'/'+M.length;
+  // terms
+  var th='<div class="terms-title">📚 Yangi atamalar:</div>';
+  m.terms.forEach(function(t){
+    th+='<div class="term-row"><span class="term-key">'+esc(t[0])+'</span><span class="term-val">'+esc(t[1])+'</span></div>';
+  });
+  document.getElementById('termsBox').innerHTML=th;
+  renderMath('termsBox');
+  // content
+  if(m.type==='test') renderTest(m);
+  else renderEskiz(m);
+  buildTabs(); updateTopStats();
+}
+
+// ═══════ TEST ═══════
+function renderTest(m){
+  if(!testAnswers[cur]) testAnswers[cur]={};
+  var h='<div class="test-panel"><div class="test-title">🧠 '+m.title+' — Test</div>';
+  m.tests.forEach(function(t,qi){
+    h+='<div class="test-q" id="tq'+qi+'">';
+    h+='<div class="test-qtext">'+(qi+1)+'. '+esc(t.q)+'</div>';
+    h+='<div class="test-opts">';
+    var answered = testAnswers[cur][qi] !== undefined;
+    t.opts.forEach(function(o,oi){
+      var cls='test-opt';
+      if(answered){
+        if(oi===t.ans) cls+=' show-correct';
+        else if(oi===testAnswers[cur][qi] && oi!==t.ans) cls+=' wrong';
+      }
+      h+='<button class="'+cls+'" onclick="answerTest('+qi+','+oi+')" '+(answered?'disabled':'')+'>'+esc(o)+'</button>';
+    });
+    h+='</div>';
+    if(answered){
+      var isCorrect = testAnswers[cur][qi]===t.ans;
+      h+='<div class="test-exp show">'+(isCorrect?'✅':'❌')+' '+esc(t.exp)+'</div>';
+    }
+    h+='</div>';
+  });
+  // score
+  var answered=Object.keys(testAnswers[cur]).length;
+  var correct=0;
+  Object.keys(testAnswers[cur]).forEach(function(qi){
+    if(testAnswers[cur][qi]===m.tests[qi].ans) correct++;
+  });
+  if(answered===m.tests.length){
+    h+='<div class="test-score show">Natija: '+correct+'/'+m.tests.length+' ✅</div>';
+    doneSet.add(cur);
+  }
+  h+='</div>';
+  document.getElementById('mainContent').innerHTML=h;
+  renderMath('mainContent');
+  document.getElementById('result-panel') && document.getElementById('result-panel').classList.remove('show');
+  updateTopStats();
+}
+
+function answerTest(qi,oi){
+  if(!testAnswers[cur]) testAnswers[cur]={};
+  if(testAnswers[cur][qi]!==undefined) return;
+  testAnswers[cur][qi]=oi;
+  renderTest(M[cur]);
+  buildTabs(); updateTopStats();
+}
+
+// ═══════ ESKIZ (kod yozish mavzulari) ═══════
+function renderEskiz(m){
+  var e=m.eskizlar[curEskiz];
+  // eskiz dots
+  var dotsH='<div style="display:flex;gap:6px;justify-content:center;margin-bottom:10px;">';
+  m.eskizlar.forEach(function(_,i){
+    var key=cur+'-'+i;
+    var w=i===curEskiz?'40px':'26px';
+    var bg=eskizDoneSet.has(key)?'#22c55e':(i===curEskiz?'#00f0c8':'#1e3048');
+    dotsH+='<div onclick="jumpEskiz('+i+')" style="width:'+w+';height:6px;border-radius:3px;background:'+bg+';cursor:pointer;transition:all .2s;"></div>';
+  });
+  dotsH+='</div>';
+  // question
+  var qH='<div style="background:#0d1828;border:1px solid #1e3048;border-left:3px solid #a855f7;border-radius:8px;padding:10px 12px;margin-bottom:10px;font-size:.71rem;line-height:1.8;color:#c4b5fd;white-space:pre-wrap;">Eskiz '+(curEskiz+1)+'/'+m.eskizlar.length+' — '+esc(e.q)+'</div>';
+  // skip row
+  var skipH='<div class="skip-row" onclick="toggleSkip()"><div class="sw" id="sw"></div><span id="skipLbl"># Kommentlarni o\'tkazib yuboring</span></div>';
+  // result panel
+  var resH='<div class="result-panel" id="resultPanel"><div class="result-title">📊 NATIJA — SIMULYATSIYA</div><div class="sim-wrap" id="simWrap"></div></div>';
+  // code block
+  var codeH='<div class="code-block"><div class="fbar"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div><div class="fn" id="fname">m3math_'+(curEskiz+1)+'.py</div><div class="fhint">↔️ suring ✏️ yozing</div></div><div class="lines-wrap" id="linesWrap"></div><div class="btn-row"><button class="btn btn-chk" onclick="doCheck()">✅ Tekshir</button><button class="btn btn-clr" onclick="doClear()">🗑️ Tozala</button><button class="btn btn-ghost" id="ghostBtn" onclick="toggleGhost()">👁️ Yashir</button><button class="btn btn-det" onclick="toggleDetail()">📖 Batafsil</button><button class="btn btn-res" onclick="toggleResult()">📊 Natija</button></div><div class="badge" id="badge"></div></div>';
+  document.getElementById('mainContent').innerHTML=dotsH+qH+skipH+resH+codeH;
+  renderMath('mainContent');
+  buildLines(e);
+  // sync skip sw
+  document.getElementById('sw').classList.toggle('on',skipOn);
+  document.getElementById('skipLbl').textContent=skipOn?'Kommentlar o\'tkazilmoqda':'# Kommentlarni o\'tkazib yuboring';
+  applyBright(); updateStats();
+}
+
+function jumpEskiz(i){ curEskiz=i; renderEskiz(M[cur]); }
+
+function buildLines(e){
+  var wrap=document.getElementById('linesWrap');
+  if(!wrap) return;
+  wrap.innerHTML=''; lineData=[];
+  var op=BRIGHT[parseInt(document.getElementById('brightSlider').value)||3];
+  e.lines.forEach(function(ln,i){
+    var isCom=ln.c.replace(/^\s+/,'').charAt(0)==='#';
+    var isEmpty=ln.c==='';
+    var isSlash=ln.c.endsWith('\\');
+    var block=document.createElement('div');
+    block.className='line-block';
+    var row=document.createElement('div');
+    row.className='line-row';
+    var num=document.createElement('div');
+    num.className='line-num'; num.id='num'+i;
+    num.textContent=isEmpty?'':(i+1);
+    var content=document.createElement('div');
+    content.className='line-content';
+    var ghost=document.createElement('div');
+    ghost.className='line-ghost'+((isCom&&skipOn)?' skip-c':'');
+    ghost.id='ghost'+i;
+    ghost.style.color=ghostVisible?'rgba(74,96,128,'+op+')':'transparent';
+    ghost.textContent=ln.c||' ';
+    var colors=document.createElement('div');
+    colors.className='line-colors'; colors.id='clr'+i;
+    var inp=document.createElement('input');
+    inp.type='text'; inp.className='line-input'; inp.id='inp'+i;
+    inp.setAttribute('spellcheck','false'); inp.setAttribute('autocorrect','off');
+    inp.setAttribute('autocapitalize','off'); inp.setAttribute('autocomplete','off');
+    if(isEmpty||(isCom&&skipOn)) inp.disabled=true;
+    (function(idx,target,noteText){
+      inp.addEventListener('input',function(){
+        if(!target) return;
+        updateLineClr(idx,target);
+        if(inp.value===target&&target!==''&&noteText!=='') showNote(idx);
+        else if(inp.value!==target) hideNote(idx);
+        updateStats();
+      });
+    })(i,ln.c,ln.n);
+    content.appendChild(ghost); content.appendChild(colors); content.appendChild(inp);
+    row.appendChild(num); row.appendChild(content);
+    var note=document.createElement('div');
+    note.className='line-done-note'; note.id='note'+i;
+    note.textContent=ln.n?('✅ '+ln.n+'!'):'';
+    block.appendChild(row);
+    if(ln.n) block.appendChild(note);
+    wrap.appendChild(block);
+    lineData.push({inp:inp,target:ln.c,isCom:isCom,isEmpty:isEmpty});
+  });
+}
+
+function updateLineClr(idx,target){
+  var inp=document.getElementById('inp'+idx);
+  var clr=document.getElementById('clr'+idx);
+  if(!inp||!clr) return;
+  var typed=inp.value, html='';
+  for(var ci=0;ci<target.length;ci++){
+    var ch=target[ci];
+    if(ci<typed.length) html+=typed[ci]===ch?'<span style="color:#22c55e">'+esc(ch)+'</span>':'<span style="color:#f43f5e;text-decoration:underline">'+esc(ch)+'</span>';
+    else html+='<span style="color:transparent">'+esc(ch)+'</span>';
+  }
+  clr.innerHTML=html;
+  var num=document.getElementById('num'+idx);
+  if(num) num.style.color=(typed===target&&target!=='')?'#22c55e':'';
+}
+
+function showNote(i){var n=document.getElementById('note'+i);if(n&&n.textContent)n.classList.add('show');}
+function hideNote(i){var n=document.getElementById('note'+i);if(n)n.classList.remove('show');}
+
+function doCheck(){
+  var e=M[cur].eskizlar[curEskiz];
+  var done=0,total=0,errors=[];
+  lineData.forEach(function(l,i){
+    if(l.isEmpty||(l.isCom&&skipOn)) return;
+    total++;
+    if(l.inp.value===l.target){
+      done++; document.getElementById('num'+i).style.color='#22c55e';
+      if(e.lines[i].n) showNote(i);
+    } else {
+      errors.push(i+1); document.getElementById('num'+i).style.color='#f43f5e';
+    }
+  });
+  var pct=total>0?Math.round(done/total*100):0;
+  var b=document.getElementById('badge');
+  if(!b) return;
+  b.className='badge show';
+  if(pct>=85){
+    b.className+=' g';
+    eskizDoneSet.add(cur+'-'+curEskiz);
+    var isLast=curEskiz===M[cur].eskizlar.length-1;
+    if(isLast){ doneSet.add(cur); b.textContent='✅ Zo\'r! '+pct+'% — barcha eskizlar tugadi!'; showRating(); }
+    else { b.textContent='✅ Zo\'r! '+pct+'% — keyingi eskiz →'; setTimeout(function(){curEskiz++;renderEskiz(M[cur]);},900); }
+  } else if(pct>=55){
+    b.className+=' o'; b.textContent='⚡ '+pct+'% — xato qatorlar: '+errors.join(', ')+'-qator';
+  } else {
+    b.className+=' r'; b.textContent='❌ '+pct+'% — qaytadan urinib ko\'ring';
+  }
+  updateStats(); buildTabs();
+}
+
+function doClear(){
+  lineData.forEach(function(l,i){
+    l.inp.value='';
+    var clr=document.getElementById('clr'+i); if(clr) clr.innerHTML='';
+    var num=document.getElementById('num'+i); if(num) num.style.color='';
+    hideNote(i);
+  });
+  var b=document.getElementById('badge'); if(b) b.className='badge';
+  updateStats();
+}
+
+function updateStats(){
+  if(M[cur].type!=='eskiz') return;
+  var done=0,total=0;
+  lineData.forEach(function(l){
+    if(l.isEmpty||(l.isCom&&skipOn)) return;
+    total++;
+    if(l.inp.value===l.target) done++;
+  });
+  var pct=total>0?Math.round(done/total*100):0;
+  document.getElementById('svDone').textContent=done+'/'+total;
+  document.getElementById('svScore').textContent=done>0?pct+'%':'—';
+  document.getElementById('progressFill').style.width=(doneSet.size/M.length*100)+'%';
+}
+
+function updateTopStats(){
+  // test balini hisoblash
+  var totalQ=0, correctQ=0;
+  M.forEach(function(m,mi){
+    if(m.type!=='test') return;
+    m.tests.forEach(function(t,qi){
+      totalQ++;
+      if(testAnswers[mi]&&testAnswers[mi][qi]===t.ans) correctQ++;
+    });
+  });
+  document.getElementById('svScore').textContent=totalQ>0?(correctQ+'/'+totalQ):'—';
+  document.getElementById('svDone').textContent=doneSet.size+'/'+M.length;
+  document.getElementById('progressFill').style.width=(doneSet.size/M.length*100)+'%';
+}
+
+function toggleGhost(){
+  ghostVisible=!ghostVisible;
+  document.querySelectorAll('.line-ghost').forEach(function(g){g.style.visibility=ghostVisible?'visible':'hidden';});
+  var gb=document.getElementById('ghostBtn');
+  if(gb) gb.textContent=ghostVisible?'👁️ Yashir':'👁️ Ko\'rsat';
+}
+
+function toggleSkip(){
+  skipOn=!skipOn;
+  var sw=document.getElementById('sw'); if(sw) sw.classList.toggle('on',skipOn);
+  var sl=document.getElementById('skipLbl'); if(sl) sl.textContent=skipOn?'Kommentlar o\'tkazilmoqda':'# Kommentlarni o\'tkazib yuboring';
+  if(M[cur].type==='eskiz'){ buildLines(M[cur].eskizlar[curEskiz]); applyBright(); updateStats(); }
+}
+
+function toggleDetail(){
+  var p=document.getElementById('detailPanel');
+  if(p.classList.contains('show')){p.classList.remove('show');}
+  else{document.getElementById('detailContent').textContent=M[cur].detail;p.classList.add('show');renderMath('detailContent');}
+}
+
+function toggleResult(){
+  var p=document.getElementById('resultPanel');
+  if(!p) return;
+  if(p.classList.contains('show')){p.classList.remove('show');}
+  else{document.getElementById('simWrap').innerHTML='<pre>'+esc(M[cur].sim)+'</pre>';p.classList.add('show');}
+}
+
+function setBright(v){document.getElementById('brightVal').textContent=v;applyBright();}
+
+function applyBright(){
+  var v=parseInt(document.getElementById('brightSlider').value)||3;
+  var op=BRIGHT[v];
+  document.querySelectorAll('.line-ghost').forEach(function(g){
+    if(!g.classList.contains('skip-c')&&ghostVisible) g.style.color='rgba(74,96,128,'+op+')';
+  });
+}
+
+function buildTabs(){
+  var c=document.getElementById('tabs'); c.innerHTML='';
+  M.forEach(function(m,i){
+    var d=document.createElement('div');
+    d.className='tab'+(i===cur?' on':'')+(doneSet.has(i)?' done':'');
+    d.textContent=m.id;
+    d.onclick=(function(n){return function(){loadMod(n);};})(i);
+    c.appendChild(d);
+  });
+}
+
+function buildStars(){
+  var sc=document.getElementById('stars'); sc.innerHTML='';
+  for(var i=1;i<=10;i++){
+    var s=document.createElement('span');
+    s.className='star'; s.textContent='⭐'; s.dataset.v=i;
+    s.onclick=(function(v){return function(){
+      selectedStar=v;
+      document.getElementById('ratingScore').textContent=v+' / 10';
+      document.querySelectorAll('.star').forEach(function(st){st.classList.toggle('on',parseInt(st.dataset.v)<=v);});
+    };})(i);
+    sc.appendChild(s);
+  }
+}
+
+function showRating(){document.getElementById('ratingBox').classList.add('show');}
+
+function submitRating(){
+  if(ratingSubmitted) return;
+  if(selectedStar===0){alert('Baho tanlang!');return;}
+  ratingSubmitted=true;
+  document.getElementById('ratingThanks').style.display='block';
+  document.querySelector('.rating-submit').style.display='none';
+}
+
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+function renderMath(elId){
+  var el=document.getElementById(elId);
+  if(!el||typeof renderMathInElement==='undefined') return;
+  try{
+    renderMathInElement(el,{
+      delimiters:[
+        {left:'$$',right:'$$',display:true},
+        {left:'$',right:'$',display:false}
+      ],
+      throwOnError:false
+    });
+  }catch(e){}
+}
+
+</script>
+</body>
+</html>

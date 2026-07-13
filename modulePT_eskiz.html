@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Eskiz — PyTorch Moduli</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:#0a0e1a;color:#dde5f0;font-family:'JetBrains Mono',monospace;font-size:13px;min-height:100vh;}
+.top{background:#0f1520;border-bottom:1px solid #1e3048;padding:8px 14px;display:flex;align-items:center;gap:8px;position:sticky;top:0;z-index:50;}
+.top-t{color:#00f0c8;font-size:.78rem;font-weight:700;}
+.top-s{color:#4a6080;font-size:.65rem;margin-left:auto;}
+.bright-bar{background:#0f1520;border-bottom:1px solid #1e3048;padding:6px 14px;display:flex;align-items:center;gap:10px;position:sticky;top:41px;z-index:49;}
+.bright-lbl{font-size:.65rem;color:#4a6080;flex-shrink:0;}
+.bright-slider{flex:1;-webkit-appearance:none;height:4px;border-radius:2px;background:#1e3048;outline:none;cursor:pointer;}
+.bright-slider::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:#00f0c8;cursor:pointer;}
+.bright-val{font-size:.68rem;color:#00f0c8;font-weight:700;width:20px;text-align:right;flex-shrink:0;}
+.wrap{padding:10px 14px;max-width:540px;margin:0 auto;}
+.tabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;margin-bottom:10px;scrollbar-width:none;}
+.tabs::-webkit-scrollbar{display:none;}
+.tab{flex-shrink:0;padding:6px 12px;border-radius:20px;border:1px solid #1e3048;background:#141e2e;color:#4a6080;font-size:.68rem;cursor:pointer;transition:all .15s;}
+.tab.on{border-color:#00f0c8;color:#00f0c8;background:rgba(0,240,200,.08);}
+.tab.done{border-color:#22c55e;color:#22c55e;background:rgba(34,197,94,.06);}
+.skip-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;padding:8px 12px;background:#141e2e;border:1px solid #1e3048;border-radius:8px;cursor:pointer;}
+.skip-row span{font-size:.7rem;color:#4a6080;}
+.sw{width:34px;height:18px;background:#1e3048;border-radius:10px;position:relative;transition:background .2s;flex-shrink:0;}
+.sw.on{background:#fbbf24;}
+.sw::after{content:'';position:absolute;top:2px;left:2px;width:14px;height:14px;background:#fff;border-radius:50%;transition:left .2s;}
+.sw.on::after{left:18px;}
+.stats{display:flex;gap:8px;margin-bottom:10px;}
+.stat{flex:1;background:#141e2e;border:1px solid #1e3048;border-radius:8px;padding:7px 8px;text-align:center;}
+.sv{font-size:.95rem;font-weight:700;color:#00f0c8;}
+.sl{font-size:.58rem;color:#4a6080;margin-top:2px;}
+.progress-bar{height:3px;background:#1e3048;border-radius:2px;margin-bottom:10px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,#00f0c8,#2563eb);border-radius:2px;transition:width .4s;}
+.intro-box{background:#0d1828;border:1px solid #1e3048;border-left:3px solid #00f0c8;border-radius:10px;padding:14px;margin-bottom:10px;}
+.intro-title{font-size:.8rem;font-weight:700;color:#00f0c8;margin-bottom:8px;}
+.intro-text{font-size:.7rem;line-height:1.85;color:#9fb0c8;margin-bottom:10px;white-space:pre-wrap;}
+.intro-stats{display:flex;gap:8px;margin-top:10px;}
+.intro-stat{flex:1;background:#080c14;border:1px solid #1e3048;border-radius:8px;padding:8px;text-align:center;}
+.intro-stat-v{font-size:1.1rem;font-weight:700;color:#00f0c8;}
+.intro-stat-l{font-size:.58rem;color:#4a6080;margin-top:2px;}
+.terms-box{background:#080c14;border:1px solid #1e3048;border-left:3px solid #a855f7;border-radius:8px;padding:10px 12px;margin-bottom:10px;}
+.terms-title{font-size:.68rem;font-weight:700;color:#a855f7;margin-bottom:8px;}
+.term-row{display:flex;gap:6px;margin-bottom:5px;align-items:flex-start;}
+.term-key{font-size:.64rem;color:#fbbf24;font-weight:700;min-width:110px;flex-shrink:0;}
+.term-val{font-size:.63rem;color:#4a6080;line-height:1.6;}
+.detail-panel{display:none;background:#0a1628;border:1px solid #2563eb;border-radius:8px;padding:12px 14px;margin-bottom:10px;font-size:.72rem;line-height:2;color:#93c5fd;white-space:pre-wrap;}
+.detail-panel.show{display:block;}
+.detail-title{color:#60a5fa;font-weight:700;margin-bottom:8px;font-size:.76rem;}
+.result-panel{display:none;background:#080c14;border:1px solid #22c55e;border-radius:10px;padding:12px;margin-bottom:10px;}
+.result-panel.show{display:block;}
+.result-title{color:#22c55e;font-size:.72rem;font-weight:700;margin-bottom:8px;}
+.sim-wrap{width:100%;overflow-x:auto;}
+.sim-wrap pre{font-size:.68rem;line-height:1.9;color:#22c55e;white-space:pre;}
+.code-block{border:1px solid #1e3048;border-radius:10px;overflow:hidden;margin-bottom:10px;background:#090d18;}
+.fbar{display:flex;align-items:center;gap:5px;padding:7px 12px;background:#0f1520;border-bottom:1px solid #1e3048;}
+.dot{width:6px;height:6px;border-radius:50%;}
+.dot.r{background:#f43f5e;}.dot.y{background:#fbbf24;}.dot.g{background:#22c55e;}
+.fn{font-size:.65rem;color:#4a6080;margin-left:4px;}
+.fhint{margin-left:auto;font-size:.6rem;color:#00f0c8;opacity:.7;}
+.lines-wrap{padding:4px 0;}
+.line-block{margin:0;}
+.line-row{display:flex;align-items:center;position:relative;min-height:30px;}
+.line-num{width:28px;flex-shrink:0;font-size:.63rem;padding:4px 4px 4px 5px;color:#2a3a50;text-align:right;user-select:none;transition:color .2s;align-self:center;}
+.line-content{flex:1;position:relative;overflow-x:auto;overflow-y:hidden;min-height:30px;}
+.line-content::-webkit-scrollbar{height:2px;}
+.line-content::-webkit-scrollbar-thumb{background:#1e3048;border-radius:1px;}
+.line-ghost{font-size:.76rem;line-height:1.8;padding:4px 8px;white-space:pre;pointer-events:none;min-height:30px;display:block;}
+.line-ghost.skip-c{opacity:.08!important;}
+.line-colors{position:absolute;top:0;left:0;font-size:.76rem;line-height:1.8;padding:4px 8px;white-space:pre;pointer-events:none;z-index:2;min-height:30px;}
+.line-input{position:absolute;top:0;left:0;right:0;bottom:0;width:100%;font-family:'JetBrains Mono',monospace;font-size:.76rem;line-height:1.8;padding:4px 8px;color:transparent;-webkit-text-fill-color:transparent;caret-color:#00f0c8;background:transparent;border:none;outline:none;white-space:pre;overflow:hidden;z-index:10;-webkit-appearance:none;}
+.line-input:disabled{cursor:default;}
+.line-done-note{display:none;font-size:.66rem;line-height:1.6;padding:3px 8px 3px 34px;color:#38bdf8;background:rgba(56,189,248,.06);border-left:2px solid #38bdf8;white-space:pre-wrap;animation:fadeIn .25s ease;}
+.line-done-note.show{display:block;}
+.line-start-note{display:none;font-size:.64rem;line-height:1.6;padding:3px 8px 3px 34px;color:#a855f7;background:rgba(168,85,247,.06);border-left:2px solid #a855f7;white-space:pre-wrap;animation:fadeIn .25s ease;}
+.line-start-note.show{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:translateY(0)}}
+.btn-row{display:flex;gap:6px;flex-wrap:wrap;padding:9px 12px;background:#0f1520;border-top:1px solid #1e3048;}
+.btn{padding:8px 11px;border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:.68rem;font-weight:700;border:none;cursor:pointer;flex-shrink:0;transition:opacity .15s;}
+.btn:active{opacity:.7;}
+.btn-chk{background:#00f0c8;color:#080c14;}
+.btn-clr{background:transparent;border:1px solid #1e3048;color:#4a6080;}
+.btn-det{background:#2563eb;color:#fff;}
+.btn-ghost{background:#7c3aed;color:#fff;}
+.btn-res{background:#16a34a;color:#fff;}
+.badge{display:none;margin:0 12px 10px;padding:7px 12px;border-radius:8px;font-size:.7rem;border:1px solid #1e3048;}
+.badge.show{display:block;}
+.badge.g{border-color:#22c55e;color:#22c55e;background:rgba(34,197,94,.07);}
+.badge.o{border-color:#fbbf24;color:#fbbf24;background:rgba(251,191,36,.07);}
+.badge.r{border-color:#f43f5e;color:#f43f5e;background:rgba(244,63,94,.07);}
+.rating-box{background:#0d1828;border:1px solid #fbbf24;border-radius:12px;padding:14px 16px;margin-top:10px;display:none;}
+.rating-box.show{display:block;}
+.rating-title{font-size:.72rem;font-weight:700;color:#fbbf24;text-align:center;margin-bottom:4px;}
+.rating-sub{font-size:.62rem;color:#4a6080;text-align:center;margin-bottom:12px;}
+.stars{display:flex;justify-content:center;gap:4px;margin-bottom:10px;flex-wrap:wrap;}
+.star{font-size:1.5rem;cursor:pointer;filter:grayscale(1);opacity:.35;transition:transform .1s,filter .1s,opacity .1s;user-select:none;}
+.star.on{filter:none;opacity:1;}
+.star:active{transform:scale(1.3);}
+.rating-score{text-align:center;font-size:.72rem;color:#fbbf24;font-weight:700;margin-bottom:8px;min-height:18px;}
+.rating-comment{width:100%;background:#141e2e;border:1px solid #1e3048;border-radius:8px;padding:8px 10px;color:#dde5f0;font-family:'JetBrains Mono',monospace;font-size:.68rem;resize:none;outline:none;margin-bottom:8px;}
+.rating-comment:focus{border-color:#fbbf24;}
+.rating-submit{width:100%;padding:10px;background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#080c14;font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:700;border:none;border-radius:8px;cursor:pointer;}
+.rating-submit:active{opacity:.8;}
+.rating-thanks{display:none;text-align:center;padding:10px;font-size:.72rem;color:#22c55e;font-weight:700;}
+</style>
+</head>
+<body>
+<div class="top">
+  <div class="top-t">🔥 PyTorch Moduli</div>
+  <div class="top-s" id="topSub">PT.1</div>
+</div>
+<div class="bright-bar">
+  <span class="bright-lbl">👁️ Xiralik:</span>
+  <input type="range" class="bright-slider" id="brightSlider" min="1" max="10" value="3" oninput="setBright(this.value)">
+  <span class="bright-val" id="brightVal">3</span>
+</div>
+<div class="wrap">
+  <div class="stats">
+    <div class="stat"><div class="sv" id="svPctV">—</div><div class="sl">TO'G'RI</div></div>
+    <div class="stat"><div class="sv" id="svDone">0/0</div><div class="sl">BAJARILDI</div></div>
+    <div class="stat"><div class="sv" id="svMod">1/10</div><div class="sl">MAVZU</div></div>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+  <div class="tabs" id="tabs"></div>
+  <div class="skip-row" onclick="toggleSkip()">
+    <div class="sw" id="sw"></div>
+    <span id="skipLbl"># Kommentlarni o'tkazib yuboring</span>
+  </div>
+
+  <div class="intro-box" id="introBox"></div>
+
+  <div class="terms-box" id="termsBox"></div>
+  <div class="detail-panel" id="detailPanel">
+    <div class="detail-title">📘 BATAFSIL</div>
+    <div id="detailContent"></div>
+  </div>
+  <div class="result-panel" id="resultPanel">
+    <div class="result-title">📊 NATIJA — SIMULYATSIYA</div>
+    <div class="sim-wrap" id="simWrap"></div>
+  </div>
+  <div class="code-block">
+    <div class="fbar">
+      <div class="dot r"></div><div class="dot y"></div><div class="dot g"></div>
+      <div class="fn" id="fname">pytorch.py</div>
+      <div class="fhint">↔️ suring ✏️ yozing</div>
+    </div>
+    <div class="lines-wrap" id="linesWrap"></div>
+    <div class="btn-row">
+      <button class="btn btn-chk" onclick="doCheck()">✅ Tekshir</button>
+      <button class="btn btn-clr" onclick="doClear()">🗑️ Tozala</button>
+      <button class="btn btn-ghost" id="ghostBtn" onclick="toggleGhost()">👁️ Yashir</button>
+      <button class="btn btn-det" onclick="toggleDetail()">📖 Batafsil</button>
+      <button class="btn btn-res" onclick="toggleResult()">📊 Natija</button>
+    </div>
+    <div class="badge" id="badge"></div>
+  </div>
+  <div class="rating-box" id="ratingBox">
+    <div class="rating-title">⭐ PyTorch Modulini baholang</div>
+    <div class="rating-sub">Fikringiz keyingi versiyani yaxshilashga yordam beradi</div>
+    <div class="stars" id="stars"></div>
+    <div class="rating-score" id="ratingScore">Baho tanlang (1–10)</div>
+    <textarea class="rating-comment" id="ratingComment" rows="2" placeholder="Izoh: nima yoqdi, nima yetishmadi..."></textarea>
+    <button class="rating-submit" onclick="submitRating()">⭐ Yuborish</button>
+    <div class="rating-thanks" id="ratingThanks">✅ Rahmat! Fikringiz qabul qilindi.</div>
+  </div>
+</div>
+
+<script>
+var MODULE_INTRO = {
+  title: "🔥 PyTorch Moduli haqida",
+  text: "Bu modulda siz PyTorch bilan Deep Learning modellarini noldan qurish, o'qitish va ishlatishni o'rganasiz.\n\nTensorFlow modulida Keras orqali yuqori darajadagi (`model.fit()` kabi) yondashuvni ko'rgan edingiz. PyTorch — boshqacha falsafaga ega: kod ko'proq \"qo'lda\" yoziladi (training loop ni o'zingiz yozasiz), lekin bu, NIMA sodir bo'layotganini ANIQROQ ko'rish va moslashtirish imkonini beradi. Aynan shu sababdan, PyTorch tadqiqot (research) sohasida ustunlik qiladi.\n\nMavzular ketma-ket bog'langan: avval Tensor va avtomatik gradient hisoblash (autograd) ni, keyin nn.Module orqali model qurishni, so'ngra to'liq training loop (forward, loss, backward, optimizer step) ni, keyin CNN va RNN qatlamlarini, va oxirida modelni saqlash/yuklash hamda GPU bilan ishlashni o'rganasiz.\n\nReal loyihada bu nima beradi? PyTorch ning moslashuvchanligi, murakkab yoki noodatiy arxitekturalar (masalan maxsus loss function, noan'anaviy training jarayoni) qurish kerak bo'lganda ayniqsa qadrlanadi — bu, ko'pchilik zamonaviy tadqiqot loyihalari (jumladan yirik til modellari) PyTorch asosida qurilishining sababi.",
+  count: 10
+};
+
+var M = [
+
+{id:'PT.1',f:'pytorch_1.py',
+plan:['PyTorch nima va torch.tensor() bilan Tensor yaratish','requires_grad — gradient kuzatish','Asosiy amallar va NumPy bilan moslik'],
+terms:[
+  ['Tensor','Ko\'p o\'lchovli massiv — PyTorch ning asosiy ma\'lumot turi'],
+  ['torch.tensor()','Tensor yaratish funksiyasi'],
+  ['requires_grad','Tensor uchun gradient kuzatishni yoqish parametri'],
+  ['.numpy() / torch.from_numpy()','Tensor va numpy massivi orasida aylantirish']
+],
+detail:'TENSOR — PYTORCH NING NEGIZI\n\nXuddi TensorFlow dagi kabi, PyTorch da ham Tensor — asosiy ma\'lumot turi, numpy array ga juda o\'xshash, lekin GPU da tezroq ishlash va AVTOMATIK GRADIENT HISOBLASH (autograd) imkoniyatiga ega.\n\nTORCH.TENSOR(): torch.tensor([1, 2, 3]) — oddiy Python ro\'yxatidan tensor yaratadi. NumPy bilan farqli o\'laroq, PyTorch tensorlari, GPU ga ko\'chirilishi va gradient kuzatilishi mumkin.\n\nREQUIRES_GRAD — ENG MUHIM FARQ TENSORFLOW DAN: torch.tensor([2.0], requires_grad=True) — bu, PyTorch ga "BU TENSOR UCHUN GRADIENTNI KUZATIB BOR" deyish. Bu — M1-modulda (DL Matematikasi) qo\'lda yozgan Backpropagation jarayonini, PyTorch AVTOMATIK bajarishi uchun zarur signal. TensorFlow da bu jarayon Keras ICHIDA "yashiringan", PyTorch da esa SIZ, qaysi tensor uchun gradient kerakligini ANIQ belgilaysiz — bu, PyTorch ning "shaffofligi" deb ataladigan xususiyati.\n\nNUMPY BILAN MOSLIK: .numpy() — tensor ni numpy massiviga aylantiradi (faqat CPU dagi, gradient kuzatilmayotgan tensorlar uchun). torch.from_numpy() — aksincha, numpy massividan tensor yaratadi.',
+sim:'>>> import torch\n>>> a = torch.tensor([1, 2, 3])\n>>> print(a)\ntensor([1, 2, 3])\n>>> b = torch.tensor([2.0], requires_grad=True)\n>>> print(b)\ntensor([2.], requires_grad=True)\n>>> c = b * 3\n>>> c.backward()\n>>> print(b.grad)\ntensor([3.])',
+eskizlar:[
+{q:'PyTorch ni import qilib, torch.tensor() bilan tensor yarating.',
+ lines:[
+  {c:'import torch',n:'Siz PyTorch kutubxonasini import qildingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'a = torch.tensor([1, 2, 3])',n:'Siz oddiy tensor yaratdingiz'},
+  {c:'print(a)',n:'Siz tensorni ekranga chiqardingiz'},
+ ]},
+{q:'requires_grad=True bilan tensor yaratib, gradient hisoblang.',
+ lines:[
+  {c:'import torch',n:'Siz PyTorch kutubxonasini import qildingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'b = torch.tensor([2.0], requires_grad=True)',n:'Siz gradient kuzatiladigan tensor yaratdingiz'},
+  {c:'c = b * 3',n:'Siz b ustida amal bajardingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'c.backward()',n:'Siz avtomatik gradient hisoblashni ishga tushirdingiz'},
+  {c:'print(b.grad)',n:'Siz b bo\'yicha hisoblangan gradientni chiqardingiz'},
+ ]},
+]},
+
+{id:'PT.2',f:'pytorch_2.py',
+plan:['nn.Module klassidan model yaratish','__init__ va forward metodlari','nn.Linear qatlami'],
+terms:[
+  ['nn.Module','PyTorch da barcha modellar asoslanadigan bazaviy klass'],
+  ['__init__()','Qatlamlarni e\'lon qilish metodi'],
+  ['forward()','Ma\'lumot qatlamlar orqali qanday o\'tishini belgilovchi metod'],
+  ['nn.Linear','PyTorch dagi Dense qatlamga teng keluvchi qatlam']
+],
+detail:'NN.MODULE — PYTORCH NING MODEL QURISH USULI\n\nKeras da Sequential() bilan qatlamlar RO\'YXAT ko\'rinishida yozilgan edi. PyTorch da, model — Python KLASSI sifatida, nn.Module dan MEROS olib, yoziladi. Bu, ko\'proq kod talab qiladi, lekin ANIQROQ nazorat beradi.\n\nIKKI MAJBURIY METOD:\n\n__INIT__(): Bu yerda, modelda ISHLATILADIGAN BARCHA qatlamlar E\'LON qilinadi (lekin ular qanday TARTIBDA ishlatilishi hali aytilmagan): self.layer1 = nn.Linear(4, 16).\n\nFORWARD(): Bu yerda, ma\'lumot (x) qatlamlar orqali QANDAY OQISHI aniq KO\'RSATILADI: def forward(self, x): x = self.layer1(x); return x. Bu — Keras Sequential dagi "avtomatik" tartibga TESKARI: PyTorch da, siz HAR BIR qadamni QO\'LDA yozasiz.\n\nNN.LINEAR: nn.Linear(in_features=4, out_features=16) — Keras dagi Dense(16, input_shape=(4,)) ga TENG. in_features — kirish xususiyatlari soni, out_features — shu qatlamdagi neyronlar soni.\n\nNEGA BU MUROSALI YONDASHUV? __init__/forward ajratilgani, sizga, forward() ICHIDA, oddiy Python kodi (shartli operatorlar, sikllar, hatto bosqichma-bosqich debug print()lar) yozish imkonini beradi — bu, murakkab, noodatiy arxitekturalar uchun ZARUR moslashuvchanlik.',
+sim:'>>> import torch.nn as nn\n>>> class OddiyModel(nn.Module):\n...     def __init__(self):\n...         super().__init__()\n...         self.layer1 = nn.Linear(4, 16)\n...         self.layer2 = nn.Linear(16, 1)\n...     def forward(self, x):\n...         x = torch.relu(self.layer1(x))\n...         x = self.layer2(x)\n...         return x\n>>> model = OddiyModel()\n>>> print(model)',
+eskizlar:[
+{q:'nn.Module dan meros oluvchi model klassini yaratib, __init__ ni yozing.',
+ lines:[
+  {c:'import torch.nn as nn',n:'Siz torch.nn modulini nn nomi bilan import qildingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'class OddiyModel(nn.Module):',n:'Siz nn.Module dan meros oluvchi klass yaratdingiz'},
+  {c:'    def __init__(self):',n:'Siz qatlamlarni e\'lon qilish metodini boshladingiz'},
+  {c:'        super().__init__()',n:'Siz ota klass (nn.Module) ni ishga tushirdingiz'},
+  {c:'        self.layer1 = nn.Linear(4, 16)',n:'Siz 4 kirish, 16 chiqishli birinchi qatlamni e\'lon qildingiz'},
+  {c:'        self.layer2 = nn.Linear(16, 1)',n:'Siz 16 kirish, 1 chiqishli yakuniy qatlamni e\'lon qildingiz'},
+ ]},
+{q:'forward() metodini yozib, ma\'lumot oqimini belgilang.',
+ lines:[
+  {c:'    def forward(self, x):',n:'Siz ma\'lumot oqimini belgilovchi metodni boshladingiz'},
+  {c:'        x = torch.relu(self.layer1(x))',n:'Siz birinchi qatlamdan o\'tkazib, ReLU qo\'lladingiz'},
+  {c:'        x = self.layer2(x)',n:'Siz ikkinchi (yakuniy) qatlamdan o\'tkazdingiz'},
+  {c:'        return x',n:'Siz yakuniy natijani qaytardingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'model = OddiyModel()',n:'Siz model obyektini yaratdingiz'},
+  {c:'print(model)',n:'Siz model strukturasini ekranga chiqardingiz'},
+ ]},
+]},
+
+{id:'PT.3',f:'pytorch_3.py',
+plan:['Loss function tanlash — nn.MSELoss, nn.BCELoss','Optimizer yaratish — torch.optim.Adam','Optimizer ga model parametrlarini berish'],
+terms:[
+  ['nn.MSELoss()','Regression uchun loss obyekti'],
+  ['nn.BCELoss()','Binary Classification uchun loss obyekti'],
+  ['torch.optim.Adam()','Adam optimizer obyekti'],
+  ['model.parameters()','Modelning barcha o\'qitiladigan og\'irliklari']
+],
+detail:'LOSS VA OPTIMIZER — ALOHIDA OBYEKTLAR SIFATIDA\n\nKeras da, model.compile() — loss va optimizer ni BIRGA, bitta chaqiruvda belgilagan edi. PyTorch da, ular IKKI ALOHIDA obyekt sifatida yaratiladi.\n\nLOSS FUNCTION: criterion = nn.MSELoss() — regression uchun (M1.5 dagi MSE formulasiga mos). criterion = nn.BCELoss() — binary classification uchun (Binary Cross-Entropy, M1.5/M1.6 dan tanish). Bu obyekt, KEYINCHALIK, criterion(bashorat, haqiqiy) ko\'rinishida CHAQIRILADI.\n\nOPTIMIZER: optimizer = torch.optim.Adam(model.parameters(), lr=0.001) — Adam optimizerini yaratadi. ENG MUHIM QISM — model.parameters(): bu, modeldagi BARCHA o\'qitiladigan og\'irliklarni (barcha nn.Linear qatlamlaridagi weight va bias) optimizatorga "TOPSHIRADI" — optimizer endi, AYNAN shu parametrlarni, Gradient Descent orqali yangilashni "biladi".\n\nLR (LEARNING RATE): M1.7-8 dan tanish parametr — qadam kattaligini belgilaydi. lr=0.001 — odatiy boshlang\'ich qiymat.',
+sim:'>>> import torch.nn as nn\n>>> import torch.optim as optim\n>>> model = OddiyModel()\n>>> criterion = nn.MSELoss()\n>>> optimizer = optim.Adam(model.parameters(), lr=0.001)\n>>> print(\'Loss va optimizer tayyor\')\nLoss va optimizer tayyor',
+eskizlar:[
+{q:'Regression uchun MSE loss funksiyasini yarating.',
+ lines:[
+  {c:'import torch.nn as nn',n:'Siz torch.nn modulini import qildingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'criterion = nn.MSELoss()',n:'Siz regression uchun MSE loss obyektini yaratdingiz'},
+  {c:'print(criterion)',n:'Siz loss obyektini ekranga chiqardingiz'},
+ ]},
+{q:'Adam optimizerini yaratib, model parametrlarini unga bog\'lang.',
+ lines:[
+  {c:'import torch.optim as optim',n:'Siz torch.optim modulini import qildingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'optimizer = optim.Adam(model.parameters(), lr=0.001)',n:'Siz Adam optimizerini, model parametrlariga bog\'lab, yaratdingiz'},
+  {c:'print(\'Optimizer tayyor\')',n:'Siz tayyorlik xabarini chiqardingiz'},
+ ]},
+]},
+
+{id:'PT.4',f:'pytorch_4.py',
+plan:['Training loop — qo\'lda yozish','optimizer.zero_grad() — gradientlarni tozalash','loss.backward() va optimizer.step()'],
+terms:[
+  ['Training loop','Forward, loss, backward, update qadamlarini qo\'lda yozish'],
+  ['optimizer.zero_grad()','Oldingi qadamdagi gradientlarni tozalash'],
+  ['loss.backward()','Backpropagation ni avtomatik ishga tushirish'],
+  ['optimizer.step()','Gradientlar asosida og\'irliklarni yangilash']
+],
+detail:'TRAINING LOOP — PYTORCH NING ENG MUHIM FARQI\n\nKeras da, model.fit() — BUTUN o\'qitish jarayonini (epoch va batch sikli, forward, loss, backward, update) BIR QATORDA YASHIRADI. PyTorch da, SIZ bu jarayonni QO\'LDA, aniq ko\'rinadigan tarzda yozasiz — bu, M1.8 da numpy bilan qo\'lda yozgan Backpropagation jarayoniga JUDA O\'XSHASH, faqat endi avtomatik (autograd orqali).\n\nTO\'RT MAJBURIY QADAM, HAR BATCH UCHUN:\n\n1. optimizer.zero_grad() — PyTorch, STANDART holatda, gradientlarni TO\'PLAB boradi (yangi gradientni eskisiga QO\'SHADI). Agar buni TOZALAMASANGIZ, oldingi batch dan qolgan gradientlar, YANGI gradient bilan ARALASHIB ketadi — bu ENG KO\'P uchraydigan boshlang\'ich xato.\n\n2. bashorat = model(X) — FORWARD PASS, M1.7-8 dan tanish.\n\n3. loss = criterion(bashorat, y) — LOSS hisoblash.\n\n4. loss.backward() — BACKWARD PASS. Bu — M1.7-8 da QO\'LDA yozgan zanjir qoidasi (chain rule) hisoblashlarining BARCHASINI, PyTorch AVTOMATIK (`requires_grad=True` tufayli) bajaradi.\n\n5. optimizer.step() — hisoblangan gradientlar ASOSIDA, BARCHA og\'irliklarni (M1.8 dagi $w_{yangi}=w_{eski}-\\text{lr}\\times dL/dw$ formulasi bo\'yicha) YANGILAYDI.',
+sim:'>>> for epoch in range(50):\n...     optimizer.zero_grad()\n...     bashorat = model(X_train)\n...     loss = criterion(bashorat, y_train)\n...     loss.backward()\n...     optimizer.step()\n...     if epoch % 10 == 0:\n...         print(f\'Epoch {epoch}, Loss: {loss.item()}\')\nEpoch 0, Loss: 2.451\nEpoch 10, Loss: 0.823\nEpoch 20, Loss: 0.341',
+eskizlar:[
+{q:'Training loop ni boshlang - gradientlarni tozalab, forward pass bajaring.',
+ lines:[
+  {c:'for epoch in range(50):',n:'Siz 50 epoch davomida sikl boshladingiz'},
+  {c:'    optimizer.zero_grad()',n:'Siz oldingi qadamdagi gradientlarni tozaladingiz'},
+  {c:'    bashorat = model(X_train)',n:'Siz forward pass orqali bashorat oldingiz'},
+ ]},
+{q:'Loss hisoblang, backward pass va og\'irlik yangilashni bajaring.',
+ lines:[
+  {c:'    loss = criterion(bashorat, y_train)',n:'Siz bashorat va haqiqiy qiymat orasidagi xatoni hisobladingiz'},
+  {c:'    loss.backward()',n:'Siz avtomatik backpropagation ni ishga tushirdingiz'},
+  {c:'    optimizer.step()',n:'Siz hisoblangan gradientlar asosida og\'irliklarni yangiladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'    if epoch % 10 == 0:',n:'Siz har 10 epochda natijani ko\'rsatish shartini qo\'shdingiz'},
+  {c:'        print(f\'Epoch {epoch}, Loss: {loss.item()}\')',n:'Siz joriy epoch va loss qiymatini chiqardingiz'},
+ ]},
+]},
+
+{id:'PT.5',f:'pytorch_5.py',
+plan:['model.eval() va torch.no_grad()','Test to\'plamida baholash','Yangi ma\'lumot uchun bashorat qilish'],
+terms:[
+  ['model.eval()','Modelni baholash rejimiga o\'tkazish (Dropout o\'chiriladi)'],
+  ['torch.no_grad()','Gradient hisoblashni vaqtincha o\'chirish'],
+  ['model.train()','Modelni qaytadan o\'qitish rejimiga o\'tkazish'],
+  ['.item()','Bitta elementli tensor dan, oddiy Python sonini olish']
+],
+detail:'BAHOLASH REJIMI — NEGA ALOHIDA KERAK?\n\nPyTorch da, model IKKI XIL rejimda ishlashi mumkin: TRAIN (o\'qitish) va EVAL (baholash). Bu ikkisi orasidagi farq, ayniqsa Dropout (TF.8 dan tanish) kabi qatlamlar uchun MUHIM — Dropout, FAQAT train paytida neyronlarni "o\'chiradi", eval/predict paytida esa BARCHA neyronlar ishlashi kerak.\n\nMODEL.EVAL(): Modelni baholash rejimiga o\'tkazadi — Dropout o\'chadi, va boshqa shunga o\'xshash rejimga bog\'liq qatlamlar (masalan BatchNorm) ham mos tarzda o\'zgaradi.\n\nTORCH.NO_GRAD(): Baholash/bashorat paytida, gradient hisoblash UMUMAN KERAK EMAS (chunki siz og\'irlikni yangilamoqchi emassiz, faqat natija olmoqchisiz). with torch.no_grad(): blok ICHIDA, PyTorch gradient HISOBLAMAYDI — bu, hisoblashni TEZLASHTIRADI va XOTIRA tejaydi.\n\n.ITEM(): loss kabi, BITTA elementli tensorlar, .item() orqali, ODDIY Python soniga aylantiriladi — bu, print() yoki keyingi hisob-kitoblarda QULAYROQ.\n\nESLATMA: Baholashdan KEYIN, agar yana o\'qitishni davom ettirish kerak bo\'lsa, model.train() chaqirib, modelni QAYTADAN train rejimiga o\'tkazish KERAK.',
+sim:'>>> model.eval()\n>>> with torch.no_grad():\n...     test_bashorat = model(X_test)\n...     test_loss = criterion(test_bashorat, y_test)\n>>> print(\'Test loss:\', test_loss.item())\nTest loss: 0.0876\n>>> model.train()',
+eskizlar:[
+{q:'Modelni baholash rejimiga o\'tkazib, gradientsiz test loss hisoblang.',
+ lines:[
+  {c:'model.eval()',n:'Siz modelni baholash rejimiga o\'tkazdingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'with torch.no_grad():',n:'Siz gradient hisoblashni vaqtincha o\'chirdingiz'},
+  {c:'    test_bashorat = model(X_test)',n:'Siz test ma\'lumoti uchun bashorat oldingiz'},
+  {c:'    test_loss = criterion(test_bashorat, y_test)',n:'Siz test loss qiymatini hisobladingiz'},
+ ]},
+{q:'Test loss ni chiqarib, modelni qaytadan train rejimiga o\'tkazing.',
+ lines:[
+  {c:'print(\'Test loss:\', test_loss.item())',n:'Siz test loss ni oddiy Python soni sifatida chiqardingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'model.train()',n:'Siz modelni qaytadan o\'qitish rejimiga o\'tkazdingiz'},
+ ]},
+]},
+
+{id:'PT.6',f:'pytorch_6.py',
+plan:['nn.Conv2d qatlami — rasm uchun','nn.MaxPool2d qatlami','Tensor ni "yassilash" (.view() yoki torch.flatten())'],
+terms:[
+  ['nn.Conv2d','Rasm uchun convolution qatlami'],
+  ['in_channels va out_channels','Conv2d ning kirish/chiqish kanal soni parametrlari'],
+  ['nn.MaxPool2d','Feature map ni kichraytirish qatlami'],
+  ['.view() / torch.flatten()','Ko\'p o\'lchovli tensor ni 1 o\'lchovga "yassilash"']
+],
+detail:'CNN QATLAMLARI PYTORCH DA\n\nM2-modulda Convolution va Pooling matematikasini numpy bilan ko\'rgan edingiz, TF modulida Keras orqali ko\'rgan edingiz. PyTorch da, MANTIQ bir xil, lekin SINTAKSIS biroz farq qiladi.\n\nNN.CONV2D: nn.Conv2d(in_channels=1, out_channels=32, kernel_size=3) — Keras dagi Conv2D(32, (3,3)) ga TENG, lekin PyTorch da, KIRISH kanal soni (in_channels) HAM ANIQ ko\'rsatilishi SHART (Keras da bu, input_shape orqali avtomatik aniqlanadi). Masalan, oq-qora rasm uchun in_channels=1, rangli (RGB) rasm uchun in_channels=3.\n\nNN.MAXPOOL2D: nn.MaxPool2d(kernel_size=2) — Keras dagi MaxPooling2D((2,2)) ga TENG.\n\nYASSILASH: Keras da Flatten() qatlami sifatida ishlatilgan edi. PyTorch da, bu, odatda, forward() METODI ICHIDA, x = x.view(x.size(0), -1) yoki x = torch.flatten(x, 1) ko\'rinishida QO\'LDA bajariladi — bu, PyTorch ning "har narsa aniq ko\'rinadi" falsafasining yana bir misoli.',
+sim:'>>> class CNNModel(nn.Module):\n...     def __init__(self):\n...         super().__init__()\n...         self.conv1 = nn.Conv2d(1, 32, kernel_size=3)\n...         self.pool = nn.MaxPool2d(kernel_size=2)\n...         self.fc1 = nn.Linear(32*13*13, 10)\n...     def forward(self, x):\n...         x = self.pool(torch.relu(self.conv1(x)))\n...         x = torch.flatten(x, 1)\n...         x = self.fc1(x)\n...         return x',
+eskizlar:[
+{q:'CNN model klassi yaratib, Conv2d va MaxPool2d qatlamlarini e\'lon qiling.',
+ lines:[
+  {c:'class CNNModel(nn.Module):',n:'Siz CNN model klassini yaratdingiz'},
+  {c:'    def __init__(self):',n:'Siz qatlamlarni e\'lon qilish metodini boshladingiz'},
+  {c:'        super().__init__()',n:'Siz ota klassni ishga tushirdingiz'},
+  {c:'        self.conv1 = nn.Conv2d(1, 32, kernel_size=3)',n:'Siz 1 kirish kanali, 32 filtrli convolution qatlamni e\'lon qildingiz'},
+  {c:'        self.pool = nn.MaxPool2d(kernel_size=2)',n:'Siz 2x2 pooling qatlamini e\'lon qildingiz'},
+  {c:'        self.fc1 = nn.Linear(32*13*13, 10)',n:'Siz yakuniy Dense (Linear) qatlamni e\'lon qildingiz'},
+ ]},
+{q:'forward() metodida convolution, pooling va flatten qadamlarini yozing.',
+ lines:[
+  {c:'    def forward(self, x):',n:'Siz ma\'lumot oqimini belgilovchi metodni boshladingiz'},
+  {c:'        x = self.pool(torch.relu(self.conv1(x)))',n:'Siz convolution, ReLU va pooling ni ketma-ket qo\'lladingiz'},
+  {c:'        x = torch.flatten(x, 1)',n:'Siz ko\'p o\'lchovli natijani 1D vektorga yassiladingiz'},
+  {c:'        x = self.fc1(x)',n:'Siz yassilangan vektorni yakuniy qatlamdan o\'tkazdingiz'},
+  {c:'        return x',n:'Siz yakuniy natijani qaytardingiz'},
+ ]},
+]},
+
+{id:'PT.7',f:'pytorch_7.py',
+plan:['nn.LSTM qatlami','LSTM ning forward dagi maxsus chiqishi (output, (h_n, c_n))','nn.Embedding qatlami'],
+terms:[
+  ['nn.LSTM','Ketma-ketlik uchun maxsus qatlam'],
+  ['batch_first=True','Tensor o\'lchamlari tartibini (batch birinchi) belgilash'],
+  ['(h_n, c_n)','LSTM ning oxirgi hidden va cell state larini qaytarishi'],
+  ['nn.Embedding','So\'zlarni raqamli vektorlarga aylantiruvchi qatlam']
+],
+detail:'LSTM QATLAMI PYTORCH DA\n\nM2-modulda LSTM gate larining (Forget, Input, Output) matematikasini ko\'rgan edingiz. PyTorch dagi nn.LSTM, bu hisob-kitoblarni avtomatik bajaradi, lekin uning CHIQISHI, Keras dagidan biroz FARQLI.\n\nNN.LSTM YARATISH: nn.LSTM(input_size=64, hidden_size=32, batch_first=True) — input_size: har bir vaqt qadamidagi xususiyatlar soni (masalan Embedding o\'lchami). hidden_size: hidden state o\'lchami (M2.8 dagi $h_t$ o\'lchami). batch_first=True — kirish tensor o\'lchamlari (batch, vaqt, xususiyat) tartibida bo\'lishini belgilaydi (bu, PyTorch standart tartibidan QULAYROQ).\n\nLSTM NING MAXSUS CHIQISHI: output, (h_n, c_n) = self.lstm(x) — LSTM, UCH narsa qaytaradi: output — HAR bir vaqt qadamidagi chiqishlar (Keras dagi return_sequences=True ga teng), h_n — OXIRGI hidden state (M2.11 dagi $h_T$), c_n — OXIRGI cell state (M2.11 dagi $C_T$). Ko\'pincha, klassifikatsiya uchun, FAQAT oxirgi hidden state (h_n) ishlatiladi.\n\nNN.EMBEDDING: nn.Embedding(num_embeddings=VOCAB_SIZE, embedding_dim=64) — Keras dagi Embedding qatlamiga TENG, har bir so\'z ID sini, raqamli vektorga aylantiradi.',
+sim:'>>> class LSTMModel(nn.Module):\n...     def __init__(self):\n...         super().__init__()\n...         self.embed = nn.Embedding(10000, 64)\n...         self.lstm = nn.LSTM(64, 32, batch_first=True)\n...         self.fc = nn.Linear(32, 1)\n...     def forward(self, x):\n...         x = self.embed(x)\n...         output, (h_n, c_n) = self.lstm(x)\n...         x = self.fc(h_n[-1])\n...         return torch.sigmoid(x)',
+eskizlar:[
+{q:'LSTM model klassi yaratib, Embedding va LSTM qatlamlarini e\'lon qiling.',
+ lines:[
+  {c:'class LSTMModel(nn.Module):',n:'Siz LSTM model klassini yaratdingiz'},
+  {c:'    def __init__(self):',n:'Siz qatlamlarni e\'lon qilish metodini boshladingiz'},
+  {c:'        super().__init__()',n:'Siz ota klassni ishga tushirdingiz'},
+  {c:'        self.embed = nn.Embedding(10000, 64)',n:'Siz 10000 so\'zlik lug\'at uchun Embedding qatlamini e\'lon qildingiz'},
+  {c:'        self.lstm = nn.LSTM(64, 32, batch_first=True)',n:'Siz LSTM qatlamini e\'lon qildingiz'},
+  {c:'        self.fc = nn.Linear(32, 1)',n:'Siz yakuniy Dense qatlamni e\'lon qildingiz'},
+ ]},
+{q:'forward() metodida embedding, LSTM va yakuniy Sigmoid ni qo\'llang.',
+ lines:[
+  {c:'    def forward(self, x):',n:'Siz ma\'lumot oqimini belgilovchi metodni boshladingiz'},
+  {c:'        x = self.embed(x)',n:'Siz so\'z ID larini vektorlarga aylantirdingiz'},
+  {c:'        output, (h_n, c_n) = self.lstm(x)',n:'Siz LSTM dan uchta natijani oldingiz'},
+  {c:'        x = self.fc(h_n[-1])',n:'Siz oxirgi hidden state ni yakuniy qatlamdan o\'tkazdingiz'},
+  {c:'        return torch.sigmoid(x)',n:'Siz natijani Sigmoid orqali ehtimollikka aylantirib qaytardingiz'},
+ ]},
+]},
+
+{id:'PT.8',f:'pytorch_8.py',
+plan:['nn.Dropout qatlami','Gradient kesish — torch.nn.utils.clip_grad_norm_','Eng yaxshi modelni qo\'lda saqlash (val loss kuzatish)'],
+terms:[
+  ['nn.Dropout','Tasodifiy neyronlarni o\'chiruvchi qatlam'],
+  ['clip_grad_norm_','Gradientning haddan tashqari kattalashishini cheklash'],
+  ['Eng yaxshi val_loss ni kuzatish','Qo\'lda Early Stopping/Checkpoint mantiqi'],
+  ['best_val_loss o\'zgaruvchisi','Eng past validation loss ni saqlab borish']
+],
+detail:'OVERFITTING VA EXPLODING GRADIENT NI BOSHQARISH\n\nNN.DROPOUT: nn.Dropout(p=0.3) — Keras dagi Dropout(0.3) ga TENG. forward() ichida, oddiy qatlam sifatida chaqiriladi: x = self.dropout(x). PT.5 da ko\'rganingizdek, model.eval() chaqirilganda, Dropout AVTOMATIK o\'chadi.\n\nGRADIENT CLIPPING: M2.10 da Exploding Gradient muammosini ko\'rgan edingiz (RNN larda, ayniqsa). torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0) — bu, loss.backward() dan KEYIN, optimizer.step() dan OLDIN chaqiriladi, va agar gradientlar JUDA katta bo\'lib ketsa, ularni MAJBURAN cheklaydi — bu, RNN/LSTM modellarini o\'qitishda, ayniqsa muhim himoya choralaridan biri.\n\nQO\'LDA EARLY STOPPING/CHECKPOINT MANTIQI: TF modulida, EarlyStopping va ModelCheckpoint — TAYYOR callback lar edi. PyTorch da, PyTorch Lightning kabi qo\'shimcha kutubxonalarsiz, bu mantiqni ODATDA QO\'LDA yozasiz: har epoch dan keyin, agar joriy val_loss, OLDINGI eng yaxshi natijadan YAXSHIROQ bo\'lsa — modelni saqlang va "eng yaxshi" qiymatni yangilang; aks holda, "sabr" hisoblagichini oshiring, va agar u chegaradan oshsa, sikldan chiqing (break).',
+sim:'>>> best_val_loss = float(\'inf\')\n>>> patience_counter = 0\n>>> for epoch in range(100):\n...     train_loss = bir_epoch_oqit(model)\n...     val_loss = baholash(model)\n...     if val_loss < best_val_loss:\n...         best_val_loss = val_loss\n...         torch.save(model.state_dict(), \'best.pt\')\n...         patience_counter = 0\n...     else:\n...         patience_counter += 1\n...         if patience_counter >= 5:\n...             print(\'Early stopping!\')\n...             break',
+eskizlar:[
+{q:'Eng yaxshi val_loss va sabr hisoblagichini boshlang\'ich qiymatlar bilan yarating.',
+ lines:[
+  {c:'best_val_loss = float(\'inf\')',n:'Siz eng yaxshi loss ni cheksiz katta qiymat bilan boshladingiz'},
+  {c:'patience_counter = 0',n:'Siz sabr hisoblagichini nol bilan boshladingiz'},
+  {c:'patience = 5',n:'Siz necha epoch yaxshilanmasa to\'xtatishni belgiladingiz'},
+ ]},
+{q:'Training loop ichida, eng yaxshi modelni saqlash va Early Stopping mantiqini yozing.',
+ lines:[
+  {c:'for epoch in range(100):',n:'Siz 100 epoch davomida sikl boshladingiz'},
+  {c:'    val_loss = baholash(model)',n:'Siz joriy epoch uchun validation loss oldingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'    if val_loss < best_val_loss:',n:'Siz joriy natija eng yaxshisidan yaxshiroqligini tekshirdingiz'},
+  {c:'        best_val_loss = val_loss',n:'Siz eng yaxshi natijani yangiladingiz'},
+  {c:'        torch.save(model.state_dict(), \'best.pt\')',n:'Siz eng yaxshi modelni saqladingiz'},
+  {c:'        patience_counter = 0',n:'Siz sabr hisoblagichini qayta nolladingiz'},
+  {c:'    else:',n:'Siz natija yaxshilanmagan holatni belgiladingiz'},
+  {c:'        patience_counter += 1',n:'Siz sabr hisoblagichini oshirdingiz'},
+  {c:'        if patience_counter >= patience:',n:'Siz chegaraga yetganini tekshirdingiz'},
+  {c:'            print(\'Early stopping!\')',n:'Siz to\'xtatish xabarini chiqardingiz'},
+  {c:'            break',n:'Siz training loop ni to\'xtatdingiz'},
+ ]},
+]},
+
+{id:'PT.9',f:'pytorch_9.py',
+plan:['model.state_dict() — og\'irliklarni saqlash','torch.save() va torch.load()','model.load_state_dict() — qayta yuklash'],
+terms:[
+  ['model.state_dict()','Modelning barcha og\'irliklarini Python lug\'ati ko\'rinishida olish'],
+  ['torch.save()','Obyektni faylga saqlash funksiyasi'],
+  ['torch.load()','Saqlangan obyektni qayta yuklash funksiyasi'],
+  ['model.load_state_dict()','Yuklangan og\'irliklarni modelga "kiyintirish"']
+],
+detail:'MODELNI SAQLASH — PYTORCH DA BOSHQACHA YONDASHUV\n\nTF modulida, model.save() — BUTUN modelni (struktura+og\'irliklar) bitta faylga saqlagan edi. PyTorch da, ENG KO\'P tavsiya etiladigan usul — faqat OG\'IRLIKLARNI (state_dict) saqlash, STRUKTURANI esa alohida, klass orqali qayta yaratish.\n\nNEGA SHUNDAY? Bu, PyTorch ning "shaffoflik" falsafasiga mos: model strukturasi (nn.Module klassi) — SIZNING kodingizda, alohida saqlanadi; fayl FAQAT raqamli og\'irliklarni o\'z ichiga oladi — bu, kichikroq fayl hajmi va moslashuvchanlik beradi.\n\nSAQLASH: torch.save(model.state_dict(), \'model_ogirliklari.pt\') — model.state_dict() barcha og\'irliklarni, qatlam nomlari bilan, Python lug\'ati (dictionary) ko\'rinishida qaytaradi; torch.save() buni faylga yozadi.\n\nYUKLASH (IKKI QADAM): 1) Avval, XUDDI ASL struktura bilan, YANGI model obyekti yaratiladi: yangi_model = OddiyModel(). 2) Keyin, saqlangan og\'irliklar YUKLANIB, shu modelga "KIYDIRILADI": yangi_model.load_state_dict(torch.load(\'model_ogirliklari.pt\')).\n\nSO\'NGRA: yangi_model.eval() chaqirilib (PT.5 dan tanish), model baholash/bashorat uchun tayyor bo\'ladi.',
+sim:'>>> torch.save(model.state_dict(), \'model_ogirliklari.pt\')\n>>> print(\'Og\\\'irliklar saqlandi\')\nOg\'irliklar saqlandi\n>>> yangi_model = OddiyModel()\n>>> yangi_model.load_state_dict(torch.load(\'model_ogirliklari.pt\'))\n>>> yangi_model.eval()\n>>> bashorat = yangi_model(X_yangi)',
+eskizlar:[
+{q:'Model og\'irliklarini state_dict() orqali faylga saqlang.',
+ lines:[
+  {c:'torch.save(model.state_dict(), \'model_ogirliklari.pt\')',n:'Siz model og\'irliklarini faylga saqladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'print(\'Og\\\'irliklar muvaffaqiyatli saqlandi\')',n:'Siz saqlash tugaganini bildiruvchi xabar chiqardingiz'},
+ ]},
+{q:'Yangi model yaratib, saqlangan og\'irliklarni unga yuklang.',
+ lines:[
+  {c:'yangi_model = OddiyModel()',n:'Siz xuddi asl strukturadagi yangi model obyekti yaratdingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'yangi_model.load_state_dict(torch.load(\'model_ogirliklari.pt\'))',n:'Siz saqlangan og\'irliklarni yangi modelga yukladingiz'},
+  {c:'yangi_model.eval()',n:'Siz modelni baholash rejimiga o\'tkazdingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'bashorat = yangi_model(X_yangi)',n:'Siz yuklangan model bilan bashorat qildingiz'},
+  {c:'print(bashorat)',n:'Siz bashoratni ekranga chiqardingiz'},
+ ]},
+]},
+
+{id:'PT.10',f:'pytorch_10.py',
+plan:['torch.cuda.is_available() — GPU borligini tekshirish','device o\'zgaruvchisi yaratish','model va tensorlarni .to(device) bilan ko\'chirish'],
+terms:[
+  ['torch.cuda.is_available()','GPU mavjudligini tekshirish'],
+  ['device','GPU yoki CPU ni belgilovchi o\'zgaruvchi'],
+  ['.to(device)','Model yoki tensor ni ko\'rsatilgan qurilmaga ko\'chirish'],
+  ['Mos kelmaslik xatosi','Model va ma\'lumot turli qurilmada bo\'lsa chiqadigan xato']
+],
+detail:'GPU BILAN ISHLASH — PYTORCH DA QO\'LDA BOSHQARISH\n\nTF modulida, TensorFlow GPU ni AVTOMATIK ishlatgan edi. PyTorch da, SIZ, model va ma\'lumotni, ANIQ qaysi qurilmada (CPU yoki GPU) ishlashini, QO\'LDA belgilashingiz KERAK — bu, yana bir bor, PyTorch ning "aniq nazorat" falsafasi.\n\nDEVICE ANIQLASH (STANDART NAMUNA): device = torch.device(\'cuda\' if torch.cuda.is_available() else \'cpu\') — bu, BIR QATOR bilan, agar GPU mavjud bo\'lsa \'cuda\'ni, aks holda \'cpu\'ni tanlaydi. Bu qator, DEYARLI HAR BIR PyTorch loyihasining boshida uchraydi.\n\nMODEL VA TENSORLARNI KO\'CHIRISH: model = model.to(device) — modelni belgilangan qurilmaga ko\'chiradi. X = X.to(device), y = y.to(device) — ma\'lumotni HAM xuddi shu qurilmaga ko\'chirish KERAK.\n\nENG KO\'P UCHRAYDIGAN XATO: Agar MODEL GPU da, lekin ma\'lumot CPU da qolib ketsa (yoki aksincha) — PyTorch "Expected all tensors to be on the same device" xatosini chiqaradi. Shuning uchun, BARCHA tensorlar (model, X, y — HAR doim) BIR XIL qurilmada bo\'lishi SHART.',
+sim:'>>> import torch\n>>> device = torch.device(\'cuda\' if torch.cuda.is_available() else \'cpu\')\n>>> print(\'Ishlatilayotgan qurilma:\', device)\nIshlatilayotgan qurilma: cpu\n>>> model = model.to(device)\n>>> X_train = X_train.to(device)\n>>> y_train = y_train.to(device)',
+eskizlar:[
+{q:'GPU mavjudligini tekshirib, device o\'zgaruvchisini yarating.',
+ lines:[
+  {c:'import torch',n:'Siz PyTorch kutubxonasini import qildingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'device = torch.device(\'cuda\' if torch.cuda.is_available() else \'cpu\')',n:'Siz mavjud bo\'lsa GPU, aks holda CPU ni tanladingiz'},
+  {c:'print(\'Ishlatilayotgan qurilma:\', device)',n:'Siz tanlangan qurilmani ekranga chiqardingiz'},
+ ]},
+{q:'Model va ma\'lumotni tanlangan qurilmaga ko\'chiring.',
+ lines:[
+  {c:'model = model.to(device)',n:'Siz modelni tanlangan qurilmaga ko\'chirdingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'X_train = X_train.to(device)',n:'Siz X ma\'lumotini ham xuddi shu qurilmaga ko\'chirdingiz'},
+  {c:'y_train = y_train.to(device)',n:'Siz y ma\'lumotini ham xuddi shu qurilmaga ko\'chirdingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'print(\'Model va ma\\\'lumot bir xil qurilmada\')',n:'Siz moslik ta\'minlanganini bildiruvchi xabar chiqardingiz'},
+ ]},
+]},
+
+];
+
+var cur = 0;
+var curEskiz = 0;
+var skipOn = false;
+var ghostVisible = true;
+var lineData = [];
+var doneSet = new Set();
+var eskizDoneSet = new Set(); // "topicIdx-eskizIdx" format
+var selectedStar = 0;
+var ratingSubmitted = false;
+var BRIGHT = [0,0.05,0.1,0.2,0.3,0.42,0.55,0.65,0.75,0.85,0.95];
+
+window.onload = function(){
+  buildStars();
+  buildTabs();
+  buildIntro();
+  loadMod(0);
+  if(window.visualViewport){
+    var t = null;
+    window.visualViewport.addEventListener('resize', function(){
+      clearTimeout(t);
+      t = setTimeout(function(){
+        var el = document.activeElement;
+        if(!el || !el.classList.contains('line-input')) return;
+        var blk = el.closest('.line-block');
+        if(!blk) return;
+        var vp = window.visualViewport;
+        var rc = blk.getBoundingClientRect();
+        var tgt = window.scrollY + rc.top + rc.height/2 - (vp.offsetTop + vp.height*0.38);
+        window.scrollTo({top: tgt, behavior:'smooth'});
+      }, 150);
+    });
+  }
+};
+
+function buildIntro(){
+  var h = '<div class="intro-title">'+MODULE_INTRO.title+'</div>';
+  h += '<div class="intro-text">'+esc(MODULE_INTRO.text)+'</div>';
+  h += '<div class="intro-stats">';
+  h += '<div class="intro-stat"><div class="intro-stat-v">'+MODULE_INTRO.count+'</div><div class="intro-stat-l">MAVZU</div></div>';
+  var totalEskiz = M.reduce(function(sum, m){ return sum + m.eskizlar.length; }, 0);
+  h += '<div class="intro-stat"><div class="intro-stat-v">'+totalEskiz+'</div><div class="intro-stat-l">ESKIZ</div></div>';
+  h += '<div class="intro-stat"><div class="intro-stat-v">PyTorch</div><div class="intro-stat-l">KUTUBXONA</div></div>';
+  h += '</div>';
+  document.getElementById('introBox').innerHTML = h;
+}
+
+function loadMod(i){
+  cur = i;
+  curEskiz = 0;
+  document.getElementById('detailPanel').classList.remove('show');
+  document.getElementById('resultPanel').classList.remove('show');
+  document.getElementById('badge').className = 'badge';
+  var m = M[i];
+  document.getElementById('topSub').textContent = m.id;
+  document.getElementById('svMod').textContent = (i+1)+'/'+M.length;
+  var th = '<div class="terms-title">📚 Yangi atamalar:</div>';
+  m.terms.forEach(function(t){
+    th += '<div class="term-row"><span class="term-key">'+esc(t[0])+'</span><span class="term-val">'+esc(t[1])+'</span></div>';
+  });
+  document.getElementById('termsBox').innerHTML = th;
+  loadEskiz();
+  buildTabs();
+}
+
+function loadEskiz(){
+  var m = M[cur];
+  var e = m.eskizlar[curEskiz];
+  document.getElementById('detailPanel').classList.remove('show');
+  document.getElementById('resultPanel').classList.remove('show');
+  document.getElementById('badge').className = 'badge';
+  document.getElementById('fname').textContent = m.f.replace('.py', '_'+(curEskiz+1)+'.py');
+  document.getElementById('fhintQ') ; // no-op guard
+  buildEskizDots();
+  buildLines(e);
+  updateStats();
+}
+
+function buildEskizDots(){
+  var existing = document.getElementById('eskizDotsRow');
+  if(existing) existing.remove();
+  var m = M[cur];
+  var row = document.createElement('div');
+  row.id = 'eskizDotsRow';
+  row.style.display = 'flex';
+  row.style.gap = '6px';
+  row.style.justifyContent = 'center';
+  row.style.marginBottom = '10px';
+  m.eskizlar.forEach(function(_, i){
+    var key = cur+'-'+i;
+    var dot = document.createElement('div');
+    dot.style.width = (i===curEskiz ? '40px' : '26px');
+    dot.style.height = '6px';
+    dot.style.borderRadius = '3px';
+    dot.style.cursor = 'pointer';
+    dot.style.background = eskizDoneSet.has(key) ? '#22c55e' : (i===curEskiz ? '#00f0c8' : '#1e3048');
+    dot.onclick = (function(idx){ return function(){ curEskiz = idx; loadEskiz(); }; })(i);
+    row.appendChild(dot);
+  });
+  var qBox = document.getElementById('eskizQBox');
+  if(qBox) qBox.remove();
+  var q = document.createElement('div');
+  q.id = 'eskizQBox';
+  q.style.cssText = 'background:#0d1828;border:1px solid #1e3048;border-left:3px solid #a855f7;border-radius:8px;padding:10px 12px;margin-bottom:10px;font-size:.71rem;line-height:1.8;color:#c4b5fd;white-space:pre-wrap;';
+  q.textContent = 'Eskiz '+(curEskiz+1)+'/'+M[cur].eskizlar.length+' — '+M[cur].eskizlar[curEskiz].q;
+
+  var anchor = document.getElementById('termsBox');
+  anchor.parentNode.insertBefore(row, anchor.nextSibling);
+  anchor.parentNode.insertBefore(q, row.nextSibling);
+}
+
+function buildLines(e){
+  var wrap = document.getElementById('linesWrap');
+  wrap.innerHTML = '';
+  lineData = [];
+  var op = BRIGHT[parseInt(document.getElementById('brightSlider').value)||3];
+  e.lines.forEach(function(ln, i){
+    var trimmed = ln.c.replace(/^\s+/,'');
+    var isCom = trimmed.charAt(0) === '#';
+    var isEmpty = ln.c === '';
+    var endsWithBrace = /[\{\(\[]\s*$/.test(ln.c);
+    var block = document.createElement('div');
+    block.className = 'line-block';
+    block.id = 'block'+i;
+    var row = document.createElement('div');
+    row.className = 'line-row';
+    var num = document.createElement('div');
+    num.className = 'line-num';
+    num.id = 'num'+i;
+    num.textContent = isEmpty ? '' : (i+1);
+    var content = document.createElement('div');
+    content.className = 'line-content';
+    var ghost = document.createElement('div');
+    ghost.className = 'line-ghost' + ((isCom && skipOn) ? ' skip-c' : '');
+    ghost.id = 'ghost'+i;
+    ghost.style.color = ghostVisible ? 'rgba(74,96,128,'+op+')' : 'transparent';
+    ghost.textContent = ln.c || ' ';
+    var colors = document.createElement('div');
+    colors.className = 'line-colors';
+    colors.id = 'clr'+i;
+    var inp = document.createElement('input');
+    inp.type = 'text';
+    inp.className = 'line-input';
+    inp.id = 'inp'+i;
+    inp.setAttribute('spellcheck','false');
+    inp.setAttribute('autocorrect','off');
+    inp.setAttribute('autocapitalize','off');
+    inp.setAttribute('autocomplete','off');
+    if(isEmpty || (isCom && skipOn)) inp.disabled = true;
+    (function(idx, target, noteText, braceTrigger){
+      inp.addEventListener('input', function(){
+        if(!target) return;
+        updateLineClr(idx, target);
+        if(braceTrigger && inp.value.length > 0 && /[\{\(\[]\s*$/.test(inp.value)){
+          showStartNote(idx);
+        }
+        if(inp.value === target && target !== '' && noteText !== ''){
+          showNote(idx);
+        } else if(inp.value !== target) {
+          hideNote(idx);
+        }
+        updateStats();
+      });
+    })(i, ln.c, ln.n, endsWithBrace);
+    content.appendChild(ghost);
+    content.appendChild(colors);
+    content.appendChild(inp);
+    row.appendChild(num);
+    row.appendChild(content);
+    var note = document.createElement('div');
+    note.className = 'line-done-note';
+    note.id = 'note'+i;
+    note.textContent = ln.n ? ('✅ ' + ln.n + '!') : '';
+    block.appendChild(row);
+    if(ln.n) block.appendChild(note);
+    wrap.appendChild(block);
+    lineData.push({inp:inp, target:ln.c, isCom:isCom, isEmpty:isEmpty});
+  });
+}
+
+function updateLineClr(idx, target){
+  var inp = document.getElementById('inp'+idx);
+  var clr = document.getElementById('clr'+idx);
+  if(!inp || !clr) return;
+  var typed = inp.value;
+  var html = '';
+  for(var ci = 0; ci < target.length; ci++){
+    var ch = target[ci];
+    if(ci < typed.length){
+      html += typed[ci] === ch
+        ? '<span style="color:#22c55e">'+esc(ch)+'</span>'
+        : '<span style="color:#f43f5e;text-decoration:underline">'+esc(ch)+'</span>';
+    } else {
+      html += '<span style="color:transparent">'+esc(ch)+'</span>';
+    }
+  }
+  clr.innerHTML = html;
+  var num = document.getElementById('num'+idx);
+  if(num) num.style.color = (typed === target && target !== '') ? '#22c55e' : '';
+}
+
+function showNote(i){ var n=document.getElementById('note'+i); if(n && n.textContent) n.classList.add('show'); }
+function hideNote(i){ var n=document.getElementById('note'+i); if(n) n.classList.remove('show'); }
+function showStartNote(i){ var num=document.getElementById('num'+i); if(num) num.style.color = '#a855f7'; }
+
+function updateStats(){
+  var done = 0, total = 0;
+  lineData.forEach(function(l){
+    if(l.isEmpty || (l.isCom && skipOn)) return;
+    total++;
+    if(l.inp.value === l.target) done++;
+  });
+  var pct = total > 0 ? Math.round(done/total*100) : 0;
+  document.getElementById('svPctV').textContent = done > 0 ? pct+'%' : '—';
+  document.getElementById('svDone').textContent = done+'/'+total;
+  if(done === total && total > 0) doneSet.add(cur);
+  document.getElementById('progressFill').style.width = (doneSet.size/M.length*100)+'%';
+  buildTabs();
+}
+
+function doCheck(){
+  var e = M[cur].eskizlar[curEskiz];
+  var done = 0, total = 0, errors = [];
+  lineData.forEach(function(l, i){
+    if(l.isEmpty || (l.isCom && skipOn)) return;
+    total++;
+    if(l.inp.value === l.target){
+      done++;
+      document.getElementById('num'+i).style.color = '#22c55e';
+      if(e.lines[i].n) showNote(i);
+    } else {
+      errors.push(i+1);
+      document.getElementById('num'+i).style.color = '#f43f5e';
+    }
+  });
+  var pct = total > 0 ? Math.round(done/total*100) : 0;
+  var b = document.getElementById('badge');
+  b.className = 'badge show';
+  if(pct >= 85){
+    b.className += ' g';
+    var key = cur+'-'+curEskiz;
+    eskizDoneSet.add(key);
+    var allDone = M[cur].eskizlar.every(function(_, idx){ return eskizDoneSet.has(cur+'-'+idx); });
+    if(allDone){
+      doneSet.add(cur);
+      b.textContent = '✅ Zo\'r! '+pct+'% — '+M[cur].id+' mavzusi to\'liq tugadi!';
+    } else {
+      b.textContent = '✅ Zo\'r! '+pct+'% ('+done+'/'+total+' qator). Keyingi eskizga o\'ting →';
+    }
+    buildEskizDots();
+    showRating();
+  } else if(pct >= 55){
+    b.className += ' o';
+    b.textContent = '⚡ '+pct+'% — xato qatorlar: '+errors.join(', ')+'-qator';
+  } else {
+    b.className += ' r';
+    b.textContent = '❌ '+pct+'% — qaytadan urinib ko\'ring';
+  }
+  updateStats();
+}
+
+function doClear(){
+  lineData.forEach(function(l, i){
+    l.inp.value = '';
+    var clr = document.getElementById('clr'+i);
+    if(clr) clr.innerHTML = '';
+    var num = document.getElementById('num'+i);
+    if(num) num.style.color = '';
+    hideNote(i);
+  });
+  document.getElementById('badge').className = 'badge';
+  updateStats();
+}
+
+function toggleGhost(){
+  ghostVisible = !ghostVisible;
+  document.querySelectorAll('.line-ghost').forEach(function(g){
+    g.style.visibility = ghostVisible ? 'visible' : 'hidden';
+  });
+  document.getElementById('ghostBtn').textContent = ghostVisible ? '👁️ Yashir' : '👁️ Ko\'rsat';
+}
+
+function toggleSkip(){
+  skipOn = !skipOn;
+  document.getElementById('sw').classList.toggle('on', skipOn);
+  document.getElementById('skipLbl').textContent = skipOn ? 'Kommentlar o\'tkazilmoqda' : '# Kommentlarni o\'tkazib yuboring';
+  buildLines(M[cur].eskizlar[curEskiz]);
+  applyBright();
+  updateStats();
+}
+
+function toggleDetail(){
+  var p = document.getElementById('detailPanel');
+  if(p.classList.contains('show')){
+    p.classList.remove('show');
+  } else {
+    document.getElementById('detailContent').textContent = M[cur].detail;
+    p.classList.add('show');
+  }
+}
+
+function toggleResult(){
+  var p = document.getElementById('resultPanel');
+  if(p.classList.contains('show')){
+    p.classList.remove('show');
+  } else {
+    document.getElementById('simWrap').innerHTML = '<pre>'+esc(M[cur].sim)+'</pre>';
+    p.classList.add('show');
+  }
+}
+
+function setBright(v){
+  document.getElementById('brightVal').textContent = v;
+  applyBright();
+}
+
+function applyBright(){
+  var v = parseInt(document.getElementById('brightSlider').value) || 3;
+  var op = BRIGHT[v];
+  document.querySelectorAll('.line-ghost').forEach(function(g){
+    if(!g.classList.contains('skip-c') && ghostVisible){
+      g.style.color = 'rgba(74,96,128,'+op+')';
+    }
+  });
+}
+
+function buildTabs(){
+  var c = document.getElementById('tabs');
+  c.innerHTML = '';
+  M.forEach(function(m, i){
+    var d = document.createElement('div');
+    d.className = 'tab'+(i===cur?' on':'')+(doneSet.has(i)?' done':'');
+    d.textContent = m.id;
+    d.onclick = (function(n){ return function(){ loadMod(n); }; })(i);
+    c.appendChild(d);
+  });
+}
+
+function buildStars(){
+  var sc = document.getElementById('stars');
+  sc.innerHTML = '';
+  for(var i = 1; i <= 10; i++){
+    var s = document.createElement('span');
+    s.className = 'star';
+    s.textContent = '⭐';
+    s.dataset.v = i;
+    s.onclick = (function(v){
+      return function(){
+        selectedStar = v;
+        document.getElementById('ratingScore').textContent = v+' / 10';
+        document.querySelectorAll('.star').forEach(function(st){
+          st.classList.toggle('on', parseInt(st.dataset.v) <= v);
+        });
+      };
+    })(i);
+    sc.appendChild(s);
+  }
+}
+
+function showRating(){
+  document.getElementById('ratingBox').classList.add('show');
+}
+
+function submitRating(){
+  if(ratingSubmitted) return;
+  if(selectedStar === 0){ alert('Iltimos baho tanlang!'); return; }
+  ratingSubmitted = true;
+  document.getElementById('ratingThanks').style.display = 'block';
+  document.querySelector('.rating-submit').style.display = 'none';
+}
+
+function esc(s){
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+</script>
+</body>
+</html>

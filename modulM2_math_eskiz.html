@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Eskiz — Deep Learning Matematikasi (2-qism)</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:#0a0e1a;color:#dde5f0;font-family:'JetBrains Mono',monospace;font-size:13px;min-height:100vh;}
+.top{background:#0f1520;border-bottom:1px solid #1e3048;padding:8px 14px;display:flex;align-items:center;gap:8px;position:sticky;top:0;z-index:50;}
+.top-t{color:#00f0c8;font-size:.78rem;font-weight:700;}
+.top-s{color:#4a6080;font-size:.65rem;margin-left:auto;}
+.bright-bar{background:#0f1520;border-bottom:1px solid #1e3048;padding:6px 14px;display:flex;align-items:center;gap:10px;position:sticky;top:41px;z-index:49;}
+.bright-lbl{font-size:.65rem;color:#4a6080;flex-shrink:0;}
+.bright-slider{flex:1;-webkit-appearance:none;height:4px;border-radius:2px;background:#1e3048;outline:none;cursor:pointer;}
+.bright-slider::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:#00f0c8;cursor:pointer;}
+.bright-val{font-size:.68rem;color:#00f0c8;font-weight:700;width:20px;text-align:right;flex-shrink:0;}
+.wrap{padding:10px 14px;max-width:540px;margin:0 auto;}
+.tabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;margin-bottom:10px;scrollbar-width:none;}
+.tabs::-webkit-scrollbar{display:none;}
+.tab{flex-shrink:0;padding:6px 12px;border-radius:20px;border:1px solid #1e3048;background:#141e2e;color:#4a6080;font-size:.68rem;cursor:pointer;transition:all .15s;}
+.tab.on{border-color:#00f0c8;color:#00f0c8;background:rgba(0,240,200,.08);}
+.tab.done{border-color:#22c55e;color:#22c55e;background:rgba(34,197,94,.06);}
+.stats{display:flex;gap:8px;margin-bottom:10px;}
+.stat{flex:1;background:#141e2e;border:1px solid #1e3048;border-radius:8px;padding:7px 8px;text-align:center;}
+.sv{font-size:.95rem;font-weight:700;color:#00f0c8;}
+.sl{font-size:.58rem;color:#4a6080;margin-top:2px;}
+.progress-bar{height:3px;background:#1e3048;border-radius:2px;margin-bottom:10px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,#00f0c8,#2563eb);border-radius:2px;transition:width .4s;}
+.intro-box{background:#0d1828;border:1px solid #1e3048;border-left:3px solid #00f0c8;border-radius:10px;padding:14px;margin-bottom:10px;}
+.intro-title{font-size:.8rem;font-weight:700;color:#00f0c8;margin-bottom:8px;}
+.intro-text{font-size:.7rem;line-height:1.85;color:#9fb0c8;white-space:pre-wrap;}
+.intro-stats{display:flex;gap:8px;margin-top:10px;}
+.intro-stat{flex:1;background:#080c14;border:1px solid #1e3048;border-radius:8px;padding:8px;text-align:center;}
+.intro-stat-v{font-size:1.1rem;font-weight:700;color:#00f0c8;}
+.intro-stat-l{font-size:.58rem;color:#4a6080;margin-top:2px;}
+.terms-box{background:#080c14;border:1px solid #1e3048;border-left:3px solid #a855f7;border-radius:8px;padding:10px 12px;margin-bottom:10px;}
+.terms-title{font-size:.68rem;font-weight:700;color:#a855f7;margin-bottom:8px;}
+.term-row{display:flex;gap:6px;margin-bottom:5px;align-items:flex-start;}
+.term-key{font-size:.64rem;color:#fbbf24;font-weight:700;min-width:120px;flex-shrink:0;}
+.term-val{font-size:.63rem;color:#4a6080;line-height:1.6;}
+.detail-panel{display:none;background:#0a1628;border:1px solid #2563eb;border-radius:8px;padding:12px 14px;margin-bottom:10px;font-size:.72rem;line-height:2;color:#93c5fd;white-space:pre-wrap;}
+.detail-panel.show{display:block;}
+.detail-title{color:#60a5fa;font-weight:700;margin-bottom:8px;font-size:.76rem;}
+
+/* TEST PANEL */
+.test-panel{background:#080c14;border:1px solid #1e3048;border-radius:10px;padding:12px;margin-bottom:10px;}
+.test-title{font-size:.72rem;font-weight:700;color:#fbbf24;margin-bottom:12px;}
+.test-q{background:#0d1828;border-left:3px solid #a855f7;border-radius:6px;padding:10px 12px;margin-bottom:10px;}
+.test-qtext{font-size:.71rem;color:#c4b5fd;line-height:1.7;margin-bottom:10px;}
+.test-opts{display:flex;flex-direction:column;gap:6px;}
+.test-opt{padding:8px 12px;border-radius:8px;border:1px solid #1e3048;background:#141e2e;font-size:.68rem;color:#8ba0c0;cursor:pointer;text-align:left;font-family:'JetBrains Mono',monospace;transition:all .15s;}
+.test-opt:active{opacity:.7;}
+.test-opt.correct{border-color:#22c55e;color:#22c55e;background:rgba(34,197,94,.1);}
+.test-opt.wrong{border-color:#f43f5e;color:#f43f5e;background:rgba(244,63,94,.1);}
+.test-opt.show-correct{border-color:#22c55e;color:#22c55e;background:rgba(34,197,94,.05);}
+.test-exp{display:none;font-size:.66rem;line-height:1.7;color:#64748b;padding:8px 0 0 4px;border-top:1px dashed #1e3048;margin-top:8px;}
+.test-exp.show{display:block;}
+.test-score{text-align:center;padding:10px;font-size:.78rem;font-weight:700;color:#00f0c8;display:none;}
+.test-score.show{display:block;}
+.btn-test-check{width:100%;padding:10px;background:#2563eb;color:#fff;font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:700;border:none;border-radius:8px;cursor:pointer;margin-top:8px;}
+
+/* ESKIZ (kod yozish mavzulari uchun) */
+.skip-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;padding:8px 12px;background:#141e2e;border:1px solid #1e3048;border-radius:8px;cursor:pointer;}
+.skip-row span{font-size:.7rem;color:#4a6080;}
+.sw{width:34px;height:18px;background:#1e3048;border-radius:10px;position:relative;transition:background .2s;flex-shrink:0;}
+.sw.on{background:#fbbf24;}
+.sw::after{content:'';position:absolute;top:2px;left:2px;width:14px;height:14px;background:#fff;border-radius:50%;transition:left .2s;}
+.sw.on::after{left:18px;}
+.sim-wrap{width:100%;overflow-x:auto;}
+.sim-wrap pre{font-size:.68rem;line-height:1.9;color:#22c55e;white-space:pre;}
+.result-panel{display:none;background:#080c14;border:1px solid #22c55e;border-radius:10px;padding:12px;margin-bottom:10px;}
+.result-panel.show{display:block;}
+.result-title{color:#22c55e;font-size:.72rem;font-weight:700;margin-bottom:8px;}
+.code-block{border:1px solid #1e3048;border-radius:10px;overflow:hidden;margin-bottom:10px;background:#090d18;}
+.fbar{display:flex;align-items:center;gap:5px;padding:7px 12px;background:#0f1520;border-bottom:1px solid #1e3048;}
+.dot{width:6px;height:6px;border-radius:50%;}
+.dot.r{background:#f43f5e;}.dot.y{background:#fbbf24;}.dot.g{background:#22c55e;}
+.fn{font-size:.65rem;color:#4a6080;margin-left:4px;}
+.fhint{margin-left:auto;font-size:.6rem;color:#00f0c8;opacity:.7;}
+.lines-wrap{padding:4px 0;}
+.line-block{margin:0;}
+.line-row{display:flex;align-items:center;position:relative;min-height:30px;}
+.line-num{width:28px;flex-shrink:0;font-size:.63rem;padding:4px 4px 4px 5px;color:#2a3a50;text-align:right;user-select:none;transition:color .2s;align-self:center;}
+.line-content{flex:1;position:relative;overflow-x:auto;overflow-y:hidden;min-height:30px;}
+.line-content::-webkit-scrollbar{height:2px;}
+.line-content::-webkit-scrollbar-thumb{background:#1e3048;border-radius:1px;}
+.line-ghost{font-size:.76rem;line-height:1.8;padding:4px 8px;white-space:pre;pointer-events:none;min-height:30px;display:block;}
+.line-ghost.skip-c{opacity:.08!important;}
+.line-colors{position:absolute;top:0;left:0;font-size:.76rem;line-height:1.8;padding:4px 8px;white-space:pre;pointer-events:none;z-index:2;min-height:30px;}
+.line-input{position:absolute;top:0;left:0;right:0;bottom:0;width:100%;font-family:'JetBrains Mono',monospace;font-size:.76rem;line-height:1.8;padding:4px 8px;color:transparent;-webkit-text-fill-color:transparent;caret-color:#00f0c8;background:transparent;border:none;outline:none;white-space:pre;overflow:hidden;z-index:10;-webkit-appearance:none;}
+.line-input:disabled{cursor:default;}
+.line-done-note{display:none;font-size:.66rem;line-height:1.6;padding:3px 8px 3px 34px;color:#38bdf8;background:rgba(56,189,248,.06);border-left:2px solid #38bdf8;white-space:pre-wrap;animation:fadeIn .25s ease;}
+.line-done-note.show{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:translateY(0)}}
+.btn-row{display:flex;gap:6px;flex-wrap:wrap;padding:9px 12px;background:#0f1520;border-top:1px solid #1e3048;}
+.btn{padding:8px 11px;border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:.68rem;font-weight:700;border:none;cursor:pointer;flex-shrink:0;transition:opacity .15s;}
+.btn:active{opacity:.7;}
+.btn-chk{background:#00f0c8;color:#080c14;}
+.btn-clr{background:transparent;border:1px solid #1e3048;color:#4a6080;}
+.btn-det{background:#2563eb;color:#fff;}
+.btn-ghost{background:#7c3aed;color:#fff;}
+.btn-res{background:#16a34a;color:#fff;}
+.badge{display:none;margin:0 12px 10px;padding:7px 12px;border-radius:8px;font-size:.7rem;border:1px solid #1e3048;}
+.badge.show{display:block;}
+.badge.g{border-color:#22c55e;color:#22c55e;background:rgba(34,197,94,.07);}
+.badge.o{border-color:#fbbf24;color:#fbbf24;background:rgba(251,191,36,.07);}
+.badge.r{border-color:#f43f5e;color:#f43f5e;background:rgba(244,63,94,.07);}
+.rating-box{background:#0d1828;border:1px solid #fbbf24;border-radius:12px;padding:14px 16px;margin-top:10px;display:none;}
+.rating-box.show{display:block;}
+.rating-title{font-size:.72rem;font-weight:700;color:#fbbf24;text-align:center;margin-bottom:4px;}
+.rating-sub{font-size:.62rem;color:#4a6080;text-align:center;margin-bottom:12px;}
+.stars{display:flex;justify-content:center;gap:4px;margin-bottom:10px;flex-wrap:wrap;}
+.star{font-size:1.5rem;cursor:pointer;filter:grayscale(1);opacity:.35;transition:transform .1s,filter .1s;user-select:none;}
+.star.on{filter:none;opacity:1;}
+.rating-score{text-align:center;font-size:.72rem;color:#fbbf24;font-weight:700;margin-bottom:8px;min-height:18px;}
+.rating-comment{width:100%;background:#141e2e;border:1px solid #1e3048;border-radius:8px;padding:8px 10px;color:#dde5f0;font-family:'JetBrains Mono',monospace;font-size:.68rem;resize:none;outline:none;margin-bottom:8px;}
+.rating-submit{width:100%;padding:10px;background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#080c14;font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:700;border:none;border-radius:8px;cursor:pointer;}
+.rating-thanks{display:none;text-align:center;padding:10px;font-size:.72rem;color:#22c55e;font-weight:700;}
+.katex{font-size:1.05em !important;color:#fbbf24;}
+.katex-display{margin:.6em 0 !important;overflow-x:auto;overflow-y:hidden;padding:4px 0;}
+.term-val .katex,.test-qtext .katex,.test-opt .katex,.test-exp .katex{color:inherit;font-size:1em !important;}
+</style>
+</head>
+<body>
+<div class="top">
+  <div class="top-t">🔬 DL Matematika (2/3) — CNN/RNN</div>
+  <div class="top-s" id="topSub">M2.1</div>
+</div>
+<div class="bright-bar">
+  <span class="bright-lbl">👁️ Xiralik:</span>
+  <input type="range" class="bright-slider" id="brightSlider" min="1" max="10" value="3" oninput="setBright(this.value)">
+  <span class="bright-val" id="brightVal">3</span>
+</div>
+<div class="wrap">
+  <div class="stats">
+    <div class="stat"><div class="sv" id="svScore">—</div><div class="sl">TEST BALL</div></div>
+    <div class="stat"><div class="sv" id="svDone">0/0</div><div class="sl">BAJARILDI</div></div>
+    <div class="stat"><div class="sv" id="svMod">1/13</div><div class="sl">MAVZU</div></div>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+  <div class="tabs" id="tabs"></div>
+  <div class="intro-box" id="introBox"></div>
+  <div class="terms-box" id="termsBox"></div>
+  <div class="detail-panel" id="detailPanel">
+    <div class="detail-title">📘 BATAFSIL</div>
+    <div id="detailContent"></div>
+  </div>
+  <div id="mainContent"></div>
+  <div class="rating-box" id="ratingBox">
+    <div class="rating-title">⭐ DL Matematika (2-qism)ni baholang</div>
+    <div class="rating-sub">Fikringiz keyingi versiyani yaxshilashga yordam beradi</div>
+    <div class="stars" id="stars"></div>
+    <div class="rating-score" id="ratingScore">Baho tanlang (1–10)</div>
+    <textarea class="rating-comment" id="ratingComment" rows="2" placeholder="Izoh..."></textarea>
+    <button class="rating-submit" onclick="submitRating()">⭐ Yuborish</button>
+    <div class="rating-thanks" id="ratingThanks">✅ Rahmat!</div>
+  </div>
+</div>
+<script>
+var MODULE_INTRO = {
+  title: "🔬 Deep Learning — Matematika (2-qism)",
+  text: "M1-qismda Backpropagation ning umumiy matematik asosini (zanjir qoidasi, aktivlashtirish hosilalari, loss gradienti) o'rgandingiz.\n\nBu 2-qismda, aynan shu asosni IKKI maxsus arxitekturaga qo'llaymiz: CNN (Convolution operatsiyasining to'liq matematikasi, output size formula, Pooling) va RNN (recurrence formula, Backpropagation Through Time, vanishing/exploding gradient ning matematik sababi, va bu muammoni hal qiluvchi LSTM gate matematikasi).\n\nHar bir formula — avval qog'ozda chiqariladi, keyin numpy bilan noldan kodga aylantiriladi.",
+  count: 13
+};
+
+var M = [
+
+{id:'M2.1', type:'test',
+ title:'Convolution operatsiyasi matematikasi',
+ terms:[
+   ['Convolution (Konvolyutsiya)','Kichik filtr (kernel) ni rasm ustida "suzdirib", har nuqtada dot product hisoblash amali'],
+   ['Kernel (Filtr)','Kichik o\'lcham matritsa, masalan $3\\times 3$, naqsh aniqlash uchun o\'rganiladi'],
+   ['Feature Map','Convolution natijasida hosil bo\'lgan yangi "rasm"'],
+   ['Dot product (Skalyar ko\'paytma)','Ikki matritsa elementlarini mosini ko\'paytirib, yig\'indisini olish']
+ ],
+ detail:'CONVOLUTION FORMULASI\n\nIkki o\'lchovli convolution (rasm uchun):\n\n$$(I * K)(i,j) = \\sum_{m=0}^{k-1}\\sum_{n=0}^{k-1} I(i+m,\\,j+n)\\cdot K(m,n)$$\n\nBu yerda $I$ — kirish rasm (matritsa), $K$ — $k\\times k$ o\'lchamli kernel (filtr), $(i,j)$ — natija matritsasidagi pozitsiya.\n\nQANDAY ISHLAYDI — QADAM-BAQADAM:\n1. Kernel rasmning chap yuqori burchagiga qo\'yiladi\n2. Kernel ostidagi rasm qiymatlari va kernel qiymatlari ELEMENT-BO\'YICHA ko\'paytiriladi\n3. Barcha ko\'paytmalar YIG\'ILADI — bu bitta sondir, natija matritsasining bitta katakchasiga yoziladi\n4. Kernel bir qadam (stride) o\'ngga suriladi, 2-3 qadamlar takrorlanadi\n5. Qator tugaganda, kernel pastga suriladi, jarayon davom etadi\n\nMISOL — CHEKKA ANIQLOVCHI KERNEL: Kernel $\\begin{bmatrix}-1&0&1\\\\-1&0&1\\\\-1&0&1\\end{bmatrix}$ — bu rasm ustida qo\'llanilganda, vertikal chekkalarni (yorug\'-qorong\'i o\'tish joylarini) "yoritib" beradi. Bu — 20.28-30 (CNN bilan rasmlarni ajratish) da Kerasning Conv2D qatlami ICHIDA aynan shu amalni avtomatik bajaradi, faqat kernel qiymatlarini O\'ZI, o\'qitish davomida, Gradient Descent orqali topadi (qo\'lda dasturlashtirish shart emas).\n\nNEGA "DEEP LEARNING" KO\'PROQ AFZAL? An\'anaviy kompyuter ko\'rish (computer vision) da, mutaxassislar qo\'lda chekka/burchak aniqlovchi kernellarni LOYIHALASHTIRGAN. CNN da, tarmoq minglab rasmni ko\'rib, ENG FOYDALI kernel qiymatlarini O\'ZI o\'rganadi.',
+ tests:[
+   {q:'Convolution operatsiyasida, kernel ostidagi qiymatlar bilan nima qilinadi?',
+    opts:['Faqat yig\'iladi, ko\'paytirilmaydi','Element-bo\'yicha ko\'paytirilib, keyin yig\'indisi olinadi','Faqat eng katta qiymat olinadi','Ular o\'chiriladi'],
+    ans:1,
+    exp:'Convolution — kernel va rasm qiymatlarini element-bo\'yicha ko\'paytirib, natijalarni yig\'ish (dot product) amali.'},
+   {q:'CNN da kernel qiymatlari qanday aniqlanadi?',
+    opts:['Inson tomonidan qo\'lda dasturlashtiriladi','Tarmoq tomonidan, Gradient Descent orqali, o\'qitish davomida o\'rganiladi','Tasodifiy va o\'zgarmas qoladi','Faqat rasm hajmiga bog\'liq'],
+    ans:1,
+    exp:'CNN ning kuchi — kernel qiymatlari (og\'irliklar) tarmoq tomonidan, ma\'lumotdan, Gradient Descent orqali AVTOMATIK o\'rganiladi, an\'anaviy usuldagi qo\'lda loyihalashtirishdan farqli.'},
+   {q:'Convolution natijasida hosil bo\'lgan yangi matritsa qanday ataladi?',
+    opts:['Kernel','Feature Map','Loss Map','Gradient Map'],
+    ans:1,
+    exp:'Convolution natijasi — Feature Map deyiladi, bu kirish rasmidagi muayyan naqsh (chekka, burchak va h.k.) qayerda kuchli ekanini ko\'rsatadi.'}
+ ]},
+
+{id:'M2.2', type:'eskiz',
+ title:'Convolution ni numpy bilan implement qilish',
+ terms:[
+   ['Sliding window','Kernelni rasm ustida qadam-baqadam surish texnikasi'],
+   ['np.sum(a*b)','Element-bo\'yicha ko\'paytirib, yig\'indi olish'],
+   ['Ikki ichki for sikli','Natija matritsasining har bir pozitsiyasi uchun hisoblash'],
+   ['Manual convolution','Kerasning Conv2D qatlami ichida sodir bo\'lgan amalni qo\'lda takrorlash']
+ ],
+ detail:'CONVOLUTION NI NOLDAN YOZISH\n\nBu mashqda, M2.1 dagi formulani to\'g\'ridan-to\'g\'ri numpy kodiga aylantirasiz — Keras Conv2D qatlamisiz, "qora quti" ichida nima sodir bo\'lishini qo\'lda ko\'rasiz.\n\nESLATMA: Bu kod ATAYLAB sikllar (`for`) bilan yozilgan, tushunarli bo\'lishi uchun — real TensorFlow/PyTorch ichida bu amal ANCHA optimallashtirilgan (GPU, vectorized) tarzda, lekin MATEMATIK MOHIYAT bir xil qoladi.',
+ sim:'>>> import numpy as np\n>>> def convolve2d(image, kernel):\n...     k = kernel.shape[0]\n...     out_size = image.shape[0] - k + 1\n...     output = np.zeros((out_size, out_size))\n...     for i in range(out_size):\n...         for j in range(out_size):\n...             region = image[i:i+k, j:j+k]\n...             output[i,j] = np.sum(region * kernel)\n...     return output\n>>> image = np.array([[1,2,3],[4,5,6],[7,8,9]])\n>>> kernel = np.array([[1,0],[0,-1]])\n>>> convolve2d(image, kernel)\narray([[-4., -4.], [-4., -4.]])',
+ eskizlar:[
+  {q:'convolve2d funksiyasini yarating - natija o\'lchamini va bo\'sh massivni tayyorlang.',
+   lines:[
+    {c:'import numpy as np',n:'Siz numpy kutubxonasini import qildingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'def convolve2d(image, kernel):',n:'Siz convolve2d funksiyasini ta\'riflashni boshladingiz'},
+    {c:'    k = kernel.shape[0]',n:'Siz kernel o\'lchamini oldingiz'},
+    {c:'    out_size = image.shape[0] - k + 1',n:'Siz natija matritsasi o\'lchamini hisobladingiz'},
+    {c:'    output = np.zeros((out_size, out_size))',n:'Siz natija uchun bo\'sh matritsa yaratdingiz'},
+   ]},
+  {q:'Ikki ichki for sikli bilan har bir pozitsiyada dot product hisoblang.',
+   lines:[
+    {c:'    for i in range(out_size):',n:'Siz qatorlar bo\'yicha sikl boshladingiz'},
+    {c:'        for j in range(out_size):',n:'Siz ustunlar bo\'yicha sikl boshladingiz'},
+    {c:'            region = image[i:i+k, j:j+k]',n:'Siz rasmdan kernel o\'lchamidagi qismni kesib oldingiz'},
+    {c:'            output[i,j] = np.sum(region * kernel)',n:'Siz element-bo\'yicha ko\'paytirib, yig\'indini sakladingiz'},
+    {c:'    return output',n:'Siz to\'liq feature map ni qaytardingiz'},
+   ]},
+ ]},
+
+{id:'M2.3', type:'test',
+ title:'Output size, Padding va Stride',
+ terms:[
+   ['Output size formula','$O=\\dfrac{W-K+2P}{S}+1$'],
+   ['Padding ($P$)','Rasm chetlariga qo\'shiladigan nol qatorlar/ustunlar'],
+   ['Stride ($S$)','Kernel har qadamda necha piksel siljishi'],
+   ['"Valid" va "Same" padding','Padding qo\'shilmagan va o\'lcham saqlanadigan rejimlar']
+ ],
+ detail:'CHIQISH O\'LCHAMINI HISOBLASH FORMULASI\n\n$$O = \\frac{W-K+2P}{S}+1$$\n\nBu yerda: $W$ — kirish rasm o\'lchami (masalan $28\\times 28$ dagi $28$), $K$ — kernel o\'lchami, $P$ — padding miqdori (har tomondan qo\'shilgan nol qatorlar soni), $S$ — stride (qadam kattaligi).\n\nMISOL: $W=28$, $K=3$, $P=0$, $S=1$ bo\'lsa: $O=\\dfrac{28-3+0}{1}+1=26$. Demak $28\\times 28$ rasmga $3\\times 3$ kernel (padding\'siz) qo\'llansa, natija $26\\times 26$ bo\'ladi — rasm "kichrayadi"!\n\nPADDING NEGA KERAK? Agar padding ishlatilmasa (`valid` padding), har bir convolution qatlamidan keyin rasm kichrayib boradi, va chekka piksellar markaziy piksellarga qaraganda KAMROQ marta "ko\'rinadi" (chekka effekti). Yechim — rasm atrofiga nol qatorlar qo\'shish (`same` padding): bu $O=W$ (o\'lcham saqlanadi) ni ta\'minlaydi, agar $P=(K-1)/2$ va $S=1$ bo\'lsa.\n\nSTRIDE TA\'SIRI: $S=2$ bo\'lsa, kernel HAR 2 PIKSELDA bir siljiydi (1 piksel o\'rniga) — bu natijani TAXMINAN 2 marta kichraytiradi, hisoblashni tezlashtiradi, lekin ba\'zi ma\'lumotni "o\'tkazib yuborish" xavfi bilan.',
+ tests:[
+   {q:'$W=10$, $K=4$, $P=0$, $S=1$ bo\'lganda, chiqish o\'lchami ($O$) nimaga teng?',
+    opts:['$6$','$7$','$10$','$4$'],
+    ans:1,
+    exp:'$O=\\dfrac{10-4+0}{1}+1=7$ — formula bo\'yicha to\'g\'ridan-to\'g\'ri hisoblanadi.'},
+   {q:'Padding (P) qo\'shishning asosiy maqsadi nima?',
+    opts:['Rasmni kattalashtirish uchun shunchaki','Chekka piksellarning "kam ko\'rinish" muammosini kamaytirish va o\'lchamni saqlash','Hisoblashni sekinlashtirish uchun','Kernel sonini ko\'paytirish uchun'],
+    ans:1,
+    exp:'Padding (nol qatorlar qo\'shish) chekka piksellarning informatsiyasini yo\'qotmaslik va chiqish o\'lchamini boshqarish (masalan saqlash) imkonini beradi.'},
+   {q:'Stride (S) qiymati 1 dan 2 ga oshirilsa, natija o\'lchamiga qanday ta\'sir qiladi?',
+    opts:['O\'lcham o\'zgarmaydi','O\'lcham taxminan 2 marta kichrayadi','O\'lcham 2 marta kattalashadi','Bu hech qanday ta\'sir qilmaydi'],
+    ans:1,
+    exp:'Formuladagi maxraj $S$ kattalashganda, $O$ kichrayadi — stride=2 da, kernel ikki marta kam pozitsiyada to\'xtaydi, natijada chiqish kichikroq bo\'ladi.'}
+ ]},
+
+{id:'M2.4', type:'eskiz',
+ title:'Output size va Padding ni numpy bilan hisoblash',
+ terms:[
+   ['calc_output_size()','Formulani funksiya sifatida yozish'],
+   ['np.pad()','Matritsa atrofiga nol qatorlar qo\'shish funksiyasi'],
+   ['mode=\'constant\'','np.pad da nol bilan to\'ldirish rejimi'],
+   ['Stride bilan convolution','Sliding window qadamini stride ga moslab o\'zgartirish']
+ ],
+ detail:'PADDING VA STRIDE NI QO\'LDA QO\'LLASH\n\nNP.PAD(): np.pad(image, pad_width, mode=\'constant\') — bu funksiya matritsa ATROFIGA belgilangan miqdorda nol (yoki boshqa qiymat) qatorlar/ustunlar qo\'shadi. Bu — `same` padding ni amalga oshirishning eng sodda yo\'li.\n\nBu mashqda, M2.3 formulasini avval funksiya sifatida tekshirib, keyin np.pad bilan haqiqiy padding qo\'llab ko\'rasiz.',
+ sim:'>>> import numpy as np\n>>> def calc_output_size(W, K, P, S):\n...     return (W - K + 2*P) // S + 1\n>>> calc_output_size(28, 3, 0, 1)\n26\n>>> calc_output_size(28, 3, 1, 1)\n28\n>>> image = np.array([[1,2],[3,4]])\n>>> np.pad(image, 1, mode=\'constant\')\narray([[0,0,0,0],[0,1,2,0],[0,3,4,0],[0,0,0,0]])',
+ eskizlar:[
+  {q:'calc_output_size formulasini yozib, bir necha holatda sinab ko\'ring.',
+   lines:[
+    {c:'def calc_output_size(W, K, P, S):',n:'Siz output size funksiyasini ta\'riflashni boshladingiz'},
+    {c:'    return (W - K + 2*P) // S + 1',n:'Siz $O=(W-K+2P)/S+1$ formulasini yozdingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'print(calc_output_size(28, 3, 0, 1))',n:'Siz padding\'siz holatni sinab ko\'rdingiz'},
+    {c:'print(calc_output_size(28, 3, 1, 1))',n:'Siz "same" padding holatini sinab ko\'rdingiz (natija 28 bo\'lishi kerak)'},
+   ]},
+  {q:'np.pad() bilan rasmga padding qo\'shing va yangi o\'lchamni tekshiring.',
+   lines:[
+    {c:'import numpy as np',n:'Siz numpy kutubxonasini import qildingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'image = np.array([[1,2,3],[4,5,6],[7,8,9]])',n:'Siz 3x3 rasm yaratdingiz'},
+    {c:'padded = np.pad(image, 1, mode=\'constant\')',n:'Siz rasm atrofiga 1 qatlam nol qo\'shdingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'print(\'Eski o\\\'lcham:\', image.shape)',n:'Siz original o\'lchamni chiqardingiz'},
+    {c:'print(\'Yangi o\\\'lcham:\', padded.shape)',n:'Siz padding qo\'shilgandan keyingi o\'lchamni chiqardingiz'},
+   ]},
+ ]},
+
+{id:'M2.5', type:'test',
+ title:'Pooling matematikasi',
+ terms:[
+   ['Max Pooling','Har bir oynadan eng katta qiymatni tanlash'],
+   ['Average Pooling','Har bir oynadagi qiymatlarning o\'rtachasini olish'],
+   ['Pooling oynasi (Pool size)','Odatda $2\\times 2$, qaysi hudud bo\'yicha tanlanishini belgilaydi'],
+   ['Translation invariance','Obyekt ozgina siljisa ham, natija deyarli o\'zgarmasligi']
+ ],
+ detail:'POOLING NIMA UCHUN KERAK?\n\nConvolution qatlamlaridan keyin, Feature Map hali ham KATTA bo\'lib qoladi — bu hisoblashni sekinlashtiradi va overfitting xavfini oshiradi. Pooling — Feature Map ni KICHRAYTIRISH (downsampling) usuli.\n\nMAX POOLING FORMULASI: $2\\times 2$ oyna uchun:\n$$\\text{MaxPool}(i,j) = \\max\\big(F(2i,2j),\\,F(2i,2j+1),\\,F(2i+1,2j),\\,F(2i+1,2j+1)\\big)$$\n\nBu — har bir $2\\times 2$ kvadratchadan FAQAT eng katta qiymatni "saqlab qolish", qolganlarini tashlab yuborish.\n\nAVERAGE POOLING: Xuddi shunday, lekin maksimal o\'rniga O\'RTACHA olinadi: $\\text{AvgPool}(i,j)=\\frac{1}{4}\\sum F(\\cdot)$.\n\nNEGA MAX POOLING KO\'PROQ ISHLATILADI? Max Pooling — "bu hududda ENG KUCHLI naqsh signali qayerda" degan savolga javob beradi, bu CNN uchun ko\'pincha foydaliroq (masalan, agar bir burchakda "ko\'z" naqshi aniqlangan bo\'lsa, uning aniq pozitsiyasi muhim emas, FAQAT borligi muhim).\n\nTRANSLATION INVARIANCE: Pooling, tarmoqqa "obyekt ozgina chapga/o\'ngga siljigan bo\'lsa ham, natija deyarli o\'zgarmasligi" xususiyatini beradi — chunki kichik siljish, ko\'pincha bir xil $2\\times 2$ oyna ichida qolib, Max qiymatni o\'zgartirmaydi.',
+ tests:[
+   {q:'Max Pooling $2\\times 2$ oynada nima qiladi?',
+    opts:['4 qiymatning o\'rtachasini oladi','4 qiymatdan eng kattasini tanlaydi','4 qiymatni yig\'indisini oladi','Hech narsa qilmaydi'],
+    ans:1,
+    exp:'Max Pooling — belgilangan oyna (masalan $2\\times 2$) ichidagi qiymatlardan FAQAT eng kattasini natija sifatida saqlaydi.'},
+   {q:'Pooling qatlamining asosiy maqsadi nima?',
+    opts:['Rasmni kattalashtirish','Feature Map ni kichraytirib, hisoblashni tezlashtirish va overfitting xavfini kamaytirish','Yangi ranglar qo\'shish','Faqat vizualizatsiya uchun'],
+    ans:1,
+    exp:'Pooling — Feature Map o\'lchamini kichraytiradi (downsampling), bu keyingi qatlamlar uchun hisoblashni tezlashtiradi va parametrlar sonini kamaytiradi.'},
+   {q:'"Translation invariance" nimani anglatadi?',
+    opts:['Tarmoq faqat bir tilda ishlaydi','Obyekt rasmda ozgina siljisa ham, natija deyarli o\'zgarmasligi','Tarmoq hech qachon xato qilmaydi','Rasm rangini o\'zgartirish imkoniyati'],
+    ans:1,
+    exp:'Pooling tufayli, kichik siljishlar ko\'pincha bir xil pooling oynasi ichida qolib, natijaga sezilarli ta\'sir qilmaydi — bu translation invariance.'}
+ ]},
+
+{id:'M2.6', type:'eskiz',
+ title:'Pooling ni numpy bilan implement qilish',
+ terms:[
+   ['max_pooling2d()','Max Pooling ni funksiya sifatida yozish'],
+   ['np.max() oyna ichida','Har bir kichik hudud uchun maksimal qiymat'],
+   ['reshape orqali oynalarga bo\'lish','Matritsani kichik bloklarga ajratish texnikasi'],
+   ['Pool size va Stride','Pooling uchun ham xuddi shu parametrlar qo\'llaniladi']
+ ],
+ detail:'MAX POOLING NI NOLDAN YOZISH\n\nBu mashqda M2.5 formulasini numpy bilan implement qilasiz — Feature Map ni $2\\times 2$ bloklarga bo\'lib, har biridan maksimal qiymatni olasiz.',
+ sim:'>>> import numpy as np\n>>> def max_pooling2d(feature_map, size=2):\n...     h, w = feature_map.shape\n...     out_h, out_w = h//size, w//size\n...     output = np.zeros((out_h, out_w))\n...     for i in range(out_h):\n...         for j in range(out_w):\n...             window = feature_map[i*size:(i+1)*size, j*size:(j+1)*size]\n...             output[i,j] = np.max(window)\n...     return output\n>>> fm = np.array([[1,3,2,4],[5,6,1,2],[3,1,4,2],[0,2,1,5]])\n>>> max_pooling2d(fm)\narray([[6., 4.], [3., 5.]])',
+ eskizlar:[
+  {q:'max_pooling2d funksiyasini yarating - natija o\'lchamini tayyorlang.',
+   lines:[
+    {c:'import numpy as np',n:'Siz numpy kutubxonasini import qildingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'def max_pooling2d(feature_map, size=2):',n:'Siz max_pooling2d funksiyasini ta\'riflashni boshladingiz'},
+    {c:'    h, w = feature_map.shape',n:'Siz kirish o\'lchamlarini oldingiz'},
+    {c:'    out_h, out_w = h//size, w//size',n:'Siz natija o\'lchamlarini hisobladingiz'},
+    {c:'    output = np.zeros((out_h, out_w))',n:'Siz natija uchun bo\'sh matritsa yaratdingiz'},
+   ]},
+  {q:'Har bir oyna uchun maksimal qiymatni topib, natijaga yozing.',
+   lines:[
+    {c:'    for i in range(out_h):',n:'Siz qatorlar bo\'yicha sikl boshladingiz'},
+    {c:'        for j in range(out_w):',n:'Siz ustunlar bo\'yicha sikl boshladingiz'},
+    {c:'            window = feature_map[i*size:(i+1)*size, j*size:(j+1)*size]',n:'Siz joriy oynani kesib oldingiz'},
+    {c:'            output[i,j] = np.max(window)',n:'Siz oynadan eng katta qiymatni sakladingiz'},
+    {c:'    return output',n:'Siz to\'liq pooling natijasini qaytardingiz'},
+   ]},
+ ]},
+
+{id:'M2.7', type:'test',
+ title:'CNN backpropagation intuitsiyasi',
+ terms:[
+   ['Gradient kernel orqali','CNN da og\'irlik (kernel) gradienti ham convolution amali orqali hisoblanadi'],
+   ['Max Pooling gradienti','Faqat maksimal qiymat tanlangan pozitsiyaga gradient o\'tadi'],
+   ['Weight Sharing','Bitta kernel butun rasm bo\'ylab QAYTA ishlatiladi'],
+   ['Parametrlar tejash','Weight sharing tufayli, CNN Dense qatlamdan ANCHA kam parametrga ega']
+ ],
+ detail:'CNN DA BACKPROPAGATION QANDAY ISHLAYDI?\n\nM1.7-8 da oddiy Dense qatlam uchun Backpropagation ni to\'liq chiqargandik. CNN da matematik MOHIYAT bir xil (zanjir qoidasi), lekin WEIGHT SHARING tufayli, hisoblash o\'zgacha ko\'rinishga ega.\n\nWEIGHT SHARING NIMA? Oddiy Dense qatlamda, har bir ulanish O\'ZINING alohida og\'irligiga ega. CNN da, BITTA kernel (masalan $3\\times 3$, atigi $9$ parametr) butun rasm bo\'ylab QAYTA-QAYTA ishlatiladi (sliding window). Bu CNN ni Dense qatlamga nisbatan JUDA kam parametrli qiladi — masalan $28\\times 28$ rasm uchun Dense qatlam minglab parametr talab qilishi mumkin, $3\\times 3$ kernel esa faqat $9$ ta!\n\nGRADIENT QANDAY HISOBLANADI (INTUITSIYA): Kernel og\'irligi BUTUN rasm bo\'ylab ishlatilgani uchun, uning gradienti — BARCHA pozitsiyalardan kelgan gradientlarning YIG\'INDISI. Matematik jihatdan, bu — kirish rasm va chiqish gradienti orasidagi YANA BIR convolution amali (faqat "correlation" ko\'rinishida). Bu sabab, CNN backprop "yangi" tushuncha emas — u xuddi shu convolution operatsiyasining, biroz boshqacha qo\'llanilishi.\n\nMAX POOLING GRADIENTI: Bu eng SODDA holat — chunki Max Pooling paytida faqat BITTA qiymat (maksimal) "tanlangan" edi, gradient HAM faqat O\'SHA pozitsiyaga o\'tadi, qolgan 3 pozitsiyaga (oynadagi boshqalar) gradient $0$ bo\'ladi — chunki ular yakuniy natijaga umuman ta\'sir qilmagan edi.',
+ tests:[
+   {q:'CNN da "Weight Sharing" nimani anglatadi?',
+    opts:['Har bir piksel o\'z og\'irligiga ega','Bitta kernel butun rasm bo\'ylab qayta-qayta ishlatiladi','Og\'irliklar tasodifiy almashtiriladi','Bu Dense qatlamga tegishli tushuncha'],
+    ans:1,
+    exp:'Weight Sharing — bitta kichik kernel (masalan 3x3, 9 parametr) butun rasm bo\'ylab QAYTA ishlatilishi, bu CNN ni juda kam parametrli qiladi.'},
+   {q:'Max Pooling qatlamida Backpropagation paytida, gradient qaysi pozitsiyaga o\'tadi?',
+    opts:['Barcha 4 pozitsiyaga teng ulushda','Faqat forward pass da maksimal tanlangan pozitsiyaga','Hech qaysi pozitsiyaga','Faqat birinchi pozitsiyaga har doim'],
+    ans:1,
+    exp:'Max Pooling da faqat maksimal qiymat natijaga ta\'sir qilgani uchun, gradient ham FAQAT o\'sha pozitsiyaga qaytadi, qolganlarga 0 beriladi.'},
+   {q:'Weight Sharing nega CNN ni Dense qatlamga nisbatan parametr jihatdan tejamkor qiladi?',
+    opts:['Chunki CNN rasm bilan ishlamaydi','Chunki bitta kichik kernel butun rasm uchun qayta ishlatiladi, har piksel uchun alohida og\'irlik kerak emas','Chunki CNN sekinroq ishlaydi','Bu noto\'g\'ri, CNN aslida ko\'proq parametrga ega'],
+    ans:1,
+    exp:'Dense qatlamda har ulanish alohida og\'irlikka ega bo\'lardi; CNN da bitta kichik kernel butun rasm bo\'ylab takrorlanadi, shuning uchun parametrlar soni ANCHA kam.'}
+ ]},
+
+{id:'M2.8', type:'test',
+ title:'RNN recurrence formula',
+ terms:[
+   ['Hidden state ($h_t$)','Tarmoqning "xotirasi" — oldingi qadamlar haqidagi ma\'lumotni saqlaydi'],
+   ['Recurrence formula','$h_t=\\tanh(W_{hh}h_{t-1}+W_{xh}x_t+b_h)$'],
+   ['Weight Sharing vaqt bo\'yicha','Bir xil $W_{hh}$, $W_{xh}$ HAR vaqt qadamida ishlatiladi'],
+   ['Chiqish formulasi','$y_t = W_{hy}h_t + b_y$']
+ ],
+ detail:'RNN — KETMA-KETLIK UCHUN MAXSUS ARXITEKTURA\n\n20.32-35 da tanish bo\'lgan RNN, matn yoki vaqt qatori kabi KETMA-KET ma\'lumot uchun mo\'ljallangan — chunki u "XOTIRA"ga ega: har bir qadamda, oldingi qadamlardan kelgan ma\'lumotni saqlab boradi.\n\nASOSIY FORMULA (Hidden State yangilanishi):\n\n$$h_t = \\tanh(W_{hh}\\,h_{t-1} + W_{xh}\\,x_t + b_h)$$\n\nBu yerda: $h_t$ — joriy vaqt qadamidagi hidden state (xotira), $h_{t-1}$ — OLDINGI qadamdagi hidden state, $x_t$ — joriy kirish (masalan, gapdagi joriy so\'z), $W_{hh}$ — hidden state\'dan hidden state\'ga og\'irlik, $W_{xh}$ — kirishdan hidden state\'ga og\'irlik.\n\nCHIQISH FORMULASI: $y_t = W_{hy}h_t + b_y$ — har bir qadamda, hidden state asosida chiqish (masalan, keyingi so\'zni bashorat qilish) hisoblanadi.\n\nWEIGHT SHARING VAQT BO\'YICHA: CNN da fazoviy (spatial) weight sharing bo\'lgani kabi (M2.7), RNN da VAQT bo\'yicha weight sharing bor — bir xil $W_{hh}$, $W_{xh}$, $b_h$ HAR BIR vaqt qadamida ($t=1,2,3,...$) qayta ishlatiladi. Bu, RNN ni har xil uzunlikdagi ketma-ketliklarni (qisqa yoki uzun gap) qabul qila olishga imkon beradi — chunki parametrlar soni ketma-ketlik uzunligiga BOG\'LIQ EMAS.\n\nBOSHLANG\'ICH HOLAT: $h_0$ odatda nol vektor bilan boshlanadi (hali hech narsa "ko\'rilmagan").',
+ tests:[
+   {q:'RNN ning recurrence formulasi $h_t=\\tanh(W_{hh}h_{t-1}+W_{xh}x_t+b_h)$ da, $h_{t-1}$ nimani bildiradi?',
+    opts:['Kelajakdagi kirish','Oldingi vaqt qadamidagi hidden state (xotira)','Yakuniy chiqish','Loss funksiyasi'],
+    ans:1,
+    exp:'$h_{t-1}$ — bir qadam OLDIN hisoblangan hidden state, bu RNN ga "xotira" beradi.'},
+   {q:'RNN da "Weight Sharing vaqt bo\'yicha" nimani anglatadi?',
+    opts:['Har vaqt qadami uchun alohida og\'irlik ishlatiladi','Bir xil $W_{hh}$, $W_{xh}$ HAR bir vaqt qadamida qayta ishlatiladi','Og\'irliklar faqat boshida ishlatiladi','Bu CNN ga tegishli tushuncha'],
+    ans:1,
+    exp:'RNN da bir xil og\'irlik matritsalari ($W_{hh}$, $W_{xh}$) HAR vaqt qadamida qayta qo\'llaniladi — bu RNN ni turli uzunlikdagi ketma-ketliklar uchun ishlatish imkonini beradi.'},
+   {q:'Boshlang\'ich hidden state ($h_0$) odatda nimaga teng qilib olinadi?',
+    opts:['Tasodifiy katta sonlar','Nol vektor','Kirish ma\'lumotining o\'rtachasi','Har doim 1'],
+    ans:1,
+    exp:'$h_0$ odatda nol vektor bilan boshlanadi, chunki birinchi qadamda hali oldingi ma\'lumot mavjud emas.'}
+ ]},
+
+{id:'M2.9', type:'eskiz',
+ title:'RNN forward pass ni numpy bilan implement qilish',
+ terms:[
+   ['rnn_cell_forward()','Bitta vaqt qadami uchun hidden state hisoblash'],
+   ['Vaqt bo\'yicha sikl','Butun ketma-ketlik orqali h_t larni ketma-ket hisoblash'],
+   ['W_hh, W_xh, b_h','Tasodifiy boshlang\'ich og\'irliklar (real holatda o\'qitiladi)'],
+   ['hidden_states ro\'yxati','Har bir qadamdagi h_t ni saqlab borish']
+ ],
+ detail:'RNN FORWARD PASS NI NOLDAN YOZISH\n\nBu mashqda, M2.8 formulasini numpy bilan, QADAM-BAQADAM (vaqt bo\'yicha sikl orqali) implement qilasiz — Keras\'ning SimpleRNN qatlami ICHIDA aynan shu hisob-kitob sodir bo\'ladi.',
+ sim:'>>> import numpy as np\n>>> def rnn_cell_forward(x_t, h_prev, W_hh, W_xh, b_h):\n...     z = W_hh @ h_prev + W_xh @ x_t + b_h\n...     return np.tanh(z)\n>>> np.random.seed(0)\n>>> W_hh = np.random.randn(3,3)*0.1\n>>> W_xh = np.random.randn(3,2)*0.1\n>>> b_h = np.zeros(3)\n>>> h = np.zeros(3)\n>>> x_sequence = [np.array([1,0]), np.array([0,1]), np.array([1,1])]\n>>> for x_t in x_sequence:\n...     h = rnn_cell_forward(x_t, h, W_hh, W_xh, b_h)\n...     print(h)',
+ eskizlar:[
+  {q:'rnn_cell_forward funksiyasini yozing - bitta vaqt qadami uchun.',
+   lines:[
+    {c:'import numpy as np',n:'Siz numpy kutubxonasini import qildingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'def rnn_cell_forward(x_t, h_prev, W_hh, W_xh, b_h):',n:'Siz bitta RNN hujayrasi funksiyasini ta\'riflashni boshladingiz'},
+    {c:'    z = W_hh @ h_prev + W_xh @ x_t + b_h',n:'Siz recurrence formulasining ichki qismini hisobladingiz'},
+    {c:'    return np.tanh(z)',n:'Siz Tanh orqali yangi hidden state ni qaytardingiz'},
+   ]},
+  {q:'Boshlang\'ich og\'irliklarni yaratib, butun ketma-ketlik bo\'ylab forward pass bajaring.',
+   lines:[
+    {c:'np.random.seed(0)',n:'Siz tasodifiy sonlar generatorini sobitlаdingiz'},
+    {c:'W_hh = np.random.randn(3,3) * 0.1',n:'Siz hidden-to-hidden og\'irlik matritsasini yaratdingiz'},
+    {c:'W_xh = np.random.randn(3,2) * 0.1',n:'Siz input-to-hidden og\'irlik matritsasini yaratdingiz'},
+    {c:'b_h = np.zeros(3)',n:'Siz bias vektorini nol bilan boshladingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'h = np.zeros(3)',n:'Siz boshlang\'ich hidden state ($h_0$) ni nol qildingiz'},
+    {c:'x_sequence = [np.array([1,0]), np.array([0,1]), np.array([1,1])]',n:'Siz 3 qadamlik kirish ketma-ketligini yaratdingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'for x_t in x_sequence:',n:'Siz har bir vaqt qadami bo\'yicha sikl boshladingiz'},
+    {c:'    h = rnn_cell_forward(x_t, h, W_hh, W_xh, b_h)',n:'Siz hidden state ni yangiladingiz'},
+    {c:'    print(h)',n:'Siz joriy hidden state ni ekranga chiqardingiz'},
+   ]},
+ ]},
+
+{id:'M2.10', type:'test',
+ title:'Backpropagation Through Time va Vanishing/Exploding Gradient',
+ terms:[
+   ['BPTT (Backpropagation Through Time)','Zanjir qoidasini VAQT bo\'yicha qo\'llash'],
+   ['Gradient yig\'indisi','$W_{hh}$ gradienti barcha vaqt qadamlaridan kelgan hissalar yig\'indisi'],
+   ['Jacobian ko\'paytmasi','Uzoq ketma-ketlikda, ko\'plab kichik matritsalar ko\'paytiriladi'],
+   ['Exploding Gradient','Agar ko\'paytmalar $>1$ bo\'lsa, gradient cheksiz kattalashadi']
+ ],
+ detail:'BPTT — ZANJIR QOIDASI VAQT O\'QI BO\'YICHA\n\nRNN ni "vaqt bo\'yicha yoyilgan" (unrolled) chuqur tarmoq deb tasavvur qilish mumkin: $h_0\\to h_1\\to h_2\\to...\\to h_T$. M1.7 dagi Backpropagation MANTIG\'I bir xil, faqat endi "qatlamlar" — VAQT QADAMLARI.\n\n$W_{hh}$ GRADIENTI NEGA MURAKKAB? $W_{hh}$ BIR XIL og\'irlik, BARCHA vaqt qadamlarida ishlatilgan (M2.8 dan tanish — weight sharing). Shuning uchun, uning to\'liq gradienti — HAR BIR vaqt qadamidan kelgan hissalarning YIG\'INDISI:\n\n$$\\frac{\\partial L}{\\partial W_{hh}} = \\sum_{t=1}^{T}\\frac{\\partial L_t}{\\partial W_{hh}}$$\n\nVA HAR BIR HISSA o\'zi zanjir qoidasi orqali, $h_T$ dan $h_t$ gacha BARCHA oraliq qadamlar orqali "orqaga" hisoblanadi — bu zanjirda, har bir qadamda $\\tanh\'(\\cdot)$ va $W_{hh}$ ko\'paytmasi paydo bo\'ladi.\n\nVANISHING/EXPLODING GRADIENT NING MATEMATIK SABABI: Uzoq ketma-ketlikda (masalan $T=50$ so\'zli gap), gradient quyidagi ko\'rinishga ega bo\'ladi:\n\n$$\\frac{\\partial h_T}{\\partial h_t} = \\prod_{k=t+1}^{T} W_{hh}^\\top\\,\\text{diag}(\\tanh\'(z_k))$$\n\nBu — $T-t$ marta takrorlanadigan KO\'PAYTMA! Agar $W_{hh}$ ning eng katta "kattalashtirish kuchi" (eigenvalue) $1$ dan KICHIK bo\'lsa — bu ko\'paytma EXPONENSIAL ravishda $0$ ga yaqinlashadi (VANISHING — gradient yo\'qoladi, uzoq o\'tmishni "unutadi"). Agar $1$ dan KATTA bo\'lsa — ko\'paytma EXPONENSIAL ravishda CHEKSIZ kattalashadi (EXPLODING — sonlar "portlab" ketadi, NaN xatosi chiqadi).\n\nBU NEGA MUHIM? Bu — oddiy RNN ning ASOSIY KAMCHILIGI: u UZOQ MUDDATLI bog\'liqliklarni (masalan gap boshidagi so\'z, gap oxiridagi javobga ta\'sir qilishi kerak bo\'lganda) o\'rganishda qiynaladi. Bu muammo — LSTM (M2.11-12) ixtiro qilinishining ASOSIY SABABI.',
+ tests:[
+   {q:'BPTT da $W_{hh}$ ning to\'liq gradienti qanday hisoblanadi?',
+    opts:['Faqat oxirgi vaqt qadamidan','Barcha vaqt qadamlaridan kelgan hissalar yig\'indisidan','Faqat birinchi vaqt qadamidan','Bu hech qachon hisoblanmaydi'],
+    ans:1,
+    exp:'$W_{hh}$ HAR vaqt qadamida ishlatilgani (weight sharing) uchun, uning to\'liq gradienti — barcha qadamlardan kelgan hissalarning yig\'indisi.'},
+   {q:'Agar $W_{hh}$ ning eigenvalue\'si $1$ dan KICHIK bo\'lsa, uzoq ketma-ketlikda qanday muammo yuzaga keladi?',
+    opts:['Exploding gradient','Vanishing gradient (gradient deyarli yo\'qoladi)','Hech qanday muammo bo\'lmaydi','Model darhol 100% aniqlikka erishadi'],
+    ans:1,
+    exp:'Eigenvalue $1$ dan kichik bo\'lsa, ko\'p marta ko\'paytirilganda natija exponensial ravishda $0$ ga yaqinlashadi — bu vanishing gradient.'},
+   {q:'Vanishing/Exploding Gradient muammosi RNN da nima uchun ayniqsa kuchli?',
+    opts:['Chunki RNN juda kam parametrga ega','Chunki uzun ketma-ketlikda, bir xil $W_{hh}$ ko\'p marta (T marta) ko\'paytiriladi','Chunki RNN faqat rasm bilan ishlaydi','Bu muammo faqat CNN da uchraydi'],
+    ans:1,
+    exp:'Uzun ketma-ketlikda, gradient hisoblashda bir xil $W_{hh}$ matritsasi T marta (ketma-ketlik uzunligicha) ko\'paytiriladi — bu exponensial kichrayish yoki kattalashishga olib keladi.'}
+ ]},
+
+{id:'M2.11', type:'test',
+ title:'LSTM gates matematikasi',
+ terms:[
+   ['Forget Gate','$f_t=\\sigma(W_f[h_{t-1},x_t]+b_f)$ — qaysi eski ma\'lumotni "unutish"'],
+   ['Input Gate','$i_t=\\sigma(W_i[h_{t-1},x_t]+b_i)$ — qancha yangi ma\'lumot qo\'shish'],
+   ['Cell State yangilanishi','$C_t=f_t\\odot C_{t-1}+i_t\\odot \\tilde{C}_t$ — additive yangilanish'],
+   ['Output Gate','$o_t=\\sigma(W_o[h_{t-1},x_t]+b_o)$ — qancha ma\'lumotni chiqarish']
+ ],
+ detail:'LSTM — VANISHING GRADIENT NI HAL QILISH UCHUN MO\'LJALLANGAN\n\nM2.10 da ko\'rgan muammo — oddiy RNN, hidden state\'ni HAR safar BUTUNLAY qayta hisoblaydi (ko\'paytirish orqali, $\\tanh$ ichida). LSTM, bunga qo\'shimcha ravishda, alohida "Cell State" ($C_t$) saqlaydi, va uni ADDITIVE (qo\'shish orqali) yangilaydi — bu gradientning "yo\'qolishini" sezilarli kamaytiradi.\n\nUCH ASOSIY GATE (har biri Sigmoid orqali, natija $0$-$1$ orasida — "qancha foiz o\'tkazish kerak" degan ma\'noda):\n\n1. FORGET GATE: $f_t=\\sigma(W_f[h_{t-1},x_t]+b_f)$ — "eski Cell State\'dan qancha qismini SAQLAB QOLISH kerak". $f_t=0$ — butunlay unutish, $f_t=1$ — butunlay saqlash.\n\n2. INPUT GATE: $i_t=\\sigma(W_i[h_{t-1},x_t]+b_i)$ — "yangi ma\'lumotdan qancha qismini QO\'SHISH kerak". Bunga qo\'shimcha, "nomzod" yangi ma\'lumot: $\\tilde{C}_t=\\tanh(W_C[h_{t-1},x_t]+b_C)$.\n\n3. CELL STATE YANGILANISHI (ENG MUHIM FORMULA):\n$$C_t = f_t\\odot C_{t-1} + i_t\\odot \\tilde{C}_t$$\n($\\odot$ — element-bo\'yicha ko\'paytirish). Diqqat qiling — bu QO\'SHISH (additive) amali, oddiy RNN dagi kabi to\'liq qayta yozish emas! Aynan shu ADDITIVE xususiyat, gradientning ko\'p vaqt qadami orqali "saqlanib qolishiga" yordam beradi — chunki $\\partial C_t/\\partial C_{t-1}=f_t$, va agar $f_t\\approx 1$ bo\'lsa, gradient deyarli O\'ZGARMASDAN o\'tadi (ko\'paytma sifatida exponensial kichraymaydi).\n\n4. OUTPUT GATE: $o_t=\\sigma(W_o[h_{t-1},x_t]+b_o)$, va yakuniy hidden state: $h_t=o_t\\odot\\tanh(C_t)$ — "Cell State\'dan qancha qismini TASHQARIGA chiqarish kerak".',
+ tests:[
+   {q:'LSTM dagi Forget Gate ($f_t$) vazifasi nima?',
+    opts:['Yangi ma\'lumot yaratish','Eski Cell State\'dan qancha qismini saqlab qolishni belgilash','Tarmoqni butunlay to\'xtatish','Faqat chiqishni hisoblash'],
+    ans:1,
+    exp:'Forget Gate — $0$ va $1$ orasidagi qiymat orqali, oldingi Cell State\'dan QANCHA qismini keyingi qadamga "saqlab qolish" kerakligini belgilaydi.'},
+   {q:'Cell State yangilanishi formulasi $C_t=f_t\\odot C_{t-1}+i_t\\odot\\tilde{C}_t$ da, nega bu ADDITIVE (qo\'shish) amali muhim?',
+    opts:['Chunki u tezroq hisoblanadi','Chunki additive yangilanish gradientning ko\'p vaqt qadami orqali "saqlanib qolishiga" yordam beradi, vanishing gradient ni kamaytiradi','Bu hech qanday ahamiyatga ega emas','Chunki u kamroq xotira talab qiladi'],
+    ans:1,
+    exp:'Additive yangilanish (ko\'paytirish o\'rniga qo\'shish), agar Forget Gate $\\approx 1$ bo\'lsa, gradientni deyarli o\'zgarishsiz o\'tkazadi — bu oddiy RNN dagi exponensial kichrayishni oldini oladi.'},
+   {q:'Output Gate ($o_t$) nima vazifani bajaradi?',
+    opts:['Yangi Cell State yaratadi','Cell State\'dan qancha qismini tashqariga (hidden state sifatida) chiqarishni belgilaydi','Eski ma\'lumotni unutadi','Loss ni hisoblaydi'],
+    ans:1,
+    exp:'Output Gate — ichki Cell State\'dan qancha qismini YAKUNIY hidden state ($h_t$) sifatida "tashqariga chiqarish" kerakligini belgilaydi.'}
+ ]},
+
+{id:'M2.12', type:'eskiz',
+ title:'LSTM gate larni numpy bilan implement qilish',
+ terms:[
+   ['lstm_cell_forward()','Barcha 4 gate (forget, input, cell-candidate, output) ni hisoblash'],
+   ['np.concatenate()','$[h_{t-1}, x_t]$ ni birlashtirib, bitta vektor qilish'],
+   ['Element-bo\'yicha ko\'paytirish (*)','numpy da $\\odot$ amali oddiy * operatori bilan yoziladi'],
+   ['To\'liq LSTM hujayrasi','Barcha formulalarni birlashtirib, C_t va h_t ni qaytarish']
+ ],
+ detail:'LSTM HUJAYRASINI TO\'LIQ NOLDAN YOZISH\n\nBu — M2 qismining yakuniy, eng murakkab amaliy mashqi: M2.11 dagi BARCHA formulalarni (Forget, Input, Cell candidate, Output gate, va Cell/Hidden state yangilanishi) birlashtirib, TO\'LIQ ishlaydigan LSTM hujayrasini yozasiz.\n\nBu — Keras\'ning LSTM qatlami (20.35 da tanish) ICHIDA, har bir vaqt qadamida, AVTOMATIK bajariladigan aynan shu hisob-kitoblarning to\'liq nusxasi.',
+ sim:'>>> import numpy as np\n>>> def sigmoid(z): return 1/(1+np.exp(-z))\n>>> def lstm_cell_forward(x_t, h_prev, C_prev, Wf, Wi, Wc, Wo, bf, bi, bc, bo):\n...     concat = np.concatenate([h_prev, x_t])\n...     f_t = sigmoid(Wf @ concat + bf)\n...     i_t = sigmoid(Wi @ concat + bi)\n...     c_tilde = np.tanh(Wc @ concat + bc)\n...     C_t = f_t * C_prev + i_t * c_tilde\n...     o_t = sigmoid(Wo @ concat + bo)\n...     h_t = o_t * np.tanh(C_t)\n...     return h_t, C_t',
+ eskizlar:[
+  {q:'sigmoid funksiyasini va lstm_cell_forward boshini (gate lar) yozing.',
+   lines:[
+    {c:'import numpy as np',n:'Siz numpy kutubxonasini import qildingiz'},
+    {c:'def sigmoid(z): return 1/(1+np.exp(-z))',n:'Siz sigmoid funksiyasini ta\'rifladingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'def lstm_cell_forward(x_t, h_prev, C_prev, Wf, Wi, Wc, Wo, bf, bi, bc, bo):',n:'Siz LSTM hujayrasi funksiyasini ta\'riflashni boshladingiz'},
+    {c:'    concat = np.concatenate([h_prev, x_t])',n:'Siz $[h_{t-1}, x_t]$ ni birlashtirdingiz'},
+    {c:'    f_t = sigmoid(Wf @ concat + bf)',n:'Siz Forget Gate ni hisobladingiz'},
+    {c:'    i_t = sigmoid(Wi @ concat + bi)',n:'Siz Input Gate ni hisobladingiz'},
+   ]},
+  {q:'Cell candidate, Cell State yangilanishi va Output Gate ni qo\'shing.',
+   lines:[
+    {c:'    c_tilde = np.tanh(Wc @ concat + bc)',n:'Siz yangi ma\'lumot nomzodini ($\\tilde{C}_t$) hisobladingiz'},
+    {c:'    C_t = f_t * C_prev + i_t * c_tilde',n:'Siz additive Cell State yangilanishini qo\'lladingiz'},
+    {c:'    o_t = sigmoid(Wo @ concat + bo)',n:'Siz Output Gate ni hisobladingiz'},
+    {c:'    h_t = o_t * np.tanh(C_t)',n:'Siz yakuniy hidden state ni hisobladingiz'},
+    {c:'    return h_t, C_t',n:'Siz h_t va C_t ikkisini birgalikda qaytardingiz'},
+   ]},
+ ]},
+
+{id:'M2.13', type:'test',
+ title:'2-qism yakuniy nazorat',
+ terms:[
+   ['Convolution','Kernel orqali rasmdan naqsh ajratish amali'],
+   ['Output size formula','$O=(W-K+2P)/S+1$'],
+   ['BPTT','Backpropagation ning vaqt o\'qi bo\'yicha qo\'llanishi'],
+   ['LSTM gates','Vanishing gradient ni additive Cell State orqali hal qilish']
+ ],
+ detail:'2-QISM YAKUNI — CNN VA RNN MATEMATIKASI\n\nBu qismda siz ikki asosiy arxitekturaning to\'liq matematikasini ko\'rib chiqdingiz:\n\nCNN: Convolution operatsiyasi (kernel + sliding window + dot product), output size formulasi, Pooling, va Weight Sharing tufayli backpropagation ning o\'ziga xosligi.\n\nRNN: Recurrence formula (hidden state orqali "xotira"), Backpropagation Through Time, va eng muhimi — Vanishing/Exploding Gradient ning ANIQ matematik sababi (Jacobian ko\'paytmasi, eigenvalue). Bu muammoni LSTM qanday hal qilishi — additive Cell State yangilanishi orqali.\n\nKEYINGI QADAM (M3): Transformer arxitekturasi — Self-Attention formulasi ($\\text{softmax}(QK^\\top/\\sqrt{d_k})V$), Multi-Head Attention, va Positional Encoding matematikasi. Bu — nima uchun zamonaviy til modellari (jumladan Claude kabi) RNN o\'rniga Transformer asosida qurilganini tushuntiradi.',
+ tests:[
+   {q:'CNN da Weight Sharing va RNN da Weight Sharing orasidagi farq nima?',
+    opts:['Ular aslida bir xil tushuncha emas','CNN da fazo (rasm) bo\'yicha, RNN da vaqt bo\'yicha bir xil og\'irlik qayta ishlatiladi','Faqat CNN da Weight Sharing mavjud','Faqat RNN da Weight Sharing mavjud'],
+    ans:1,
+    exp:'Ikkisida ham bir xil MANTIQ qo\'llaniladi — CNN da kernel FAZODA (rasm bo\'ylab), RNN da og\'irlik VAQTDA (ketma-ketlik bo\'ylab) qayta ishlatiladi.'},
+   {q:'LSTM, oddiy RNN ga nisbatan, vanishing gradient muammosini qanday kamaytiradi?',
+    opts:['Ko\'proq qatlam qo\'shish orqali','Cell State ni additive (qo\'shish) usulida yangilash orqali, ko\'paytirish o\'rniga','Faqat ReLU ishlatish orqali','Bu muammoni umuman hal qilmaydi'],
+    ans:1,
+    exp:'LSTM ning Cell State yangilanishi ADDITIVE ($C_t=f_t\\odot C_{t-1}+i_t\\odot\\tilde{C}_t$) bo\'lgani uchun, gradient ko\'p vaqt qadami orqali ko\'paytirish natijasida exponensial kichraymaydi.'},
+   {q:'M3-qismda (keyingi qism) qaysi arxitektura matematikasi o\'rganiladi?',
+    opts:['Yana CNN','Transformer (Self-Attention, Multi-Head Attention)','Faqat Linear Regression','Faqat Decision Tree'],
+    ans:1,
+    exp:'M3-qismda Transformer arxitekturasining matematikasi — Self-Attention formulasi, Multi-Head Attention va Positional Encoding chuqur o\'rganiladi.'}
+ ]},
+
+];
+
+// ═══════ HOLAT ═══════
+var cur=0, curEskiz=0, skipOn=false, ghostVisible=true;
+var lineData=[], doneSet=new Set(), eskizDoneSet=new Set();
+var testAnswers={}, selectedStar=0, ratingSubmitted=false;
+var BRIGHT=[0,0.05,0.1,0.2,0.3,0.42,0.55,0.65,0.75,0.85,0.95];
+
+window.onload=function(){buildStars();buildTabs();buildIntro();loadMod(0);};
+
+function buildIntro(){
+  var testTopics=M.filter(function(m){return m.type==='test';}).length;
+  var eskizCount=M.reduce(function(s,m){return s+(m.type==='eskiz'?m.eskizlar.length:0);},0);
+  var h='<div class="intro-title">'+MODULE_INTRO.title+'</div>';
+  h+='<div class="intro-text">'+esc(MODULE_INTRO.text)+'</div>';
+  h+='<div class="intro-stats">';
+  h+='<div class="intro-stat"><div class="intro-stat-v">'+testTopics+'</div><div class="intro-stat-l">TEST</div></div>';
+  h+='<div class="intro-stat"><div class="intro-stat-v">'+eskizCount+'</div><div class="intro-stat-l">ESKIZ</div></div>';
+  h+='<div class="intro-stat"><div class="intro-stat-v">numpy</div><div class="intro-stat-l">KUTUBXONA</div></div>';
+  h+='</div>';
+  document.getElementById('introBox').innerHTML=h;
+  renderMath('introBox');
+}
+
+function loadMod(i){
+  cur=i; curEskiz=0;
+  document.getElementById('detailPanel').classList.remove('show');
+  document.getElementById('badge') && (document.getElementById('badge').className='badge');
+  var m=M[i];
+  document.getElementById('topSub').textContent=m.id;
+  document.getElementById('svMod').textContent=(i+1)+'/'+M.length;
+  // terms
+  var th='<div class="terms-title">📚 Yangi atamalar:</div>';
+  m.terms.forEach(function(t){
+    th+='<div class="term-row"><span class="term-key">'+esc(t[0])+'</span><span class="term-val">'+esc(t[1])+'</span></div>';
+  });
+  document.getElementById('termsBox').innerHTML=th;
+  renderMath('termsBox');
+  // content
+  if(m.type==='test') renderTest(m);
+  else renderEskiz(m);
+  buildTabs(); updateTopStats();
+}
+
+// ═══════ TEST ═══════
+function renderTest(m){
+  if(!testAnswers[cur]) testAnswers[cur]={};
+  var h='<div class="test-panel"><div class="test-title">🧠 '+m.title+' — Test</div>';
+  m.tests.forEach(function(t,qi){
+    h+='<div class="test-q" id="tq'+qi+'">';
+    h+='<div class="test-qtext">'+(qi+1)+'. '+esc(t.q)+'</div>';
+    h+='<div class="test-opts">';
+    var answered = testAnswers[cur][qi] !== undefined;
+    t.opts.forEach(function(o,oi){
+      var cls='test-opt';
+      if(answered){
+        if(oi===t.ans) cls+=' show-correct';
+        else if(oi===testAnswers[cur][qi] && oi!==t.ans) cls+=' wrong';
+      }
+      h+='<button class="'+cls+'" onclick="answerTest('+qi+','+oi+')" '+(answered?'disabled':'')+'>'+esc(o)+'</button>';
+    });
+    h+='</div>';
+    if(answered){
+      var isCorrect = testAnswers[cur][qi]===t.ans;
+      h+='<div class="test-exp show">'+(isCorrect?'✅':'❌')+' '+esc(t.exp)+'</div>';
+    }
+    h+='</div>';
+  });
+  // score
+  var answered=Object.keys(testAnswers[cur]).length;
+  var correct=0;
+  Object.keys(testAnswers[cur]).forEach(function(qi){
+    if(testAnswers[cur][qi]===m.tests[qi].ans) correct++;
+  });
+  if(answered===m.tests.length){
+    h+='<div class="test-score show">Natija: '+correct+'/'+m.tests.length+' ✅</div>';
+    doneSet.add(cur);
+  }
+  h+='</div>';
+  document.getElementById('mainContent').innerHTML=h;
+  renderMath('mainContent');
+  document.getElementById('result-panel') && document.getElementById('result-panel').classList.remove('show');
+  updateTopStats();
+}
+
+function answerTest(qi,oi){
+  if(!testAnswers[cur]) testAnswers[cur]={};
+  if(testAnswers[cur][qi]!==undefined) return;
+  testAnswers[cur][qi]=oi;
+  renderTest(M[cur]);
+  buildTabs(); updateTopStats();
+}
+
+// ═══════ ESKIZ (kod yozish mavzulari) ═══════
+function renderEskiz(m){
+  var e=m.eskizlar[curEskiz];
+  // eskiz dots
+  var dotsH='<div style="display:flex;gap:6px;justify-content:center;margin-bottom:10px;">';
+  m.eskizlar.forEach(function(_,i){
+    var key=cur+'-'+i;
+    var w=i===curEskiz?'40px':'26px';
+    var bg=eskizDoneSet.has(key)?'#22c55e':(i===curEskiz?'#00f0c8':'#1e3048');
+    dotsH+='<div onclick="jumpEskiz('+i+')" style="width:'+w+';height:6px;border-radius:3px;background:'+bg+';cursor:pointer;transition:all .2s;"></div>';
+  });
+  dotsH+='</div>';
+  // question
+  var qH='<div style="background:#0d1828;border:1px solid #1e3048;border-left:3px solid #a855f7;border-radius:8px;padding:10px 12px;margin-bottom:10px;font-size:.71rem;line-height:1.8;color:#c4b5fd;white-space:pre-wrap;">Eskiz '+(curEskiz+1)+'/'+m.eskizlar.length+' — '+esc(e.q)+'</div>';
+  // skip row
+  var skipH='<div class="skip-row" onclick="toggleSkip()"><div class="sw" id="sw"></div><span id="skipLbl"># Kommentlarni o\'tkazib yuboring</span></div>';
+  // result panel
+  var resH='<div class="result-panel" id="resultPanel"><div class="result-title">📊 NATIJA — SIMULYATSIYA</div><div class="sim-wrap" id="simWrap"></div></div>';
+  // code block
+  var codeH='<div class="code-block"><div class="fbar"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div><div class="fn" id="fname">m2math_'+(curEskiz+1)+'.py</div><div class="fhint">↔️ suring ✏️ yozing</div></div><div class="lines-wrap" id="linesWrap"></div><div class="btn-row"><button class="btn btn-chk" onclick="doCheck()">✅ Tekshir</button><button class="btn btn-clr" onclick="doClear()">🗑️ Tozala</button><button class="btn btn-ghost" id="ghostBtn" onclick="toggleGhost()">👁️ Yashir</button><button class="btn btn-det" onclick="toggleDetail()">📖 Batafsil</button><button class="btn btn-res" onclick="toggleResult()">📊 Natija</button></div><div class="badge" id="badge"></div></div>';
+  document.getElementById('mainContent').innerHTML=dotsH+qH+skipH+resH+codeH;
+  renderMath('mainContent');
+  buildLines(e);
+  // sync skip sw
+  document.getElementById('sw').classList.toggle('on',skipOn);
+  document.getElementById('skipLbl').textContent=skipOn?'Kommentlar o\'tkazilmoqda':'# Kommentlarni o\'tkazib yuboring';
+  applyBright(); updateStats();
+}
+
+function jumpEskiz(i){ curEskiz=i; renderEskiz(M[cur]); }
+
+function buildLines(e){
+  var wrap=document.getElementById('linesWrap');
+  if(!wrap) return;
+  wrap.innerHTML=''; lineData=[];
+  var op=BRIGHT[parseInt(document.getElementById('brightSlider').value)||3];
+  e.lines.forEach(function(ln,i){
+    var isCom=ln.c.replace(/^\s+/,'').charAt(0)==='#';
+    var isEmpty=ln.c==='';
+    var isSlash=ln.c.endsWith('\\');
+    var block=document.createElement('div');
+    block.className='line-block';
+    var row=document.createElement('div');
+    row.className='line-row';
+    var num=document.createElement('div');
+    num.className='line-num'; num.id='num'+i;
+    num.textContent=isEmpty?'':(i+1);
+    var content=document.createElement('div');
+    content.className='line-content';
+    var ghost=document.createElement('div');
+    ghost.className='line-ghost'+((isCom&&skipOn)?' skip-c':'');
+    ghost.id='ghost'+i;
+    ghost.style.color=ghostVisible?'rgba(74,96,128,'+op+')':'transparent';
+    ghost.textContent=ln.c||' ';
+    var colors=document.createElement('div');
+    colors.className='line-colors'; colors.id='clr'+i;
+    var inp=document.createElement('input');
+    inp.type='text'; inp.className='line-input'; inp.id='inp'+i;
+    inp.setAttribute('spellcheck','false'); inp.setAttribute('autocorrect','off');
+    inp.setAttribute('autocapitalize','off'); inp.setAttribute('autocomplete','off');
+    if(isEmpty||(isCom&&skipOn)) inp.disabled=true;
+    (function(idx,target,noteText){
+      inp.addEventListener('input',function(){
+        if(!target) return;
+        updateLineClr(idx,target);
+        if(inp.value===target&&target!==''&&noteText!=='') showNote(idx);
+        else if(inp.value!==target) hideNote(idx);
+        updateStats();
+      });
+    })(i,ln.c,ln.n);
+    content.appendChild(ghost); content.appendChild(colors); content.appendChild(inp);
+    row.appendChild(num); row.appendChild(content);
+    var note=document.createElement('div');
+    note.className='line-done-note'; note.id='note'+i;
+    note.textContent=ln.n?('✅ '+ln.n+'!'):'';
+    block.appendChild(row);
+    if(ln.n) block.appendChild(note);
+    wrap.appendChild(block);
+    lineData.push({inp:inp,target:ln.c,isCom:isCom,isEmpty:isEmpty});
+  });
+}
+
+function updateLineClr(idx,target){
+  var inp=document.getElementById('inp'+idx);
+  var clr=document.getElementById('clr'+idx);
+  if(!inp||!clr) return;
+  var typed=inp.value, html='';
+  for(var ci=0;ci<target.length;ci++){
+    var ch=target[ci];
+    if(ci<typed.length) html+=typed[ci]===ch?'<span style="color:#22c55e">'+esc(ch)+'</span>':'<span style="color:#f43f5e;text-decoration:underline">'+esc(ch)+'</span>';
+    else html+='<span style="color:transparent">'+esc(ch)+'</span>';
+  }
+  clr.innerHTML=html;
+  var num=document.getElementById('num'+idx);
+  if(num) num.style.color=(typed===target&&target!=='')?'#22c55e':'';
+}
+
+function showNote(i){var n=document.getElementById('note'+i);if(n&&n.textContent)n.classList.add('show');}
+function hideNote(i){var n=document.getElementById('note'+i);if(n)n.classList.remove('show');}
+
+function doCheck(){
+  var e=M[cur].eskizlar[curEskiz];
+  var done=0,total=0,errors=[];
+  lineData.forEach(function(l,i){
+    if(l.isEmpty||(l.isCom&&skipOn)) return;
+    total++;
+    if(l.inp.value===l.target){
+      done++; document.getElementById('num'+i).style.color='#22c55e';
+      if(e.lines[i].n) showNote(i);
+    } else {
+      errors.push(i+1); document.getElementById('num'+i).style.color='#f43f5e';
+    }
+  });
+  var pct=total>0?Math.round(done/total*100):0;
+  var b=document.getElementById('badge');
+  if(!b) return;
+  b.className='badge show';
+  if(pct>=85){
+    b.className+=' g';
+    eskizDoneSet.add(cur+'-'+curEskiz);
+    var isLast=curEskiz===M[cur].eskizlar.length-1;
+    if(isLast){ doneSet.add(cur); b.textContent='✅ Zo\'r! '+pct+'% — barcha eskizlar tugadi!'; showRating(); }
+    else { b.textContent='✅ Zo\'r! '+pct+'% — keyingi eskiz →'; setTimeout(function(){curEskiz++;renderEskiz(M[cur]);},900); }
+  } else if(pct>=55){
+    b.className+=' o'; b.textContent='⚡ '+pct+'% — xato qatorlar: '+errors.join(', ')+'-qator';
+  } else {
+    b.className+=' r'; b.textContent='❌ '+pct+'% — qaytadan urinib ko\'ring';
+  }
+  updateStats(); buildTabs();
+}
+
+function doClear(){
+  lineData.forEach(function(l,i){
+    l.inp.value='';
+    var clr=document.getElementById('clr'+i); if(clr) clr.innerHTML='';
+    var num=document.getElementById('num'+i); if(num) num.style.color='';
+    hideNote(i);
+  });
+  var b=document.getElementById('badge'); if(b) b.className='badge';
+  updateStats();
+}
+
+function updateStats(){
+  if(M[cur].type!=='eskiz') return;
+  var done=0,total=0;
+  lineData.forEach(function(l){
+    if(l.isEmpty||(l.isCom&&skipOn)) return;
+    total++;
+    if(l.inp.value===l.target) done++;
+  });
+  var pct=total>0?Math.round(done/total*100):0;
+  document.getElementById('svDone').textContent=done+'/'+total;
+  document.getElementById('svScore').textContent=done>0?pct+'%':'—';
+  document.getElementById('progressFill').style.width=(doneSet.size/M.length*100)+'%';
+}
+
+function updateTopStats(){
+  // test balini hisoblash
+  var totalQ=0, correctQ=0;
+  M.forEach(function(m,mi){
+    if(m.type!=='test') return;
+    m.tests.forEach(function(t,qi){
+      totalQ++;
+      if(testAnswers[mi]&&testAnswers[mi][qi]===t.ans) correctQ++;
+    });
+  });
+  document.getElementById('svScore').textContent=totalQ>0?(correctQ+'/'+totalQ):'—';
+  document.getElementById('svDone').textContent=doneSet.size+'/'+M.length;
+  document.getElementById('progressFill').style.width=(doneSet.size/M.length*100)+'%';
+}
+
+function toggleGhost(){
+  ghostVisible=!ghostVisible;
+  document.querySelectorAll('.line-ghost').forEach(function(g){g.style.visibility=ghostVisible?'visible':'hidden';});
+  var gb=document.getElementById('ghostBtn');
+  if(gb) gb.textContent=ghostVisible?'👁️ Yashir':'👁️ Ko\'rsat';
+}
+
+function toggleSkip(){
+  skipOn=!skipOn;
+  var sw=document.getElementById('sw'); if(sw) sw.classList.toggle('on',skipOn);
+  var sl=document.getElementById('skipLbl'); if(sl) sl.textContent=skipOn?'Kommentlar o\'tkazilmoqda':'# Kommentlarni o\'tkazib yuboring';
+  if(M[cur].type==='eskiz'){ buildLines(M[cur].eskizlar[curEskiz]); applyBright(); updateStats(); }
+}
+
+function toggleDetail(){
+  var p=document.getElementById('detailPanel');
+  if(p.classList.contains('show')){p.classList.remove('show');}
+  else{document.getElementById('detailContent').textContent=M[cur].detail;p.classList.add('show');renderMath('detailContent');}
+}
+
+function toggleResult(){
+  var p=document.getElementById('resultPanel');
+  if(!p) return;
+  if(p.classList.contains('show')){p.classList.remove('show');}
+  else{document.getElementById('simWrap').innerHTML='<pre>'+esc(M[cur].sim)+'</pre>';p.classList.add('show');}
+}
+
+function setBright(v){document.getElementById('brightVal').textContent=v;applyBright();}
+
+function applyBright(){
+  var v=parseInt(document.getElementById('brightSlider').value)||3;
+  var op=BRIGHT[v];
+  document.querySelectorAll('.line-ghost').forEach(function(g){
+    if(!g.classList.contains('skip-c')&&ghostVisible) g.style.color='rgba(74,96,128,'+op+')';
+  });
+}
+
+function buildTabs(){
+  var c=document.getElementById('tabs'); c.innerHTML='';
+  M.forEach(function(m,i){
+    var d=document.createElement('div');
+    d.className='tab'+(i===cur?' on':'')+(doneSet.has(i)?' done':'');
+    d.textContent=m.id;
+    d.onclick=(function(n){return function(){loadMod(n);};})(i);
+    c.appendChild(d);
+  });
+}
+
+function buildStars(){
+  var sc=document.getElementById('stars'); sc.innerHTML='';
+  for(var i=1;i<=10;i++){
+    var s=document.createElement('span');
+    s.className='star'; s.textContent='⭐'; s.dataset.v=i;
+    s.onclick=(function(v){return function(){
+      selectedStar=v;
+      document.getElementById('ratingScore').textContent=v+' / 10';
+      document.querySelectorAll('.star').forEach(function(st){st.classList.toggle('on',parseInt(st.dataset.v)<=v);});
+    };})(i);
+    sc.appendChild(s);
+  }
+}
+
+function showRating(){document.getElementById('ratingBox').classList.add('show');}
+
+function submitRating(){
+  if(ratingSubmitted) return;
+  if(selectedStar===0){alert('Baho tanlang!');return;}
+  ratingSubmitted=true;
+  document.getElementById('ratingThanks').style.display='block';
+  document.querySelector('.rating-submit').style.display='none';
+}
+
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+function renderMath(elId){
+  var el=document.getElementById(elId);
+  if(!el||typeof renderMathInElement==='undefined') return;
+  try{
+    renderMathInElement(el,{
+      delimiters:[
+        {left:'$$',right:'$$',display:true},
+        {left:'$',right:'$',display:false}
+      ],
+      throwOnError:false
+    });
+  }catch(e){}
+}
+
+</script>
+</body>
+</html>

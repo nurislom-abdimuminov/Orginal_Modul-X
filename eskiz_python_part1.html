@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Eskiz — Python 3.1–3.15</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:#0a0e1a;color:#dde5f0;font-family:'JetBrains Mono',monospace;font-size:13px;min-height:100vh;}
+.top{background:#0f1520;border-bottom:1px solid #1e3048;padding:8px 14px;display:flex;align-items:center;gap:8px;position:sticky;top:0;z-index:50;}
+.top-t{color:#00f0c8;font-size:.78rem;font-weight:700;}
+.top-s{color:#4a6080;font-size:.65rem;margin-left:auto;}
+.bright-bar{background:#0f1520;border-bottom:1px solid #1e3048;padding:6px 14px;display:flex;align-items:center;gap:10px;position:sticky;top:41px;z-index:49;}
+.bright-lbl{font-size:.65rem;color:#4a6080;flex-shrink:0;}
+.bright-slider{flex:1;-webkit-appearance:none;height:4px;border-radius:2px;background:#1e3048;outline:none;}
+.bright-slider::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:#00f0c8;}
+.bright-val{font-size:.68rem;color:#00f0c8;font-weight:700;width:20px;text-align:right;flex-shrink:0;}
+.wrap{padding:10px 14px;max-width:540px;margin:0 auto;}
+.tabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;margin-bottom:10px;scrollbar-width:none;}
+.tabs::-webkit-scrollbar{display:none;}
+.tab{flex-shrink:0;padding:6px 12px;border-radius:20px;border:1px solid #1e3048;background:#141e2e;color:#4a6080;font-size:.68rem;cursor:pointer;transition:all .2s;}
+.tab.on{border-color:#00f0c8;color:#00f0c8;background:rgba(0,240,200,.08);}
+.tab.done{border-color:#22c55e;color:#22c55e;background:rgba(34,197,94,.08);}
+.skip-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;padding:8px 12px;background:#141e2e;border:1px solid #1e3048;border-radius:8px;cursor:pointer;}
+.skip-row span{font-size:.7rem;color:#4a6080;}
+.sw{width:34px;height:18px;background:#1e3048;border-radius:10px;position:relative;transition:background .2s;flex-shrink:0;}
+.sw.on{background:#fbbf24;}
+.sw::after{content:'';position:absolute;top:2px;left:2px;width:14px;height:14px;background:#fff;border-radius:50%;transition:left .2s;}
+.sw.on::after{left:18px;}
+.stats{display:flex;gap:8px;margin-bottom:10px;}
+.stat{flex:1;background:#141e2e;border:1px solid #1e3048;border-radius:8px;padding:7px 8px;text-align:center;}
+.sv{font-size:.95rem;font-weight:700;color:#00f0c8;}
+.sl{font-size:.58rem;color:#4a6080;margin-top:2px;}
+.info-box{background:#0f1520;border:1px solid #1e3048;border-left:3px solid #00f0c8;border-radius:8px;padding:10px 12px;margin-bottom:10px;font-size:.71rem;line-height:1.9;color:#8ba0c0;white-space:pre-wrap;}
+.detail-panel{display:none;background:#0a1628;border:1px solid #2563eb;border-radius:8px;padding:12px 14px;margin-bottom:10px;font-size:.71rem;line-height:2.0;color:#93c5fd;white-space:pre-wrap;}
+.detail-panel.show{display:block;}
+.detail-title{color:#60a5fa;font-weight:700;margin-bottom:8px;font-size:.74rem;}
+.test-panel{display:none;background:#080c14;border:1px solid #a855f7;border-radius:10px;padding:12px;margin-bottom:10px;}
+.test-panel.show{display:block;}
+.test-title{color:#a855f7;font-size:.72rem;font-weight:700;margin-bottom:8px;}
+.test-q{font-size:.72rem;color:#dde5f0;margin-bottom:10px;line-height:1.7;}
+.test-opts{display:flex;flex-direction:column;gap:6px;}
+.test-opt{padding:8px 12px;border-radius:8px;border:1px solid #1e3048;background:#141e2e;color:#8ba0c0;font-size:.7rem;cursor:pointer;font-family:'JetBrains Mono',monospace;transition:all .2s;}
+.test-opt.correct{border-color:#22c55e;background:rgba(34,197,94,.1);color:#22c55e;}
+.test-opt.wrong{border-color:#f43f5e;background:rgba(244,63,94,.1);color:#f43f5e;}
+.test-exp{display:none;margin-top:8px;font-size:.68rem;color:#a855f7;padding:6px 10px;background:rgba(168,85,247,.08);border-radius:6px;border-left:2px solid #a855f7;line-height:1.8;}
+.test-exp.show{display:block;}
+.result-panel{display:none;background:#080c14;border:1px solid #22c55e;border-radius:10px;padding:12px;margin-bottom:10px;}
+.result-panel.show{display:block;}
+.result-title{color:#22c55e;font-size:.72rem;font-weight:700;margin-bottom:8px;}
+.sim-wrap{width:100%;overflow-x:auto;font-size:.71rem;}
+.code-block{border:1px solid #1e3048;border-radius:10px;overflow:hidden;margin-bottom:10px;background:#090d18;}
+.fbar{display:flex;align-items:center;gap:5px;padding:7px 12px;background:#0f1520;border-bottom:1px solid #1e3048;}
+.dot{width:6px;height:6px;border-radius:50%;}
+.dot.r{background:#f43f5e;}.dot.y{background:#fbbf24;}.dot.g{background:#22c55e;}
+.fn{font-size:.65rem;color:#4a6080;margin-left:4px;}
+.fhint{margin-left:auto;font-size:.6rem;color:#00f0c8;opacity:.7;}
+.lines-wrap{padding:4px 0;}
+.line-block{margin:0;}
+.line-row{display:flex;align-items:center;position:relative;min-height:30px;}
+.line-num{width:26px;flex-shrink:0;font-size:.63rem;padding:4px 4px 4px 5px;color:#2a3a50;text-align:right;user-select:none;transition:color .2s;align-self:center;}
+.line-indent-pre{font-size:.76rem;line-height:1.8;padding:4px 0 4px 8px;white-space:pre;color:#2a5070;user-select:none;flex-shrink:0;align-self:center;}
+.line-content{flex:1;position:relative;overflow-x:auto;overflow-y:hidden;min-height:30px;}
+.line-content::-webkit-scrollbar{height:2px;}
+.line-content::-webkit-scrollbar-thumb{background:#1e3048;border-radius:1px;}
+.line-ghost{font-size:.76rem;line-height:1.8;padding:4px 8px;white-space:nowrap;pointer-events:none;min-height:30px;display:block;}
+.line-ghost.skip-c{opacity:.15;}
+.line-colors{position:absolute;top:0;left:0;font-size:.76rem;line-height:1.8;padding:4px 8px;white-space:nowrap;pointer-events:none;z-index:2;min-height:30px;}
+.line-input{position:absolute;top:0;left:0;right:0;bottom:0;width:100%;font-family:'JetBrains Mono',monospace;font-size:.76rem;line-height:1.8;padding:4px 8px;color:transparent;-webkit-text-fill-color:transparent;caret-color:#00f0c8;background:transparent;border:none;outline:none;white-space:nowrap;overflow:hidden;z-index:10;-webkit-appearance:none;}
+.line-input:disabled{cursor:default;}
+.line-done-note{display:none;font-size:.66rem;line-height:1.6;padding:3px 8px 3px 34px;color:#38bdf8;background:rgba(56,189,248,.06);border-left:2px solid #38bdf8;white-space:pre-wrap;animation:fadeIn .25s ease;}
+.line-done-note.show{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:translateY(0)}}
+.btn-row{display:flex;gap:6px;flex-wrap:wrap;padding:9px 12px;background:#0f1520;border-top:1px solid #1e3048;}
+.btn{padding:8px 11px;border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:.68rem;font-weight:700;border:none;cursor:pointer;flex-shrink:0;transition:opacity .15s;}
+.btn:active{opacity:.7;}
+.btn-chk{background:#00f0c8;color:#080c14;}
+.btn-clr{background:transparent;border:1px solid #1e3048;color:#4a6080;}
+.btn-det{background:#2563eb;color:#fff;}
+.btn-ghost{background:#7c3aed;color:#fff;}
+.btn-res{background:#16a34a;color:#fff;}
+.btn-test{background:#a855f7;color:#fff;}
+.badge{display:none;margin:0 12px 10px;padding:7px 12px;border-radius:8px;font-size:.7rem;border:1px solid #1e3048;}
+.badge.show{display:block;}
+.badge.g{border-color:#22c55e;color:#22c55e;background:rgba(34,197,94,.07);}
+.badge.o{border-color:#fbbf24;color:#fbbf24;background:rgba(251,191,36,.07);}
+.badge.r{border-color:#f43f5e;color:#f43f5e;background:rgba(244,63,94,.07);}
+.progress-wrap{margin-bottom:10px;}
+.progress-bar{height:4px;background:#1e3048;border-radius:2px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,#00f0c8,#00a8ff);border-radius:2px;transition:width .4s ease;}
+.progress-lbl{font-size:.6rem;color:#4a6080;margin-top:4px;text-align:right;}
+/* keyboard spacer — pushes content above keyboard */
+.kb-spacer{height:0;transition:height .15s;}
+</style>
+</head>
+<body>
+<div class="top">
+  <div class="top-t">✏️ Python 3.1–3.15 (1-qism)</div>
+  <div class="top-s" id="topSub">—</div>
+</div>
+<div class="bright-bar">
+  <span class="bright-lbl">👁️ Xiralik:</span>
+  <input type="range" class="bright-slider" id="brightSlider" min="1" max="10" value="3" oninput="setBright(this.value)">
+  <span class="bright-val" id="brightVal">3</span>
+</div>
+<div class="wrap">
+  <div class="stats">
+    <div class="stat"><div class="sv" id="svPct">—</div><div class="sl">TOGRI</div></div>
+    <div class="stat"><div class="sv" id="svDone">0</div><div class="sl">BAJARILDI</div></div>
+    <div class="stat"><div class="sv" id="svTotal">—</div><div class="sl">JAMI</div></div>
+  </div>
+  <div class="progress-wrap">
+    <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+    <div class="progress-lbl" id="progressLbl">0 / 15 mavzu</div>
+  </div>
+  <div class="tabs" id="tabs"></div>
+  <div class="skip-row" onclick="toggleSkip()">
+    <div class="sw" id="sw"></div>
+    <span id="skipLbl"># Kommentlarni otkazib yuboring</span>
+  </div>
+  <div class="info-box" id="infoBox">—</div>
+  <div class="detail-panel" id="detailPanel">
+    <div class="detail-title">📖 BATAFSIL — MENTOR IZOHI</div>
+    <div id="detailContent"></div>
+  </div>
+  <div class="test-panel" id="testPanel">
+    <div class="test-title">🧠 TEST SAVOLI</div>
+    <div class="test-q" id="testQ"></div>
+    <div class="test-opts" id="testOpts"></div>
+    <div class="test-exp" id="testExp"></div>
+  </div>
+  <div class="result-panel" id="resultPanel">
+    <div class="result-title">📊 KOD NATIJASI</div>
+    <div class="sim-wrap" id="simWrap"></div>
+  </div>
+  <div class="code-block">
+    <div class="fbar">
+      <div class="dot r"></div><div class="dot y"></div><div class="dot g"></div>
+      <div class="fn" id="fname">main.py</div>
+      <div class="fhint">↔️ suring ✏️ yozing</div>
+    </div>
+    <div class="lines-wrap" id="linesWrap"></div>
+    <div class="btn-row">
+      <button class="btn btn-chk" onclick="doCheck()">✅ Tekshir</button>
+      <button class="btn btn-clr" onclick="doClear()">🗑️ Tozala</button>
+      <button class="btn btn-ghost" id="ghostBtn" onclick="toggleGhost()">👁️ Yashir</button>
+      <button class="btn btn-det" onclick="toggleDetail()">📖 Batafsil</button>
+      <button class="btn btn-test" onclick="toggleTest()">🧠 Test</button>
+      <button class="btn btn-res" onclick="toggleResult()">📊 Natija</button>
+    </div>
+    <div class="badge" id="badge"></div>
+  </div>
+  <div class="kb-spacer" id="kbSpacer"></div>
+</div>
+<script>
+var SIMS={
+'kirish':'<div style="background:#0d1117;border-radius:8px;padding:10px 14px;font-size:.72rem;line-height:1.9;"><div style="color:#4a6080;margin-bottom:6px;font-size:.63rem;">▶ Python nima uchun?</div><div style="color:#00f0c8;">Data Science &amp; ML ✓</div><div style="color:#00f0c8;">Web backend ✓</div><div style="color:#00f0c8;">Avtomatlashtirish ✓</div><div style="color:#00f0c8;">Kichik sinteks ✓</div><div style="color:#4a6080;margin-top:6px;font-size:.63rem;">▶ Python versiyasi:</div><div style="color:#fbbf24;">Python 3.x (hozirgi standart)</div></div>',
+
+'install':'<div style="background:#0d1117;border-radius:8px;padding:10px 14px;font-size:.72rem;line-height:1.9;"><div style="color:#4a6080;margin-bottom:6px;font-size:.63rem;">▶ Terminalda tekshirish:</div><div style="color:#22c55e;">$ python --version</div><div style="color:#fbbf24;">Python 3.11.4</div><div style="color:#4a6080;margin-top:6px;font-size:.63rem;">▶ pip (paket menejeri):</div><div style="color:#22c55e;">$ pip install pandas</div><div style="color:#22c55e;">$ pip install numpy</div></div>',
+
+'print':'<div style="background:#0d1117;border-radius:8px;padding:10px 14px;font-size:.72rem;line-height:1.9;"><div style="color:#4a6080;margin-bottom:4px;font-size:.63rem;">▶ Natija:</div><div style="color:#22c55e;">Salom, dunyo!</div><div style="color:#22c55e;">Python 3</div><div style="color:#22c55e;">Men Aliman, 20 yoshdaman</div><div style="color:#22c55e;">1 + 2 + 3</div><div style="color:#fbbf24;">A  B  C</div></div>',
+
+'variables':'<div style="background:#0d1117;border-radius:8px;padding:10px 14px;font-size:.72rem;line-height:1.9;"><div style="color:#4a6080;font-size:.63rem;">▶ Natija:</div><div style="color:#22c55e;">Ali</div><div style="color:#22c55e;">25</div><div style="color:#22c55e;">1.75</div><div style="color:#22c55e;">True</div><div style="color:#4a6080;font-size:.63rem;margin-top:4px;">▶ type():</div><div style="color:#fbbf24;">&lt;class str&gt;  &lt;class int&gt;  &lt;class float&gt;  &lt;class bool&gt;</div></div>',
+
+'strings':'<div style="background:#0d1117;border-radius:8px;padding:10px 14px;font-size:.72rem;line-height:1.9;"><div style="color:#4a6080;font-size:.63rem;">▶ Natija:</div><div style="color:#22c55e;">ALI VALIYEV</div><div style="color:#22c55e;">ali valiyev</div><div style="color:#22c55e;">Ali Valiyev</div><div style="color:#22c55e;">11</div><div style="color:#22c55e;">a (0-indeks)</div><div style="color:#22c55e;">v (oxirgi)</div><div style="color:#fbbf24;">ali (0:3 kesish)</div><div style="color:#22c55e;">True (startswith)</div></div>',
+
+'numbers':'<div style="background:#0d1117;border-radius:8px;padding:10px 14px;font-size:.72rem;line-height:1.9;"><div style="color:#4a6080;font-size:.63rem;">▶ Natija:</div><div style="color:#22c55e;">15</div><div style="color:#22c55e;">5</div><div style="color:#22c55e;">50</div><div style="color:#22c55e;">2.5</div><div style="color:#22c55e;">2 (butun boʻlinma)</div><div style="color:#22c55e;">0 (qoldiq)</div><div style="color:#fbbf24;">1000 (10**3)</div></div>',
+
+'lists':'<div style="background:#0d1117;border-radius:8px;padding:10px 14px;font-size:.72rem;line-height:1.9;"><div style="color:#4a6080;font-size:.63rem;">▶ Natija:</div><div style="color:#22c55e;">[\'olma\', \'nok\', \'uzum\', \'shaftoli\']</div><div style="color:#22c55e;">olma | shaftoli (oxirgi)</div><div style="color:#22c55e;">4 ta element</div><div style="color:#22c55e;">[\'nok\', \'uzum\'] (kesish)</div><div style="color:#fbbf24;">[\'olma\', \'nok\', \'uzum\'] (oʻchirildi)</div><div style="color:#22c55e;">[\'nok\', \'olma\', \'uzum\'] (sort)</div></div>',
+
+'lists2':'<div style="background:#0d1117;border-radius:8px;padding:10px 14px;font-size:.72rem;line-height:1.9;"><div style="color:#4a6080;font-size:.63rem;">▶ Tuple natija:</div><div style="color:#22c55e;">(10, 20, 30)</div><div style="color:#22c55e;">10 (birinchi)</div><div style="color:#f43f5e;">TypeError: tuple oʻzgarmaydi</div><div style="color:#4a6080;font-size:.63rem;margin-top:4px;">▶ enumerate:</div><div style="color:#fbbf24;">0: olma  1: nok  2: uzum</div></div>',
+
+'for':'<div style="background:#0d1117;border-radius:8px;padding:10px 14px;font-size:.72rem;line-height:1.9;"><div style="color:#4a6080;font-size:.63rem;">▶ Natija:</div><div style="color:#22c55e;">olma  nok  uzum</div><div style="color:#22c55e;">0  1  2  3  4</div><div style="color:#fbbf24;">Jami: 15</div><div style="color:#22c55e;">0: olma  1: nok (enumerate)</div></div>',
+
+'ifelse':'<div style="background:#0d1117;border-radius:8px;padding:10px 14px;font-size:.72rem;line-height:1.9;"><div style="color:#4a6080;font-size:.63rem;">▶ ball=75:</div><div style="color:#22c55e;">Yaxshi</div><div style="color:#4a6080;font-size:.63rem;">▶ ball=95:</div><div style="color:#22c55e;">Aʼlo</div><div style="color:#4a6080;font-size:.63rem;">▶ ball=35:</div><div style="color:#f43f5e;">Qoniqarsiz</div></div>',
+
+'ifelif':'<div style="background:#0d1117;border-radius:8px;padding:10px 14px;font-size:.72rem;line-height:1.9;"><div style="color:#4a6080;font-size:.63rem;">▶ and / or / not:</div><div style="color:#22c55e;">True and True → True</div><div style="color:#22c55e;">True or False → True</div><div style="color:#fbbf24;">not True → False</div><div style="color:#22c55e;">18-65 yosh: ishchi ✓</div></div>',
+
+'dict':'<div style="background:#0d1117;border-radius:8px;padding:10px 14px;font-size:.72rem;line-height:1.9;"><div style="color:#4a6080;font-size:.63rem;">▶ Natija:</div><div style="color:#22c55e;">Ali</div><div style="color:#22c55e;">{\'ism\':\'Ali\',\'yosh\':26,\'shahar\':\'Toshkent\'}</div><div style="color:#fbbf24;">ism | yosh | shahar (keys)</div><div style="color:#22c55e;">Yoʻq (get default)</div></div>',
+
+'dict2':'<div style="background:#0d1117;border-radius:8px;padding:10px 14px;font-size:.72rem;line-height:1.9;"><div style="color:#4a6080;font-size:.63rem;">▶ Lug\'at bilan ishlash:</div><div style="color:#22c55e;">ism: Ali</div><div style="color:#22c55e;">yosh: 25</div><div style="color:#22c55e;">shahar: Toshkent</div><div style="color:#fbbf24;">Ali, 25 yosh (f-string)</div></div>',
+
+'nesting':'<div style="background:#0d1117;border-radius:8px;padding:10px 14px;font-size:.72rem;line-height:1.9;"><div style="color:#4a6080;font-size:.63rem;">▶ Ichma-ich sikl natijasi:</div><div style="color:#22c55e;">1x1=1  1x2=2  1x3=3</div><div style="color:#22c55e;">2x1=2  2x2=4  2x3=6</div><div style="color:#22c55e;">3x1=3  3x2=6  3x3=9</div></div>',
+
+'while':'<div style="background:#0d1117;border-radius:8px;padding:10px 14px;font-size:.72rem;line-height:1.9;"><div style="color:#4a6080;font-size:.63rem;">▶ Natija:</div><div style="color:#22c55e;">1  2  3  4  5</div><div style="color:#fbbf24;">Sikl tugadi!</div><div style="color:#4a6080;font-size:.63rem;margin-top:4px;">▶ break misoli:</div><div style="color:#22c55e;">1  2  3  (break da toʻxtadi)</div></div>'
+};
+
+var M=[
+/* 1 */
+{id:'kirish',f:'3.1_kirish.py',
+info:'3.1 — KIRISH: PYTHON NIMA?\nPython — oddiy sinteksli, kuchli til.\n\nQaerda ishlatiladi:\n  Data Science va ML\n  Web dasturlash (Django, Flask)\n  Avtomatlashtirish\n  Ilmiy hisob-kitob\n\nBirinchi fayl: main.py',
+detail:'PYTHON — NIMA VA NIMA UCHUN?\n\nPython 1991-yilda Guido van Rossum tomonidan\nyaratilgan. Hozir eng mashhur til.\n\n━━━ NIMA UCHUN PYTHON? ━━━\n\n1. O\'QISH OSON\n   Java:   System.out.println("Salom");\n   Python: print("Salom")\n   → Python ancha sodda!\n\n2. KUTUBXONALAR KO\'P\n   pandas, numpy, sklearn, tensorflow...\n   Har qanday vazifa uchun tayyor vositalar.\n\n3. TALABGA EGA\n   Data Scientist, ML Engineer, Backend — hammasi Python.\n\n━━━ PYTHON QANDAY ISHLAYDI? ━━━\n\n.py fayl → Python interpreter → Natija\n\nInterpreter — kod qatorlarini birma-bir o\'qib bajaradi.\nBu "compile" qilish shart emasligini anglatadi.\n\n━━━ BIRINCHI QADAM ━━━\n\nHar qanday Python kodi:\n1. Matn muharriri (VS Code, Notepad++)\n2. .py kengaymali fayl\n3. Terminal: python main.py\n\nYoki: Google Colab, Kaggle Notebooks — brauzerda!',
+tq:'Python qaysi sohada ENG KO\'P ishlatiladi?',
+to:['Mobil ilovalar','Data Science va ML','O\'yinlar yaratish','Operatsion tizimlar'],
+ta:1,
+te:'Python Data Science, Machine Learning va AI sohasining asosiy tili. pandas, numpy, sklearn — barchasi Python.',
+lines:[
+{c:'# 3.1 — Python birinchi qadam',n:''},
+{c:'# Bu fayl: main.py',n:''},
+{c:'',n:''},
+{c:'# Python — sodda va kuchli til',n:''},
+{c:'# Qo\'llash sohalari:',n:''},
+{c:'# - Data Science va ML',n:''},
+{c:'# - Web backend (Django)',n:''},
+{c:'# - Avtomatlashtirish',n:''},
+{c:'',n:''},
+{c:'print("Python o\'rganishni boshladim!")',n:'ekranga birinchi xabaringizni chiqardingiz'}
+]},
+
+/* 2 */
+{id:'install',f:'3.2_install.py',
+info:'3.2 — PYTHON O\'RNATISH\nPython.org dan yuklab o\'rnatiladi.\n\nTerminalda tekshirish:\n  python --version\n  python3 --version\n\npip — paket menejeri:\n  pip install kutubxona_nomi',
+detail:'PYTHON O\'RNATISH — BATAFSIL\n\n━━━ O\'RNATISH QADAMLARI ━━━\n\n1. python.org → Downloads\n2. O\'z OS ingiz uchun yuklab oling\n3. "Add Python to PATH" belgini qo\'ying!\n4. O\'rnatish tugadi.\n\n━━━ MUXIT (ENVIRONMENT) ━━━\n\nTerminal/CMD da:\n  python --version     → Python 3.11.4\n  python               → interaktiv rejim\n  exit()               → chiqish\n\n━━━ PIP — PAKET MENEJERI ━━━\n\npip = Python\'s package installer\n\npip install pandas       → pandas yuklab olish\npip install numpy        → numpy yuklab olish\npip list                 → o\'rnatilganlarni ko\'rish\npip uninstall pandas     → o\'chirish\n\n━━━ VIRTUAL MUHIT ━━━\n\nHar loyiha uchun alohida muhit:\npython -m venv mening_env\nmening_env\\Scripts\\activate  (Windows)\nsource mening_env/bin/activate  (Mac/Linux)\n\n━━━ GOOGLE COLAB — O\'RNATISHSIZ ━━━\n\nColab: colab.research.google.com\n→ Brauzerda ishlaydi, o\'rnatish shart emas!\n→ GPU/TPU bepul\n→ Kaggle ham shunday',
+tq:'pip nima vazifasini bajaradi?',
+to:['Python ni o\'rnatadi','Kutubxonalarni o\'rnatish va boshqaradi','Kodni tekshiradi','Fayllarni saqlaydi'],
+ta:1,
+te:'pip (Package Installer for Python) — kutubxonalarni o\'rnatish, yangilash, o\'chirish uchun. pip install pandas kabi ishlatiladi.',
+lines:[
+{c:'# 3.2 — O\'rnatish va muhit',n:''},
+{c:'',n:''},
+{c:'# Terminalda (bu Python kodi emas, izoh):',n:''},
+{c:'# python --version',n:''},
+{c:'# pip install pandas numpy matplotlib',n:''},
+{c:'',n:''},
+{c:'# Python o\'rnatilganini tekshiramiz',n:''},
+{c:'import sys',n:'sys modulini yuklab oldingiz'},
+{c:'print(sys.version)',n:'Python versiyasini ekranga chiqardingiz'},
+{c:'',n:''},
+{c:'# Platforma',n:''},
+{c:'print(sys.platform)',n:'operatsion tizim nomini chiqardingiz'}
+]},
+
+/* 3 */
+{id:'print',f:'3.3_print.py',
+info:'3.3 — PRINT() VA SINTEKS\nprint() — ekranga chiqarish.\n\nprint("matn")          → oddiy\nprint(a, b, sep=", ")  → ajratuvchi\nprint("x", end="")     → qator yakunsiz\nf"Salom {ism}!"        → f-string',
+detail:'PRINT() — BATAFSIL\n\nprint() — Python\'da ekranga chiqarishning yagona usuli.\n\n━━━ ASOSIY SHAKLLAR ━━━\n\nprint("Salom")               → Salom\nprint(42)                    → 42\nprint(3.14)                  → 3.14\nprint(True)                  → True\n\n━━━ BIR NECHA QIYMAT ━━━\n\nprint("Yosh:", 25)           → Yosh: 25\nprint("a", "b", "c")        → a b c\nprint("a","b","c",sep="-")  → a-b-c\nprint("a","b",sep="")       → ab\n\n━━━ END PARAMETRI ━━━\n\nprint("Salom", end=" ")      → Salom (keyingi qatorga o\'tmaydi)\nprint("dunyo!")              → dunyo!\nNatija: Salom dunyo!\n\n━━━ F-STRING (ENG QULAY) ━━━\n\nism = "Ali"\nyosh = 20\nprint(f"Men {ism}man, {yosh} yoshdaman")\n→ Men Aliman, 20 yoshdaman\n\nF-string ichida hisob ham qilsa bo\'ladi:\nprint(f"2+3 = {2+3}")  → 2+3 = 5\n\n━━━ XATO QILMASLIK ━━━\n\n❌ print(Salom)        → NameError (o\'zgaruvchi qidiradi)\n✅ print("Salom")      → to\'g\'ri\n❌ print("1" + 2)      → TypeError\n✅ print("1", 2)       → 1 2',
+tq:'f"Men {ism}man" da {} nima vazifasi?',
+to:['Hisob matematik amal','O\'zgaruvchi qiymatini joyiga qo\'yadi','Qavos sifatida ko\'rsatiladi','Xato belgisi'],
+ta:1,
+te:'F-string da {} ichiga o\'zgaruvchi yoki ifoda yoziladi, Python uni qiymat bilan almashtiradi. Misol: ism="Ali" → f"{ism}" → "Ali".',
+lines:[
+{c:'# 3.3 — print() va f-string',n:''},
+{c:'',n:''},
+{c:'print("Salom, dunyo!")',n:'ekranga birinchi matn chiqardingiz'},
+{c:'print("Python", 3)',n:'matn va son birgalikda chiqardingiz'},
+{c:'',n:''},
+{c:'# f-string',n:''},
+{c:'ism = "Ali"',n:'ism o\'zgaruvchisiga Ali berdingiz'},
+{c:'yosh = 20',n:'yosh o\'zgaruvchisiga 20 berdingiz'},
+{c:'print(f"Men {ism}man, {yosh} yoshdaman")',n:'f-string bilan o\'zgaruvchilarni matnga qo\'shdingiz'},
+{c:'',n:''},
+{c:'# sep va end',n:''},
+{c:'print(1, 2, 3, sep=" + ")',n:'sep parametri bilan elementlar orasiga + belgisi qo\'ydingiz'},
+{c:'print("A", end="  ")',n:'end parametri bilan keyingi qatorga o\'tmaslikni bildirdingiz'},
+{c:'print("B", end="  ")',n:'B ni ham xuddi shunday chiqardingiz'},
+{c:'print("C")',n:'C ni oddiy chiqardingiz'}
+]},
+
+/* 4 */
+{id:'variables',f:'3.5_variables.py',
+info:'3.5 — O\'ZGARUVCHILAR\nTo\'rt asosiy tur:\n\nstr   → "Ali"        (matn)\nint   → 25           (butun son)\nfloat → 1.75         (kasr son)\nbool  → True/False   (mantiq)\n\ntype() — turini aniqlash\nint() str() float() — konvertatsiya',
+detail:'O\'ZGARUVCHILAR — BATAFSIL\n\nO\'zgaruvchi — xotiradagi nom berilgan quticha.\n\n━━━ TO\'RT ASOSIY TUR ━━━\n\n1) str — matn (string)\n   ism = "Ali"         ← qo\'shtirnoq SHART\n   joy = \'Toshkent\'   ← apostrof ham bo\'ladi\n   xat = """Ko\'p\n   qatorli"""          ← uch qo\'shtirnoq\n\n2) int — butun son\n   yosh = 25\n   minus = -10\n   katta = 1_000_000   ← minglik ajratgich (o\'qishga qulay)\n\n3) float — kasr son\n   narx = 9.99\n   pi = 3.14159\n   Muhim: 9 ≠ 9.0\n\n4) bool — mantiqiy\n   faol = True    ← katta T!\n   yopiq = False  ← katta F!\n   bool aslida int: True==1, False==0\n\n━━━ TYPE() ━━━\n\ntype("Ali")   → <class \'str\'>\ntype(25)      → <class \'int\'>\ntype(9.99)    → <class \'float\'>\ntype(True)    → <class \'bool\'>\n\n━━━ KONVERTATSIYA ━━━\n\nint("25")     → 25      (str → int)\nstr(25)       → "25"    (int → str)\nfloat("3.14") → 3.14    (str → float)\nbool(0)       → False\nbool(1)       → True\nbool("")      → False   (bo\'sh matn)\n\n━━━ NOMLASH ━━━\n\n✅ kichik_harf_underscore  (tavsiya — snake_case)\n✅ camelCase               (ham qo\'llaniladi)\n❌ 2nom = x               (raqamdan boshlanmaydi)\n❌ for = 5               (kalit so\'z bo\'lmaydi)',
+tq:'bool turining qiymatlari nimalar?',
+to:['0 va 1','Yes va No','True va False','On va Off'],
+ta:2,
+te:'bool — True yoki False (katta harf bilan!). Aslida True==1, False==0. Shuning uchun True+True=2 ham ishlaydi.',
+lines:[
+{c:'# 3.5 — O\'zgaruvchilar va turlar',n:''},
+{c:'',n:''},
+{c:'ism = "Ali"',n:'str turida ism o\'zgaruvchisi yaratdingiz'},
+{c:'yosh = 25',n:'int turida yosh o\'zgaruvchisi yaratdingiz'},
+{c:'boy = 1.75',n:'float turida boy o\'zgaruvchisi yaratdingiz'},
+{c:'aktiv = True',n:'bool turida aktiv o\'zgaruvchisi yaratdingiz'},
+{c:'',n:''},
+{c:'print(ism, yosh, boy, aktiv)',n:'barcha o\'zgaruvchilarni bir qatorda chiqardingiz'},
+{c:'',n:''},
+{c:'# type() bilan tur aniqlash',n:''},
+{c:'print(type(ism))',n:'ism o\'zgaruvchisi turini chiqardingiz'},
+{c:'print(type(yosh))',n:'yosh o\'zgaruvchisi turini chiqardingiz'},
+{c:'',n:''},
+{c:'# Konvertatsiya',n:''},
+{c:'son_matn = "100"',n:'100 raqamini matn ko\'rinishida saqladdingiz'},
+{c:'son = int(son_matn)',n:'matnni int ga aylantirib son ga saqladdingiz'},
+{c:'print(son + 5)',n:'son ga 5 qo\'shib natijani chiqardingiz'}
+]},
+
+/* 5 */
+{id:'strings',f:'3.6_strings.py',
+info:'3.6 — MATN (STRINGS)\nMatn metodlari:\n\n.upper()  .lower()  .title()\nlen()     — uzunlik\n[0]       — birinchi harf (0-dan!)\n[-1]      — oxirgi harf\n[1:4]     — kesish\n.replace() .split() .strip()',
+detail:'STRINGS — BATAFSIL\n\nMatn — Python da eng ko\'p ishlatiladigan tur.\n\n━━━ KATTA-KICHIK ━━━\n\n"salom".upper()        → "SALOM"\n"SALOM".lower()        → "salom"\n"ali vali".title()     → "Ali Vali"\n"  bo\'sh  ".strip()    → "bo\'sh"  (chetdagi probel)\n"  bo\'sh  ".lstrip()   → "bo\'sh  " (chapdan)\n"  bo\'sh  ".rstrip()   → "  bo\'sh" (o\'ngdan)\n\n━━━ UZUNLIK VA INDEKS ━━━\n\nmatn = "Python"\nlen(matn)   → 6\nmatn[0]     → "P"   ← BIRINCHI (0 dan!)\nmatn[1]     → "y"\nmatn[-1]    → "n"   ← OXIRGI\nmatn[-2]    → "o"\n\n━━━ KESISH (SLICING) ━━━\n\nmatn[0:3]   → "Pyt"   (0,1,2)\nmatn[2:]    → "thon"  (2 dan oxiriga)\nmatn[:4]    → "Pyth"  (0 dan 3 gacha)\nmatn[::2]   → "Pto"   (har ikkinchi)\n\n━━━ QIDIRISH ━━━\n\n"Py" in matn           → True\n"Java" in matn         → False\nmatn.startswith("Py")  → True\nmatn.endswith("on")    → True\nmatn.find("th")        → 2 (indeks)\nmatn.count("y")        → 1\n\n━━━ O\'ZGARTIRISH ━━━\n\n"salom dunyo".replace("dunyo","Python")\n→ "salom Python"\n\n"ali,vali,sali".split(",")\n→ ["ali","vali","sali"]\n\n"-".join(["a","b","c"])\n→ "a-b-c"',
+tq:'matn[-1] nima qaytaradi?',
+to:['Xatolik','Birinchi harf','Oxirgi harf','Uzunlik'],
+ta:2,
+te:'Manfiy indeks — oxiridan hisoblaydi. [-1] oxirgi, [-2] oxiridan ikkinchi. matn="Python" bo\'lsa matn[-1]="n".',
+lines:[
+{c:'# 3.6 — Matn (Strings)',n:''},
+{c:'',n:''},
+{c:'matn = "ali valiyev"',n:'kichik harfli matn yaratdingiz'},
+{c:'',n:''},
+{c:'print(matn.upper())',n:'.upper() bilan barcha harflarni kattalatdingiz'},
+{c:'print(matn.lower())',n:'.lower() bilan barcha harflarni kichiklatdingiz'},
+{c:'print(matn.title())',n:'.title() bilan har so\'z bosh harfini kattalatdingiz'},
+{c:'',n:''},
+{c:'# Uzunlik va indeks',n:''},
+{c:'print(len(matn))',n:'len() bilan matn uzunligini chiqdingiz'},
+{c:'print(matn[0])',n:'0-indeks bilan birinchi harfni oldingiz'},
+{c:'print(matn[-1])',n:'-1 indeks bilan oxirgi harfni oldingiz'},
+{c:'print(matn[0:3])',n:'0 dan 3 gacha kesib oldingiz'},
+{c:'',n:''},
+{c:'# Qidirish va almashtirish',n:''},
+{c:'print(matn.startswith("ali"))',n:'.startswith() bilan matn ali bilan boshlanishini tekshirdingiz'},
+{c:'print(matn.replace("ali","Ali"))',n:'.replace() bilan ali ni Ali ga o\'zgartirdingiz'}
+]},
+
+/* 6 */
+{id:'numbers',f:'3.7_numbers.py',
+info:'3.7 — SONLAR BILAN ISHLASH\nArfimetik amallar:\n\n+  -  *  /       → asosiy\n//   → butun bo\'lish\n%    → qoldiq (modulo)\n**   → daraja\nabs() round() max() min()',
+detail:'SONLAR — BATAFSIL\n\n━━━ ARIFMETIK AMALLAR ━━━\n\na = 10\nb = 3\n\na + b   → 13\na - b   → 7\na * b   → 30\na / b   → 3.333...   ← har doim float!\na // b  → 3          ← butun qism (qoldiq tashlanadi)\na % b   → 1          ← qoldiq\na ** b  → 1000       ← daraja (10³)\n\n━━━ MUHIM: / VA // ━━━\n\n10 / 2   → 5.0   ← float (5 emas!)\n10 // 2  → 5     ← int\n7 / 2    → 3.5\n7 // 2   → 3     ← 3.5 ning butun qismi\n\n━━━ MODULO (%) ━━━\n\nJuftlikni tekshirish:\n8 % 2 == 0  → True   (juft)\n7 % 2 == 0  → False  (toq)\n\n10 % 3 → 1  (10 = 3*3 + 1)\n15 % 5 → 0  (15 = 5*3 + 0)\n\n━━━ TAYYOR FUNKSIYALAR ━━━\n\nabs(-5)        → 5   (mutloq qiymat)\nround(3.7)     → 4   (yaxlitlash)\nround(3.14159, 2) → 3.14\nmax(3,1,8,2)   → 8\nmin(3,1,8,2)   → 1\nsum([1,2,3])   → 6\n\n━━━ MATEMATIK MODUL ━━━\n\nimport math\nmath.sqrt(16)   → 4.0\nmath.pi         → 3.14159...\nmath.floor(3.9) → 3  (pastga)\nmath.ceil(3.1)  → 4  (tepaga)',
+tq:'10 // 3 natijasi nima?',
+to:['3.33','3','1','0.33'],
+ta:1,
+te:'// — butun bo\'lish. 10//3=3 (3.33 ning butun qismi). % — qoldiq: 10%3=1 (10=3*3+1).',
+lines:[
+{c:'# 3.7 — Sonlar bilan ishlash',n:''},
+{c:'',n:''},
+{c:'a = 10',n:'a o\'zgaruvchisiga 10 berdingiz'},
+{c:'b = 3',n:'b o\'zgaruvchisiga 3 berdingiz'},
+{c:'',n:''},
+{c:'print(a + b)',n:'yig\'indi chiqardingiz'},
+{c:'print(a - b)',n:'ayirma chiqardingiz'},
+{c:'print(a * b)',n:'ko\'paytma chiqardingiz'},
+{c:'print(a / b)',n:'bo\'linma (float) chiqardingiz'},
+{c:'print(a // b)',n:'butun bo\'linma chiqardingiz'},
+{c:'print(a % b)',n:'qoldiq chiqardingiz'},
+{c:'print(a ** b)',n:'darajani chiqardingiz'},
+{c:'',n:''},
+{c:'# Tayyor funksiyalar',n:''},
+{c:'print(abs(-25))',n:'abs() bilan mutloq qiymat chiqardingiz'},
+{c:'print(round(3.7))',n:'round() bilan yaxlitladingiz'},
+{c:'print(max(3, 8, 1, 5))',n:'max() bilan eng kattasini chiqdingiz'}
+]},
+
+/* 7 */
+{id:'lists',f:'3.8_lists.py',
+info:'3.8 — RO\'YXATLAR (Lists)\nBir necha qiymat bitta o\'zgaruvchida.\n\n[q1, q2, q3]     → yaratish\n.append(q)       → oxirga qo\'shish\n.insert(i, q)    → i-joyga\n.remove(q)       → o\'chirish\n.sort()          → o\'sish tartibida\n.sort(reverse=True) → kamayish',
+detail:'RO\'YXATLAR — BATAFSIL\n\nRo\'yxat — tartibli, o\'zgaruvchan, har xil turli to\'plam.\n\n━━━ YARATISH ━━━\n\nmevalar = ["olma","nok","uzum"]\nsonlar = [1, 2, 3, 4, 5]\naralash = ["Ali", 25, True, 3.14]\nbo\'sh = []\n\n━━━ INDEKS ━━━\n\nmevalar[0]    → "olma"   (birinchi)\nmevalar[-1]   → "uzum"   (oxirgi)\nmevalar[1:3]  → ["nok","uzum"]\n\n━━━ O\'ZGARTIRISH ━━━\n\nmevalar[0] = "anor"  → ro\'yxatni o\'zgartirdi\n\n━━━ QOSHISH ━━━\n\nmevalar.append("banan")    → oxirga\nmevalar.insert(0,"gilos")  → boshiga\nmevalar += ["limon"]       → birlashtirish\n\n━━━ O\'CHIRISH ━━━\n\nmevalar.remove("nok")      → qiymat bo\'yicha\nmevalar.pop()              → oxirgini o\'chirib qaytaradi\nmevalar.pop(0)             → 0-ni o\'chirib qaytaradi\ndel mevalar[1]             → o\'chirish\n\n━━━ TARTIBLASH — SORT ━━━\n\nsonlar = [3,1,4,1,5,9,2,6]\nsonlar.sort()              → [1,1,2,3,4,5,6,9]\nsonlar.sort(reverse=True)  → [9,6,5,4,3,2,1,1]\n\nsorted(sonlar)             → yangi tartibli ro\'yxat\n                             (asliini o\'zgartirmaydi!)\n\n━━━ BOSHQA METODLAR ━━━\n\n"olma" in mevalar          → True\nlen(mevalar)               → 4\nmevalar.count("olma")      → 1\nmevalar.index("nok")       → 1\nmevalar.reverse()          → teskari\nmevalar.clear()            → bo\'shatish',
+tq:'.sort() va sorted() farqi nima?',
+to:['Farqi yo\'q','sort() asilini o\'zgartiradi, sorted() yangi ro\'yxat beradi','sorted() tezroq','sort() faqat sonlarga'],
+ta:1,
+te:'.sort() — ro\'yxatning o\'zini o\'zgartiradi, None qaytaradi. sorted(x) — asil ro\'yxatni o\'zgartiimay yangi tartibli ro\'yxat qaytaradi.',
+lines:[
+{c:'# 3.8 — Ro\'yxatlar (Lists)',n:''},
+{c:'',n:''},
+{c:'mevalar = ["olma", "nok", "uzum"]',n:'3 elementli ro\'yxat yaratdingiz'},
+{c:'',n:''},
+{c:'# Qo\'shish',n:''},
+{c:'mevalar.append("shaftoli")',n:'.append() bilan oxirga shaftoli qo\'shdingiz'},
+{c:'mevalar.insert(0, "gilos")',n:'.insert() bilan boshiga gilos qo\'shdingiz'},
+{c:'print(mevalar)',n:'to\'liq ro\'yxatni chiqardingiz'},
+{c:'',n:''},
+{c:'# Indeks va kesish',n:''},
+{c:'print(mevalar[0])',n:'0-indeks bilan birinchi elementni oldingiz'},
+{c:'print(mevalar[-1])',n:'-1 bilan oxirgi elementni oldingiz'},
+{c:'print(len(mevalar))',n:'ro\'yxat uzunligini chiqardingiz'},
+{c:'print(mevalar[1:3])',n:'1 dan 3 gacha kesib oldingiz'},
+{c:'',n:''},
+{c:'# O\'chirish va tartiblash',n:''},
+{c:'mevalar.remove("gilos")',n:'.remove() bilan gilosni o\'chirdingiz'},
+{c:'',n:''},
+{c:'sonlar = [3, 1, 4, 1, 5, 9, 2]',n:'tartiblash uchun sonlar ro\'yxati yaratdingiz'},
+{c:'sonlar.sort()',n:'.sort() bilan o\'sish tartibida saraladingiz'},
+{c:'print(sonlar)',n:'tartiblangan ro\'yxatni chiqardingiz'},
+{c:'sonlar.sort(reverse=True)',n:'.sort(reverse=True) bilan kamayish tartibiga o\'tdingiz'},
+{c:'print(sonlar)',n:'teskari tartibdagi ro\'yxatni chiqardingiz'}
+]},
+
+/* 8 */
+{id:'lists2',f:'3.9_tuples.py',
+info:'3.9 — TUPLES (O\'ZGARMAS RO\'YXAT)\nTuple = () qavos, o\'zgartirib bo\'lmaydi.\n\nt = (1, 2, 3)\nt[0]         → birinchi\nt[-1]        → oxirgi\nlen(t)       → uzunlik\n\nList vs Tuple:\nlist — o\'zgaruvchan\ntuple — o\'zgarmas (tezroq!)',
+detail:'TUPLE — BATAFSIL\n\nTuple — list ga o\'xshash, lekin o\'zgarmas.\nYaratilgandan keyin elementlarini o\'zgartirib bo\'lmaydi.\n\n━━━ YARATISH ━━━\n\nt = (1, 2, 3)\nt = (\"Ali\", 25, True)\nt = (42,)        ← BIR ELEMENTLI tuple: vergul shart!\nt = 1, 2, 3      ← qavossiz ham bo\'ladi\n\n━━━ LIST BILAN FARQ ━━━\n\nList:  [1, 2, 3]   → [ ] qavos, o\'zgaradi\nTuple: (1, 2, 3)   → ( ) qavos, o\'zgarmaydi\n\n━━━ O\'XSHASH TOMONLAR ━━━\n\nt[0]          → birinchi element\nt[-1]         → oxirgi element\nt[1:3]        → kesish\nlen(t)        → uzunlik\n\"a\" in t      → qidirish\n\n━━━ O\'ZGARMAS EKANLIGI ━━━\n\nt = (1, 2, 3)\nt[0] = 10     → TypeError!\n              Tuple o\'zgartirib bo\'lmaydi!\n\n━━━ QACHON TUPLE? ━━━\n\n1. O\'zgarmasligi kerak (koordinatalar, RGB rang)\n2. Dictionary kaliti sifatida (list bo\'lmaydi!)\n3. Funksiyadan bir necha qiymat qaytarish\n\n━━━ ENUMERATE ━━━\n\nfor i, meva in enumerate([\"olma\",\"nok\",\"uzum\"]):\n    print(f\"{i}: {meva}\")\n→ 0: olma\n→ 1: nok\n→ 2: uzum',
+tq:'Tuple va List asosiy farqi nima?',
+to:['Tuple faqat sonlar uchun','Tuple o\'zgartirib bo\'lmaydi, list o\'zgaradi','Tuple tezroq qidiriladi','List kattaroq bo\'lishi mumkin'],
+ta:1,
+te:'Tuple — immutable (o\'zgarmas). List — mutable (o\'zgaruvchan). Tuple () qavos, list [] qavos ishlatadi.',
+lines:[
+{c:'# 3.9 — Tuple (O\'zgarmas ro\'yxat)',n:''},
+{c:'',n:''},
+{c:'mevalar_t = ("olma", "nok", "uzum")',n:'tuple yaratdingiz — () qavos'},
+{c:'',n:''},
+{c:'print(mevalar_t)',n:'to\'liq tuple ni chiqardingiz'},
+{c:'print(mevalar_t[0])',n:'0-indeks bilan birinchi elementni oldingiz'},
+{c:'print(mevalar_t[-1])',n:'-1 bilan oxirgi elementni oldingiz'},
+{c:'print(len(mevalar_t))',n:'tuple uzunligini chiqardingiz'},
+{c:'',n:''},
+{c:'# Tuple o\'zgarmaydi',n:''},
+{c:'# mevalar_t[0] = "gilos"  → TypeError!',n:''},
+{c:'',n:''},
+{c:'# enumerate',n:''},
+{c:'for i, meva in enumerate(mevalar_t):',n:'enumerate bilan indeks va qiymatni birgalikda oldingiz'},
+{c:'    print(f"{i}: {meva}")',n:'har bir element va uning raqamini chiqardingiz'}
+]},
+
+/* 9 */
+{id:'for',f:'3.10_for.py',
+info:'3.10 — FOR SIKLI\nTakrorlash va aylanish.\n\nfor e in ro\'yxat:\n    # e har safar bitta element\n\nrange(5)     → 0..4\nrange(1,6)   → 1..5\nrange(0,10,2)→ 0,2,4,6,8\nenumerate()  → indeks + qiymat',
+detail:'FOR SIKLI — BATAFSIL\n\nFor — iteratsiya uchun. Ro\'yxat, matn, range, dict.\n\n━━━ ASOSIY ━━━\n\nfor son in [1, 2, 3]:\n    print(son)\n→ 1  2  3\n\n━━━ RANGE ━━━\n\nrange(5)         → 0, 1, 2, 3, 4\nrange(1, 6)      → 1, 2, 3, 4, 5\nrange(0, 10, 2)  → 0, 2, 4, 6, 8\nrange(10, 0, -1) → 10, 9, 8...1\n\nfor i in range(5):\n    print(i)\n→ 0 1 2 3 4\n\n━━━ ENUMERATE ━━━\n\nfor i, val in enumerate([\"a\",\"b\",\"c\"]):\n    print(i, val)\n→ 0 a\n→ 1 b\n→ 2 c\n\n━━━ MATN BO\'YLAB ━━━\n\nfor harf in \"Python\":\n    print(harf, end=\" \")\n→ P y t h o n\n\n━━━ YIG\'ISH ━━━\n\njami = 0\nfor son in range(1, 11):\n    jami += son        ← +=  qisqartma: jami = jami + son\nprint(jami)  → 55    ← 1+2+...+10\n\n━━━ BREAK VA CONTINUE ━━━\n\nbreak    → siklni DARHOL to\'xtatadi\ncontinue → bu iteratsiyani o\'tkazadi, sikl davom etadi\n\nfor i in range(10):\n    if i == 5:\n        break\n    print(i)\n→ 0 1 2 3 4\n\n━━━ LIST COMPREHENSION ━━━\n\nkvadratlar = [x**2 for x in range(5)]\n→ [0, 1, 4, 9, 16]\n\nKalit narsaB: bu for siklning qisqa shakli.',
+tq:'range(2, 10, 3) qanday sonlar beradi?',
+to:['2, 3, 4, 5, 6, 7, 8, 9','2, 5, 8','2, 4, 6, 8','3, 6, 9'],
+ta:1,
+te:'range(start, stop, step): 2 dan boshlab, 10 dan kichik, har 3 qadam: 2, 5, 8.',
+lines:[
+{c:'# 3.10 — for sikli',n:''},
+{c:'',n:''},
+{c:'mevalar = ["olma", "nok", "uzum"]',n:'uch mevali ro\'yxat yaratdingiz'},
+{c:'',n:''},
+{c:'for meva in mevalar:',n:'ro\'yxat bo\'ylab sikl boshladingiz'},
+{c:'    print(meva)',n:'har bir mevani chiqardingiz'},
+{c:'',n:''},
+{c:'# range() bilan',n:''},
+{c:'for i in range(5):',n:'0 dan 4 gacha range sikli boshladingiz'},
+{c:'    print(i, end="  ")',n:'har sonni chiqardingiz (yangi qatorsiz)'},
+{c:'print()',n:'yangi qatorga o\'tdingiz'},
+{c:'',n:''},
+{c:'# enumerate',n:''},
+{c:'for i, meva in enumerate(mevalar):',n:'enumerate bilan indeks va qiymat birgalikda oldingiz'},
+{c:'    print(f"{i}: {meva}")',n:'indeks va mevani chiqardingiz'},
+{c:'',n:''},
+{c:'# Jami hisoblash',n:''},
+{c:'jami = 0',n:'yig\'uvchi o\'zgaruvchi noldan boshladingiz'},
+{c:'for son in range(1, 6):',n:'1 dan 5 gacha sonlar bo\'ylab aylandingiz'},
+{c:'    jami += son',n:'har sonni jamiga qo\'shdingiz'},
+{c:'print(jami)',n:'natijani chiqardingiz'}
+]},
+
+/* 10 */
+{id:'ifelse',f:'3.11_if_else.py',
+info:'3.11 — IF-ELSE SHARTLAR\nShart asosida qaror qabul qilish.\n\nif shart:\n    # rost\nelif shart2:\n    # 2-shart rost\nelse:\n    # hech biri emas\n\n==  !=  >  <  >=  <=',
+detail:'IF-ELSE — BATAFSIL\n\n━━━ ASOSIY SHAKL ━━━\n\nif shart:\n    # True bo\'lsa\nelse:\n    # False bo\'lsa\n\n━━━ TAQQOSLASH ━━━\n\n==   teng:             5 == 5  → True\n!=   teng emas:        5 != 3  → True\n>    katta:            7 > 3   → True\n<    kichik:           2 < 8   → True\n>=   katta/teng:       5 >= 5  → True\n<=   kichik/teng:      3 <= 4  → True\n\n⚠️  = va == ni aralashtirib yuborish #1 xato!\n=  → o\'zlashtirish (ism = "Ali")\n== → taqqoslash  (ism == "Ali" → True/False)\n\n━━━ AND, OR, NOT ━━━\n\nand → ikkalasi True bo\'lishi kerak\nor  → bittasi True bo\'lsa yetarli\nnot → teskari\n\nyosh >= 18 and yosh < 65     → ishchi yoshi\nbaho == "A" or baho == "B"   → yaxshi o\'quvchi\nnot (son > 0)                → son manfiy yoki nol\n\n━━━ ELIF ━━━\n\nball = 82\nif ball >= 90:\n    print("A\'lo")\nelif ball >= 75:\n    print("Yaxshi")  ← bu bajariladi\nelif ball >= 60:\n    print("Qoniqarli")\nelse:\n    print("Qoniqarsiz")\n\n━━━ QISQA SHAKL (TERNARY) ━━━\n\nbaho = "o\'tdi" if ball >= 60 else "o\'tmadi"\n\n━━━ IN OPERATORI ━━━\n\n"olma" in ["olma","nok"]  → True\n5 in range(10)            → True',
+tq:'and operatori qachon True qaytaradi?',
+to:['Bitta shart True bo\'lsa','Ikkalasi ham True bo\'lsa','Ikkalasi ham False bo\'lsa','Har doim'],
+ta:1,
+te:'and → ikkalasi ham True bo\'lishi kerak. or → bittasi True bo\'lsa yetarli. not → True ni False ga, False ni True ga aylantiradi.',
+lines:[
+{c:'# 3.11 — if-elif-else',n:''},
+{c:'',n:''},
+{c:'ball = 75',n:'ball o\'zgaruvchisiga 75 berdingiz'},
+{c:'',n:''},
+{c:'if ball >= 90:',n:'ball 90 dan katta yoki tengligini tekshirdingiz'},
+{c:'    print("Aʼlo")',n:'90+ uchun Aʼlo chiqarish yozdingiz'},
+{c:'elif ball >= 70:',n:'yoki 70 dan katta yoki tengligini tekshirdingiz'},
+{c:'    print("Yaxshi")',n:'70-89 uchun Yaxshi chiqarish yozdingiz'},
+{c:'elif ball >= 50:',n:'yoki 50 dan katta yoki tengligini tekshirdingiz'},
+{c:'    print("Qoniqarli")',n:'50-69 uchun Qoniqarli chiqarish yozdingiz'},
+{c:'else:',n:'hech biri to\'g\'ri bo\'lmasa blok boshladingiz'},
+{c:'    print("Qoniqarsiz")',n:'50 dan past uchun Qoniqarsiz chiqarish yozdingiz'},
+{c:'',n:''},
+{c:'# and / or',n:''},
+{c:'yosh = 22',n:'yosh o\'zgaruvchisiga 22 berdingiz'},
+{c:'if yosh >= 18 and yosh < 65:',n:'and bilan ikkala shartni birgalikda tekshirdingiz'},
+{c:'    print("Ishchi yoshi")',n:'shart to\'g\'ri bo\'lsa xabar chiqardingiz'}
+]},
+
+/* 11 */
+{id:'ifelif',f:'3.12_elif.py',
+info:'3.12 — IF-ELIF-ELSE (CHUQUR)\nMantiqiy operatorlar:\n\nand  → ikkalasi True\nor   → bittasi True\nnot  → teskari\n\nin   → ro\'yxatda bormi?\nnot in → yo\'qmi?\n\nQisqa shakl:\nx = a if shart else b',
+detail:'MANTIQIY OPERATORLAR — BATAFSIL\n\n━━━ AND ━━━\n\nTrue and True   → True\nTrue and False  → False\nFalse and True  → False\nFalse and False → False\n\nFaqat ikkala shart ham rost bo\'lgandagina True.\n\n━━━ OR ━━━\n\nTrue or True    → True\nTrue or False   → True\nFalse or True   → True\nFalse or False  → False\n\nKamida bitta rost bo\'lsa True.\n\n━━━ NOT ━━━\n\nnot True    → False\nnot False   → True\nnot (5>3)   → False\n\n━━━ ZANJIR SHART ━━━\n\n# Uch shartni birlashtiramiz:\nyosh = 25\n(yosh >= 18) and (yosh < 30) and (yosh != 20)\n\n# Oddiy ko\'rinish:\n18 <= yosh < 30    ← Python bu shakl ham qabul qiladi!\n\n━━━ IN VA NOT IN ━━━\n\nroʻyxat = ["a", "b", "c"]\n"a" in roʻyxat       → True\n"d" not in roʻyxat   → True\n\n━━━ TERNARY OPERATOR ━━━\n\nbaho = "yaxshi" if ball >= 60 else "yomon"\n\n# Bu qisqa shakl:\nif ball >= 60:\n    baho = "yaxshi"\nelse:\n    baho = "yomon"\n\n━━━ TRUTHY VA FALSY ━━━\n\nFalsy (False kabi): 0, "", [], {}, None\nTruthy (True kabi): 1, "a", [1], {"k":"v"}\n\nif []:       → bajarmaydi (bo\'sh list — falsy)\nif [1,2]:    → bajaradi (bo\'sh emas — truthy)',
+tq:'"a" not in ["b","c","d"] natijasi?',
+to:['False','True','None','Xatolik'],
+ta:1,
+te:'"a" in ["b","c","d"] → False, chunki "a" ro\'yxatda yo\'q. not in → teskari: "a" not in → True.',
+lines:[
+{c:'# 3.12 — Mantiqiy operatorlar',n:''},
+{c:'',n:''},
+{c:'yosh = 22',n:'yosh o\'zgaruvchisiga 22 berdingiz'},
+{c:'maosh = 3000000',n:'maosh o\'zgaruvchisiga 3000000 berdingiz'},
+{c:'',n:''},
+{c:'# and',n:''},
+{c:'if yosh >= 18 and maosh >= 2000000:',n:'and bilan yosh va maosh shartlarini birgalikda tekshirdingiz'},
+{c:'    print("Kredit olish mumkin")',n:'ikkalasi to\'g\'ri bo\'lganda xabar chiqardingiz'},
+{c:'',n:''},
+{c:'# or',n:''},
+{c:'til = "Python"',n:'til o\'zgaruvchisiga Python berdingiz'},
+{c:'if til == "Python" or til == "R":',n:'or bilan Python yoki R ekanligini tekshirdingiz'},
+{c:'    print("Data Science tili")',n:'bittasi to\'g\'ri bo\'lganda xabar chiqardingiz'},
+{c:'',n:''},
+{c:'# in operatori',n:''},
+{c:'mevalar = ["olma", "nok", "uzum"]',n:'mevalar ro\'yxati yaratdingiz'},
+{c:'if "nok" in mevalar:',n:'in bilan nok ro\'yxatda borligini tekshirdingiz'},
+{c:'    print("Nok bor!")',n:'bor bo\'lsa xabar chiqardingiz'}
+]},
+
+/* 12 */
+{id:'dict',f:'3.13_dict.py',
+info:'3.13 — LUG\'AT (Dictionary)\nKalit-qiymat juftliklari.\n\nd = {"kalit": qiymat}\nd["kalit"]          → olish\nd["yangi"] = q      → qo\'shish\nd.get(k, standart)  → xavfsiz olish\nd.keys()  .values() .items()',
+detail:'LUG\'AT (Dictionary) — BATAFSIL\n\nLug\'at — kalit-qiymat (key:value) to\'plami.\nTartibsiz (Python 3.7+ dan tartib saqlanadi).\n\n━━━ YARATISH ━━━\n\nshaxs = {\n    "ism": "Ali",\n    "yosh": 25,\n    "shahar": "Toshkent"\n}\n\nbo\'sh_dict = {}\n\n━━━ OLISH ━━━\n\nshaxs["ism"]              → "Ali"\nshaxs["yoq"]              → KeyError! (kalit yo\'q)\nshaxs.get("yoq")          → None (xatosiz)\nshaxs.get("yoq", "—")    → "—" (standart qiymat)\n\n━━━ QO\'SHISH VA O\'ZGARTIRISH ━━━\n\nshaxs["tel"] = "+998901234567"   → yangi kalit\nshaxs["yosh"] = 26              → o\'zgartirish\n\n━━━ O\'CHIRISH ━━━\n\ndel shaxs["tel"]           → o\'chirish\nshaxs.pop("tel")           → o\'chirib qaytaradi\nshaxs.pop("tel", None)     → xavfsiz o\'chirish\n\n━━━ METODLAR ━━━\n\nshaxs.keys()     → kalitlar\nshaxs.values()   → qiymatlar\nshaxs.items()    → (kalit, qiymat) juftlar\n"ism" in shaxs   → True\nlen(shaxs)       → 3\n\n━━━ ITERATSIYA ━━━\n\nfor kalit, qiymat in shaxs.items():\n    print(f"{kalit}: {qiymat}")\n\n━━━ ICHKI LUG\'AT ━━━\n\ntalaba = {\n    "ism": "Ali",\n    "baholar": {"matematika": 95, "fizika": 88}\n}\ntalaba["baholar"]["matematika"]  → 95',
+tq:'.get(kalit, "Yoʻq") nima farq qiladi oddiy d[kalit] dan?',
+to:['Farqi yo\'q','Kalit yo\'q bo\'lsa standart qaytaradi, xato chiqarmaydi','Faqat string kalitlar uchun','Qiymatni o\'zgartiradi'],
+ta:1,
+te:'d["kalit"] — kalit yo\'q bo\'lsa KeyError chiqaradi. d.get("kalit","standart") — kalit yo\'q bo\'lsa standart qiymat qaytaradi, xato yo\'q.',
+lines:[
+{c:'# 3.13 — Lug\'at (Dictionary)',n:''},
+{c:'',n:''},
+{c:'shaxs = {"ism": "Ali", "yosh": 25, "shahar": "Toshkent"}',n:'3 juftli lug\'at yaratdingiz'},
+{c:'',n:''},
+{c:'# Olish',n:''},
+{c:'print(shaxs["ism"])',n:'ism kaliti bo\'yicha qiymat oldingiz'},
+{c:'print(shaxs.get("tel", "Yoq"))',n:'.get() bilan mavjud bo\'lmagan kalitni xavfsiz so\'radingiz'},
+{c:'',n:''},
+{c:'# Qo\'shish va o\'zgartirish',n:''},
+{c:'shaxs["yosh"] = 26',n:'yosh qiymatini 26 ga o\'zgartirdingiz'},
+{c:'shaxs["kasb"] = "Dasturchi"',n:'kasb kalitiga yangi qiymat qo\'shdingiz'},
+{c:'print(shaxs)',n:'to\'liq yangilangan lug\'atni chiqardingiz'},
+{c:'',n:''},
+{c:'# keys, values, items',n:''},
+{c:'for kalit, qiymat in shaxs.items():',n:'.items() bilan kalit-qiymat juftlarini oldingiz'},
+{c:'    print(f"{kalit}: {qiymat}")',n:'har bir juftni chiqardingiz'}
+]},
+
+/* 13 */
+{id:'dict2',f:'3.14_dict2.py',
+info:'3.14 — LUG\'AT BILAN ISHLASH\nAmpliy amallar:\n\nRo\'yxat ichida lug\'at\nLug\'at ichida lug\'at\n\n.update()   → ko\'p qiymat yangilash\n.copy()     → nusxa olish\ndict()      → yaratish usuli',
+detail:'LUG\'AT BILAN ISHLASH — BATAFSIL\n\n━━━ RO\'YXAT ICHIDA LUG\'AT ━━━\n\ntalabalar = [\n    {"ism": "Ali",  "ball": 90},\n    {"ism": "Vali", "ball": 75},\n    {"ism": "Sali", "ball": 85}\n]\n\ntalabalar[0]["ism"]   → "Ali"\ntalabalar[1]["ball"]  → 75\n\n━━━ FOR BILAN AYLANISH ━━━\n\nfor t in talabalar:\n    print(f"{t[\'ism\']}: {t[\'ball\']}")\n\n━━━ UPDATE METODI ━━━\n\nshaxs = {"ism": "Ali"}\nshaxs.update({"yosh": 25, "shahar": "Toshkent"})\n→ {\"ism\":\"Ali\", \"yosh\":25, \"shahar\":\"Toshkent\"}\n\n━━━ DICT YARATISH USULLARI ━━━\n\n# 1: to\'g\'ridan-to\'g\'ri\nd = {"a": 1, "b": 2}\n\n# 2: dict() funksiyasi\nd = dict(a=1, b=2)\n\n# 3: dict comprehension\nd = {x: x**2 for x in range(5)}\n→ {0:0, 1:1, 2:4, 3:9, 4:16}\n\n━━━ NUSXA OLISH ━━━\n\nasl = {"a": 1}\nnusxa = asl.copy()   ← to\'g\'ri\nnusxa2 = asl        ← XATO! Bu ikkisi bir xil ob\'ektga ishora\n\nnusxa["a"] = 99\nprint(asl["a"])  → 1  (o\'zgarmadi)',
+tq:'talabalar[1]["ism"] nima qaytaradi?',
+to:['1','Vali','Ali','KeyError'],
+ta:1,
+te:'talabalar[1] — 2-chi lug\'at (indeks 1). ["ism"] — shu lug\'atning ism kaliti. Natija: "Vali".',
+lines:[
+{c:'# 3.14 — Lug\'at bilan ishlash',n:''},
+{c:'',n:''},
+{c:'talabalar = [',n:'lug\'atlar ro\'yxatini ochmoqdasiz'},
+{c:'    {"ism": "Ali",  "ball": 90},',n:'birinchi lug\'atni qo\'shdingiz'},
+{c:'    {"ism": "Vali", "ball": 75},',n:'ikkinchi lug\'atni qo\'shdingiz'},
+{c:'    {"ism": "Sali", "ball": 85}',n:'uchinchi lug\'atni qo\'shdingiz'},
+{c:']',n:'ro\'yxatni yopdingiz'},
+{c:'',n:''},
+{c:'# Barcha talabalarni chiqarish',n:''},
+{c:'for t in talabalar:',n:'ro\'yxat bo\'ylab sikl boshladingiz'},
+{c:'    print(f"{t[\'ism\']}: {t[\'ball\']}")',n:'har talabaning ism va ballini chiqardingiz'},
+{c:'',n:''},
+{c:'# Eng yuqori ball',n:''},
+{c:'eng_yaxshi = max(talabalar, key=lambda t: t["ball"])',n:'max() va lambda bilan eng yuqori balli talabani topdingiz'},
+{c:'print(eng_yaxshi["ism"])',n:'eng yaxshi talaba ismini chiqardingiz'}
+]},
+
+/* 14 */
+{id:'nesting',f:'3.15_nesting.py',
+info:'3.15 — NESTING (ICHMA-ICH)\nSikl ichida sikl:\n\nfor i in range(3):\n    for j in range(3):\n        # ichki sikl\n\nListdan list ichida qidirish\nKo\'paytirish jadvali',
+detail:'NESTING (ICHMA-ICH) — BATAFSIL\n\nIchma-ich — bir blok boshqa bloq ichida.\n\n━━━ ICHMA-ICH SIKL ━━━\n\nfor i in range(1, 4):      ← tashqi: i = 1,2,3\n    for j in range(1, 4):  ← ichki: j = 1,2,3\n        print(i*j, end="  ")\n    print()                ← yangi qator\n\nNatija:\n1  2  3\n2  4  6\n3  6  9\n\n━━━ MURAKKABLIK ━━━\n\nTashqi sikl N marta, ichki M marta → N×M operatsiya.\nN=1000, M=1000 → 1_000_000 operatsiya — sekin!\n\n━━━ LUG\'AT RO\'YXATIDA QIDIRISH ━━━\n\ntalabalar = [\n    {"ism": "Ali", "ball": 90},\n    {"ism": "Vali", "ball": 75}\n]\n\nfor t in talabalar:\n    if t["ball"] >= 85:\n        print(t["ism"], "- aʼlo!")\n\n━━━ ICHMA-ICH LIST ━━━\n\nmatritsa = [[1,2,3],[4,5,6],[7,8,9]]\n\nfor qator in matritsa:\n    for element in qator:\n        print(element, end=" ")\n    print()\n\n━━━ BREAK ICHKI SIKLDA ━━━\n\nbreak — faqat o\'zi joylashgan siklni to\'xtatadi.\nIchki break → ichki siklni to\'xtatadi, tashqi davom etadi.',
+tq:'Ichma-ich siklda break nima qiladi?',
+to:['Ikala siklni to\'xtatadi','Faqat tashqi siklni to\'xtatadi','Faqat ichki siklni to\'xtatadi','Hech narsani to\'xtatmaydi'],
+ta:2,
+te:'break — faqat o\'zi joylashgan (eng ichki) siklni to\'xtatadi. Tashqi sikl davom etadi.',
+lines:[
+{c:'# 3.15 — Nesting (Ichma-ich)',n:''},
+{c:'',n:''},
+{c:'# Ko\'paytirish jadvali',n:''},
+{c:'for i in range(1, 4):',n:'tashqi sikl — i 1 dan 3 gacha'},
+{c:'    for j in range(1, 4):',n:'ichki sikl — j 1 dan 3 gacha'},
+{c:'        print(f"{i}x{j}={i*j}", end="  ")',n:'ko\'paytmani chiqardingiz'},
+{c:'    print()',n:'ichki sikl tugagach yangi qatorga o\'tdingiz'},
+{c:'',n:''},
+{c:'# Lug\'at ro\'yxatida qidirish',n:''},
+{c:'talabalar = [{"ism":"Ali","ball":90}, {"ism":"Vali","ball":55}]',n:'talabalar ro\'yxati yaratdingiz'},
+{c:'',n:''},
+{c:'for t in talabalar:',n:'talabalar bo\'ylab aylandingiz'},
+{c:'    if t["ball"] >= 85:',n:'ball 85 dan katta yoki tengligini tekshirdingiz'},
+{c:'        print(t["ism"], "- aʼlo!")',n:'shart to\'g\'ri bo\'lsa ismni chiqardingiz'}
+]},
+
+/* 15 */
+{id:'while',f:'3.16_while.py',
+info:'3.16 — WHILE SIKLI\nShart bajarilguncha takrorlash.\n\nwhile shart:\n    # tanasi\n    # o\'zgaruvchini yangilash!\n\nbreak    → siklni to\'xtatish\ncontinue → bu qadamni o\'tish\nwhile True: → cheksiz (break kerak!)',
+detail:'WHILE SIKLI — BATAFSIL\n\nFor — nechta marta bilganda.\nWhile — shart bajarilguncha.\n\n━━━ ASOSIY ━━━\n\nsanoq = 1\nwhile sanoq <= 5:\n    print(sanoq)\n    sanoq += 1    ← BU MUHIM! Unutilsa cheksiz!\n\n━━━ CHEKSIZ SIKL ━━━\n\nwhile True:\n    javob = input("Davom etasizmi? (ha/yoq): ")\n    if javob == "yoq":\n        break\n    print("OK, davom etmoqda...")\n\n━━━ BREAK ━━━\n\nfor i in range(100):\n    if i == 5:\n        break         ← 5 da to\'xtatadi\n    print(i)\n→ 0 1 2 3 4\n\n━━━ CONTINUE ━━━\n\nfor i in range(10):\n    if i % 2 == 0:\n        continue      ← juftlarni o\'tkazadi\n    print(i)\n→ 1 3 5 7 9\n\n━━━ WHILE vs FOR ━━━\n\nFor  → for i in range(5)  (5 marta aniq)\nWhile→ while son < limit  (chegarasi noma\'lum)\n\n━━━ WHILE ELSE ━━━\n\ni = 0\nwhile i < 5:\n    print(i)\n    i += 1\nelse:\n    print("Sikl normal tugadi")  ← break bo\'lmasa ishlaydi',
+tq:'continue nima qiladi?',
+to:['Siklni to\'xtatadi','Joriy iteratsiyani o\'tkazib yuboradi, sikl davom etadi','Dasturni to\'xtatadi','Keyingi siklga o\'tadi'],
+ta:1,
+te:'continue — joriy iteratsiyani to\'xtatib, keyingisiga o\'tadi. break — siklni butunlay to\'xtatadi.',
+lines:[
+{c:'# 3.16 — while sikli',n:''},
+{c:'',n:''},
+{c:'sanoq = 1',n:'sanoq ni 1 dan boshladingiz'},
+{c:'while sanoq <= 5:',n:'sanoq 5 dan kichik yoki teng ekan davom etish yozdingiz'},
+{c:'    print(sanoq, end="  ")',n:'sanoqni chiqardingiz (xatorsiz)'},
+{c:'    sanoq += 1',n:'sanoqni 1 ga oshirdingiz'},
+{c:'print()',n:'yangi qatorga o\'tdingiz'},
+{c:'print("Sikl tugadi!")',n:'sikl tugagach xabar chiqardingiz'},
+{c:'',n:''},
+{c:'# break misoli',n:''},
+{c:'for i in range(10):',n:'0 dan 9 gacha sikl boshladingiz'},
+{c:'    if i == 3:',n:'i 3 ga teng bo\'lsa shartni tekshirdingiz'},
+{c:'        break',n:'3 da siklni to\'xtatdingiz'},
+{c:'    print(i, end="  ")',n:'3 dan oldingi sonlarni chiqardingiz'},
+{c:'',n:''},
+{c:'# continue misoli',n:''},
+{c:'for i in range(6):',n:'0 dan 5 gacha sikl boshladingiz'},
+{c:'    if i % 2 == 0:',n:'juft sonlarni tekshirdingiz'},
+{c:'        continue',n:'juft sonlarni o\'tkazib yubordingiz'},
+{c:'    print(i, end="  ")',n:'faqat toq sonlarni chiqardingiz'}
+]}
+];
+
+/* ═══════════════ ENGINE ═══════════════ */
+var cur=0,skipOn=false,brightLevel=3,ghostVisible=true,resultVisible=false,testVisible=false;
+var lineData=[],testAnswered=false,modProgress={};
+var BRIGHT_OPACITY=[0,0.05,0.1,0.2,0.3,0.42,0.55,0.65,0.75,0.85,0.95];
+
+window.onload=function(){
+  buildTabs();
+  loadMod(0);
+  setupKeyboardScroll();
+};
+
+/* ── Kursor (klaviatura) muammosini hal qilish ── */
+function setupKeyboardScroll(){
+  if(!window.visualViewport) return;
+  var lastH=window.visualViewport.height;
+  window.visualViewport.addEventListener('resize',function(){
+    var newH=window.visualViewport.height;
+    var kbOpen=newH<lastH-50;
+    /* klaviatura ochilganda — faol input ni ko'rinishga keltirish */
+    if(kbOpen){
+      setTimeout(function(){
+        var el=document.activeElement;
+        if(!el||!el.classList.contains('line-input')) return;
+        /* Ekranining 35% yuqorisiga markazlashtirish */
+        var rect=el.getBoundingClientRect();
+        var vpTop=window.visualViewport.offsetTop;
+        var vpH=window.visualViewport.height;
+        var elCenter=window.scrollY+rect.top+rect.height/2;
+        var target=elCenter-(vpTop+vpH*0.35);
+        window.scrollTo({top:Math.max(0,target),behavior:'smooth'});
+      },200);
+    }
+    lastH=newH;
+  });
+  /* Input focus da ham scroll */
+  document.addEventListener('focus',function(e){
+    if(!e.target.classList.contains('line-input')) return;
+    if(!window.visualViewport) return;
+    setTimeout(function(){
+      var rect=e.target.getBoundingClientRect();
+      var vpTop=window.visualViewport.offsetTop;
+      var vpH=window.visualViewport.height;
+      /* Agar element viewport ichida ko'rinsa — harakatlanma */
+      if(rect.top>vpTop+50 && rect.bottom<vpTop+vpH-80) return;
+      var elCenter=window.scrollY+rect.top+rect.height/2;
+      var target=elCenter-(vpTop+vpH*0.35);
+      window.scrollTo({top:Math.max(0,target),behavior:'smooth'});
+    },300);
+  },true);
+}
+
+function setBright(v){
+  brightLevel=parseInt(v);
+  document.getElementById('brightVal').textContent=v;
+  applyBright();
+}
+function applyBright(){
+  var op=BRIGHT_OPACITY[brightLevel];
+  document.querySelectorAll('.line-ghost').forEach(function(g){
+    if(!g.classList.contains('skip-c')&&ghostVisible)
+      g.style.color='rgba(74,96,128,'+op+')';
+  });
+}
+
+function buildTabs(){
+  var c=document.getElementById('tabs');
+  c.innerHTML='';
+  M.forEach(function(m,i){
+    var d=document.createElement('div');
+    d.className='tab'+(i===cur?' on':'')+(modProgress[i]?' done':'');
+    d.id='tab'+i;
+    d.textContent=(i+1)+'. '+m.id;
+    d.onclick=(function(n){return function(){loadMod(n);};})(i);
+    c.appendChild(d);
+  });
+}
+
+function loadMod(i){
+  cur=i;
+  resultVisible=false; testVisible=false; testAnswered=false;
+  document.getElementById('resultPanel').className='result-panel';
+  document.getElementById('testPanel').className='test-panel';
+  document.getElementById('detailPanel').className='detail-panel';
+  document.getElementById('badge').className='badge';
+  var m=M[i];
+  document.getElementById('fname').textContent=m.f;
+  document.getElementById('topSub').textContent=m.f;
+  document.querySelectorAll('.tab').forEach(function(t,j){t.classList.toggle('on',j===i);});
+  document.getElementById('infoBox').textContent=m.info;
+  buildLines(m);
+  updateStats();
+  updateProgress();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function getIndent(s){var r=s.match(/^(\s+)/);return r?r[1]:'';}
+
+function buildLines(m){
+  var wrap=document.getElementById('linesWrap');
+  wrap.innerHTML='';
+  lineData=[];
+  var op=BRIGHT_OPACITY[brightLevel];
+  m.lines.forEach(function(ln,i){
+    var isCom=ln.c.trimStart().charAt(0)==='#';
+    var isEmpty=ln.c==='';
+    var indent=getIndent(ln.c);
+    var cp=isEmpty?'':ln.c.slice(indent.length);
+
+    var block=document.createElement('div');
+    block.className='line-block';block.id='block'+i;
+    var row=document.createElement('div');row.className='line-row';
+    var num=document.createElement('div');
+    num.className='line-num';num.id='num'+i;
+    num.textContent=isEmpty?'':i+1;
+
+    if(indent.length>0&&!isEmpty){
+      var pre=document.createElement('div');
+      pre.className='line-indent-pre';
+      pre.textContent=indent.replace(/ /g,'\u00a0');
+      row.appendChild(num);row.appendChild(pre);
+    } else {
+      row.appendChild(num);
+    }
+
+    var content=document.createElement('div');content.className='line-content';
+    var ghost=document.createElement('div');
+    ghost.className='line-ghost'+((isCom&&skipOn)?' skip-c':'');
+    ghost.id='ghost'+i;
+    ghost.style.color=ghostVisible?'rgba(74,96,128,'+op+')':'transparent';
+    ghost.textContent=cp||' ';
+    var colors=document.createElement('div');colors.className='line-colors';colors.id='clr'+i;
+    var inp=document.createElement('input');
+    inp.type='text';inp.className='line-input';inp.id='inp'+i;
+    inp.setAttribute('spellcheck','false');inp.setAttribute('autocorrect','off');
+    inp.setAttribute('autocapitalize','off');inp.setAttribute('autocomplete','off');
+    if(isEmpty||(isCom&&skipOn)) inp.disabled=true;
+
+    (function(idx,ct,isC,empty,note){
+      inp.addEventListener('input',function(){
+        if(empty) return;
+        updateClr(idx,ct,isC);
+        if(inp.value===ct&&ct!==''&&note!=='') showNote(idx);
+        else hideNote(idx);
+        updateStats();
+      });
+    })(i,cp,isCom,isEmpty,ln.n);
+
+    content.appendChild(ghost);content.appendChild(colors);content.appendChild(inp);
+    row.appendChild(content);
+    var note=document.createElement('div');
+    note.className='line-done-note';note.id='note'+i;
+    note.textContent='✅ Siz '+ln.n+'!';
+    block.appendChild(row);
+    if(ln.n) block.appendChild(note);
+    wrap.appendChild(block);
+    lineData.push({inp:inp,target:cp,isCom:isCom,isEmpty:isEmpty});
+  });
+}
+
+function showNote(i){document.getElementById('note'+i).classList.add('show');}
+function hideNote(i){var n=document.getElementById('note'+i);if(n)n.classList.remove('show');}
+
+function updateClr(idx,target,isCom){
+  if(isCom&&skipOn) return;
+  var inp=document.getElementById('inp'+idx);
+  var clr=document.getElementById('clr'+idx);
+  var typed=inp.value,html='';
+  for(var ci=0;ci<target.length;ci++){
+    var ch=target[ci];
+    if(ci<typed.length)
+      html+=typed[ci]===ch?'<span style="color:#22c55e">'+esc(ch)+'</span>':'<span style="color:#f43f5e;text-decoration:underline">'+esc(ch)+'</span>';
+    else
+      html+='<span style="color:transparent">'+esc(ch)+'</span>';
+  }
+  clr.innerHTML=html;
+  document.getElementById('num'+idx).style.color=(typed===target&&target!=='')?'#22c55e':'';
+}
+
+function updateStats(){
+  var done=0,total=0;
+  lineData.forEach(function(l){
+    if(l.isEmpty||(l.isCom&&skipOn)) return;
+    total++;
+    if(l.inp.value===l.target) done++;
+  });
+  var pct=total>0?Math.round(done/total*100):0;
+  document.getElementById('svPct').textContent=done>0?pct+'%':'—';
+  document.getElementById('svDone').textContent=done+'/'+total;
+  document.getElementById('svTotal').textContent=total+' ta';
+}
+
+function updateProgress(){
+  var done=Object.keys(modProgress).length,total=M.length;
+  document.getElementById('progressFill').style.width=Math.round(done/total*100)+'%';
+  document.getElementById('progressLbl').textContent=done+' / '+total+' mavzu bajarildi';
+}
+
+function doCheck(){
+  var done=0,total=0,errors=[];
+  lineData.forEach(function(l,i){
+    if(l.isEmpty||(l.isCom&&skipOn)) return;
+    total++;
+    if(l.inp.value===l.target){done++;document.getElementById('num'+i).style.color='#22c55e';}
+    else{errors.push(i+1);document.getElementById('num'+i).style.color='#f43f5e';}
+  });
+  var pct=Math.round(done/total*100),b=document.getElementById('badge');
+  b.className='badge show';
+  if(pct>=85){b.className+=' g';b.textContent='🎉 Zor! '+pct+'% ('+done+'/'+total+')';modProgress[cur]=true;document.getElementById('tab'+cur).classList.add('done');updateProgress();}
+  else if(pct>=55){b.className+=' o';b.textContent='👍 '+pct+'% — xato: '+errors.join(', ')+'-qatorlar';}
+  else{b.className+=' r';b.textContent='❌ '+pct+'% — xato: '+errors.join(', ')+'-qatorlar';}
+}
+
+function doClear(){
+  lineData.forEach(function(l,i){
+    l.inp.value='';
+    var c=document.getElementById('clr'+i);if(c)c.innerHTML='';
+    var n=document.getElementById('num'+i);if(n)n.style.color='';
+    hideNote(i);
+  });
+  document.getElementById('badge').className='badge';
+  updateStats();
+}
+
+function toggleGhost(){
+  ghostVisible=!ghostVisible;
+  document.querySelectorAll('.line-ghost').forEach(function(g){g.style.visibility=ghostVisible?'visible':'hidden';});
+  document.getElementById('ghostBtn').textContent=ghostVisible?'👁️ Yashir':'👁️ Ko\'rsat';
+}
+
+function toggleSkip(){
+  skipOn=!skipOn;
+  document.getElementById('sw').classList.toggle('on',skipOn);
+  document.getElementById('skipLbl').textContent=skipOn?'Kommentlar o\'tkazilmoqda':'# Kommentlarni o\'tkazib yuboring';
+  buildLines(M[cur]);applyBright();updateStats();
+}
+
+function toggleDetail(){
+  var p=document.getElementById('detailPanel');
+  if(p.classList.contains('show')){p.classList.remove('show');}
+  else{document.getElementById('detailContent').textContent=M[cur].detail;p.classList.add('show');}
+}
+
+function toggleTest(){
+  testVisible=!testVisible;
+  var p=document.getElementById('testPanel');
+  if(testVisible){p.className='test-panel show';buildTest();}
+  else p.className='test-panel';
+}
+
+function buildTest(){
+  var m=M[cur];
+  document.getElementById('testQ').textContent=m.tq;
+  document.getElementById('testExp').className='test-exp';
+  testAnswered=false;
+  var opts=document.getElementById('testOpts');
+  opts.innerHTML='';
+  m.to.forEach(function(opt,i){
+    var btn=document.createElement('button');
+    btn.className='test-opt';
+    btn.textContent=(i+1)+'. '+opt;
+    btn.onclick=(function(idx){return function(){
+      if(testAnswered) return;
+      testAnswered=true;
+      var ok=(idx===m.ta);
+      document.querySelectorAll('.test-opt').forEach(function(b,j){
+        if(j===m.ta)b.classList.add('correct');
+        else if(j===idx&&!ok)b.classList.add('wrong');
+      });
+      var exp=document.getElementById('testExp');
+      exp.textContent=(ok?'✅ To\'g\'ri! ':'❌ Xato. ')+m.te;
+      exp.className='test-exp show';
+    };})(i);
+    opts.appendChild(btn);
+  });
+}
+
+function toggleResult(){
+  resultVisible=!resultVisible;
+  var p=document.getElementById('resultPanel');
+  if(resultVisible){
+    p.className='result-panel show';
+    document.getElementById('simWrap').innerHTML=SIMS[M[cur].id]||'<div style="padding:12px;color:#4a6080;font-size:.7rem;">Simulatsiya yo\'q</div>';
+  } else p.className='result-panel';
+}
+
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+</script>
+</body>
+</html>

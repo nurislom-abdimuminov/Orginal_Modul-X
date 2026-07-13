@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Eskiz — Python 3.17–3.30</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:#0a0e1a;color:#dde5f0;font-family:'JetBrains Mono',monospace;font-size:13px;min-height:100vh;}
+.top{background:#0f1520;border-bottom:1px solid #1e3048;padding:8px 14px;display:flex;align-items:center;gap:8px;position:sticky;top:0;z-index:50;}
+.top-t{color:#00f0c8;font-size:.78rem;font-weight:700;}
+.top-s{color:#4a6080;font-size:.65rem;margin-left:auto;}
+.bright-bar{background:#0f1520;border-bottom:1px solid #1e3048;padding:6px 14px;display:flex;align-items:center;gap:10px;position:sticky;top:41px;z-index:49;}
+.bright-lbl{font-size:.65rem;color:#4a6080;flex-shrink:0;}
+.bright-slider{flex:1;-webkit-appearance:none;height:4px;border-radius:2px;background:#1e3048;outline:none;}
+.bright-slider::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:#00f0c8;}
+.bright-val{font-size:.68rem;color:#00f0c8;font-weight:700;width:20px;text-align:right;flex-shrink:0;}
+.wrap{padding:10px 14px;max-width:540px;margin:0 auto;}
+.tabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;margin-bottom:10px;scrollbar-width:none;}
+.tabs::-webkit-scrollbar{display:none;}
+.tab{flex-shrink:0;padding:6px 12px;border-radius:20px;border:1px solid #1e3048;background:#141e2e;color:#4a6080;font-size:.68rem;cursor:pointer;transition:all .2s;}
+.tab.on{border-color:#00f0c8;color:#00f0c8;background:rgba(0,240,200,.08);}
+.tab.done{border-color:#22c55e;color:#22c55e;background:rgba(34,197,94,.08);}
+.skip-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;padding:8px 12px;background:#141e2e;border:1px solid #1e3048;border-radius:8px;cursor:pointer;}
+.skip-row span{font-size:.7rem;color:#4a6080;}
+.sw{width:34px;height:18px;background:#1e3048;border-radius:10px;position:relative;transition:background .2s;flex-shrink:0;}
+.sw.on{background:#fbbf24;}
+.sw::after{content:'';position:absolute;top:2px;left:2px;width:14px;height:14px;background:#fff;border-radius:50%;transition:left .2s;}
+.sw.on::after{left:18px;}
+.stats{display:flex;gap:8px;margin-bottom:10px;}
+.stat{flex:1;background:#141e2e;border:1px solid #1e3048;border-radius:8px;padding:7px 8px;text-align:center;}
+.sv{font-size:.95rem;font-weight:700;color:#00f0c8;}
+.sl{font-size:.58rem;color:#4a6080;margin-top:2px;}
+.info-box{background:#0f1520;border:1px solid #1e3048;border-left:3px solid #00f0c8;border-radius:8px;padding:10px 12px;margin-bottom:10px;font-size:.71rem;line-height:1.9;color:#8ba0c0;white-space:pre-wrap;}
+.detail-panel{display:none;background:#0a1628;border:1px solid #2563eb;border-radius:8px;padding:12px 14px;margin-bottom:10px;font-size:.71rem;line-height:2.0;color:#93c5fd;white-space:pre-wrap;}
+.detail-panel.show{display:block;}
+.detail-title{color:#60a5fa;font-weight:700;margin-bottom:8px;font-size:.74rem;}
+.test-panel{display:none;background:#080c14;border:1px solid #a855f7;border-radius:10px;padding:12px;margin-bottom:10px;}
+.test-panel.show{display:block;}
+.test-title{color:#a855f7;font-size:.72rem;font-weight:700;margin-bottom:8px;}
+.test-q{font-size:.72rem;color:#dde5f0;margin-bottom:10px;line-height:1.7;}
+.test-opts{display:flex;flex-direction:column;gap:6px;}
+.test-opt{padding:8px 12px;border-radius:8px;border:1px solid #1e3048;background:#141e2e;color:#8ba0c0;font-size:.7rem;cursor:pointer;font-family:'JetBrains Mono',monospace;transition:all .2s;}
+.test-opt.correct{border-color:#22c55e;background:rgba(34,197,94,.1);color:#22c55e;}
+.test-opt.wrong{border-color:#f43f5e;background:rgba(244,63,94,.1);color:#f43f5e;}
+.test-exp{display:none;margin-top:8px;font-size:.68rem;color:#a855f7;padding:6px 10px;background:rgba(168,85,247,.08);border-radius:6px;border-left:2px solid #a855f7;line-height:1.8;}
+.test-exp.show{display:block;}
+.result-panel{display:none;background:#080c14;border:1px solid #22c55e;border-radius:10px;padding:12px;margin-bottom:10px;}
+.result-panel.show{display:block;}
+.result-title{color:#22c55e;font-size:.72rem;font-weight:700;margin-bottom:8px;}
+.sim-wrap{width:100%;overflow-x:auto;font-size:.71rem;}
+.code-block{border:1px solid #1e3048;border-radius:10px;overflow:hidden;margin-bottom:10px;background:#090d18;}
+.fbar{display:flex;align-items:center;gap:5px;padding:7px 12px;background:#0f1520;border-bottom:1px solid #1e3048;}
+.dot{width:6px;height:6px;border-radius:50%;}
+.dot.r{background:#f43f5e;}.dot.y{background:#fbbf24;}.dot.g{background:#22c55e;}
+.fn{font-size:.65rem;color:#4a6080;margin-left:4px;}
+.fhint{margin-left:auto;font-size:.6rem;color:#00f0c8;opacity:.7;}
+.lines-wrap{padding:4px 0;}
+.line-block{margin:0;}
+.line-row{display:flex;align-items:center;position:relative;min-height:30px;}
+.line-num{width:26px;flex-shrink:0;font-size:.63rem;padding:4px 4px 4px 5px;color:#2a3a50;text-align:right;user-select:none;transition:color .2s;align-self:center;}
+.line-indent-pre{font-size:.76rem;line-height:1.8;padding:4px 0 4px 8px;white-space:pre;color:#2a5070;user-select:none;flex-shrink:0;align-self:center;}
+.line-content{flex:1;position:relative;overflow-x:auto;overflow-y:hidden;min-height:30px;}
+.line-content::-webkit-scrollbar{height:2px;}
+.line-content::-webkit-scrollbar-thumb{background:#1e3048;border-radius:1px;}
+.line-ghost{font-size:.76rem;line-height:1.8;padding:4px 8px;white-space:nowrap;pointer-events:none;min-height:30px;display:block;}
+.line-ghost.skip-c{opacity:.15;}
+.line-colors{position:absolute;top:0;left:0;font-size:.76rem;line-height:1.8;padding:4px 8px;white-space:nowrap;pointer-events:none;z-index:2;min-height:30px;}
+.line-input{position:absolute;top:0;left:0;right:0;bottom:0;width:100%;font-family:'JetBrains Mono',monospace;font-size:.76rem;line-height:1.8;padding:4px 8px;color:transparent;-webkit-text-fill-color:transparent;caret-color:#00f0c8;background:transparent;border:none;outline:none;white-space:nowrap;overflow:hidden;z-index:10;-webkit-appearance:none;}
+.line-input:disabled{cursor:default;}
+.line-done-note{display:none;font-size:.66rem;line-height:1.6;padding:3px 8px 3px 34px;color:#38bdf8;background:rgba(56,189,248,.06);border-left:2px solid #38bdf8;white-space:pre-wrap;animation:fadeIn .25s ease;}
+.line-done-note.show{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:translateY(0)}}
+.btn-row{display:flex;gap:6px;flex-wrap:wrap;padding:9px 12px;background:#0f1520;border-top:1px solid #1e3048;}
+.btn{padding:8px 11px;border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:.68rem;font-weight:700;border:none;cursor:pointer;flex-shrink:0;transition:opacity .15s;}
+.btn:active{opacity:.7;}
+.btn-chk{background:#00f0c8;color:#080c14;}
+.btn-clr{background:transparent;border:1px solid #1e3048;color:#4a6080;}
+.btn-det{background:#2563eb;color:#fff;}
+.btn-ghost{background:#7c3aed;color:#fff;}
+.btn-res{background:#16a34a;color:#fff;}
+.btn-test{background:#a855f7;color:#fff;}
+.badge{display:none;margin:0 12px 10px;padding:7px 12px;border-radius:8px;font-size:.7rem;border:1px solid #1e3048;}
+.badge.show{display:block;}
+.badge.g{border-color:#22c55e;color:#22c55e;background:rgba(34,197,94,.07);}
+.badge.o{border-color:#fbbf24;color:#fbbf24;background:rgba(251,191,36,.07);}
+.badge.r{border-color:#f43f5e;color:#f43f5e;background:rgba(244,63,94,.07);}
+.progress-wrap{margin-bottom:10px;}
+.progress-bar{height:4px;background:#1e3048;border-radius:2px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,#00f0c8,#00a8ff);border-radius:2px;transition:width .4s ease;}
+.progress-lbl{font-size:.6rem;color:#4a6080;margin-top:4px;text-align:right;}
+.kb-spacer{height:0;transition:height .15s;}
+</style>
+</head>
+<body>
+<div class="top">
+  <div class="top-t">✏️ Python 3.17–3.30 (2-qism)</div>
+  <div class="top-s" id="topSub">—</div>
+</div>
+<div class="bright-bar">
+  <span class="bright-lbl">👁️ Xiralik:</span>
+  <input type="range" class="bright-slider" id="brightSlider" min="1" max="10" value="3" oninput="setBright(this.value)">
+  <span class="bright-val" id="brightVal">3</span>
+</div>
+<div class="wrap">
+  <div class="stats">
+    <div class="stat"><div class="sv" id="svPct">—</div><div class="sl">TOGRI</div></div>
+    <div class="stat"><div class="sv" id="svDone">0</div><div class="sl">BAJARILDI</div></div>
+    <div class="stat"><div class="sv" id="svTotal">—</div><div class="sl">JAMI</div></div>
+  </div>
+  <div class="progress-wrap">
+    <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+    <div class="progress-lbl" id="progressLbl">0 / 15 mavzu</div>
+  </div>
+  <div class="tabs" id="tabs"></div>
+  <div class="skip-row" onclick="toggleSkip()">
+    <div class="sw" id="sw"></div>
+    <span id="skipLbl"># Kommentlarni otkazib yuboring</span>
+  </div>
+  <div class="info-box" id="infoBox">—</div>
+  <div class="detail-panel" id="detailPanel">
+    <div class="detail-title">📖 BATAFSIL — MENTOR IZOHI</div>
+    <div id="detailContent"></div>
+  </div>
+  <div class="test-panel" id="testPanel">
+    <div class="test-title">🧠 TEST SAVOLI</div>
+    <div class="test-q" id="testQ"></div>
+    <div class="test-opts" id="testOpts"></div>
+    <div class="test-exp" id="testExp"></div>
+  </div>
+  <div class="result-panel" id="resultPanel">
+    <div class="result-title">📊 KOD NATIJASI</div>
+    <div class="sim-wrap" id="simWrap"></div>
+  </div>
+  <div class="code-block">
+    <div class="fbar">
+      <div class="dot r"></div><div class="dot y"></div><div class="dot g"></div>
+      <div class="fn" id="fname">main.py</div>
+      <div class="fhint">↔️ suring ✏️ yozing</div>
+    </div>
+    <div class="lines-wrap" id="linesWrap"></div>
+    <div class="btn-row">
+      <button class="btn btn-chk" onclick="doCheck()">✅ Tekshir</button>
+      <button class="btn btn-clr" onclick="doClear()">🗑️ Tozala</button>
+      <button class="btn btn-ghost" id="ghostBtn" onclick="toggleGhost()">👁️ Yashir</button>
+      <button class="btn btn-det" onclick="toggleDetail()">📖 Batafsil</button>
+      <button class="btn btn-test" onclick="toggleTest()">🧠 Test</button>
+      <button class="btn btn-res" onclick="toggleResult()">📊 Natija</button>
+    </div>
+    <div class="badge" id="badge"></div>
+  </div>
+  <div class="kb-spacer" id="kbSpacer"></div>
+</div>
+<script>
+var SIMS={
+'while-list':'<div style="background:#0d1117;border-radius:8px;padding:10px 14px;font-size:.72rem;line-height:1.9;"><div style="color:#4a6080;font-size:.63rem;">▶ Natija:</div><div style="color:#22c55e;">3 elementli ro\'yxat: [\'a\',\'b\',\'c\']</div><div style="color:#22c55e;">Jami: 15 (range 1-5)</div><div style="color:#fbbf24;">break da to\'xtadi: 0 1 2</div></div>',
+'funksiya':'<div style="background:#0d1117;border-radius:8px;padding:10px 14px;font-size:.72rem;line-height:1.9;"><div style="color:#4a6080;font-size:.63rem;">▶ Natija:</div><div style="color:#22c55e;">Salom, Ali!</div><div style="color:#22c55e;">Salom, Vali!</div><div style="color:#fbbf24;">kvadrat(5) = 25</div></div>',
+'return':'<div style="background:#0d1117;border-radius:8px;padding:10px 14px;font-size:.72rem;line-height:1.9;"><div style="color:#4a6080;font-size:.63rem;">▶ Natija:</div><div style="color:#22c55e;">12 (3*4)</div><div style="color:#22c55e;">Juft (8%2==0)</div><div style="color:#fbbf24;">kichik=1, katta=9</div></div>',
+'args':'<div style="background:#0d1117;border-radius:8px;padding:10px 14px;font-size:.72rem;line-height:1.9;"><div style="color:#4a6080;font-size:.63rem;">▶ Natija:</div><div style="color:#22c55e;">Ali, 25 yosh, Toshkentdan</div><div style="color:#22c55e;">Vali, 30 yosh, o\'zbekistondan</div><div style="color:#fbbf24;">*args jami: 150</div></div>',
+'funksiya-end':'<div style="background:#0d1117;border-radius:8px;padding:10px 14px;font-size:.72rem;line-height:1.9;"><div style="color:#4a6080;font-size:.63rem;">▶ Natija:</div><div style="color:#22c55e;">DRY tamoyili ishlamoqda</div><div style="color:#22c55e;">Funksiyalar kodni tartibli qiladi</div><div style="color:#fbbf24;">lambda: 16</div></div>',
+'modul':'<div style="background:#0d1117;border-radius:8px;padding:10px 14px;font-size:.72rem;line-height:1.9;"><div style="color:#4a6080;font-size:.63rem;">▶ Modul chaqirish natijasi:</div><div style="color:#22c55e;">GM Malibu, Qora, 2020</div><div style="color:#22c55e;">math.sqrt(16) = 4.0</div><div style="color:#fbbf24;">random: 42 (tasodifiy)</div></div>',
+'klass':'<div style="background:#0d1117;border-radius:8px;padding:10px 14px;font-size:.72rem;line-height:1.9;"><div style="color:#4a6080;font-size:.63rem;">▶ Natija:</div><div style="color:#22c55e;">GM Malibu, 2020-yil</div><div style="color:#22c55e;">Toshkent, 3.5 mln</div><div style="color:#fbbf24;">&lt;class Mashina&gt;</div></div>',
+'oop':'<div style="background:#0d1117;border-radius:8px;padding:10px 14px;font-size:.72rem;line-height:1.9;"><div style="color:#4a6080;font-size:.63rem;">▶ OOP natijasi:</div><div style="color:#22c55e;">Hayvon: Mitti, mushuk</div><div style="color:#22c55e;">Hayvon: Rex, it</div><div style="color:#fbbf24;">Meow! (mushuk ovozi)</div><div style="color:#fbbf24;">Woof! (it ovozi)</div></div>',
+'github':'<div style="background:#0d1117;border-radius:8px;padding:10px 14px;font-size:.72rem;line-height:1.9;"><div style="color:#4a6080;font-size:.63rem;">▶ Git buyruqlari:</div><div style="color:#22c55e;">git init</div><div style="color:#22c55e;">git add .</div><div style="color:#22c55e;">git commit -m "first"</div><div style="color:#fbbf24;">github.com/username/repo</div></div>',
+'xatolar':'<div style="background:#0d1117;border-radius:8px;padding:10px 14px;font-size:.72rem;line-height:1.9;"><div style="color:#4a6080;font-size:.63rem;">▶ Xato turlari:</div><div style="color:#f43f5e;">SyntaxError: belgi yetishmaydi</div><div style="color:#f43f5e;">NameError: o\'zgaruvchi yo\'q</div><div style="color:#f43f5e;">TypeError: tur noto\'g\'ri</div><div style="color:#fbbf24;">try-except bilan ushlash mumkin</div></div>',
+'tryexcept':'<div style="background:#0d1117;border-radius:8px;padding:10px 14px;font-size:.72rem;line-height:1.9;"><div style="color:#4a6080;font-size:.63rem;">▶ Natija:</div><div style="color:#f43f5e;">Xato: nolga bolish!</div><div style="color:#22c55e;">Natija: 5.0</div><div style="color:#fbbf24;">finally: har doim ishlaydi</div></div>',
+'stdlib':'<div style="background:#0d1117;border-radius:8px;padding:10px 14px;font-size:.72rem;line-height:1.9;"><div style="color:#4a6080;font-size:.63rem;">▶ math, random, datetime:</div><div style="color:#22c55e;">math.sqrt(16) = 4.0</div><div style="color:#22c55e;">math.pi = 3.14159</div><div style="color:#fbbf24;">random: tasodifiy son</div><div style="color:#22c55e;">Bugun: 2025-04-16</div></div>',
+'pypi':'<div style="background:#0d1117;border-radius:8px;padding:10px 14px;font-size:.72rem;line-height:1.9;"><div style="color:#4a6080;font-size:.63rem;">▶ pip buyruqlari:</div><div style="color:#22c55e;">pip install pandas</div><div style="color:#22c55e;">pip install numpy matplotlib</div><div style="color:#fbbf24;">import pandas as pd ✓</div></div>',
+'oop2':'<div style="background:#0d1117;border-radius:8px;padding:10px 14px;font-size:.72rem;line-height:1.9;"><div style="color:#4a6080;font-size:.63rem;">▶ OOP tamoyillari:</div><div style="color:#22c55e;">Encapsulation ✓</div><div style="color:#22c55e;">Inheritance ✓</div><div style="color:#22c55e;">Polymorphism ✓</div></div>'
+};
+
+var M=[
+/* 1 */
+{id:'while-list',f:'3.17_while_lists.py',
+info:'3.17 — WHILE, RO\'YXAT VA LUG\'AT\nWhile bilan ro\'yxat to\'ldirish:\n\nwhile True:\n    q = input("...")\n    ro\'yxat.append(q)\n    if q == "stop": break\n\nWhile + lug\'at birgalikda\nfoydalanuvchi ma\'lumot kiritish',
+detail:'WHILE VA RO\'YXAT BIRGALIKDA — BATAFSIL\n\nReal dasturlarda while sikli ko\'pincha foydalanuvchidan\nma\'lumot to\'plash uchun ishlatiladi.\n\n━━━ FOYDALANUVCHI KIRITISH ━━━\n\nnatijalar = []\nwhile True:\n    qiymat = input("Son kiring (stop — tugat): ")\n    if qiymat == "stop":\n        break\n    natijalar.append(int(qiymat))\nprint("Kiritildi:", natijalar)\n\n━━━ LUG\'AT BILAN ━━━\n\navtolar = []\nwhile True:\n    marka = input("Marka: ")\n    yil = input("Yil: ")\n    avtolar.append({"marka": marka, "yil": int(yil)})\n    yana = input("Yana? (ha/yoq): ")\n    if yana == "yoq":\n        break\n\nprint(f"Jami {len(avtolar)} ta avto kiritildi")\n\n━━━ RO\'YXAT USTIDA WHILE ━━━\n\ni = 0\nwhile i < len(ro\'yxat):\n    print(ro\'yxat[i])\n    i += 1\n\nBu for sikliga teng, lekin while aniq nazorat uchun.\n\n━━━ WHILE ELSE ━━━\n\ni = 0\nwhile i < 5:\n    i += 1\nelse:\n    print("Normal tugadi")  ← break bo\'lmasa ishlaydi',
+tq:'Foydalanuvchidan ma\'lumot to\'plashda qaysi sikl qulay?',
+to:['for','while True + break','range()','if-else'],
+ta:1,
+te:'while True + break — foydalanuvchi "stop" yoki "yoq" kiritmagunicha ishlaydi. Nechta kiritishini oldindan bilmaymiz.',
+lines:[
+{c:'# 3.17 — While, ro\'yxat va lug\'at',n:''},
+{c:'',n:''},
+{c:'# Ro\'yxatga while bilan qo\'shish',n:''},
+{c:'mevalar = []',n:'bo\'sh ro\'yxat yaratdingiz'},
+{c:'mevalar.append("olma")',n:'.append() bilan olma qo\'shdingiz'},
+{c:'mevalar.append("nok")',n:'.append() bilan nok qo\'shdingiz'},
+{c:'mevalar.append("uzum")',n:'.append() bilan uzum qo\'shdingiz'},
+{c:'print(f"{len(mevalar)} elementli ro\'yxat: {mevalar}")',n:'f-string bilan uzunlik va ro\'yxatni chiqardingiz'},
+{c:'',n:''},
+{c:'# Jami hisoblash',n:''},
+{c:'jami = 0',n:'jami ni noldan boshladingiz'},
+{c:'for son in range(1, 6):',n:'1 dan 5 gacha sikl boshladingiz'},
+{c:'    jami += son',n:'har sonni jamiga qo\'shdingiz'},
+{c:'print(f"Jami: {jami}")',n:'natijani chiqardingiz'},
+{c:'',n:''},
+{c:'# break misoli',n:''},
+{c:'for i in range(10):',n:'0 dan 9 gacha sikl boshladingiz'},
+{c:'    if i == 3:',n:'i 3 ga teng bo\'lganda shartni tekshirdingiz'},
+{c:'        break',n:'3 da siklni to\'xtatdingiz'},
+{c:'    print(i, end=" ")',n:'3 gacha sonlarni chiqardingiz'}
+]},
+
+/* 2 */
+{id:'funksiya',f:'3.18_funksiya.py',
+info:'3.18 — FUNKSIYA\nKodni qayta-qayta ishlatish.\n\ndef nom(parametr):\n    # tanasi\n    return natija\n\ndef     → e\'lon qilish\nreturn  → qiymat qaytarish\nchaqirish: nom(argument)',
+detail:'FUNKSIYA — BATAFSIL\n\nFunksiya — bir blok kodni nom bilan saqlash.\nDRY: Don\'t Repeat Yourself!\n\n━━━ ASOSIY SHAKL ━━━\n\ndef salomlash(ism):\n    print(f"Salom, {ism}!")\n\nsalomlash("Ali")   → Salom, Ali!\nsalomlash("Vali")  → Salom, Vali!\n\n━━━ PARAMETRLAR ━━━\n\ndef to\'rtburchak_maydoni(a, b):\n    return a * b\n\nnatija = to\'rtburchak_maydoni(4, 5)\nprint(natija)  → 20\n\n━━━ STANDART QIYMAT ━━━\n\ndef salomlash(ism, til="uz"):\n    if til == "uz":\n        return f"Salom, {ism}!"\n    return f"Hello, {ism}!"\n\nsalomlash("Ali")         → Salom, Ali!\nsalomlash("John","en")   → Hello, John!\n\n━━━ DOCSTRING ━━━\n\ndef funksiya(x):\n    """Bu funksiya x ni 2 ga ko\'paytiradi.\"\"\"\n    return x * 2\n\nprint(funksiya.__doc__)  → hujjatni chiqaradi\n\n━━━ NIMA UCHUN FUNKSIYA? ━━━\n\n1. DRY — takrorlanmas\n2. Kodni o\'qish oson\n3. Xatolarni topish oson\n4. Qayta ishlatish mumkin\n5. Test qilish oson',
+tq:'def kalit so\'zi nima uchun?',
+to:['O\'zgaruvchi yaratish','Funksiya e\'lon qilish','Shart tekshirish','Modul import'],
+ta:1,
+te:'def — define (aniqlash). def funksiya_nomi(parametrlar): shaklida yoziladi. Funksiya chaqirilmagunicha bajarmaydi.',
+lines:[
+{c:'# 3.18 — Funksiya',n:''},
+{c:'',n:''},
+{c:'def salomlash(ism):',n:'salomlash nomli funksiya yaratdingiz'},
+{c:'    print(f"Salom, {ism}!")',n:'f-string bilan salomlashuv chiqarishni yozdingiz'},
+{c:'',n:''},
+{c:'salomlash("Ali")',n:'funksiyani Ali bilan chaqirdingiz'},
+{c:'salomlash("Vali")',n:'funksiyani Vali bilan chaqirdingiz'},
+{c:'',n:''},
+{c:'# Return bilan funksiya',n:''},
+{c:'def kvadrat(son):',n:'kvadrat nomli funksiya yaratdingiz'},
+{c:'    return son * son',n:'sonning kvadratini qaytardingiz'},
+{c:'',n:''},
+{c:'natija = kvadrat(5)',n:'funksiyani 5 bilan chaqirib natijaga saqladdingiz'},
+{c:'print(f"kvadrat(5) = {natija}")',n:'f-string bilan natijani chiqardingiz'},
+{c:'',n:''},
+{c:'# Standart qiymat',n:''},
+{c:'def salomlash2(ism, til="uz"):',n:'standart til parametrli funksiya yaratdingiz'},
+{c:'    if til == "uz":',n:'til uz ekanligini tekshirdingiz'},
+{c:'        return f"Salom, {ism}!"',n:'uz uchun o\'zbek salomlashuv qaytardingiz'},
+{c:'    return f"Hello, {ism}!"',n:'boshqa til uchun inglizcha qaytardingiz'},
+{c:'',n:''},
+{c:'print(salomlash2("Ali"))',n:'standart til bilan chaqirdingiz'},
+{c:'print(salomlash2("John", "en"))',n:'en til bilan chaqirdingiz'}
+]},
+
+/* 3 */
+{id:'return',f:'3.19_return.py',
+info:'3.19 — FUNKSIYADAN QIYMAT QAYTARISH\nreturn — natija qaytarish va chiqish.\n\nNatija saqlanmasa yo\'qoladi:\nn = funksiya()  # saqla!\n\nBir necha qiymat:\nreturn a, b  → (a, b) tuple\na, b = funksiya()',
+detail:'RETURN — BATAFSIL\n\n━━━ ASOSIY QOIDALAR ━━━\n\n1. return — funksiyani DARHOL to\'xtatadi\n2. return keyingi kod BAJARILMAYDI\n3. return yo\'q → None qaytadi\n4. Natijani saqlamasak yo\'qoladi\n\n━━━ TO\'G\'RI VA XATO ━━━\n\ndef yig\'ish(a, b):\n    return a + b\n    print("Bu bajarilmaydi!")  ← return dan keyin!\n\n# Natijani saqlash:\nx = yig\'ish(3, 7)   ← to\'g\'ri\nprint(x)  → 10\n\n# Saqlamasdan:\nyig\'ish(3, 7)       ← natija yo\'qoladi!\n\n━━━ BIR NECHA QIYMAT ━━━\n\ndef min_max(lst):\n    return min(lst), max(lst)\n\nkichik, katta = min_max([3, 1, 9, 2, 7])\nprint(kichik)  → 1\nprint(katta)   → 9\n\n━━━ EARLY RETURN ━━━\n\ndef mutloq(son):\n    if son >= 0:\n        return son      ← ijobiy: darhol qaytadi\n    return -son         ← manfiy: ishorasiz\n\n━━━ RETURN NONE ━━━\n\ndef chiqar(ism):\n    print(f"Salom, {ism}!")\n    # return yo\'q\n\nx = chiqar("Ali")   → Salom, Ali!\nprint(x)            → None',
+tq:'return yo\'q bo\'lsa funksiya nima qaytaradi?',
+to:['0','""','False','None'],
+ta:3,
+te:'Har qanday funksiyada return bo\'lmasa None qaytadi. x = f() bo\'lsa x == None bo\'ladi.',
+lines:[
+{c:'# 3.19 — Return',n:''},
+{c:'',n:''},
+{c:'def ko\'paytir(a, b):',n:'ko\'paytir nomli funksiya yaratdingiz'},
+{c:'    return a * b',n:'a va b ko\'paytmasini qaytardingiz'},
+{c:'',n:''},
+{c:'natija = ko\'paytir(3, 4)',n:'3 va 4 ni ko\'paytirib natijaga saqladdingiz'},
+{c:'print(natija)',n:'natijani chiqardingiz'},
+{c:'',n:''},
+{c:'# Juft/toq tekshirish',n:''},
+{c:'def juft_mi(son):',n:'juft_mi funksiyasini yaratdingiz'},
+{c:'    if son % 2 == 0:',n:'son 2 ga qoldiqsiz bo\'linishini tekshirdingiz'},
+{c:'        return "Juft"',n:'juft bo\'lsa Juft qaytardingiz'},
+{c:'    return "Toq"',n:'toq bo\'lsa Toq qaytardingiz'},
+{c:'',n:''},
+{c:'print(juft_mi(8))',n:'8 uchun funksiyani chaqirdingiz'},
+{c:'',n:''},
+{c:'# Bir necha qiymat',n:''},
+{c:'def min_max(lst):',n:'min_max nomli funksiya yaratdingiz'},
+{c:'    return min(lst), max(lst)',n:'min va max ni birgalikda qaytardingiz'},
+{c:'',n:''},
+{c:'kichik, katta = min_max([3, 1, 9, 2, 7])',n:'ikkala qiymatni bir vaqtda saqladdingiz'},
+{c:'print(f"kichik={kichik}, katta={katta}")',n:'f-string bilan natijalarni chiqardingiz'}
+]},
+
+/* 4 */
+{id:'args',f:'3.20_args.py',
+info:'3.20 — FUNKSIYAGA RO\'YXAT UZATISH\nRo\'yxat ham parametr bo\'la oladi.\n\ndef f(ro\'yxat): ...\n\n*args — istalgancha argument:\ndef f(*args): ...\n\n**kwargs — nom bilan:\ndef f(**kwargs): ...',
+detail:'*ARGS VA **KWARGS — BATAFSIL\n\n━━━ ODDIY RO\'YXAT PARAMETR ━━━\n\ndef jami(sonlar):\n    return sum(sonlar)\n\njami([1,2,3,4,5])  → 15\n\n━━━ *ARGS — ISTALGANCHA ━━━\n\ndef ko\'p_jami(*args):\n    return sum(args)\n\nko\'p_jami(1)          → 1\nko\'p_jami(1,2,3)      → 6\nko\'p_jami(10,20,30)   → 60\n\n*args → (1,2,3) tuple sifatida keladi\n\n━━━ **KWARGS — NOM BILAN ━━━\n\ndef shaxs_info(**kwargs):\n    for k,v in kwargs.items():\n        print(f"{k}: {v}")\n\nshaxs_info(ism="Ali", yosh=25)\n→ ism: Ali\n→ yosh: 25\n\n**kwargs → {"ism":"Ali","yosh":25} dict\n\n━━━ ARALASH ━━━\n\ndef f(oddiy, *args, **kwargs):\n    print(oddiy)    ← birinchi\n    print(args)     ← qolganlari tuple\n    print(kwargs)   ← nom bilan dict\n\nf("salom", 1,2,3, til="uz")\n→ salom\n→ (1, 2, 3)\n→ {\'til\': \'uz\'}',
+tq:'*args funksiya ichida qanday turda keladi?',
+to:['list','dict','tuple','set'],
+ta:2,
+te:'*args — funksiya ichida tuple sifatida keladi. args = (1,2,3). **kwargs esa dict sifatida: {"ism":"Ali"}.',
+lines:[
+{c:'# 3.20 — Ro\'yxat va *args',n:''},
+{c:'',n:''},
+{c:'def talaba_info(ism, yosh, shahar="O\'zbekiston"):',n:'standart qiymatli 3 parametrli funksiya yaratdingiz'},
+{c:'    print(f"{ism}, {yosh} yosh, {shahar}dan")',n:'f-string bilan ma\'lumotlarni chiqardingiz'},
+{c:'',n:''},
+{c:'talaba_info("Ali", 25, "Toshkent")',n:'uchala argumentni berdingiz'},
+{c:'talaba_info("Vali", 30)',n:'shahar ni standart qoldirdingiz'},
+{c:'',n:''},
+{c:'# *args',n:''},
+{c:'def ko\'p_jami(*args):',n:'*args bilan istalgancha son qabul qiluvchi funksiya yaratdingiz'},
+{c:'    return sum(args)',n:'barcha argumentlar yig\'indisini qaytardingiz'},
+{c:'',n:''},
+{c:'print(f"*args jami: {ko\'p_jami(10, 20, 30, 40, 50)}")',n:'5 ta son bilan chaqirdingiz'},
+{c:'',n:''},
+{c:'# Ro\'yxatni funksiyaga uzatish',n:''},
+{c:'def eng_katta(sonlar):',n:'ro\'yxat parametrli funksiya yaratdingiz'},
+{c:'    return max(sonlar)',n:'ro\'yxatdan eng kattasini qaytardingiz'},
+{c:'',n:''},
+{c:'print(eng_katta([5, 2, 8, 1, 9, 3]))',n:'ro\'yxatni funksiyaga berdingiz'}
+]},
+
+/* 5 */
+{id:'funksiya-end',f:'3.23_funksiya_end.py',
+info:'3.23 — FUNKSIYA SO\'NGSOZ\nIlg\'or funksiya tushunchalari:\n\nlambda  → bir qatorli funksiya\nmap()   → ro\'yxatga funksiya\nfilter()→ shartga mos elementlar\nsorted() + key=\n\nDRY tamoyili',
+detail:'FUNKSIYA — ILGOR MAVZULAR\n\n━━━ LAMBDA ━━━\n\nLambda — ismsiz, bir qatorli funksiya.\n\ndef ikkilamchi(x):\n    return x * 2\n\n# lambda bilan:\nikkilamchi = lambda x: x * 2\n\n# Farqi yo\'q, lambda qisqaroq\nprint(ikkilamchi(5))  → 10\n\n━━━ MAP() ━━━\n\nsonlar = [1, 2, 3, 4, 5]\nkvadratlar = list(map(lambda x: x**2, sonlar))\n→ [1, 4, 9, 16, 25]\n\n━━━ FILTER() ━━━\n\njuftlar = list(filter(lambda x: x%2==0, sonlar))\n→ [2, 4]\n\n━━━ SORTED + KEY ━━━\n\nso\'zlar = ["banana", "olma", "kivi"]\nsorted(so\'zlar, key=len)\n→ ["kivi", "olma", "banana"]\n\ntalabalar = [{"ism":"Ali","ball":90},{"ism":"Vali","ball":75}]\nsorted(talabalar, key=lambda t: t["ball"], reverse=True)\n→ Ali birinchi (90 > 75)\n\n━━━ FUNKSIYA ICHIDA FUNKSIYA ━━━\n\ndef tashqi(x):\n    def ichki(y):\n        return y * 2\n    return ichki(x) + 1\n\n━━━ DRY TAMOYILI ━━━\n\nDon\'t Repeat Yourself — kodni takrorlamang!\nTakrorlanuvchi kodni funksiyaga chiqaring.',
+tq:'lambda nima?',
+to:['Ko\'p qatorli funksiya','Ismsiz bir qatorli funksiya','Ro\'yxat yaratish','Shart tekshirish'],
+ta:1,
+te:'lambda — anonim (ismsiz), bir qatorli funksiya. lambda x: x*2 — x parametrli, x*2 qaytaruvchi funksiya. def bilan bir xil natija.',
+lines:[
+{c:'# 3.23 — Lambda va map/filter',n:''},
+{c:'',n:''},
+{c:'# Lambda',n:''},
+{c:'kvadrat = lambda x: x ** 2',n:'lambda bilan kvadrat funksiyasi yaratdingiz'},
+{c:'print(kvadrat(4))',n:'lambda funksiyasini 4 bilan chaqirdingiz'},
+{c:'',n:''},
+{c:'# map()',n:''},
+{c:'sonlar = [1, 2, 3, 4, 5]',n:'sonlar ro\'yxati yaratdingiz'},
+{c:'kvdr = list(map(lambda x: x**2, sonlar))',n:'map() bilan har elementni kvadratladingiz'},
+{c:'print(kvdr)',n:'kvadratlar ro\'yxatini chiqardingiz'},
+{c:'',n:''},
+{c:'# filter()',n:''},
+{c:'juftlar = list(filter(lambda x: x%2==0, sonlar))',n:'filter() bilan faqat juft sonlarni oldingiz'},
+{c:'print(juftlar)',n:'juft sonlar ro\'yxatini chiqardingiz'},
+{c:'',n:''},
+{c:'# sorted + key',n:''},
+{c:'sozlar = ["banana", "olma", "kivi", "anor"]',n:'so\'zlar ro\'yxati yaratdingiz'},
+{c:'print(sorted(sozlar, key=len))',n:'sorted() + key=len bilan uzunlik bo\'yicha saraladingiz'}
+]},
+
+/* 6 */
+{id:'modul',f:'3.22_modul.py',
+info:'3.22 — MODULLAR\nKodni faylga ajratish va import.\n\nimport modul_nomi\nimport modul as nom\nfrom modul import f\nfrom modul import *\n\nmath, random — tayyor modullar',
+detail:'MODULLAR — BATAFSIL\n\nModul — alohida .py fayl. Funksiyalar va o\'zgaruvchilar.\n\n━━━ IMPORT USULLARI ━━━\n\n1. import math\n   math.sqrt(16)  ← modul nomi bilan\n\n2. import math as m\n   m.sqrt(16)     ← qisqa nom\n\n3. from math import sqrt\n   sqrt(16)       ← to\'g\'ridan-to\'g\'ri\n\n4. from math import sqrt, pi, floor\n   sqrt(16) + pi  ← bir nechtasi\n\n5. from math import *   ← TAVSIYA QILINMAYDI!\n\n━━━ MATH MODULI ━━━\n\nimport math\n\nmath.sqrt(16)      → 4.0  (kvadrat ildiz)\nmath.pi            → 3.14159...\nmath.floor(3.9)    → 3    (pastga yaxlitlash)\nmath.ceil(3.1)     → 4    (tepaga)\nmath.log2(8)       → 3.0\nmath.log10(100)    → 2.0\nmath.pow(2, 10)    → 1024.0\n\n━━━ RANDOM MODULI ━━━\n\nimport random\n\nrandom.randint(1, 100)       → 1-100 orasida butun son\nrandom.random()              → 0.0 va 1.0 orasida\nrandom.choice(["a","b","c"]) → tasodifiy element\nrandom.shuffle(ro\'yxat)      → ro\'yxatni aralashtiradi\n\n━━━ O\'Z MODULINGIZ ━━━\n\n# utils.py faylida:\ndef salomlash(ism):\n    return f"Salom, {ism}!"\n\n# main.py faylida:\nimport utils\nprint(utils.salomlash("Ali"))  → Salom, Ali!',
+tq:'from math import sqrt nima beradi?',
+to:['Butun math modulini import qiladi','Faqat sqrt funksiyasini import qiladi','sqrt ni math.sqrt deb chaqirish kerak bo\'ladi','Xato chiqaradi'],
+ta:1,
+te:'from math import sqrt — faqat sqrt funksiyasini oladi. Keyin sqrt(16) deb ishlatsa bo\'ladi, math.sqrt() emas.',
+lines:[
+{c:'# 3.22 — Modullar',n:''},
+{c:'',n:''},
+{c:'import math',n:'math modulini import qildingiz'},
+{c:'',n:''},
+{c:'print(math.sqrt(16))',n:'math.sqrt() bilan 16 ning kvadrat ildizini topdingiz'},
+{c:'print(math.pi)',n:'math.pi bilan pi konstantasini chiqardingiz'},
+{c:'print(math.floor(3.9))',n:'math.floor() bilan pastga yaxlitladingiz'},
+{c:'print(math.ceil(3.1))',n:'math.ceil() bilan tepaga yaxlitladingiz'},
+{c:'',n:''},
+{c:'# from import',n:''},
+{c:'from math import sqrt, log2',n:'from import bilan faqat sqrt va log2 ni oldingiz'},
+{c:'print(sqrt(25))',n:'sqrt() ni to\'g\'ridan-to\'g\'ri chaqirdingiz'},
+{c:'print(log2(8))',n:'log2() ni to\'g\'ridan-to\'g\'ri chaqirdingiz'},
+{c:'',n:''},
+{c:'# random moduli',n:''},
+{c:'import random',n:'random modulini import qildingiz'},
+{c:'print(random.randint(1, 100))',n:'1 dan 100 gacha tasodifiy son chiqdingiz'},
+{c:'',n:''},
+{c:'mevalar = ["olma", "nok", "uzum", "shaftoli"]',n:'mevalar ro\'yxati yaratdingiz'},
+{c:'print(random.choice(mevalar))',n:'random.choice() bilan tasodifiy meva tanladingiz'}
+]},
+
+/* 7 */
+{id:'klass',f:'3.24_klass.py',
+info:'3.24 — KLASS VA OBYEKT\nOOP — Obyektga yo\'naltirilgan.\n\nclass Nom:\n    def __init__(self, p):\n        self.p = p\n\n__init__ — konstruktor\nself      — obyektning o\'zi\natribut   — ma\'lumot\nmetod     — funksiya',
+detail:'KLASS VA OBYEKT — BATAFSIL\n\nKlass — shablyon (blueprint).\nObyekt — shablondan yaratilgan narsa.\n\nMisol: "Mashina" — klass.\n       "GM Malibu 2020" — obyekt.\n\n━━━ KLASS YARATISH ━━━\n\nclass Mashina:\n    def __init__(self, marka, model, yil):\n        self.marka = marka    ← atribut\n        self.model = model\n        self.yil = yil\n\n    def info(self):           ← metod\n        print(f"{self.marka} {self.model}, {self.yil}")\n\n━━━ OBYEKT YARATISH ━━━\n\nauto1 = Mashina("GM", "Malibu", 2020)\nauto2 = Mashina("Toyota", "Camry", 2022)\n\nauto1.info()   → GM Malibu, 2020\nauto2.info()   → Toyota Camry, 2022\n\n━━━ __INIT__ ━━━\n\n__init__ — konstruktor. Obyekt yaratilganda\navtomatik chaqiriladi.\nself — yaratilayotgan obyektning o\'zi.\nHar metodning birinchi parametri self!\n\n━━━ ATRIBUT VA METOD ━━━\n\nAtribut — ma\'lumot: self.marka = "GM"\nMetod   — harakat: def info(self):\n\n━━━ TYPE ━━━\n\ntype(auto1)         → <class \'Mashina\'>\ntype(auto1.marka)   → <class \'str\'>\nisinstance(auto1, Mashina)  → True',
+tq:'__init__ qachon chaqiriladi?',
+to:['Dastur boshida','Obyekt yaratilganda avtomatik','Funksiya chaqirilganda','Modul import qilinganda'],
+ta:1,
+te:'__init__ — konstruktor. auto1 = Mashina("GM",...) yozsak, Python darhol __init__ ni chaqiradi.',
+lines:[
+{c:'# 3.24 — Klass va Obyekt',n:''},
+{c:'',n:''},
+{c:'class Mashina:',n:'Mashina nomli klass e\'lon qildingiz'},
+{c:'    def __init__(self, marka, yil):',n:'konstruktor metodini yozdingiz'},
+{c:'        self.marka = marka',n:'marka atributini saqladdingiz'},
+{c:'        self.yil = yil',n:'yil atributini saqladdingiz'},
+{c:'',n:''},
+{c:'    def info(self):',n:'info nomli metod yozdingiz'},
+{c:'        print(f"{self.marka}, {self.yil}-yil")',n:'mashina ma\'lumotini chiqarishni yozdingiz'},
+{c:'',n:''},
+{c:'    def yangilik_mi(self):',n:'yangilik_mi nomli metod yozdingiz'},
+{c:'        return self.yil >= 2020',n:'yil 2020 dan katta bo\'lsa True qaytardingiz'},
+{c:'',n:''},
+{c:'# Obyekt yaratish',n:''},
+{c:'auto1 = Mashina("GM Malibu", 2020)',n:'Mashina klassidan birinchi obyekt yaratdingiz'},
+{c:'auto2 = Mashina("Toyota Camry", 2018)',n:'Mashina klassidan ikkinchi obyekt yaratdingiz'},
+{c:'',n:''},
+{c:'auto1.info()',n:'auto1 ning info metodini chaqirdingiz'},
+{c:'auto2.info()',n:'auto2 ning info metodini chaqirdingiz'},
+{c:'print(auto1.yangilik_mi())',n:'auto1 yangi ekanligini tekshirdingiz'},
+{c:'print(type(auto1))',n:'auto1 turini chiqardingiz'}
+]},
+
+/* 8 */
+{id:'oop',f:'3.30_oop.py',
+info:'3.30 — OOP NIMA?\nObyektga yo\'naltirilgan dasturlash.\n\nMeros (Inheritance):\nclass Bola(Ota): ...\nsuper().__init__()\n\nPolimorfizm:\nhar klass o\'z usulida ishleydi',
+detail:'OOP — BATAFSIL\n\nOOP — Obyektga Yo\'naltirilgan Dasturlash.\n4 tamoyil: Encapsulation, Inheritance, Polymorphism, Abstraction.\n\n━━━ INHERITANCE (MEROS) ━━━\n\nclass Hayvon:\n    def __init__(self, ism, tur):\n        self.ism = ism\n        self.tur = tur\n\n    def tanistir(self):\n        print(f"Men {self.ism}, {self.tur}")\n\nclass Mushuk(Hayvon):      ← Hayvon dan meros\n    def ovoz(self):\n        print("Meow!")\n\nclass It(Hayvon):          ← Hayvon dan meros\n    def ovoz(self):\n        print("Woof!")\n\nmushuk1 = Mushuk("Mitti","mushuk")\nit1 = It("Rex","it")\nmushuk1.tanistir()   → Men Mitti, mushuk\nmushuk1.ovoz()       → Meow!\nit1.ovoz()           → Woof!\n\n━━━ SUPER() ━━━\n\nclass Elektrik(Mashina):\n    def __init__(self, marka, yil, batareya):\n        super().__init__(marka, yil)   ← ota __init__\n        self.batareya = batareya\n\n━━━ POLYMORPHISM ━━━\n\nHar klass ovoz() metodini o\'zicha bajaradi.\nBu polimorfizm: bir nom, har xil harakat.\n\n━━━ ENCAPSULATION ━━━\n\nMa\'lumot va funksiyalar birgalikda klassdda.\nTashqaridan to\'g\'ridan-to\'g\'ri o\'zgartirib\nbo\'lmaydi (private atributlar: self.__narx).',
+tq:'super().__init__() nima qiladi?',
+to:['Klass o\'chiriladi','Ota klass konstruktorini chaqiradi','Yangi klass yaratadi','Metodlarni o\'chiradi'],
+ta:1,
+te:'super() — ota klassga murojaat. super().__init__() — ota klassning konstruktorini chaqiradi, atributlarni meros oladi.',
+lines:[
+{c:'# 3.30 — OOP va meros',n:''},
+{c:'',n:''},
+{c:'class Hayvon:',n:'Hayvon nomli asosiy klass yaratdingiz'},
+{c:'    def __init__(self, ism, tur):',n:'konstruktor yozdingiz'},
+{c:'        self.ism = ism',n:'ism atributini saqladdingiz'},
+{c:'        self.tur = tur',n:'tur atributini saqladdingiz'},
+{c:'',n:''},
+{c:'    def tanistir(self):',n:'tanistir metodini yozdingiz'},
+{c:'        print(f"Hayvon: {self.ism}, {self.tur}")',n:'hayvon haqida ma\'lumot chiqarishni yozdingiz'},
+{c:'',n:''},
+{c:'class Mushuk(Hayvon):',n:'Hayvondan meros olgan Mushuk klassi yaratdingiz'},
+{c:'    def ovoz(self):',n:'Mushuk uchun ovoz metodini yozdingiz'},
+{c:'        print("Meow!")',n:'mushuk ovozini chiqardingiz'},
+{c:'',n:''},
+{c:'class It(Hayvon):',n:'Hayvondan meros olgan It klassi yaratdingiz'},
+{c:'    def ovoz(self):',n:'It uchun ovoz metodini yozdingiz'},
+{c:'        print("Woof!")',n:'it ovozini chiqardingiz'},
+{c:'',n:''},
+{c:'mushuk1 = Mushuk("Mitti", "mushuk")',n:'Mushuk klassidan obyekt yaratdingiz'},
+{c:'it1 = It("Rex", "it")',n:'It klassidan obyekt yaratdingiz'},
+{c:'',n:''},
+{c:'mushuk1.tanistir()',n:'meros olingan tanistir metodini chaqirdingiz'},
+{c:'it1.tanistir()',n:'it ning tanistir metodini chaqirdingiz'},
+{c:'mushuk1.ovoz()',n:'mushuk ning o\'z ovoz metodini chaqirdingiz'},
+{c:'it1.ovoz()',n:'it ning o\'z ovoz metodini chaqirdingiz'}
+]},
+
+/* 9 */
+{id:'github',f:'3.25_github.py',
+info:'3.25 — GITHUB PORTFOLIO\nGit — versiyani boshqarish.\n\ngit init        → yangi repo\ngit add .       → fayllarni belgilash\ngit commit -m   → saqlash\ngit push        → GitHub ga yuklash\n\n.gitignore — keraksiz fayllar',
+detail:'GIT VA GITHUB — BATAFSIL\n\nGit — kod versiyalarini boshqarish tizimi.\nGitHub — git repolarini onlayn saqlash.\n\n━━━ ASOSIY BUYRUQLAR ━━━\n\ngit init                      → yangi repo yaratish\ngit status                    → holatni ko\'rish\ngit add fayl.py               → faylni tayyorlash\ngit add .                     → barcha fayllarni\ngit commit -m "xabar"         → saqlash (snapshot)\ngit log                       → tarix\n\n━━━ GITHUB BILAN ISHLASH ━━━\n\ngit remote add origin URL     → github bilan bog\'lash\ngit push origin main          → yuklash\ngit pull origin main          → yuklab olish\ngit clone URL                 → nusxa olish\n\n━━━ BRANCH ━━━\n\ngit branch yangi-xususiyat    → yangi branch\ngit checkout yangi-xususiyat  → o\'tish\ngit merge yangi-xususiyat     → birlashtirish\n\n━━━ .GITIGNORE ━━━\n\n# .gitignore fayli:\n__pycache__/\n*.pyc\n.env\nvenv/\n→ Bu fayllar git ga kirmaydi\n\n━━━ PORTFOLIO UCHUN ━━━\n\n1. Har loyiha uchun repo\n2. README.md — tavsif\n3. Har kun commit\n4. Ko\'rsatish: github.com/username',
+tq:'git commit -m "..." nima qiladi?',
+to:['Fayllarni o\'chiradi','O\'zgarishlarni xabar bilan saqlaydi','GitHub ga yuklaydi','Yangi branch yaratadi'],
+ta:1,
+te:'git commit — o\'zgarishlarni snapshot qilib saqlaydi. -m "xabar" — qisqa tavsif. Keyin git push bilan GitHub ga yuklash mumkin.',
+lines:[
+{c:'# 3.25 — Git buyruqlari (kommentda)',n:''},
+{c:'',n:''},
+{c:'# Terminalda bajariladigan buyruqlar:',n:''},
+{c:'# git init             → yangi repo',n:''},
+{c:'# git add .            → barcha fayllar',n:''},
+{c:'# git commit -m "first commit"',n:''},
+{c:'# git push origin main → GitHub ga yuklash',n:''},
+{c:'',n:''},
+{c:'# Python da os moduli bilan ishlash',n:''},
+{c:'import os',n:'os modulini import qildingiz'},
+{c:'',n:''},
+{c:'# Joriy katalog',n:''},
+{c:'print(os.getcwd())',n:'os.getcwd() bilan joriy papkani chiqardingiz'},
+{c:'',n:''},
+{c:'# Fayl mavjudmi tekshirish',n:''},
+{c:'print(os.path.exists("main.py"))',n:'os.path.exists() bilan main.py mavjudligini tekshirdingiz'},
+{c:'',n:''},
+{c:'# Papkadagi fayllar',n:''},
+{c:'fayllar = os.listdir(".")',n:'os.listdir() bilan joriy papka fayllarini oldingiz'},
+{c:'print(fayllar)',n:'fayllar ro\'yxatini chiqardingiz'}
+]},
+
+/* 10 */
+{id:'xatolar',f:'3.26_xatolar.py',
+info:'3.26 — KO\'P UCHRAYDIGAN XATOLAR\nAsosiy xato turlari:\n\nSyntaxError  → sinteks xato\nNameError    → o\'zgaruvchi yo\'q\nTypeError    → tur xato\nIndexError   → indeks chegaradan\nKeyError     → kalit yo\'q\nZeroDivisionError → 0 ga bo\'lish',
+detail:'KO\'P UCHRAYDIGAN XATOLAR — BATAFSIL\n\n━━━ 1. SYNTAXERROR ━━━\n\nprint("Salom"    ← ) yetishmaydi\nif x == 5       ← : yetishmaydi\n\nPython kodni bajarmasdan xato ko\'rsatadi.\n\n━━━ 2. NAMEERROR ━━━\n\nprint(ism)  → NameError: ism aniqlanmagan\n\nSabab: ism = "Ali" deb yozilmagan.\n\n━━━ 3. TYPEERROR ━━━\n\nprint("Yosh: " + 25)  → TypeError\nprint("Yosh: " + str(25))  ← to\'g\'ri\n\n"Ali" + "Vali"  → "AliVali"  (string concat)\n"Ali" + 25      → TypeError  (str + int bo\'lmaydi)\n\n━━━ 4. INDEXERROR ━━━\n\nro\'yxat = ["a","b","c"]\nro\'yxat[5]  → IndexError\nro\'yxat[-1] → "c" (xato emas!)\n\n━━━ 5. KEYERROR ━━━\n\nd = {"ism":"Ali"}\nd["yosh"]       → KeyError\nd.get("yosh")   → None (xato yo\'q!)\n\n━━━ 6. ZERODIVISIONERROR ━━━\n\n5 / 0    → ZeroDivisionError\n5 // 0   → ZeroDivisionError\n\n━━━ XATOLARNI O\'QISH ━━━\n\nTraceback (most recent call last):\n  File "main.py", line 3, in <module>\n    print(ism)\nNameError: name \'ism\' is not defined\n\n→ Fayl nomi + qator raqami + xato nomi!\n   Shu ma\'lumot bilan topsa bo\'ladi.',
+tq:'TypeError qachon chiqadi?',
+to:['O\'zgaruvchi topilmaganda','Noto\'g\'ri tur ishlatilganda (str+int kabi)','Kalit topilmaganda','Indeks chegaradan chiqsa'],
+ta:1,
+te:'TypeError — tur mos kelmaganda. "Ali" + 25 → TypeError. Tuzatish: str(25) yoki f"Salom {25}".',
+lines:[
+{c:'# 3.26 — Ko\'p uchraydigan xatolar',n:''},
+{c:'',n:''},
+{c:'# TypeError misoli va yechimi',n:''},
+{c:'yosh = 25',n:'yosh o\'zgaruvchisiga 25 berdingiz'},
+{c:'print("Yosh: " + str(yosh))',n:'str() bilan int ni matnga aylantirib birlashtirgdingiz'},
+{c:'',n:''},
+{c:'# IndexError dan saqlanish',n:''},
+{c:'ro\'yxat = ["a", "b", "c"]',n:'3 elementli ro\'yxat yaratdingiz'},
+{c:'if len(ro\'yxat) > 5:',n:'5-indeks mavjudligini oldin tekshirdingiz'},
+{c:'    print(ro\'yxat[5])',n:'shart bajarilgandagina elementni oldingiz'},
+{c:'else:',n:'aks holda blok boshladingiz'},
+{c:'    print("Indeks chegaradan tashqari")',n:'xavfsiz xabar chiqardingiz'},
+{c:'',n:''},
+{c:'# KeyError dan saqlanish',n:''},
+{c:'shaxs = {"ism": "Ali", "yosh": 25}',n:'lug\'at yaratdingiz'},
+{c:'print(shaxs.get("tel", "Raqam yo\'q"))',n:'.get() bilan KeyError dan saqlandingiz'}
+]},
+
+/* 11 */
+{id:'tryexcept',f:'3.27_try_except.py',
+info:'3.27 — XATOLAR BILAN ISHLASH\ntry-except-finally:\n\ntry:\n    # xavfli kod\nexcept XatoTuri:\n    # xato bo\'lsa\nelse:\n    # xato bo\'lmasa\nfinally:\n    # har doim',
+detail:'TRY-EXCEPT — BATAFSIL\n\ntry-except — xatolarni ushlab, dastur crash bo\'lishini oldini oladi.\n\n━━━ ASOSIY SHAKL ━━━\n\ntry:\n    x = int(input("Son: "))  ← xato bo\'lishi mumkin\nexcept ValueError:\n    print("Bu son emas!")    ← ushlandi\n\n━━━ EXCEPT TURLARI ━━━\n\ntry:\n    ...\nexcept ValueError:\n    print("Qiymat xato")\nexcept ZeroDivisionError:\n    print("0 ga bo\'lish")\nexcept (TypeError, KeyError):\n    print("Tur yoki kalit xato")\nexcept Exception as e:\n    print(f"Xato: {e}")     ← har qanday xato\n\n━━━ ELSE ━━━\n\ntry:\n    n = int("25")\nexcept ValueError:\n    print("Xato")\nelse:\n    print(f"Muvaffaqiyat: {n}")  ← xato bo\'lmasa\n\n━━━ FINALLY ━━━\n\ntry:\n    f = open("file.txt")\nexcept FileNotFoundError:\n    print("Fayl yo\'q")\nfinally:\n    print("Har doim bajariladi")  ← xato bo\'lsa ham!\n\n━━━ RAISE — XATO CHIQARISH ━━━\n\ndef yoshni_tekshir(yosh):\n    if yosh < 0:\n        raise ValueError("Yosh manfiy bo\'lmaydi!")\n    return yosh\n\ntry:\n    yoshni_tekshir(-5)\nexcept ValueError as e:\n    print(e)',
+tq:'finally bloki qachon bajariladi?',
+to:['Faqat xato bo\'lganda','Faqat xato bo\'lmaganda','Har doim, xato bo\'lsa ham bo\'lmasa ham','Faqat return dan keyin'],
+ta:2,
+te:'finally — har doim bajariladi: xato bo\'lsa ham, bo\'lmasa ham. Faylni yopish, ulanishni uzish kabi tozalash uchun ishlatiladi.',
+lines:[
+{c:'# 3.27 — try-except-finally',n:''},
+{c:'',n:''},
+{c:'def bo\'lish(a, b):',n:'bo\'lish funksiyasi yaratdingiz'},
+{c:'    try:',n:'xavfli kodni try ga yozdingiz'},
+{c:'        natija = a / b',n:'bo\'lishni bajarishga harakat qildingiz'},
+{c:'        return natija',n:'muvaffaqiyatli natijani qaytardingiz'},
+{c:'    except ZeroDivisionError:',n:'nolga bo\'lish xatosini ushladingiz'},
+{c:'        print("Xato: nolga bolish!")',n:'xato xabarini chiqardingiz'},
+{c:'        return None',n:'None qaytardingiz'},
+{c:'    finally:',n:'finally bloki har doim ishlaydi deb yozdingiz'},
+{c:'        print("bo\'lish funksiyasi tugadi")',n:'finally da xabar chiqardingiz'},
+{c:'',n:''},
+{c:'print(bo\'lish(10, 2))',n:'to\'g\'ri bo\'linma chiqardingiz'},
+{c:'print(bo\'lish(5, 0))',n:'nolga bo\'linma — xato ushlandi'},
+{c:'',n:''},
+{c:'# ValueError ushlash',n:''},
+{c:'try:',n:''},
+{c:'    son = int("abc")',n:'matni int ga aylantirishga urinib xato chiqardingiz'},
+{c:'except ValueError as e:',n:'ValueError ni e nomi bilan ushladingiz'},
+{c:'    print(f"ValueError: {e}")',n:'xato xabarini f-string bilan chiqardingiz'}
+]},
+
+/* 12 */
+{id:'stdlib',f:'3.28_stdlib.py',
+info:'3.28 — PYTHON STANDART KUTUBXONASI\nO\'rnatishsiz ishlatiladigan modullar:\n\nmath     → matematika\nrandom   → tasodifiylik\ndatetime → sana va vaqt\nos       → fayl tizimi\nsys      → tizim ma\'lumotlari\njson     → JSON bilan ishlash',
+detail:'STANDART KUTUBXONA — BATAFSIL\n\nPython bilan birga keladigan modullar — bepul va tayyorB\n\n━━━ MATH ━━━\n\nimport math\nmath.sqrt(16)    → 4.0\nmath.pi          → 3.14159...\nmath.factorial(5)→ 120\nmath.gcd(12, 8)  → 4\n\n━━━ RANDOM ━━━\n\nimport random\nrandom.randint(1,100)       → butun son\nrandom.random()             → 0.0-1.0\nrandom.choice([1,2,3])      → element\nrandom.sample([1,2,3,4],2)  → 2 ta tanlov\n\n━━━ DATETIME ━━━\n\nfrom datetime import datetime\nnow = datetime.now()\nprint(now.year)    → 2025\nprint(now.month)   → 4\nprint(now.day)     → 16\nprint(now.strftime("%Y-%m-%d"))  → 2025-04-16\n\n━━━ OS ━━━\n\nimport os\nos.getcwd()         → joriy papka\nos.listdir(".")     → fayllar\nos.path.exists(p)   → mavjudmi?\nos.mkdir("papka")   → papka yaratish\n\n━━━ JSON ━━━\n\nimport json\n\nd = {"ism": "Ali", "yosh": 25}\nmatn = json.dumps(d)         → matn (JSON string)\nqayta = json.loads(matn)     → dict ga qaytarish',
+tq:'datetime.now() nima qaytaradi?',
+to:['Unix vaqt (soniyalar)','Hozirgi sana va vaqt obyekti','Faqat sana (kun/oy/yil)','Faqat vaqt (soat:daqiqa)'],
+ta:1,
+te:'datetime.now() — hozirgi sana va vaqt bilan datetime obyekti qaytaradi. .year .month .day .hour .minute kabi atributlar bor.',
+lines:[
+{c:'# 3.28 — Standart kutubxona',n:''},
+{c:'',n:''},
+{c:'import math',n:'math modulini import qildingiz'},
+{c:'import random',n:'random modulini import qildingiz'},
+{c:'from datetime import datetime',n:'datetime dan datetime ni import qildingiz'},
+{c:'',n:''},
+{c:'# math',n:''},
+{c:'print(math.sqrt(16))',n:'math.sqrt() bilan 16 ildizini chiqardingiz'},
+{c:'print(math.factorial(5))',n:'math.factorial() bilan 5! ni chiqardingiz'},
+{c:'',n:''},
+{c:'# random',n:''},
+{c:'print(random.randint(1, 100))',n:'1-100 orasida tasodifiy son chiqardingiz'},
+{c:'',n:''},
+{c:'sozlar = ["Python", "Data", "Science", "AI"]',n:'so\'zlar ro\'yxati yaratdingiz'},
+{c:'print(random.choice(sozlar))',n:'tasodifiy so\'z tanladingiz'},
+{c:'',n:''},
+{c:'# datetime',n:''},
+{c:'hozir = datetime.now()',n:'datetime.now() bilan hozirgi vaqtni oldingiz'},
+{c:'print(hozir.year)',n:'yilni chiqardingiz'},
+{c:'print(hozir.strftime("%Y-%m-%d"))',n:'strftime() bilan formatli sana chiqardingiz'}
+]},
+
+/* 13 */
+{id:'pypi',f:'3.29_pypi.py',
+info:'3.29 — TASHQI KUTUBXONA (PyPI)\npypi.org — kutubxonalar ombori.\n\npip install paket\n\nMashhur kutubxonalar:\npandas   → jadval (DataFrame)\nnumpy    → massivlar\nrequests → HTTP so\'rovlar\nmatplotlib → grafiklar',
+detail:'TASHQI KUTUBXONALAR — BATAFSIL\n\nPyPI — Python Package Index.\n400,000+ kutubxona bepul.\n\n━━━ O\'RNATISH ━━━\n\npip install pandas\npip install numpy matplotlib seaborn\npip install requests\n\npip list                    → o\'rnatilganlar\npip show pandas             → info\npip uninstall pandas        → o\'chirish\npip install pandas==1.5.3   → versiya ko\'rsatish\n\n━━━ REQUIREMENTS.TXT ━━━\n\npip freeze > requirements.txt\n→ barcha kutubxonalar yoziladi\n\npip install -r requirements.txt\n→ barchasini o\'rnatish\n\n━━━ MASHHUR KUTUBXONALAR ━━━\n\npandas      → DataFrame, CSV, Excel\nnumpy       → massivlar, matematik\nmatplotlib  → grafiklar, vizualizatsiya\nseaborn     → statistik grafiklar\nrequests    → HTTP so\'rovlar, API\nflask       → web ilovalar\nscikit-learn→ Machine Learning\ntensorflow  → Deep Learning\nopencv      → tasvir qayta ishlash\n\n━━━ IMPORT USLUBI ━━━\n\nimport pandas as pd           ← standart alias\nimport numpy as np\nimport matplotlib.pyplot as plt\nimport seaborn as sns\n\nBu aliaslar butun data science jamoasida qabul qilingan!',
+tq:'requirements.txt nima uchun?',
+to:['Kod yozish uchun','Loyihadagi barcha kutubxonalar ro\'yxati','Fayllarni saqlash uchun','Git uchun'],
+ta:1,
+te:'requirements.txt — loyihada ishlatiladigan kutubxonalar va versiyalar ro\'yxati. pip install -r requirements.txt bilan hammasi o\'rnatiladi.',
+lines:[
+{c:'# 3.29 — Tashqi kutubxonalar',n:''},
+{c:'',n:''},
+{c:'# pip install pandas numpy (terminalda)',n:''},
+{c:'',n:''},
+{c:'# Import uslublari (standart aliaslar)',n:''},
+{c:'# import pandas as pd',n:''},
+{c:'# import numpy as np',n:''},
+{c:'# import matplotlib.pyplot as plt',n:''},
+{c:'',n:''},
+{c:'# Standart kutubxona bilan misol',n:''},
+{c:'import json',n:'json modulini import qildingiz'},
+{c:'',n:''},
+{c:'# JSON — ma\'lumot almashish formati',n:''},
+{c:'ma_lumot = {"ism": "Ali", "yosh": 25, "tillar": ["Python", "SQL"]}',n:'dictionary yaratdingiz'},
+{c:'json_matn = json.dumps(ma_lumot, indent=2)',n:'json.dumps() bilan dict ni JSON matnga aylandirdingiz'},
+{c:'print(json_matn)',n:'JSON formatdagi matnni chiqardingiz'},
+{c:'',n:''},
+{c:'# Orqaga dict ga',n:''},
+{c:'qayta = json.loads(json_matn)',n:'json.loads() bilan JSON ni dict ga qaytardingiz'},
+{c:'print(qayta["ism"])',n:'dict dan ism ni oldingiz'}
+]},
+
+/* 14 */
+{id:'oop2',f:'3.30_oop2.py',
+info:'3.30 — OOP TAMOYILLARI\n4 asosiy tamoyil:\n\nEncapsulation  → berkitish\nInheritance    → meros\nPolymorphism   → ko\'p shakllilik\nAbstraction    → abstraksiya\n\nPython OOP ni to\'liq qo\'llaydi',
+detail:'OOP TAMOYILLARI — BATAFSIL\n\n━━━ 1. ENCAPSULATION (BERKITISH) ━━━\n\nMa\'lumot va funksiyalarni birgalikda saqlash.\nPrivate atributlar: __ (ikki pastki chiziq)\n\nclass BankHisobi:\n    def __init__(self):\n        self.__balans = 0    ← private\n\n    def kirim(self, summa):\n        self.__balans += summa\n\n    def balans(self):\n        return self.__balans\n\n━━━ 2. INHERITANCE (MEROS) ━━━\n\nclass Hayvon:\n    def nafas_ol(self):\n        print("nafas olmoqda")\n\nclass Mushuk(Hayvon):    ← meros\n    def meow(self):\n        print("Meow!")\n\nmushuk = Mushuk()\nmushuk.nafas_ol()  ← meros olingan metod!\nmushuk.meow()\n\n━━━ 3. POLYMORPHISM ━━━\n\nclass Shakl:\n    def maydon(self):\n        return 0\n\nclass Doira(Shakl):\n    def maydon(self):\n        return 3.14 * self.r ** 2\n\nclass Kvadrat(Shakl):\n    def maydon(self):\n        return self.a ** 2\n\n# Bir xil nom, har xil ishlash!\n\n━━━ 4. ABSTRACTION ━━━\n\nMurakkablikni berkitish.\nFoydalanuvchi faqat interfeys bilan ishlaydi,\nichki ishlash muhim emas.',
+tq:'Encapsulation nima maqsadda ishlatiladi?',
+to:['Kodni tezlashtirish uchun','Ma\'lumot va funksiyalarni birgalikda himoyalash','Meros olish uchun','Interfeys yaratish uchun'],
+ta:1,
+te:'Encapsulation — ma\'lumot va funksiyalarni birgalikda klassda saqlash va tashqaridan bevosita o\'zgartirishdan himoyalash.',
+lines:[
+{c:'# 3.30 — OOP tamoyillari amalda',n:''},
+{c:'',n:''},
+{c:'class Shakl:',n:'asosiy Shakl klassini yaratdingiz'},
+{c:'    def tur(self):',n:'tur metodini yozdingiz'},
+{c:'        return "Nomalum shakl"',n:'standart tur nomini qaytardingiz'},
+{c:'',n:''},
+{c:'    def maydon(self):',n:'maydon metodini yozdingiz'},
+{c:'        return 0',n:'standart 0 qaytardingiz'},
+{c:'',n:''},
+{c:'class Toʻrtburchak(Shakl):',n:'Shakldan meros olgan To\'rtburchak yaratdingiz'},
+{c:'    def __init__(self, a, b):',n:'konstruktor yozdingiz'},
+{c:'        self.a = a',n:'a tomonini saqladdingiz'},
+{c:'        self.b = b',n:'b tomonini saqladdingiz'},
+{c:'',n:''},
+{c:'    def tur(self):',n:'tur metodini qayta yozdingiz (override)'},
+{c:'        return "Toʻrtburchak"',n:'To\'rtburchak nomini qaytardingiz'},
+{c:'',n:''},
+{c:'    def maydon(self):',n:'maydon metodini qayta yozdingiz'},
+{c:'        return self.a * self.b',n:'to\'rtburchak maydonini qaytardingiz'},
+{c:'',n:''},
+{c:'t = Toʻrtburchak(4, 5)',n:'4x5 li to\'rtburchak yaratdingiz'},
+{c:'print(t.tur())',n:'shakl turini chiqardingiz'},
+{c:'print(t.maydon())',n:'maydonni chiqardingiz'}
+]},
+
+/* 15 */
+{id:'final',f:'3_yakuniy.py',
+info:'3-BO\'LIM YAKUNIY TAKRORLASH\nO\'rganilgan barcha mavzular:\n\nprint, o\'zgaruvchi, matn, ro\'yxat\nfor, while, if-else, dict\nfunksiya, klass, modullar\ntry-except, OOP\n\nBularni bilib → keyingi bosqich!\npandas, numpy, ML...',
+detail:'YAKUNIY TAKRORLASH — BATAFSIL\n\nSiz Python asoslarini o\'rgandingiz! Nima bildingiz?\n\n━━━ O\'RGANILGANLAR ━━━\n\n✅ print() va f-string\n✅ O\'zgaruvchilar: int, float, str, bool\n✅ Matn metodlari: upper, lower, len, slice\n✅ Sonlar: +,-,*,/,//,%,**\n✅ Ro\'yxat: append, remove, sort, slice\n✅ Tuple: o\'zgarmas ro\'yxat\n✅ For sikli: range, enumerate\n✅ If-elif-else: and, or, not\n✅ Dictionary: get, keys, values, items\n✅ While: break, continue\n✅ Funksiya: def, return, *args, lambda\n✅ Modullar: import, math, random\n✅ Klass: __init__, self, meros\n✅ Try-except-finally\n✅ OOP: 4 tamoyil\n\n━━━ KEYINGI BOSQICH ━━━\n\n1. PANDAS — ma\'lumotlar bilan ishlash\n   import pandas as pd\n   df = pd.read_csv("fayl.csv")\n\n2. NUMPY — matematik amallar\n   import numpy as np\n   arr = np.array([1,2,3,4,5])\n\n3. MATPLOTLIB — grafiklar\n   import matplotlib.pyplot as plt\n   plt.plot(x, y)\n\n4. SCIKIT-LEARN — Machine Learning\n\n━━━ MASLAHAT ━━━\n\nKod yozish = mahorat.\nHar kuni kamida 30 daqiqa mashq!\nKaggle Notebooks — bepul GPU.\nHar loyiha → GitHub ga.\nSavollar → Stack Overflow.',
+tq:'Python asoslaridan keyin qaysi yo\'nalish tavsiya etiladi?',
+to:['Java o\'rganish','pandas va numpy bilan davom etish','HTML/CSS o\'rganish','C++ o\'rganish'],
+ta:1,
+te:'Python asoslaridan keyin Data Science uchun: pandas, numpy, matplotlib. ML uchun: scikit-learn. Bu kutubxonalarni bilmasdan professional darajada ishlab bo\'lmaydi.',
+lines:[
+{c:'# 3-bo\'lim yakuniy takrorlash',n:''},
+{c:'',n:''},
+{c:'# Barcha asosiy tushunchalar',n:''},
+{c:'ism = "Data Scientist"',n:'ism o\'zgaruvchisiga kasb nomini berdingiz'},
+{c:'ko\'nikmalar = ["Python", "pandas", "ML", "SQL"]',n:'ko\'nikmalar ro\'yxati yaratdingiz'},
+{c:'',n:''},
+{c:'def sertifikat(ism, ko\'nikmalar):',n:'sertifikat nomli funksiya yaratdingiz'},
+{c:'    print(f"\\n=== {ism} SERTIFIKATI ===")',n:'sarlavha chiqardingiz'},
+{c:'    for i, k in enumerate(ko\'nikmalar, 1):',n:'enumerate bilan tartiblangan ko\'nikmalarni aylandingiz'},
+{c:'        print(f"  {i}. {k}")',n:'har ko\'nikmani raqam bilan chiqardingiz'},
+{c:'    print(f"Jami: {len(ko\'nikmalar)} ta ko\'nikma")',n:'umumiy ko\'nikmalar sonini chiqardingiz'},
+{c:'',n:''},
+{c:'sertifikat(ism, ko\'nikmalar)',n:'funksiyani chaqirdingiz'},
+{c:'',n:''},
+{c:'# Keyingi qadam',n:''},
+{c:'print("\\nKeyingi: pandas, numpy, ML!")',n:'keyingi o\'rganish yo\'nalishini chiqardingiz'}
+]}
+];
+
+/* ═══════════════ ENGINE (Part 1 bilan bir xil) ═══════════════ */
+var cur=0,skipOn=false,brightLevel=3,ghostVisible=true,resultVisible=false,testVisible=false;
+var lineData=[],testAnswered=false,modProgress={};
+var BRIGHT_OPACITY=[0,0.05,0.1,0.2,0.3,0.42,0.55,0.65,0.75,0.85,0.95];
+
+window.onload=function(){buildTabs();loadMod(0);setupKeyboardScroll();};
+
+function setupKeyboardScroll(){
+  if(!window.visualViewport) return;
+  var lastH=window.visualViewport.height;
+  window.visualViewport.addEventListener('resize',function(){
+    var newH=window.visualViewport.height;
+    if(newH<lastH-50){
+      setTimeout(function(){
+        var el=document.activeElement;
+        if(!el||!el.classList.contains('line-input')) return;
+        var rect=el.getBoundingClientRect();
+        var vpTop=window.visualViewport.offsetTop;
+        var vpH=window.visualViewport.height;
+        var elCenter=window.scrollY+rect.top+rect.height/2;
+        var target=elCenter-(vpTop+vpH*0.35);
+        window.scrollTo({top:Math.max(0,target),behavior:'smooth'});
+      },200);
+    }
+    lastH=newH;
+  });
+  document.addEventListener('focus',function(e){
+    if(!e.target.classList.contains('line-input')) return;
+    if(!window.visualViewport) return;
+    setTimeout(function(){
+      var rect=e.target.getBoundingClientRect();
+      var vpTop=window.visualViewport.offsetTop;
+      var vpH=window.visualViewport.height;
+      if(rect.top>vpTop+50&&rect.bottom<vpTop+vpH-80) return;
+      var elCenter=window.scrollY+rect.top+rect.height/2;
+      var target=elCenter-(vpTop+vpH*0.35);
+      window.scrollTo({top:Math.max(0,target),behavior:'smooth'});
+    },300);
+  },true);
+}
+
+function setBright(v){brightLevel=parseInt(v);document.getElementById('brightVal').textContent=v;applyBright();}
+function applyBright(){
+  var op=BRIGHT_OPACITY[brightLevel];
+  document.querySelectorAll('.line-ghost').forEach(function(g){
+    if(!g.classList.contains('skip-c')&&ghostVisible)g.style.color='rgba(74,96,128,'+op+')';
+  });
+}
+function buildTabs(){
+  var c=document.getElementById('tabs');c.innerHTML='';
+  M.forEach(function(m,i){
+    var d=document.createElement('div');
+    d.className='tab'+(i===cur?' on':'')+(modProgress[i]?' done':'');
+    d.id='tab'+i;d.textContent=(i+1)+'. '+m.id;
+    d.onclick=(function(n){return function(){loadMod(n);};})(i);
+    c.appendChild(d);
+  });
+}
+function loadMod(i){
+  cur=i;resultVisible=false;testVisible=false;testAnswered=false;
+  document.getElementById('resultPanel').className='result-panel';
+  document.getElementById('testPanel').className='test-panel';
+  document.getElementById('detailPanel').className='detail-panel';
+  document.getElementById('badge').className='badge';
+  var m=M[i];
+  document.getElementById('fname').textContent=m.f;
+  document.getElementById('topSub').textContent=m.f;
+  document.querySelectorAll('.tab').forEach(function(t,j){t.classList.toggle('on',j===i);});
+  document.getElementById('infoBox').textContent=m.info;
+  buildLines(m);updateStats();updateProgress();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function getIndent(s){var r=s.match(/^(\s+)/);return r?r[1]:'';}
+function buildLines(m){
+  var wrap=document.getElementById('linesWrap');wrap.innerHTML='';lineData=[];
+  var op=BRIGHT_OPACITY[brightLevel];
+  m.lines.forEach(function(ln,i){
+    var isCom=ln.c.trimStart().charAt(0)==='#';
+    var isEmpty=ln.c==='';
+    var indent=getIndent(ln.c);
+    var cp=isEmpty?'':ln.c.slice(indent.length);
+    var block=document.createElement('div');block.className='line-block';block.id='block'+i;
+    var row=document.createElement('div');row.className='line-row';
+    var num=document.createElement('div');num.className='line-num';num.id='num'+i;
+    num.textContent=isEmpty?'':i+1;
+    if(indent.length>0&&!isEmpty){
+      var pre=document.createElement('div');pre.className='line-indent-pre';
+      pre.textContent=indent.replace(/ /g,'\u00a0');
+      row.appendChild(num);row.appendChild(pre);
+    } else {row.appendChild(num);}
+    var content=document.createElement('div');content.className='line-content';
+    var ghost=document.createElement('div');
+    ghost.className='line-ghost'+((isCom&&skipOn)?' skip-c':'');
+    ghost.id='ghost'+i;ghost.style.color=ghostVisible?'rgba(74,96,128,'+op+')':'transparent';
+    ghost.textContent=cp||' ';
+    var colors=document.createElement('div');colors.className='line-colors';colors.id='clr'+i;
+    var inp=document.createElement('input');inp.type='text';inp.className='line-input';inp.id='inp'+i;
+    inp.setAttribute('spellcheck','false');inp.setAttribute('autocorrect','off');
+    inp.setAttribute('autocapitalize','off');inp.setAttribute('autocomplete','off');
+    if(isEmpty||(isCom&&skipOn)) inp.disabled=true;
+    (function(idx,ct,isC,empty,note){
+      inp.addEventListener('input',function(){
+        if(empty) return;
+        updateClr(idx,ct,isC);
+        if(inp.value===ct&&ct!==''&&note!=='')showNote(idx);else hideNote(idx);
+        updateStats();
+      });
+    })(i,cp,isCom,isEmpty,ln.n);
+    content.appendChild(ghost);content.appendChild(colors);content.appendChild(inp);
+    row.appendChild(content);
+    var note=document.createElement('div');note.className='line-done-note';note.id='note'+i;
+    note.textContent='✅ Siz '+ln.n+'!';
+    block.appendChild(row);if(ln.n)block.appendChild(note);
+    wrap.appendChild(block);
+    lineData.push({inp:inp,target:cp,isCom:isCom,isEmpty:isEmpty});
+  });
+}
+function showNote(i){document.getElementById('note'+i).classList.add('show');}
+function hideNote(i){var n=document.getElementById('note'+i);if(n)n.classList.remove('show');}
+function updateClr(idx,target,isCom){
+  if(isCom&&skipOn) return;
+  var inp=document.getElementById('inp'+idx),clr=document.getElementById('clr'+idx);
+  var typed=inp.value,html='';
+  for(var ci=0;ci<target.length;ci++){
+    var ch=target[ci];
+    if(ci<typed.length)html+=typed[ci]===ch?'<span style="color:#22c55e">'+esc(ch)+'</span>':'<span style="color:#f43f5e;text-decoration:underline">'+esc(ch)+'</span>';
+    else html+='<span style="color:transparent">'+esc(ch)+'</span>';
+  }
+  clr.innerHTML=html;
+  document.getElementById('num'+idx).style.color=(typed===target&&target!=='')?'#22c55e':'';
+}
+function updateStats(){
+  var done=0,total=0;
+  lineData.forEach(function(l){if(l.isEmpty||(l.isCom&&skipOn))return;total++;if(l.inp.value===l.target)done++;});
+  var pct=total>0?Math.round(done/total*100):0;
+  document.getElementById('svPct').textContent=done>0?pct+'%':'—';
+  document.getElementById('svDone').textContent=done+'/'+total;
+  document.getElementById('svTotal').textContent=total+' ta';
+}
+function updateProgress(){
+  var done=Object.keys(modProgress).length,total=M.length;
+  document.getElementById('progressFill').style.width=Math.round(done/total*100)+'%';
+  document.getElementById('progressLbl').textContent=done+' / '+total+' mavzu bajarildi';
+}
+function doCheck(){
+  var done=0,total=0,errors=[];
+  lineData.forEach(function(l,i){
+    if(l.isEmpty||(l.isCom&&skipOn))return;total++;
+    if(l.inp.value===l.target){done++;document.getElementById('num'+i).style.color='#22c55e';}
+    else{errors.push(i+1);document.getElementById('num'+i).style.color='#f43f5e';}
+  });
+  var pct=Math.round(done/total*100),b=document.getElementById('badge');
+  b.className='badge show';
+  if(pct>=85){b.className+=' g';b.textContent='🎉 Zor! '+pct+'% ('+done+'/'+total+')';modProgress[cur]=true;document.getElementById('tab'+cur).classList.add('done');updateProgress();}
+  else if(pct>=55){b.className+=' o';b.textContent='👍 '+pct+'% — xato: '+errors.join(', ')+'-qatorlar';}
+  else{b.className+=' r';b.textContent='❌ '+pct+'% — xato: '+errors.join(', ')+'-qatorlar';}
+}
+function doClear(){
+  lineData.forEach(function(l,i){
+    l.inp.value='';var c=document.getElementById('clr'+i);if(c)c.innerHTML='';
+    var n=document.getElementById('num'+i);if(n)n.style.color='';hideNote(i);
+  });
+  document.getElementById('badge').className='badge';updateStats();
+}
+function toggleGhost(){
+  ghostVisible=!ghostVisible;
+  document.querySelectorAll('.line-ghost').forEach(function(g){g.style.visibility=ghostVisible?'visible':'hidden';});
+  document.getElementById('ghostBtn').textContent=ghostVisible?'👁️ Yashir':'👁️ Ko\'rsat';
+}
+function toggleSkip(){
+  skipOn=!skipOn;
+  document.getElementById('sw').classList.toggle('on',skipOn);
+  document.getElementById('skipLbl').textContent=skipOn?'Kommentlar o\'tkazilmoqda':'# Kommentlarni o\'tkazib yuboring';
+  buildLines(M[cur]);applyBright();updateStats();
+}
+function toggleDetail(){
+  var p=document.getElementById('detailPanel');
+  if(p.classList.contains('show'))p.classList.remove('show');
+  else{document.getElementById('detailContent').textContent=M[cur].detail;p.classList.add('show');}
+}
+function toggleTest(){
+  testVisible=!testVisible;var p=document.getElementById('testPanel');
+  if(testVisible){p.className='test-panel show';buildTest();}else p.className='test-panel';
+}
+function buildTest(){
+  var m=M[cur];
+  document.getElementById('testQ').textContent=m.tq;
+  document.getElementById('testExp').className='test-exp';
+  testAnswered=false;var opts=document.getElementById('testOpts');opts.innerHTML='';
+  m.to.forEach(function(opt,i){
+    var btn=document.createElement('button');btn.className='test-opt';
+    btn.textContent=(i+1)+'. '+opt;
+    btn.onclick=(function(idx){return function(){
+      if(testAnswered)return;testAnswered=true;var ok=(idx===m.ta);
+      document.querySelectorAll('.test-opt').forEach(function(b,j){
+        if(j===m.ta)b.classList.add('correct');else if(j===idx&&!ok)b.classList.add('wrong');
+      });
+      var exp=document.getElementById('testExp');
+      exp.textContent=(ok?'✅ To\'g\'ri! ':'❌ Xato. ')+m.te;exp.className='test-exp show';
+    };})(i);opts.appendChild(btn);
+  });
+}
+function toggleResult(){
+  resultVisible=!resultVisible;var p=document.getElementById('resultPanel');
+  if(resultVisible){
+    p.className='result-panel show';
+    document.getElementById('simWrap').innerHTML=SIMS[M[cur].id]||'<div style="padding:12px;color:#4a6080;font-size:.7rem;">Simulatsiya yo\'q</div>';
+  }else p.className='result-panel';
+}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+</script>
+</body>
+</html>

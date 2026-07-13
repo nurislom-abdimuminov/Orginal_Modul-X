@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Eskiz — 13-Modul. Vizualizatsiya. Grafiklar</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:#0a0e1a;color:#dde5f0;font-family:'JetBrains Mono',monospace;font-size:13px;min-height:100vh;}
+.top{background:#0f1520;border-bottom:1px solid #1e3048;padding:8px 14px;display:flex;align-items:center;gap:8px;position:sticky;top:0;z-index:50;}
+.top-t{color:#00f0c8;font-size:.78rem;font-weight:700;}
+.top-s{color:#4a6080;font-size:.65rem;margin-left:auto;}
+.bright-bar{background:#0f1520;border-bottom:1px solid #1e3048;padding:6px 14px;display:flex;align-items:center;gap:10px;position:sticky;top:41px;z-index:49;}
+.bright-lbl{font-size:.65rem;color:#4a6080;flex-shrink:0;}
+.bright-slider{flex:1;-webkit-appearance:none;height:4px;border-radius:2px;background:#1e3048;outline:none;cursor:pointer;}
+.bright-slider::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:#00f0c8;cursor:pointer;}
+.bright-val{font-size:.68rem;color:#00f0c8;font-weight:700;width:20px;text-align:right;flex-shrink:0;}
+.wrap{padding:10px 14px;max-width:540px;margin:0 auto;}
+.tabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;margin-bottom:10px;scrollbar-width:none;}
+.tabs::-webkit-scrollbar{display:none;}
+.tab{flex-shrink:0;padding:6px 12px;border-radius:20px;border:1px solid #1e3048;background:#141e2e;color:#4a6080;font-size:.68rem;cursor:pointer;transition:all .15s;}
+.tab.on{border-color:#00f0c8;color:#00f0c8;background:rgba(0,240,200,.08);}
+.tab.done{border-color:#22c55e;color:#22c55e;background:rgba(34,197,94,.06);}
+.skip-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;padding:8px 12px;background:#141e2e;border:1px solid #1e3048;border-radius:8px;cursor:pointer;}
+.skip-row span{font-size:.7rem;color:#4a6080;}
+.sw{width:34px;height:18px;background:#1e3048;border-radius:10px;position:relative;transition:background .2s;flex-shrink:0;}
+.sw.on{background:#fbbf24;}
+.sw::after{content:'';position:absolute;top:2px;left:2px;width:14px;height:14px;background:#fff;border-radius:50%;transition:left .2s;}
+.sw.on::after{left:18px;}
+.stats{display:flex;gap:8px;margin-bottom:10px;}
+.stat{flex:1;background:#141e2e;border:1px solid #1e3048;border-radius:8px;padding:7px 8px;text-align:center;}
+.sv{font-size:.95rem;font-weight:700;color:#00f0c8;}
+.sl{font-size:.58rem;color:#4a6080;margin-top:2px;}
+.progress-bar{height:3px;background:#1e3048;border-radius:2px;margin-bottom:10px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,#00f0c8,#2563eb);border-radius:2px;transition:width .4s;}
+.intro-box{background:#0d1828;border:1px solid #1e3048;border-left:3px solid #00f0c8;border-radius:10px;padding:14px;margin-bottom:10px;}
+.intro-title{font-size:.8rem;font-weight:700;color:#00f0c8;margin-bottom:8px;}
+.intro-text{font-size:.7rem;line-height:1.85;color:#9fb0c8;margin-bottom:10px;white-space:pre-wrap;}
+.intro-stats{display:flex;gap:8px;margin-top:10px;}
+.intro-stat{flex:1;background:#080c14;border:1px solid #1e3048;border-radius:8px;padding:8px;text-align:center;}
+.intro-stat-v{font-size:1.1rem;font-weight:700;color:#00f0c8;}
+.intro-stat-l{font-size:.58rem;color:#4a6080;margin-top:2px;}
+.terms-box{background:#080c14;border:1px solid #1e3048;border-left:3px solid #a855f7;border-radius:8px;padding:10px 12px;margin-bottom:10px;}
+.terms-title{font-size:.68rem;font-weight:700;color:#a855f7;margin-bottom:8px;}
+.term-row{display:flex;gap:6px;margin-bottom:5px;align-items:flex-start;}
+.term-key{font-size:.64rem;color:#fbbf24;font-weight:700;min-width:110px;flex-shrink:0;}
+.term-val{font-size:.63rem;color:#4a6080;line-height:1.6;}
+.detail-panel{display:none;background:#0a1628;border:1px solid #2563eb;border-radius:8px;padding:12px 14px;margin-bottom:10px;font-size:.72rem;line-height:2;color:#93c5fd;white-space:pre-wrap;}
+.detail-panel.show{display:block;}
+.detail-title{color:#60a5fa;font-weight:700;margin-bottom:8px;font-size:.76rem;}
+.result-panel{display:none;background:#080c14;border:1px solid #22c55e;border-radius:10px;padding:12px;margin-bottom:10px;}
+.result-panel.show{display:block;}
+.result-title{color:#22c55e;font-size:.72rem;font-weight:700;margin-bottom:8px;}
+.sim-wrap{width:100%;overflow-x:auto;}
+.sim-wrap pre{font-size:.68rem;line-height:1.9;color:#22c55e;white-space:pre;}
+.code-block{border:1px solid #1e3048;border-radius:10px;overflow:hidden;margin-bottom:10px;background:#090d18;}
+.fbar{display:flex;align-items:center;gap:5px;padding:7px 12px;background:#0f1520;border-bottom:1px solid #1e3048;}
+.dot{width:6px;height:6px;border-radius:50%;}
+.dot.r{background:#f43f5e;}.dot.y{background:#fbbf24;}.dot.g{background:#22c55e;}
+.fn{font-size:.65rem;color:#4a6080;margin-left:4px;}
+.fhint{margin-left:auto;font-size:.6rem;color:#00f0c8;opacity:.7;}
+.lines-wrap{padding:4px 0;}
+.line-block{margin:0;}
+.line-row{display:flex;align-items:center;position:relative;min-height:30px;}
+.line-num{width:28px;flex-shrink:0;font-size:.63rem;padding:4px 4px 4px 5px;color:#2a3a50;text-align:right;user-select:none;transition:color .2s;align-self:center;}
+.line-content{flex:1;position:relative;overflow-x:auto;overflow-y:hidden;min-height:30px;}
+.line-content::-webkit-scrollbar{height:2px;}
+.line-content::-webkit-scrollbar-thumb{background:#1e3048;border-radius:1px;}
+.line-ghost{font-size:.76rem;line-height:1.8;padding:4px 8px;white-space:pre;pointer-events:none;min-height:30px;display:block;}
+.line-ghost.skip-c{opacity:.08!important;}
+.line-colors{position:absolute;top:0;left:0;font-size:.76rem;line-height:1.8;padding:4px 8px;white-space:pre;pointer-events:none;z-index:2;min-height:30px;}
+.line-input{position:absolute;top:0;left:0;right:0;bottom:0;width:100%;font-family:'JetBrains Mono',monospace;font-size:.76rem;line-height:1.8;padding:4px 8px;color:transparent;-webkit-text-fill-color:transparent;caret-color:#00f0c8;background:transparent;border:none;outline:none;white-space:pre;overflow:hidden;z-index:10;-webkit-appearance:none;}
+.line-input:disabled{cursor:default;}
+.line-done-note{display:none;font-size:.66rem;line-height:1.6;padding:3px 8px 3px 34px;color:#38bdf8;background:rgba(56,189,248,.06);border-left:2px solid #38bdf8;white-space:pre-wrap;animation:fadeIn .25s ease;}
+.line-done-note.show{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:translateY(0)}}
+.btn-row{display:flex;gap:6px;flex-wrap:wrap;padding:9px 12px;background:#0f1520;border-top:1px solid #1e3048;}
+.btn{padding:8px 11px;border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:.68rem;font-weight:700;border:none;cursor:pointer;flex-shrink:0;transition:opacity .15s;}
+.btn:active{opacity:.7;}
+.btn-chk{background:#00f0c8;color:#080c14;}
+.btn-clr{background:transparent;border:1px solid #1e3048;color:#4a6080;}
+.btn-det{background:#2563eb;color:#fff;}
+.btn-ghost{background:#7c3aed;color:#fff;}
+.btn-res{background:#16a34a;color:#fff;}
+.badge{display:none;margin:0 12px 10px;padding:7px 12px;border-radius:8px;font-size:.7rem;border:1px solid #1e3048;}
+.badge.show{display:block;}
+.badge.g{border-color:#22c55e;color:#22c55e;background:rgba(34,197,94,.07);}
+.badge.o{border-color:#fbbf24;color:#fbbf24;background:rgba(251,191,36,.07);}
+.badge.r{border-color:#f43f5e;color:#f43f5e;background:rgba(244,63,94,.07);}
+.rating-box{background:#0d1828;border:1px solid #fbbf24;border-radius:12px;padding:14px 16px;margin-top:10px;display:none;}
+.rating-box.show{display:block;}
+.rating-title{font-size:.72rem;font-weight:700;color:#fbbf24;text-align:center;margin-bottom:4px;}
+.rating-sub{font-size:.62rem;color:#4a6080;text-align:center;margin-bottom:12px;}
+.stars{display:flex;justify-content:center;gap:4px;margin-bottom:10px;flex-wrap:wrap;}
+.star{font-size:1.5rem;cursor:pointer;filter:grayscale(1);opacity:.35;transition:transform .1s,filter .1s,opacity .1s;user-select:none;}
+.star.on{filter:none;opacity:1;}
+.star:active{transform:scale(1.3);}
+.rating-score{text-align:center;font-size:.72rem;color:#fbbf24;font-weight:700;margin-bottom:8px;min-height:18px;}
+.rating-comment{width:100%;background:#141e2e;border:1px solid #1e3048;border-radius:8px;padding:8px 10px;color:#dde5f0;font-family:'JetBrains Mono',monospace;font-size:.68rem;resize:none;outline:none;margin-bottom:8px;}
+.rating-comment:focus{border-color:#fbbf24;}
+.rating-submit{width:100%;padding:10px;background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#080c14;font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:700;border:none;border-radius:8px;cursor:pointer;}
+.rating-submit:active{opacity:.8;}
+.rating-thanks{display:none;text-align:center;padding:10px;font-size:.72rem;color:#22c55e;font-weight:700;}
+</style>
+</head>
+<body>
+<div class="top">
+  <div class="top-t">✏️ Matplotlib/Seaborn — 13-Modul</div>
+  <div class="top-s" id="topSub">13.2</div>
+</div>
+<div class="bright-bar">
+  <span class="bright-lbl">👁️ Xiralik:</span>
+  <input type="range" class="bright-slider" id="brightSlider" min="1" max="10" value="3" oninput="setBright(this.value)">
+  <span class="bright-val" id="brightVal">3</span>
+</div>
+<div class="wrap">
+  <div class="stats">
+    <div class="stat"><div class="sv" id="svPctV">—</div><div class="sl">TO'G'RI</div></div>
+    <div class="stat"><div class="sv" id="svDone">0/0</div><div class="sl">BAJARILDI</div></div>
+    <div class="stat"><div class="sv" id="svMod">1/7</div><div class="sl">MAVZU</div></div>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+  <div class="tabs" id="tabs"></div>
+  <div class="skip-row" onclick="toggleSkip()">
+    <div class="sw" id="sw"></div>
+    <span id="skipLbl"># Kommentlarni o'tkazib yuboring</span>
+  </div>
+  <div class="intro-box" id="introBox"></div>
+  <div class="terms-box" id="termsBox"></div>
+  <div class="detail-panel" id="detailPanel">
+    <div class="detail-title">📘 BATAFSIL</div>
+    <div id="detailContent"></div>
+  </div>
+  <div class="result-panel" id="resultPanel">
+    <div class="result-title">📊 NATIJA — SIMULYATSIYA</div>
+    <div class="sim-wrap" id="simWrap"></div>
+  </div>
+  <div class="code-block">
+    <div class="fbar">
+      <div class="dot r"></div><div class="dot y"></div><div class="dot g"></div>
+      <div class="fn" id="fname">vizual_13.py</div>
+      <div class="fhint">↔️ suring ✏️ yozing</div>
+    </div>
+    <div class="lines-wrap" id="linesWrap"></div>
+    <div class="btn-row">
+      <button class="btn btn-chk" onclick="doCheck()">✅ Tekshir</button>
+      <button class="btn btn-clr" onclick="doClear()">🗑️ Tozala</button>
+      <button class="btn btn-ghost" id="ghostBtn" onclick="toggleGhost()">👁️ Yashir</button>
+      <button class="btn btn-det" onclick="toggleDetail()">📖 Batafsil</button>
+      <button class="btn btn-res" onclick="toggleResult()">📊 Natija</button>
+    </div>
+    <div class="badge" id="badge"></div>
+  </div>
+  <div class="rating-box" id="ratingBox">
+    <div class="rating-title">⭐ 13-Modulni baholang</div>
+    <div class="rating-sub">Fikringiz keyingi versiyani yaxshilashga yordam beradi</div>
+    <div class="stars" id="stars"></div>
+    <div class="rating-score" id="ratingScore">Baho tanlang (1–10)</div>
+    <textarea class="rating-comment" id="ratingComment" rows="2" placeholder="Izoh: nima yoqdi, nima yetishmadi..."></textarea>
+    <button class="rating-submit" onclick="submitRating()">⭐ Yuborish</button>
+    <div class="rating-thanks" id="ratingThanks">✅ Rahmat! Fikringiz qabul qilindi.</div>
+  </div>
+</div>
+<script>
+var MODULE_INTRO = {
+  title: "📦 13-Modul haqida",
+  text: "Bu modulda siz ma'lumotlarni grafik ko'rinishida tasvirlashni o'rganasiz.\n\nSonlar va jadvallar ko'pincha tushunish qiyin. Lekin bitta grafik mingta raqamdan ko'ra tezroq tushuntiradi — bu Data Science da \"bir rasm mingta so'zdan ortiq\" degan qoidaning asosi.\n\nMavzular: matplotlib — Python ning asosiy grafik kutubxonasi, seaborn — matplotlib ustida qurilgan, statistik grafiklar uchun qulay kutubxona. Chiziqli grafik (lineplot) — tendensiyalarni ko'rsatadi, ustunli grafik (barplot) — toifalarni taqqoslaydi, issiqlik xaritasi (heatmap) — korrelyatsiyalarni ko'rsatadi, tarqoqlik grafigi (scatterplot) — ikki o'zgaruvchi o'rtasidagi bog'liqlikni ko'rsatadi, taqsimot (histplot) — qiymatlar qanday tarqalganini ko'rsatadi, subplot — bir ekranda bir nechta grafik.\n\nReal loyihada bu nima beradi? Har qanday tahlil natijasini grafik bilan tasdiqlash — bu investorlarga, mijozlarga va jamoaga tushuntirish uchun eng muhim ko'nikma. Siz hisoblagan raqamlar grafiksiz ishonchli ko'rinmaydi.",
+  count: 7
+};
+
+var M = [
+
+{id:'13.2',f:'vizual_13_2.py',
+plan:['matplotlib kutubxonasini import qilish','plt.plot() bilan chiziqli grafik','plt.title(), xlabel(), ylabel() bilan nomlash','plt.show() va plt.savefig()'],
+terms:[
+  ['matplotlib','Python dagi asosiy grafik kutubxona'],
+  ['plt.plot()','Chiziqli grafik chizish funksiyasi'],
+  ['plt.title()','Grafikka sarlavha berish'],
+  ['plt.show()','Grafikni ekranda ko\'rsatish']
+],
+detail:'MATPLOTLIB NIMA VA NEGA KERAK?\n\nmatplotlib — Python dagi eng keng tarqalgan grafik kutubxona. U 2003 yilda yaratilgan va hozir ham barcha data scientist lar ishlatadigan standart vosita. Seaborn, plotly kabi kutubxonalar ham aslida matplotlib ustida qurilgan.\n\nPLT.PLOT() QANDAY ISHLAYDI? plt.plot(x, y) — x o\'qi uchun qiymatlar va y o\'qi uchun qiymatlar beriladi. Pandas bilan birga ishlatganda df["ustun"] orqali to\'g\'ridan-to\'g\'ri ma\'lumot bersa bo\'ladi.\n\nNOMLASH NEGA MUHIM? Grafik sarlavhasiz va o\'q nomlarsiz — bu "nima ko\'rsatilmoqda" degan savolga javob bermaydi. Ayniqsa boshqalarga taqdim etiladigan grafikda plt.title(), xlabel(), ylabel() MAJBURIY hisoblanadi.\n\nSAVEFIG VS SHOW: plt.show() — grafikni ekranda ko\'rsatadi (Jupyter da ishlatiladi). plt.savefig("fayl.png") — grafikni rasmga saqlaydi. plt.close() — joriy grafikni yopadi va xotirani tozalaydi — bir nechta grafik chizilganda muhim.',
+sim:'# Chiziqli grafik misoli\nimport matplotlib.pyplot as plt\n\nx = [1, 2, 3, 4, 5]\ny = [10, 20, 15, 25, 30]\n\nplt.plot(x, y)\nplt.title("Savdo dinamikasi")\nplt.xlabel("Oy")\nplt.ylabel("Savdo (mln)")\nplt.show()\n\n# Natija: o\'sish tendensiyasi ko\'rsatilgan chiziq',
+eskizlar:[
+{q:'Oddiy chiziqli grafik chizing va sarlavha bering.',
+ lines:[
+  {c:'import matplotlib.pyplot as plt',n:'Siz matplotlib pyplot modulini plt nomi bilan yukladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'x = [1, 2, 3, 4, 5]',n:'Siz x o\'qi uchun qiymatlar ro\'yxatini yaratdingiz'},
+  {c:'y = [10, 20, 15, 25, 30]',n:'Siz y o\'qi uchun qiymatlar ro\'yxatini yaratdingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'plt.plot(x, y)',n:'Siz x va y qiymatlari bo\'yicha chiziqli grafik chizdingiz'},
+  {c:'plt.title(\'Savdo dinamikasi\')',n:'Siz grafikka sarlavha berdingiz'},
+  {c:'plt.xlabel(\'Oy\')',n:'Siz x o\'qiga nom berdingiz'},
+  {c:'plt.ylabel(\'Savdo\')',n:'Siz y o\'qiga nom berdingiz'},
+  {c:'plt.show()',n:'Siz grafikni ekranda ko\'rsatdingiz'},
+ ]},
+{q:'DataFrame dan grafik chizing: Oy va Savdo ustunlari.',
+ lines:[
+  {c:'import matplotlib.pyplot as plt',n:'Siz matplotlib pyplot modulini yukladingiz'},
+  {c:'import pandas as pd',n:'Siz pandas kutubxonasini pd nomi bilan yukladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'df = pd.DataFrame({',n:'Siz DataFrame yaratishni boshladingiz'},
+  {c:'  \'Oy\':[1,2,3,4,5],',n:'Siz Oy ustunini qo\'shdingiz'},
+  {c:'  \'Savdo\':[100,120,110,140,130]',n:'Siz Savdo ustunini qo\'shdingiz'},
+  {c:'})',n:'Siz DataFrame yaratishni yakunladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'plt.plot(df[\'Oy\'], df[\'Savdo\'])',n:'Siz DataFrame ustunlaridan grafik chizdingiz'},
+  {c:'plt.title(\'Oylik savdo\')',n:'Siz grafikka sarlavha berdingiz'},
+  {c:'plt.show()',n:'Siz grafikni ko\'rsatdingiz'},
+ ]},
+{q:'Grafikni "savdo.png" nomli faylga saqlang.',
+ lines:[
+  {c:'import matplotlib.pyplot as plt',n:'Siz matplotlib pyplot modulini yukladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'x = [1, 2, 3, 4, 5]',n:'Siz x qiymatlarini yaratdingiz'},
+  {c:'y = [10, 20, 15, 25, 30]',n:'Siz y qiymatlarini yaratdingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'plt.plot(x, y)',n:'Siz chiziqli grafik chizdingiz'},
+  {c:'plt.title(\'Savdo grafigi\')',n:'Siz sarlavha berdingiz'},
+  {c:'plt.savefig(\'savdo.png\')',n:'Siz grafikni savdo.png fayliga saqlladingiz'},
+  {c:'plt.close()',n:'Siz grafikni yopib, xotirani tozaladingiz'},
+ ]},
+]},
+
+{id:'13.5',f:'vizual_13_5.py',
+plan:['seaborn kutubxonasini import qilish','sns.lineplot() bilan chiziqli grafik','hue parametri — ranglar bilan ajratish','DataFrame dan to\'g\'ridan-to\'g\'ri grafik'],
+terms:[
+  ['seaborn','matplotlib ustida qurilgan statistik grafik kutubxona'],
+  ['sns.lineplot()','Seaborn bilan chiziqli grafik'],
+  ['hue','Toifalar bo\'yicha rang ajratish parametri'],
+  ['data=','DataFrame ni to\'g\'ridan-to\'g\'ri berish parametri']
+],
+detail:'SEABORN MATPLOTLIB DAN QANDAY FARQ QILADI?\n\nmatplotlib — past darajali grafik kutubxona: har narsani o\'zingiz sozlaysiz (ranglar, o\'lchov, belgilar). Bu ko\'p nazorat beradi, lekin ko\'p kod yozishni talab qiladi.\n\nseaborn — matplotlib ustida qurilgan, statistik grafik uchun mo\'ljallangan. Asosiy farqlari: DataFrame bilan bevosita ishlaydi (data=df parametri), avtomatik ranglar va chiroyli ko\'rinish, statistik qo\'shimchalar (xatolik chiziqlari va h.k.) avtomatik hisoblanadi.\n\nHUE PARAMETRI NIMA? hue — "ranglar bilan ajrat" degani. Masalan lineplot da hue="Jinsi" desangiz, erkaklar va ayollar uchun alohida, har xil rangli chiziqlar chiziladi. Bu bir grafikda bir nechta guruhni taqqoslash imkonini beradi.\n\nQACHON SEABORN, QACHON MATPLOTLIB? Oddiy grafik, to\'liq nazorat kerak — matplotlib. Statistik tahlil, DataFrame bilan qulay ishlash kerak — seaborn. Amalda ko\'pincha ikkalasi birga ishlatiladi: seaborn grafik chizadi, matplotlib nomlash va sozlash uchun.',
+sim:'>>> import seaborn as sns\n>>> import pandas as pd\n>>> df = pd.DataFrame({\n...   \'Oy\':[1,2,3,4,5],\n...   \'Savdo\':[100,120,110,140,130]})\n>>> sns.lineplot(data=df, x=\'Oy\', y=\'Savdo\')\n# Natija: chiroyli chiziqli grafik\n# xatolik oralig\'i avtomatik',
+eskizlar:[
+{q:'seaborn bilan chiziqli grafik chizing.',
+ lines:[
+  {c:'import seaborn as sns',n:'Siz seaborn kutubxonasini sns nomi bilan yukladingiz'},
+  {c:'import pandas as pd',n:'Siz pandas kutubxonasini pd nomi bilan yukladingiz'},
+  {c:'import matplotlib.pyplot as plt',n:'Siz matplotlib pyplot modulini yukladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'df = pd.DataFrame({',n:'Siz DataFrame yaratishni boshladingiz'},
+  {c:'  \'Oy\':[1,2,3,4,5],',n:'Siz Oy ustunini qo\'shdingiz'},
+  {c:'  \'Savdo\':[100,120,110,140,130]',n:'Siz Savdo ustunini qo\'shdingiz'},
+  {c:'})',n:'Siz DataFrame yaratishni yakunladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'sns.lineplot(',n:'Siz seaborn lineplot chizishni boshladingiz'},
+  {c:'  data=df,',n:'Siz DataFrame ni berdingiz'},
+  {c:'  x=\'Oy\', y=\'Savdo\')',n:'Siz x va y ustunlarini ko\'rsatdingiz'},
+  {c:'plt.show()',n:'Siz grafikni ekranda ko\'rsatdingiz'},
+ ]},
+{q:'hue parametri bilan ikki guruhni bir grafikda ko\'rsating.',
+ lines:[
+  {c:'import seaborn as sns',n:'Siz seaborn kutubxonasini yukladingiz'},
+  {c:'import pandas as pd',n:'Siz pandas kutubxonasini yukladingiz'},
+  {c:'import matplotlib.pyplot as plt',n:'Siz matplotlib pyplot modulini yukladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'df = pd.DataFrame({',n:'Siz DataFrame yaratishni boshladingiz'},
+  {c:'  \'Oy\':[1,2,3,1,2,3],',n:'Siz Oy ustunini qo\'shdingiz'},
+  {c:'  \'Savdo\':[100,120,110,80,90,95],',n:'Siz Savdo ustunini qo\'shdingiz'},
+  {c:'  \'Bolim\':[\'A\',\'A\',\'A\',\'B\',\'B\',\'B\']',n:'Siz Bolim ustunini qo\'shdingiz'},
+  {c:'})',n:'Siz DataFrame yaratishni yakunladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'sns.lineplot(',n:'Siz lineplot chizishni boshladingiz'},
+  {c:'  data=df, x=\'Oy\',',n:'Siz DataFrame va x ustunini berdingiz'},
+  {c:'  y=\'Savdo\', hue=\'Bolim\')',n:'Siz Bolim bo\'yicha rang ajratdingiz'},
+  {c:'plt.show()',n:'Siz grafikni ko\'rsatdingiz'},
+ ]},
+{q:'Grafikka sarlavha va o\'q nomlarini qo\'shing.',
+ lines:[
+  {c:'import seaborn as sns',n:'Siz seaborn kutubxonasini yukladingiz'},
+  {c:'import pandas as pd',n:'Siz pandas kutubxonasini yukladingiz'},
+  {c:'import matplotlib.pyplot as plt',n:'Siz matplotlib pyplot modulini yukladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'df = pd.DataFrame({',n:'Siz DataFrame yaratishni boshladingiz'},
+  {c:'  \'Oy\':[1,2,3,4,5],',n:'Siz Oy ustunini qo\'shdingiz'},
+  {c:'  \'Daromad\':[50,60,55,70,65]',n:'Siz Daromad ustunini qo\'shdingiz'},
+  {c:'})',n:'Siz DataFrame yaratishni yakunladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'sns.lineplot(',n:'Siz lineplot chizishni boshladingiz'},
+  {c:'  data=df, x=\'Oy\', y=\'Daromad\')',n:'Siz x va y ustunlarini ko\'rsatdingiz'},
+  {c:'plt.title(\'Oylik daromad\')',n:'Siz grafikka sarlavha berdingiz'},
+  {c:'plt.xlabel(\'Oy raqami\')',n:'Siz x o\'qiga nom berdingiz'},
+  {c:'plt.ylabel(\'Daromad (mln)\')',n:'Siz y o\'qiga nom berdingiz'},
+  {c:'plt.show()',n:'Siz grafikni ko\'rsatdingiz'},
+ ]},
+]},
+
+{id:'13.7',f:'vizual_13_7.py',
+plan:['sns.barplot() — ustunli grafik','x va y parametrlari','Grafikni formatlash','Kategoriyalar bo\'yicha taqqoslash'],
+terms:[
+  ['sns.barplot()','Kategoriyalar bo\'yicha ustunli grafik'],
+  ['estimator','Ustun balandligini hisoblash usuli (mean, sum...)'],
+  ['palette','Grafik rang palitrasini tanlash'],
+  ['plt.xticks()','X o\'qi belgilerini boshqarish']
+],
+detail:'BARPLOT QACHON ISHLATILADI?\n\nBarplot (ustunli grafik) — kategoriyalarni taqqoslash uchun eng mos grafik. Masalan "har shahar bo\'yicha o\'rtacha daromad" yoki "har mahsulot toifasi bo\'yicha sotuv soni" — bular barplot uchun klassik misollar.\n\nLINEPLOT DAN FARQI: Lineplot — vaqt bo\'yicha o\'zgarishni ko\'rsatadi (x o\'qida davomiy son: oy, yil). Barplot — alohida-alohida kategoriyalarni taqqoslaydi (x o\'qida matn: shahar nomi, mahsulot nomi).\n\nESTIMATOR PARAMETRI: Standart holda barplot har kategoriya uchun O\'RTACHA qiymatni ko\'rsatadi. estimator=sum desangiz — yig\'indi, estimator=len desangiz — soni ko\'rsatiladi. Katta datasetlarda bu farq muhim.\n\nPALETTE: Standart rang palitrasidan boshqasini tanlash uchun. Masalan palette="Blues" — ko\'k ranglar gradientida, palette="Set2" — kontrastli turli ranglar. Bu estetik jihatdan muhim, ayniqsa taqdimotlar uchun.',
+sim:'>>> import seaborn as sns\n>>> import pandas as pd\n>>> df = pd.DataFrame({\n...   \'Shahar\':[\'Toshkent\',\'Samarqand\',\'Buxoro\'],\n...   \'Aholi\':[2.5, 1.0, 0.8]})\n>>> sns.barplot(\n...   data=df, x=\'Shahar\', y=\'Aholi\')\n# Natija: 3 ta ustun,\n# har biri shahar aholisini ko\'rsatadi',
+eskizlar:[
+{q:'Shaharlar aholisini ustunli grafik bilan ko\'rsating.',
+ lines:[
+  {c:'import seaborn as sns',n:'Siz seaborn kutubxonasini yukladingiz'},
+  {c:'import pandas as pd',n:'Siz pandas kutubxonasini yukladingiz'},
+  {c:'import matplotlib.pyplot as plt',n:'Siz matplotlib pyplot modulini yukladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'df = pd.DataFrame({',n:'Siz DataFrame yaratishni boshladingiz'},
+  {c:'  \'Shahar\':[\'Toshkent\',',n:'Siz Shahar ustunini qo\'shishni boshladingiz'},
+  {c:'    \'Samarqand\',\'Buxoro\'],',n:'Siz qolgan shaharlarni qo\'shdingiz'},
+  {c:'  \'Aholi\':[2.5, 1.0, 0.8]',n:'Siz Aholi ustunini qo\'shdingiz (mln)'},
+  {c:'})',n:'Siz DataFrame yaratishni yakunladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'sns.barplot(',n:'Siz barplot chizishni boshladingiz'},
+  {c:'  data=df,',n:'Siz DataFrame ni berdingiz'},
+  {c:'  x=\'Shahar\', y=\'Aholi\')',n:'Siz x va y ustunlarini ko\'rsatdingiz'},
+  {c:'plt.title(\'Shaharlar aholisi\')',n:'Siz sarlavha berdingiz'},
+  {c:'plt.show()',n:'Siz grafikni ko\'rsatdingiz'},
+ ]},
+{q:'palette parametri bilan ranglarni o\'zgartiring.',
+ lines:[
+  {c:'import seaborn as sns',n:'Siz seaborn kutubxonasini yukladingiz'},
+  {c:'import pandas as pd',n:'Siz pandas kutubxonasini yukladingiz'},
+  {c:'import matplotlib.pyplot as plt',n:'Siz matplotlib pyplot modulini yukladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'df = pd.DataFrame({',n:'Siz DataFrame yaratishni boshladingiz'},
+  {c:'  \'Toifa\':[\'Meva\',\'Sabzi\',\'Non\'],',n:'Siz Toifa ustunini qo\'shdingiz'},
+  {c:'  \'Narx\':[5000, 3000, 2000]',n:'Siz Narx ustunini qo\'shdingiz'},
+  {c:'})',n:'Siz DataFrame yaratishni yakunladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'sns.barplot(',n:'Siz barplot chizishni boshladingiz'},
+  {c:'  data=df, x=\'Toifa\',',n:'Siz DataFrame va x ustunini berdingiz'},
+  {c:'  y=\'Narx\', palette=\'Set2\')',n:'Siz Set2 rang palitrasini tanladingiz'},
+  {c:'plt.show()',n:'Siz grafikni ko\'rsatdingiz'},
+ ]},
+{q:'hue parametri bilan guruhlab ustunli grafik chizing.',
+ lines:[
+  {c:'import seaborn as sns',n:'Siz seaborn kutubxonasini yukladingiz'},
+  {c:'import pandas as pd',n:'Siz pandas kutubxonasini yukladingiz'},
+  {c:'import matplotlib.pyplot as plt',n:'Siz matplotlib pyplot modulini yukladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'df = pd.DataFrame({',n:'Siz DataFrame yaratishni boshladingiz'},
+  {c:'  \'Toifa\':[\'Meva\',\'Non\',\'Meva\',\'Non\'],',n:'Siz Toifa ustunini qo\'shdingiz'},
+  {c:'  \'Yil\':[2023,2023,2024,2024],',n:'Siz Yil ustunini qo\'shdingiz'},
+  {c:'  \'Savdo\':[100,80,120,95]',n:'Siz Savdo ustunini qo\'shdingiz'},
+  {c:'})',n:'Siz DataFrame yaratishni yakunladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'sns.barplot(',n:'Siz barplot chizishni boshladingiz'},
+  {c:'  data=df, x=\'Toifa\',',n:'Siz DataFrame va x ustunini berdingiz'},
+  {c:'  y=\'Savdo\', hue=\'Yil\')',n:'Siz Yil bo\'yicha rang ajratdingiz'},
+  {c:'plt.show()',n:'Siz grafikni ko\'rsatdingiz'},
+ ]},
+]},
+
+{id:'13.8',f:'vizual_13_8.py',
+plan:['sns.heatmap() — issiqlik xaritasi','annot=True bilan raqam ko\'rsatish','Korrelyatsiya matritsasini vizualizatsiya','cmap parametri — rang xaritasi'],
+terms:[
+  ['sns.heatmap()','Matritsa qiymatlarini rang bilan ko\'rsatish'],
+  ['annot=True','Hujayralarda raqamlarni ko\'rsatish'],
+  ['.corr()','DataFrame ustunlari orasidagi korrelyatsiyani hisoblash'],
+  ['cmap','Rang xaritasi: Blues, Reds, coolwarm...']
+],
+detail:'HEATMAP NIMA UCHUN ISHLATILADI?\n\nHeatmap (issiqlik xaritasi) — bu matritsa ko\'rinishidagi ma\'lumotni rang orqali ko\'rsatadi. Har bir hujayra qiymatiga qarab rang oladi: katta qiymat — to\'q rang, kichik qiymat — och rang.\n\nKORRELYATSIYA MATRITSA UCHUN ENG KO\'P ISHLATILADI: Machine Learning da muhim qadam — ustunlar orasidagi korrelyatsiyani tekshirish. df.corr() — har ikki ustun orasidagi korrelyatsiya koeffitsientini hisoblab, kvadrat matritsaga joylashtiradi (-1 dan +1 gacha). Keyin sns.heatmap() bu matritsani rangli ko\'rinishda ko\'rsatadi.\n\nANNOT=TRUE NEGA MUHIM? annot=True — har hujayrada qiymatni raqam sifatida ham yozadi. Raqamsiz heatmap faqat "bu yerda kuchli bog\'liqlik bor" deydi, raqamli heatmap "0.87 korrelyatsiya" deb aniq ko\'rsatadi.\n\nCMAP PARAMETRI: coolwarm — ko\'k (manfiy) dan qizil (musbat) ga, Blues — faqat ko\'k gradientda, RdYlGn — qizildan yashilga (trafikka o\'xshash). Korrelyatsiya uchun coolwarm eng keng ishlatiladi — musbat va manfiy korrelyatsiyani aniq ajratadi.',
+sim:'>>> import seaborn as sns\n>>> import pandas as pd\n>>> df = pd.DataFrame({\n...   \'A\':[1,2,3],\'B\':[4,5,6],\'C\':[7,8,9]})\n>>> sns.heatmap(\n...   df, annot=True, cmap=\'Blues\')\n# Natija: 3x3 rangli matritsa\n# har hujayrada raqam ko\'rinadi\n\n# Korrelyatsiya uchun:\n>>> sns.heatmap(\n...   df.corr(), annot=True, cmap=\'coolwarm\')',
+eskizlar:[
+{q:'Oddiy matritsa uchun heatmap chizing.',
+ lines:[
+  {c:'import seaborn as sns',n:'Siz seaborn kutubxonasini yukladingiz'},
+  {c:'import pandas as pd',n:'Siz pandas kutubxonasini yukladingiz'},
+  {c:'import matplotlib.pyplot as plt',n:'Siz matplotlib pyplot modulini yukladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'df = pd.DataFrame({',n:'Siz DataFrame yaratishni boshladingiz'},
+  {c:'  \'A\':[1,2,3],',n:'Siz A ustunini qo\'shdingiz'},
+  {c:'  \'B\':[4,5,6],',n:'Siz B ustunini qo\'shdingiz'},
+  {c:'  \'C\':[7,8,9]',n:'Siz C ustunini qo\'shdingiz'},
+  {c:'})',n:'Siz DataFrame yaratishni yakunladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'sns.heatmap(',n:'Siz heatmap chizishni boshladingiz'},
+  {c:'  df, annot=True)',n:'Siz raqamlarni ham ko\'rsatishni so\'radingiz'},
+  {c:'plt.title(\'Issiqlik xaritasi\')',n:'Siz sarlavha berdingiz'},
+  {c:'plt.show()',n:'Siz grafikni ko\'rsatdingiz'},
+ ]},
+{q:'Korrelyatsiya matritsasini heatmap bilan ko\'rsating.',
+ lines:[
+  {c:'import seaborn as sns',n:'Siz seaborn kutubxonasini yukladingiz'},
+  {c:'import pandas as pd',n:'Siz pandas kutubxonasini yukladingiz'},
+  {c:'import matplotlib.pyplot as plt',n:'Siz matplotlib pyplot modulini yukladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'df = pd.DataFrame({',n:'Siz DataFrame yaratishni boshladingiz'},
+  {c:'  \'Boy\':[160,170,175,180],',n:'Siz Boy ustunini qo\'shdingiz'},
+  {c:'  \'Vazn\':[55,65,70,80],',n:'Siz Vazn ustunini qo\'shdingiz'},
+  {c:'  \'Yosh\':[20,25,30,35]',n:'Siz Yosh ustunini qo\'shdingiz'},
+  {c:'})',n:'Siz DataFrame yaratishni yakunladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'korr = df.corr()',n:'Siz korrelyatsiya matritsasini hisobladingiz'},
+  {c:'sns.heatmap(',n:'Siz heatmap chizishni boshladingiz'},
+  {c:'  korr, annot=True,',n:'Siz korrelyatsiya matritsasini va raqamlarni berdingiz'},
+  {c:'  cmap=\'coolwarm\')',n:'Siz coolwarm rang xaritasini tanladingiz'},
+  {c:'plt.show()',n:'Siz grafikni ko\'rsatdingiz'},
+ ]},
+{q:'cmap parametrini "Blues" ga o\'zgartiring va fmt=".2f" bilan 2 o\'nli ko\'rsating.',
+ lines:[
+  {c:'import seaborn as sns',n:'Siz seaborn kutubxonasini yukladingiz'},
+  {c:'import pandas as pd',n:'Siz pandas kutubxonasini yukladingiz'},
+  {c:'import matplotlib.pyplot as plt',n:'Siz matplotlib pyplot modulini yukladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'df = pd.DataFrame({',n:'Siz DataFrame yaratishni boshladingiz'},
+  {c:'  \'A\':[1,4,7],',n:'Siz A ustunini qo\'shdingiz'},
+  {c:'  \'B\':[2,5,8],',n:'Siz B ustunini qo\'shdingiz'},
+  {c:'  \'C\':[3,6,9]',n:'Siz C ustunini qo\'shdingiz'},
+  {c:'})',n:'Siz DataFrame yaratishni yakunladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'sns.heatmap(df,',n:'Siz heatmap chizishni boshladingiz'},
+  {c:'  annot=True,',n:'Siz raqamlarni ko\'rsatishni so\'radingiz'},
+  {c:'  fmt=\'.1f\',',n:'Siz 1 ta o\'nli son formatini tanladingiz'},
+  {c:'  cmap=\'Blues\')',n:'Siz Blues rang xaritasini tanladingiz'},
+  {c:'plt.show()',n:'Siz grafikni ko\'rsatdingiz'},
+ ]},
+]},
+
+{id:'13.11',f:'vizual_13_11.py',
+plan:['sns.scatterplot() — tarqoqlik grafigi','x va y o\'zgaruvchilari','size va hue parametrlari','Chiziqli trend qo\'shish'],
+terms:[
+  ['sns.scatterplot()','Ikki o\'zgaruvchi orasidagi bog\'liqlikni nuqtalar bilan ko\'rsatish'],
+  ['size','Nuqta o\'lchamini uchinchi o\'zgaruvchiga bog\'lash'],
+  ['sns.regplot()','Tarqoqlik grafigi + trend chizig\'i'],
+  ['Korrelyatsiya','Ikki o\'zgaruvchi orasidagi bog\'liqlik darajasi']
+],
+detail:'SCATTERPLOT NEGA MUHIM?\n\nScatterplot (tarqoqlik grafigi) — ikki raqamli o\'zgaruvchi orasidagi bog\'liqlikni ko\'rsatadi. Har bir nuqta — bitta kuzatuv (masalan bitta kishi). X o\'qi bitta o\'zgaruvchi (boy), Y o\'qi ikkinchisi (vazn).\n\nNIMANI KO\'RSATADI? Nuqtalar chap pastdan o\'ng tepaga ketsa — musbat korrelyatsiya (boy oshganda vazn ham oshadi). Chap tepadan o\'ng pastga ketsa — manfiy korrelyatsiya. Tartibsiz tarqalsa — korrelyatsiya yo\'q.\n\nSIZE PARAMETRI: size="ustun" desangiz, har nuqtaning o\'lchami o\'sha ustun qiymatiga qarab o\'zgaradi. Bu uch o\'zgaruvchini bir grafikda ko\'rsatish imkonini beradi.\n\nREGPLOT VS SCATTERPLOT: sns.scatterplot() — faqat nuqtalar. sns.regplot() — nuqtalar + trend chizig\'i (regression line). Trend chizig\'i bog\'liqlikning yo\'nalishini aniqroq ko\'rsatadi va kelajakdagi qiymatlarni taxmin qilish uchun ishlatiladi.',
+sim:'>>> import seaborn as sns\n>>> import pandas as pd\n>>> df = pd.DataFrame({\n...   \'Boy\':[160,170,175,180],\n...   \'Vazn\':[55,65,70,80]})\n>>> sns.scatterplot(\n...   data=df, x=\'Boy\', y=\'Vazn\')\n# Natija: har bir kishi nuqta sifatida\n# Ko\'rinish: o\'sish tendensiyasi',
+eskizlar:[
+{q:'Boy va Vazn orasidagi bog\'liqlikni scatterplot bilan ko\'rsating.',
+ lines:[
+  {c:'import seaborn as sns',n:'Siz seaborn kutubxonasini yukladingiz'},
+  {c:'import pandas as pd',n:'Siz pandas kutubxonasini yukladingiz'},
+  {c:'import matplotlib.pyplot as plt',n:'Siz matplotlib pyplot modulini yukladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'df = pd.DataFrame({',n:'Siz DataFrame yaratishni boshladingiz'},
+  {c:'  \'Boy\':[160,170,175,180,165],',n:'Siz Boy ustunini qo\'shdingiz'},
+  {c:'  \'Vazn\':[55,65,70,80,60]',n:'Siz Vazn ustunini qo\'shdingiz'},
+  {c:'})',n:'Siz DataFrame yaratishni yakunladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'sns.scatterplot(',n:'Siz scatterplot chizishni boshladingiz'},
+  {c:'  data=df,',n:'Siz DataFrame ni berdingiz'},
+  {c:'  x=\'Boy\', y=\'Vazn\')',n:'Siz x va y ustunlarini ko\'rsatdingiz'},
+  {c:'plt.title(\'Boy va Vazn bog\'\'liqlik\')',n:'Siz sarlavha berdingiz'},
+  {c:'plt.show()',n:'Siz grafikni ko\'rsatdingiz'},
+ ]},
+{q:'hue parametri bilan Jinsi bo\'yicha rang ajrating.',
+ lines:[
+  {c:'import seaborn as sns',n:'Siz seaborn kutubxonasini yukladingiz'},
+  {c:'import pandas as pd',n:'Siz pandas kutubxonasini yukladingiz'},
+  {c:'import matplotlib.pyplot as plt',n:'Siz matplotlib pyplot modulini yukladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'df = pd.DataFrame({',n:'Siz DataFrame yaratishni boshladingiz'},
+  {c:'  \'Boy\':[160,170,175,180],',n:'Siz Boy ustunini qo\'shdingiz'},
+  {c:'  \'Vazn\':[55,65,70,80],',n:'Siz Vazn ustunini qo\'shdingiz'},
+  {c:'  \'Jinsi\':[\'A\',\'E\',\'E\',\'E\']',n:'Siz Jinsi ustunini qo\'shdingiz'},
+  {c:'})',n:'Siz DataFrame yaratishni yakunladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'sns.scatterplot(',n:'Siz scatterplot chizishni boshladingiz'},
+  {c:'  data=df, x=\'Boy\',',n:'Siz DataFrame va x ustunini berdingiz'},
+  {c:'  y=\'Vazn\', hue=\'Jinsi\')',n:'Siz Jinsi bo\'yicha rang ajratdingiz'},
+  {c:'plt.show()',n:'Siz grafikni ko\'rsatdingiz'},
+ ]},
+{q:'regplot bilan trend chizig\'ini ham ko\'rsating.',
+ lines:[
+  {c:'import seaborn as sns',n:'Siz seaborn kutubxonasini yukladingiz'},
+  {c:'import pandas as pd',n:'Siz pandas kutubxonasini yukladingiz'},
+  {c:'import matplotlib.pyplot as plt',n:'Siz matplotlib pyplot modulini yukladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'df = pd.DataFrame({',n:'Siz DataFrame yaratishni boshladingiz'},
+  {c:'  \'Boy\':[160,170,175,180,165],',n:'Siz Boy ustunini qo\'shdingiz'},
+  {c:'  \'Vazn\':[55,65,70,80,60]',n:'Siz Vazn ustunini qo\'shdingiz'},
+  {c:'})',n:'Siz DataFrame yaratishni yakunladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'sns.regplot(',n:'Siz regplot chizishni boshladingiz'},
+  {c:'  data=df,',n:'Siz DataFrame ni berdingiz'},
+  {c:'  x=\'Boy\', y=\'Vazn\')',n:'Siz x va y ustunlarini ko\'rsatdingiz'},
+  {c:'plt.title(\'Trend chizig\'\'i bilan\')',n:'Siz sarlavha berdingiz'},
+  {c:'plt.show()',n:'Siz nuqtalar va trend chizig\'ini ko\'rsatdingiz'},
+ ]},
+]},
+
+{id:'13.15',f:'vizual_13_15.py',
+plan:['sns.histplot() — taqsimot grafigi','bins parametri — ustunlar soni','kde=True bilan silliq egri','Ikki taqsimotni taqqoslash'],
+terms:[
+  ['sns.histplot()','Qiymatlarning taqsimotini ko\'rsatish'],
+  ['bins','Grafik ustunlar (to\'siqlar) soni'],
+  ['kde=True','Silliq taqsimot egri chizig\'ini qo\'shish'],
+  ['KDE','Kernel Density Estimation — silliq zichlik grafigi']
+],
+detail:'HISTPLOT (TAQSIMOT GRAFIGI) NIMA KO\'RSATADI?\n\nHistplot — qiymatlarning qanday taqsimlanganini ko\'rsatadi. Masalan sinf o\'quvchilarining baholari: ko\'pchilik 4 va 5 olganmi yoki 2 va 3 olganmi? Bu grafik shu savolga javob beradi.\n\nBINS PARAMETRI: bins — grafikni nechta ustunchaga bo\'lish kerakligini bildiradi. Kam bins — juda umumiy ko\'rinish, mos naqsh ko\'rinmaydi. Ko\'p bins — juda batafsil, shovqin ko\'p bo\'ladi. Odatda 10-30 orasida tanlanadi, ma\'lumot hajmiga qarab.\n\nKDE=TRUE NIMA? KDE (Kernel Density Estimation) — bu histogrammaning silliq versiyasi. Har bir ustun o\'rniga yaxlit egri chiziq chiziladi. Bu ayniqsa ikkita taqsimotni taqqoslashda qulay — egri chiziqlar ustma-ust joylashtiriladi va farq ko\'rinadi.\n\nQACHON TAQSIMOT GRAFIGI KERAK? Machine Learning da: feature engineering (xususiyatlarni tayyorlash) bosqichida har ustunning taqsimotini tekshirish muhim. Normal taqsimotmi? Og\'mamikin? Outlierlar bormi? Bularning barchasi histplot bilan ko\'rinadi.',
+sim:'>>> import seaborn as sns\n>>> import pandas as pd\n>>> df = pd.DataFrame({\n...   \'Baho\':[3,4,4,5,3,5,4,5,3,4]})\n>>> sns.histplot(\n...   data=df, x=\'Baho\', bins=5)\n# Natija: har baho nechanchi\n# marta uchraganini ko\'rsatadi\n\n>>> sns.histplot(\n...   data=df, x=\'Baho\', kde=True)\n# + silliq egri chiziq qo\'shiladi',
+eskizlar:[
+{q:'Baholar taqsimotini histplot bilan ko\'rsating.',
+ lines:[
+  {c:'import seaborn as sns',n:'Siz seaborn kutubxonasini yukladingiz'},
+  {c:'import pandas as pd',n:'Siz pandas kutubxonasini yukladingiz'},
+  {c:'import matplotlib.pyplot as plt',n:'Siz matplotlib pyplot modulini yukladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'df = pd.DataFrame({',n:'Siz DataFrame yaratishni boshladingiz'},
+  {c:'  \'Baho\':[3,4,4,5,3,5,4,5,3,4]',n:'Siz Baho ustunini qo\'shdingiz'},
+  {c:'})',n:'Siz DataFrame yaratishni yakunladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'sns.histplot(',n:'Siz histplot chizishni boshladingiz'},
+  {c:'  data=df, x=\'Baho\')',n:'Siz DataFrame va x ustunini berdingiz'},
+  {c:'plt.title(\'Baholar taqsimoti\')',n:'Siz sarlavha berdingiz'},
+  {c:'plt.show()',n:'Siz grafikni ko\'rsatdingiz'},
+ ]},
+{q:'kde=True bilan silliq egri chiziq qo\'shing.',
+ lines:[
+  {c:'import seaborn as sns',n:'Siz seaborn kutubxonasini yukladingiz'},
+  {c:'import pandas as pd',n:'Siz pandas kutubxonasini yukladingiz'},
+  {c:'import matplotlib.pyplot as plt',n:'Siz matplotlib pyplot modulini yukladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'df = pd.DataFrame({',n:'Siz DataFrame yaratishni boshladingiz'},
+  {c:'  \'Ball\':[45,55,60,65,70,75,80,85]',n:'Siz Ball ustunini qo\'shdingiz'},
+  {c:'})',n:'Siz DataFrame yaratishni yakunladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'sns.histplot(',n:'Siz histplot chizishni boshladingiz'},
+  {c:'  data=df, x=\'Ball\',',n:'Siz DataFrame va x ustunini berdingiz'},
+  {c:'  kde=True)',n:'Siz silliq egri chiziq qo\'shdingiz'},
+  {c:'plt.title(\'Ball taqsimoti + KDE\')',n:'Siz sarlavha berdingiz'},
+  {c:'plt.show()',n:'Siz grafikni ko\'rsatdingiz'},
+ ]},
+{q:'bins=5 bilan ustunlar sonini boshqaring.',
+ lines:[
+  {c:'import seaborn as sns',n:'Siz seaborn kutubxonasini yukladingiz'},
+  {c:'import pandas as pd',n:'Siz pandas kutubxonasini yukladingiz'},
+  {c:'import matplotlib.pyplot as plt',n:'Siz matplotlib pyplot modulini yukladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'df = pd.DataFrame({',n:'Siz DataFrame yaratishni boshladingiz'},
+  {c:'  \'Narx\':[10,15,12,20,18,',n:'Siz Narx ustunini qo\'shishni boshladingiz'},
+  {c:'    25,22,30,28,35]',n:'Siz Narx qiymatlarini yakunladingiz'},
+  {c:'})',n:'Siz DataFrame yaratishni yakunladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'sns.histplot(',n:'Siz histplot chizishni boshladingiz'},
+  {c:'  data=df, x=\'Narx\',',n:'Siz DataFrame va x ustunini berdingiz'},
+  {c:'  bins=5)',n:'Siz 5 ta ustunchaga bo\'lishni so\'radingiz'},
+  {c:'plt.show()',n:'Siz grafikni ko\'rsatdingiz'},
+ ]},
+]},
+
+{id:'13.20',f:'vizual_13_20.py',
+plan:['plt.subplots() — bir nechta grafik','fig va axes tushunchasi','axes[0], axes[1] bilan ishlash','figsize bilan o\'lchamni boshqarish'],
+terms:[
+  ['plt.subplots()','Bir ekranda bir nechta grafik oynasi yaratish'],
+  ['fig','Butun grafik "uyasi" (Figure ob\'ekti)'],
+  ['axes','Har bir grafik paneli — axes ob\'ekti'],
+  ['figsize','Butun grafik o\'lchami (kenglik, balandlik)']
+],
+detail:'SUBPLOT NEGA KERAK?\n\nKo\'pincha bir nechta grafikni yonma-yon ko\'rsatish kerak bo\'ladi — masalan "chiziqli grafik (tendensiya) va ustunli grafik (taqqoslash) birga". plt.subplots() aynan shu uchun.\n\nFIG VA AXES NIMA? plt.subplots(1, 2) ikki narsani qaytaradi: fig — butun grafik "sahifasi" (o\'lcham, sarlavha va boshqa umumiy sozlamalar uchun), axes — har bir grafik paneli (ustun va qatorda). axes[0] — birinchi panel, axes[1] — ikkinchi panel.\n\nQATOR VA USTUNLAR: plt.subplots(2, 3) — 2 qator, 3 ustunli 6 ta panel yaratadi. Bu holda axes[0][1] — birinchi qator, ikkinchi ustun degan ma\'noni bildiradi.\n\nFIGSIZE: figsize=(kenglik, balandlik) — santimetr emas, "dyuym" da. figsize=(12, 4) — keng va past, figsize=(6, 8) — tor va baland. Ekran o\'lchamiga qarab moslash kerak.',
+sim:'>>> import matplotlib.pyplot as plt\n>>> fig, axes = plt.subplots(\n...   1, 2, figsize=(10, 4))\n>>> axes[0].plot([1,2,3],[1,4,9])\n>>> axes[0].set_title(\'Chiziqli\')\n>>> axes[1].bar([\'A\',\'B\'],[3,5])\n>>> axes[1].set_title(\'Ustunli\')\n>>> plt.tight_layout()\n>>> plt.show()\n# Natija: 2 ta grafik yonma-yon',
+eskizlar:[
+{q:'Bir ekranda 2 ta grafik chizing: chiziqli va ustunli.',
+ lines:[
+  {c:'import matplotlib.pyplot as plt',n:'Siz matplotlib pyplot modulini yukladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'fig, axes = plt.subplots(',n:'Siz subplot yaratishni boshladingiz'},
+  {c:'  1, 2, figsize=(10, 4))',n:'Siz 1 qator 2 ustunli 10x4 o\'lchamli panel yaratdingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'axes[0].plot(',n:'Siz birinchi panelda chiziqli grafik chizdingiz'},
+  {c:'  [1,2,3], [1,4,9])',n:'Siz x va y qiymatlarini berdingiz'},
+  {c:'axes[0].set_title(\'Chiziqli\')',n:'Siz birinchi panelga sarlavha berdingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'axes[1].bar(',n:'Siz ikkinchi panelda ustunli grafik chizdingiz'},
+  {c:'  [\'A\',\'B\',\'C\'], [3,5,2])',n:'Siz kategoriyalar va qiymatlarni berdingiz'},
+  {c:'axes[1].set_title(\'Ustunli\')',n:'Siz ikkinchi panelga sarlavha berdingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'plt.tight_layout()',n:'Siz grafiklar orasidagi bo\'shliqni avtomatik sozladingiz'},
+  {c:'plt.show()',n:'Siz ikkala grafikni ko\'rsatdingiz'},
+ ]},
+{q:'2 qator 2 ustunli (4 ta) subplot yarating.',
+ lines:[
+  {c:'import matplotlib.pyplot as plt',n:'Siz matplotlib pyplot modulini yukladingiz'},
+  {c:'import seaborn as sns',n:'Siz seaborn kutubxonasini yukladingiz'},
+  {c:'import pandas as pd',n:'Siz pandas kutubxonasini yukladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'df = pd.DataFrame({',n:'Siz DataFrame yaratishni boshladingiz'},
+  {c:'  \'x\':[1,2,3,4,5],',n:'Siz x ustunini qo\'shdingiz'},
+  {c:'  \'y\':[2,4,3,5,4]',n:'Siz y ustunini qo\'shdingiz'},
+  {c:'})',n:'Siz DataFrame yaratishni yakunladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'fig, axes = plt.subplots(',n:'Siz subplot yaratishni boshladingiz'},
+  {c:'  2, 2, figsize=(10, 8))',n:'Siz 2x2 panellar yaratdingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'axes[0][0].plot(df[\'x\'],df[\'y\'])',n:'Siz yuqori chap panelga chiziqli grafik chizdingiz'},
+  {c:'axes[0][1].scatter(df[\'x\'],df[\'y\'])',n:'Siz yuqori o\'ng panelga scatter chizdingiz'},
+  {c:'plt.tight_layout()',n:'Siz joylashuvni avtomatik sozladingiz'},
+  {c:'plt.show()',n:'Siz barcha grafiklarni ko\'rsatdingiz'},
+ ]},
+{q:'fig.suptitle() bilan butun grafikka umumiy sarlavha bering.',
+ lines:[
+  {c:'import matplotlib.pyplot as plt',n:'Siz matplotlib pyplot modulini yukladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'fig, axes = plt.subplots(',n:'Siz subplot yaratishni boshladingiz'},
+  {c:'  1, 2, figsize=(10, 4))',n:'Siz 1x2 panellar yaratdingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'axes[0].plot([1,2,3],[10,20,15])',n:'Siz birinchi panelga grafik chizdingiz'},
+  {c:'axes[0].set_title(\'1-grafik\')',n:'Siz birinchi panelga sarlavha berdingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'axes[1].bar([\'A\',\'B\'],[30,50])',n:'Siz ikkinchi panelga ustunli grafik chizdingiz'},
+  {c:'axes[1].set_title(\'2-grafik\')',n:'Siz ikkinchi panelga sarlavha berdingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'fig.suptitle(\'Umumiy sarlavha\')',n:'Siz butun grafikka umumiy sarlavha berdingiz'},
+  {c:'plt.tight_layout()',n:'Siz joylashuvni sozladingiz'},
+  {c:'plt.show()',n:'Siz grafikni ko\'rsatdingiz'},
+ ]},
+]},
+
+];
+
+// ═══════════════════════════════════════════════════════════════
+// HOLATLAR
+// ═══════════════════════════════════════════════════════════════
+var cur=0, curEskiz=0, skipOn=false, ghostVisible=true;
+var lineData=[], doneSet=new Set(), eskizDoneSet=new Set();
+var selectedStar=0, ratingSubmitted=false;
+var BRIGHT=[0,0.05,0.1,0.2,0.3,0.42,0.55,0.65,0.75,0.85,0.95];
+
+window.onload=function(){
+  buildStars(); buildTabs(); buildIntro(); loadMod(0);
+  if(window.visualViewport){
+    var t=null;
+    window.visualViewport.addEventListener('resize',function(){
+      clearTimeout(t);
+      t=setTimeout(function(){
+        var el=document.activeElement;
+        if(!el||!el.classList.contains('line-input')) return;
+        var blk=el.closest('.line-block');
+        if(!blk) return;
+        var vp=window.visualViewport;
+        var rc=blk.getBoundingClientRect();
+        window.scrollTo({top:window.scrollY+rc.top+rc.height/2-(vp.offsetTop+vp.height*0.38),behavior:'smooth'});
+      },150);
+    });
+  }
+};
+
+function buildIntro(){
+  var tot=M.reduce(function(s,m){return s+m.eskizlar.length;},0);
+  var h='<div class="intro-title">'+MODULE_INTRO.title+'</div>';
+  h+='<div class="intro-text">'+esc(MODULE_INTRO.text)+'</div>';
+  h+='<div class="intro-stats">';
+  h+='<div class="intro-stat"><div class="intro-stat-v">'+MODULE_INTRO.count+'</div><div class="intro-stat-l">MAVZU</div></div>';
+  h+='<div class="intro-stat"><div class="intro-stat-v">'+tot+'</div><div class="intro-stat-l">ESKIZ</div></div>';
+  h+='<div class="intro-stat"><div class="intro-stat-v">seaborn</div><div class="intro-stat-l">KUTUBXONA</div></div>';
+  h+='</div>';
+  document.getElementById('introBox').innerHTML=h;
+}
+
+function loadMod(i){
+  cur=i; curEskiz=0;
+  document.getElementById('detailPanel').classList.remove('show');
+  document.getElementById('resultPanel').classList.remove('show');
+  document.getElementById('badge').className='badge';
+  var m=M[i];
+  document.getElementById('topSub').textContent=m.id;
+  document.getElementById('svMod').textContent=(i+1)+'/'+M.length;
+  var th='<div class="terms-title">📚 Yangi atamalar:</div>';
+  m.terms.forEach(function(t){
+    th+='<div class="term-row"><span class="term-key">'+esc(t[0])+'</span><span class="term-val">'+esc(t[1])+'</span></div>';
+  });
+  document.getElementById('termsBox').innerHTML=th;
+  loadEskiz(); buildTabs();
+}
+
+function loadEskiz(){
+  var m=M[cur], e=m.eskizlar[curEskiz];
+  document.getElementById('detailPanel').classList.remove('show');
+  document.getElementById('resultPanel').classList.remove('show');
+  document.getElementById('badge').className='badge';
+  document.getElementById('fname').textContent=m.f.replace('.py','_'+(curEskiz+1)+'.py');
+  buildEskizDots(); buildEskizQ(e); buildLines(e); updateStats();
+}
+
+function buildEskizQ(e){
+  var ex=document.getElementById('eskizQBox');
+  if(ex) ex.remove();
+  var q=document.createElement('div');
+  q.id='eskizQBox';
+  q.style.cssText='background:#0d1828;border:1px solid #1e3048;border-left:3px solid #a855f7;border-radius:8px;padding:10px 12px;margin-bottom:10px;font-size:.71rem;line-height:1.8;color:#c4b5fd;white-space:pre-wrap;';
+  q.textContent='Eskiz '+(curEskiz+1)+'/'+M[cur].eskizlar.length+' — '+e.q;
+  var anchor=document.getElementById('termsBox');
+  anchor.parentNode.insertBefore(q,anchor.nextSibling);
+}
+
+function buildEskizDots(){
+  var ex=document.getElementById('eskizDotsRow');
+  if(ex) ex.remove();
+  var row=document.createElement('div');
+  row.id='eskizDotsRow';
+  row.style.cssText='display:flex;gap:6px;justify-content:center;margin-bottom:10px;';
+  M[cur].eskizlar.forEach(function(_,i){
+    var key=cur+'-'+i;
+    var d=document.createElement('div');
+    d.style.cssText='height:6px;border-radius:3px;cursor:pointer;transition:all .2s;';
+    d.style.width=(i===curEskiz?'40px':'26px');
+    d.style.background=eskizDoneSet.has(key)?'#22c55e':(i===curEskiz?'#00f0c8':'#1e3048');
+    d.onclick=(function(idx){return function(){curEskiz=idx;loadEskiz();};})(i);
+    row.appendChild(d);
+  });
+  var qb=document.getElementById('eskizQBox');
+  if(qb) qb.parentNode.insertBefore(row,qb);
+}
+
+function buildLines(e){
+  var wrap=document.getElementById('linesWrap');
+  wrap.innerHTML=''; lineData=[];
+  var op=BRIGHT[parseInt(document.getElementById('brightSlider').value)||3];
+  e.lines.forEach(function(ln,i){
+    var isCom=ln.c.replace(/^\s+/,'').charAt(0)==='#';
+    var isEmpty=ln.c==='';
+    var block=document.createElement('div');
+    block.className='line-block';
+    var row=document.createElement('div');
+    row.className='line-row';
+    var num=document.createElement('div');
+    num.className='line-num'; num.id='num'+i;
+    num.textContent=isEmpty?'':(i+1);
+    var content=document.createElement('div');
+    content.className='line-content';
+    var ghost=document.createElement('div');
+    ghost.className='line-ghost'+((isCom&&skipOn)?' skip-c':'');
+    ghost.id='ghost'+i;
+    ghost.style.color=ghostVisible?'rgba(74,96,128,'+op+')':'transparent';
+    ghost.textContent=ln.c||' ';
+    var colors=document.createElement('div');
+    colors.className='line-colors'; colors.id='clr'+i;
+    var inp=document.createElement('input');
+    inp.type='text'; inp.className='line-input'; inp.id='inp'+i;
+    inp.setAttribute('spellcheck','false'); inp.setAttribute('autocorrect','off');
+    inp.setAttribute('autocapitalize','off'); inp.setAttribute('autocomplete','off');
+    if(isEmpty||(isCom&&skipOn)) inp.disabled=true;
+    (function(idx,target,noteText){
+      inp.addEventListener('input',function(){
+        if(!target) return;
+        updateLineClr(idx,target);
+        if(inp.value===target&&target!==''&&noteText!=='') showNote(idx);
+        else if(inp.value!==target) hideNote(idx);
+        updateStats();
+      });
+    })(i,ln.c,ln.n);
+    content.appendChild(ghost); content.appendChild(colors); content.appendChild(inp);
+    row.appendChild(num); row.appendChild(content);
+    var note=document.createElement('div');
+    note.className='line-done-note'; note.id='note'+i;
+    note.textContent=ln.n?('✅ '+ln.n+'!'):'';
+    block.appendChild(row);
+    if(ln.n) block.appendChild(note);
+    wrap.appendChild(block);
+    lineData.push({inp:inp,target:ln.c,isCom:isCom,isEmpty:isEmpty});
+  });
+}
+
+function updateLineClr(idx,target){
+  var inp=document.getElementById('inp'+idx);
+  var clr=document.getElementById('clr'+idx);
+  if(!inp||!clr) return;
+  var typed=inp.value, html='';
+  for(var ci=0;ci<target.length;ci++){
+    var ch=target[ci];
+    if(ci<typed.length){
+      html+=typed[ci]===ch?'<span style="color:#22c55e">'+esc(ch)+'</span>':'<span style="color:#f43f5e;text-decoration:underline">'+esc(ch)+'</span>';
+    } else {
+      html+='<span style="color:transparent">'+esc(ch)+'</span>';
+    }
+  }
+  clr.innerHTML=html;
+  var num=document.getElementById('num'+idx);
+  if(num) num.style.color=(typed===target&&target!=='')?'#22c55e':'';
+}
+
+function showNote(i){var n=document.getElementById('note'+i);if(n&&n.textContent)n.classList.add('show');}
+function hideNote(i){var n=document.getElementById('note'+i);if(n)n.classList.remove('show');}
+
+function doCheck(){
+  var e=M[cur].eskizlar[curEskiz];
+  var done=0,total=0,errors=[];
+  lineData.forEach(function(l,i){
+    if(l.isEmpty||(l.isCom&&skipOn)) return;
+    total++;
+    if(l.inp.value===l.target){
+      done++;
+      document.getElementById('num'+i).style.color='#22c55e';
+      if(e.lines[i].n) showNote(i);
+    } else {
+      errors.push(i+1);
+      document.getElementById('num'+i).style.color='#f43f5e';
+    }
+  });
+  var pct=total>0?Math.round(done/total*100):0;
+  var b=document.getElementById('badge');
+  b.className='badge show';
+  if(pct>=85){
+    b.className+=' g';
+    eskizDoneSet.add(cur+'-'+curEskiz);
+    var isLast=curEskiz===M[cur].eskizlar.length-1;
+    if(isLast){
+      doneSet.add(cur);
+      b.textContent='✅ Zo\'r! '+pct+'% — mavzu tugadi!';
+      showRating();
+    } else {
+      b.textContent='✅ Zo\'r! '+pct+'% — keyingi eskiz →';
+      setTimeout(function(){curEskiz++;loadEskiz();},900);
+    }
+    buildEskizDots();
+  } else if(pct>=55){
+    b.className+=' o';
+    b.textContent='⚡ '+pct+'% — xato qatorlar: '+errors.join(', ')+'-qator';
+  } else {
+    b.className+=' r';
+    b.textContent='❌ '+pct+'% — qaytadan urinib ko\'ring';
+  }
+  updateStats();
+}
+
+function doClear(){
+  lineData.forEach(function(l,i){
+    l.inp.value='';
+    var clr=document.getElementById('clr'+i);
+    if(clr) clr.innerHTML='';
+    var num=document.getElementById('num'+i);
+    if(num) num.style.color='';
+    hideNote(i);
+  });
+  document.getElementById('badge').className='badge';
+  updateStats();
+}
+
+function updateStats(){
+  var done=0,total=0;
+  lineData.forEach(function(l){
+    if(l.isEmpty||(l.isCom&&skipOn)) return;
+    total++;
+    if(l.inp.value===l.target) done++;
+  });
+  var pct=total>0?Math.round(done/total*100):0;
+  document.getElementById('svPctV').textContent=done>0?pct+'%':'—';
+  document.getElementById('svDone').textContent=done+'/'+total;
+  document.getElementById('progressFill').style.width=(doneSet.size/M.length*100)+'%';
+  buildTabs();
+}
+
+function toggleGhost(){
+  ghostVisible=!ghostVisible;
+  document.querySelectorAll('.line-ghost').forEach(function(g){g.style.visibility=ghostVisible?'visible':'hidden';});
+  document.getElementById('ghostBtn').textContent=ghostVisible?'👁️ Yashir':'👁️ Ko\'rsat';
+}
+
+function toggleSkip(){
+  skipOn=!skipOn;
+  document.getElementById('sw').classList.toggle('on',skipOn);
+  document.getElementById('skipLbl').textContent=skipOn?'Kommentlar o\'tkazilmoqda':'# Kommentlarni o\'tkazib yuboring';
+  buildLines(M[cur].eskizlar[curEskiz]); applyBright(); updateStats();
+}
+
+function toggleDetail(){
+  var p=document.getElementById('detailPanel');
+  if(p.classList.contains('show')){p.classList.remove('show');}
+  else{document.getElementById('detailContent').textContent=M[cur].detail;p.classList.add('show');}
+}
+
+function toggleResult(){
+  var p=document.getElementById('resultPanel');
+  if(p.classList.contains('show')){p.classList.remove('show');}
+  else{document.getElementById('simWrap').innerHTML='<pre>'+esc(M[cur].sim)+'</pre>';p.classList.add('show');}
+}
+
+function setBright(v){
+  document.getElementById('brightVal').textContent=v;
+  applyBright();
+}
+
+function applyBright(){
+  var v=parseInt(document.getElementById('brightSlider').value)||3;
+  var op=BRIGHT[v];
+  document.querySelectorAll('.line-ghost').forEach(function(g){
+    if(!g.classList.contains('skip-c')&&ghostVisible)
+      g.style.color='rgba(74,96,128,'+op+')';
+  });
+}
+
+function buildTabs(){
+  var c=document.getElementById('tabs');
+  c.innerHTML='';
+  M.forEach(function(m,i){
+    var d=document.createElement('div');
+    d.className='tab'+(i===cur?' on':'')+(doneSet.has(i)?' done':'');
+    d.textContent=m.id;
+    d.onclick=(function(n){return function(){loadMod(n);};})(i);
+    c.appendChild(d);
+  });
+}
+
+function buildStars(){
+  var sc=document.getElementById('stars');
+  sc.innerHTML='';
+  for(var i=1;i<=10;i++){
+    var s=document.createElement('span');
+    s.className='star'; s.textContent='⭐'; s.dataset.v=i;
+    s.onclick=(function(v){
+      return function(){
+        selectedStar=v;
+        document.getElementById('ratingScore').textContent=v+' / 10';
+        document.querySelectorAll('.star').forEach(function(st){st.classList.toggle('on',parseInt(st.dataset.v)<=v);});
+      };
+    })(i);
+    sc.appendChild(s);
+  }
+}
+
+function showRating(){document.getElementById('ratingBox').classList.add('show');}
+
+function submitRating(){
+  if(ratingSubmitted) return;
+  if(selectedStar===0){alert('Iltimos baho tanlang!');return;}
+  ratingSubmitted=true;
+  document.getElementById('ratingThanks').style.display='block';
+  document.querySelector('.rating-submit').style.display='none';
+}
+
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+</script>
+</body>
+</html>

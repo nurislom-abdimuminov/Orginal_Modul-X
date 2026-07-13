@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Eskiz — 17-Modul. Klassifikatsiya (Classification)</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:#0a0e1a;color:#dde5f0;font-family:'JetBrains Mono',monospace;font-size:13px;min-height:100vh;}
+.top{background:#0f1520;border-bottom:1px solid #1e3048;padding:8px 14px;display:flex;align-items:center;gap:8px;position:sticky;top:0;z-index:50;}
+.top-t{color:#00f0c8;font-size:.78rem;font-weight:700;}
+.top-s{color:#4a6080;font-size:.65rem;margin-left:auto;}
+.bright-bar{background:#0f1520;border-bottom:1px solid #1e3048;padding:6px 14px;display:flex;align-items:center;gap:10px;position:sticky;top:41px;z-index:49;}
+.bright-lbl{font-size:.65rem;color:#4a6080;flex-shrink:0;}
+.bright-slider{flex:1;-webkit-appearance:none;height:4px;border-radius:2px;background:#1e3048;outline:none;cursor:pointer;}
+.bright-slider::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:#00f0c8;cursor:pointer;}
+.bright-val{font-size:.68rem;color:#00f0c8;font-weight:700;width:20px;text-align:right;flex-shrink:0;}
+.wrap{padding:10px 14px;max-width:540px;margin:0 auto;}
+.tabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;margin-bottom:10px;scrollbar-width:none;}
+.tabs::-webkit-scrollbar{display:none;}
+.tab{flex-shrink:0;padding:6px 12px;border-radius:20px;border:1px solid #1e3048;background:#141e2e;color:#4a6080;font-size:.68rem;cursor:pointer;transition:all .15s;}
+.tab.on{border-color:#00f0c8;color:#00f0c8;background:rgba(0,240,200,.08);}
+.tab.done{border-color:#22c55e;color:#22c55e;background:rgba(34,197,94,.06);}
+.stats{display:flex;gap:8px;margin-bottom:10px;}
+.stat{flex:1;background:#141e2e;border:1px solid #1e3048;border-radius:8px;padding:7px 8px;text-align:center;}
+.sv{font-size:.95rem;font-weight:700;color:#00f0c8;}
+.sl{font-size:.58rem;color:#4a6080;margin-top:2px;}
+.progress-bar{height:3px;background:#1e3048;border-radius:2px;margin-bottom:10px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,#00f0c8,#2563eb);border-radius:2px;transition:width .4s;}
+.intro-box{background:#0d1828;border:1px solid #1e3048;border-left:3px solid #00f0c8;border-radius:10px;padding:14px;margin-bottom:10px;}
+.intro-title{font-size:.8rem;font-weight:700;color:#00f0c8;margin-bottom:8px;}
+.intro-text{font-size:.7rem;line-height:1.85;color:#9fb0c8;white-space:pre-wrap;}
+.intro-stats{display:flex;gap:8px;margin-top:10px;}
+.intro-stat{flex:1;background:#080c14;border:1px solid #1e3048;border-radius:8px;padding:8px;text-align:center;}
+.intro-stat-v{font-size:1.1rem;font-weight:700;color:#00f0c8;}
+.intro-stat-l{font-size:.58rem;color:#4a6080;margin-top:2px;}
+.terms-box{background:#080c14;border:1px solid #1e3048;border-left:3px solid #a855f7;border-radius:8px;padding:10px 12px;margin-bottom:10px;}
+.terms-title{font-size:.68rem;font-weight:700;color:#a855f7;margin-bottom:8px;}
+.term-row{display:flex;gap:6px;margin-bottom:5px;align-items:flex-start;}
+.term-key{font-size:.64rem;color:#fbbf24;font-weight:700;min-width:120px;flex-shrink:0;}
+.term-val{font-size:.63rem;color:#4a6080;line-height:1.6;}
+.detail-panel{display:none;background:#0a1628;border:1px solid #2563eb;border-radius:8px;padding:12px 14px;margin-bottom:10px;font-size:.72rem;line-height:2;color:#93c5fd;white-space:pre-wrap;}
+.detail-panel.show{display:block;}
+.detail-title{color:#60a5fa;font-weight:700;margin-bottom:8px;font-size:.76rem;}
+
+/* TEST PANEL */
+.test-panel{background:#080c14;border:1px solid #1e3048;border-radius:10px;padding:12px;margin-bottom:10px;}
+.test-title{font-size:.72rem;font-weight:700;color:#fbbf24;margin-bottom:12px;}
+.test-q{background:#0d1828;border-left:3px solid #a855f7;border-radius:6px;padding:10px 12px;margin-bottom:10px;}
+.test-qtext{font-size:.71rem;color:#c4b5fd;line-height:1.7;margin-bottom:10px;}
+.test-opts{display:flex;flex-direction:column;gap:6px;}
+.test-opt{padding:8px 12px;border-radius:8px;border:1px solid #1e3048;background:#141e2e;font-size:.68rem;color:#8ba0c0;cursor:pointer;text-align:left;font-family:'JetBrains Mono',monospace;transition:all .15s;}
+.test-opt:active{opacity:.7;}
+.test-opt.correct{border-color:#22c55e;color:#22c55e;background:rgba(34,197,94,.1);}
+.test-opt.wrong{border-color:#f43f5e;color:#f43f5e;background:rgba(244,63,94,.1);}
+.test-opt.show-correct{border-color:#22c55e;color:#22c55e;background:rgba(34,197,94,.05);}
+.test-exp{display:none;font-size:.66rem;line-height:1.7;color:#64748b;padding:8px 0 0 4px;border-top:1px dashed #1e3048;margin-top:8px;}
+.test-exp.show{display:block;}
+.test-score{text-align:center;padding:10px;font-size:.78rem;font-weight:700;color:#00f0c8;display:none;}
+.test-score.show{display:block;}
+.btn-test-check{width:100%;padding:10px;background:#2563eb;color:#fff;font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:700;border:none;border-radius:8px;cursor:pointer;margin-top:8px;}
+
+/* ESKIZ (kod yozish mavzulari uchun) */
+.skip-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;padding:8px 12px;background:#141e2e;border:1px solid #1e3048;border-radius:8px;cursor:pointer;}
+.skip-row span{font-size:.7rem;color:#4a6080;}
+.sw{width:34px;height:18px;background:#1e3048;border-radius:10px;position:relative;transition:background .2s;flex-shrink:0;}
+.sw.on{background:#fbbf24;}
+.sw::after{content:'';position:absolute;top:2px;left:2px;width:14px;height:14px;background:#fff;border-radius:50%;transition:left .2s;}
+.sw.on::after{left:18px;}
+.sim-wrap{width:100%;overflow-x:auto;}
+.sim-wrap pre{font-size:.68rem;line-height:1.9;color:#22c55e;white-space:pre;}
+.result-panel{display:none;background:#080c14;border:1px solid #22c55e;border-radius:10px;padding:12px;margin-bottom:10px;}
+.result-panel.show{display:block;}
+.result-title{color:#22c55e;font-size:.72rem;font-weight:700;margin-bottom:8px;}
+.code-block{border:1px solid #1e3048;border-radius:10px;overflow:hidden;margin-bottom:10px;background:#090d18;}
+.fbar{display:flex;align-items:center;gap:5px;padding:7px 12px;background:#0f1520;border-bottom:1px solid #1e3048;}
+.dot{width:6px;height:6px;border-radius:50%;}
+.dot.r{background:#f43f5e;}.dot.y{background:#fbbf24;}.dot.g{background:#22c55e;}
+.fn{font-size:.65rem;color:#4a6080;margin-left:4px;}
+.fhint{margin-left:auto;font-size:.6rem;color:#00f0c8;opacity:.7;}
+.lines-wrap{padding:4px 0;}
+.line-block{margin:0;}
+.line-row{display:flex;align-items:center;position:relative;min-height:30px;}
+.line-num{width:28px;flex-shrink:0;font-size:.63rem;padding:4px 4px 4px 5px;color:#2a3a50;text-align:right;user-select:none;transition:color .2s;align-self:center;}
+.line-content{flex:1;position:relative;overflow-x:auto;overflow-y:hidden;min-height:30px;}
+.line-content::-webkit-scrollbar{height:2px;}
+.line-content::-webkit-scrollbar-thumb{background:#1e3048;border-radius:1px;}
+.line-ghost{font-size:.76rem;line-height:1.8;padding:4px 8px;white-space:pre;pointer-events:none;min-height:30px;display:block;}
+.line-ghost.skip-c{opacity:.08!important;}
+.line-colors{position:absolute;top:0;left:0;font-size:.76rem;line-height:1.8;padding:4px 8px;white-space:pre;pointer-events:none;z-index:2;min-height:30px;}
+.line-input{position:absolute;top:0;left:0;right:0;bottom:0;width:100%;font-family:'JetBrains Mono',monospace;font-size:.76rem;line-height:1.8;padding:4px 8px;color:transparent;-webkit-text-fill-color:transparent;caret-color:#00f0c8;background:transparent;border:none;outline:none;white-space:pre;overflow:hidden;z-index:10;-webkit-appearance:none;}
+.line-input:disabled{cursor:default;}
+.line-done-note{display:none;font-size:.66rem;line-height:1.6;padding:3px 8px 3px 34px;color:#38bdf8;background:rgba(56,189,248,.06);border-left:2px solid #38bdf8;white-space:pre-wrap;animation:fadeIn .25s ease;}
+.line-done-note.show{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:translateY(0)}}
+.btn-row{display:flex;gap:6px;flex-wrap:wrap;padding:9px 12px;background:#0f1520;border-top:1px solid #1e3048;}
+.btn{padding:8px 11px;border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:.68rem;font-weight:700;border:none;cursor:pointer;flex-shrink:0;transition:opacity .15s;}
+.btn:active{opacity:.7;}
+.btn-chk{background:#00f0c8;color:#080c14;}
+.btn-clr{background:transparent;border:1px solid #1e3048;color:#4a6080;}
+.btn-det{background:#2563eb;color:#fff;}
+.btn-ghost{background:#7c3aed;color:#fff;}
+.btn-res{background:#16a34a;color:#fff;}
+.badge{display:none;margin:0 12px 10px;padding:7px 12px;border-radius:8px;font-size:.7rem;border:1px solid #1e3048;}
+.badge.show{display:block;}
+.badge.g{border-color:#22c55e;color:#22c55e;background:rgba(34,197,94,.07);}
+.badge.o{border-color:#fbbf24;color:#fbbf24;background:rgba(251,191,36,.07);}
+.badge.r{border-color:#f43f5e;color:#f43f5e;background:rgba(244,63,94,.07);}
+.rating-box{background:#0d1828;border:1px solid #fbbf24;border-radius:12px;padding:14px 16px;margin-top:10px;display:none;}
+.rating-box.show{display:block;}
+.rating-title{font-size:.72rem;font-weight:700;color:#fbbf24;text-align:center;margin-bottom:4px;}
+.rating-sub{font-size:.62rem;color:#4a6080;text-align:center;margin-bottom:12px;}
+.stars{display:flex;justify-content:center;gap:4px;margin-bottom:10px;flex-wrap:wrap;}
+.star{font-size:1.5rem;cursor:pointer;filter:grayscale(1);opacity:.35;transition:transform .1s,filter .1s;user-select:none;}
+.star.on{filter:none;opacity:1;}
+.rating-score{text-align:center;font-size:.72rem;color:#fbbf24;font-weight:700;margin-bottom:8px;min-height:18px;}
+.rating-comment{width:100%;background:#141e2e;border:1px solid #1e3048;border-radius:8px;padding:8px 10px;color:#dde5f0;font-family:'JetBrains Mono',monospace;font-size:.68rem;resize:none;outline:none;margin-bottom:8px;}
+.rating-submit{width:100%;padding:10px;background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#080c14;font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:700;border:none;border-radius:8px;cursor:pointer;}
+.rating-thanks{display:none;text-align:center;padding:10px;font-size:.72rem;color:#22c55e;font-weight:700;}
+</style>
+</head>
+<body>
+<div class="top">
+  <div class="top-t">🎯 Klassifikatsiya — 17-Modul</div>
+  <div class="top-s" id="topSub">17.1</div>
+</div>
+<div class="bright-bar">
+  <span class="bright-lbl">👁️ Xiralik:</span>
+  <input type="range" class="bright-slider" id="brightSlider" min="1" max="10" value="3" oninput="setBright(this.value)">
+  <span class="bright-val" id="brightVal">3</span>
+</div>
+<div class="wrap">
+  <div class="stats">
+    <div class="stat"><div class="sv" id="svScore">—</div><div class="sl">TEST BALL</div></div>
+    <div class="stat"><div class="sv" id="svDone">0/0</div><div class="sl">BAJARILDI</div></div>
+    <div class="stat"><div class="sv" id="svMod">1/17</div><div class="sl">MAVZU</div></div>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+  <div class="tabs" id="tabs"></div>
+  <div class="intro-box" id="introBox"></div>
+  <div class="terms-box" id="termsBox"></div>
+  <div class="detail-panel" id="detailPanel">
+    <div class="detail-title">📘 BATAFSIL</div>
+    <div id="detailContent"></div>
+  </div>
+  <div id="mainContent"></div>
+  <div class="rating-box" id="ratingBox">
+    <div class="rating-title">⭐ 17-Modulni baholang</div>
+    <div class="rating-sub">Fikringiz keyingi versiyani yaxshilashga yordam beradi</div>
+    <div class="stars" id="stars"></div>
+    <div class="rating-score" id="ratingScore">Baho tanlang (1–10)</div>
+    <textarea class="rating-comment" id="ratingComment" rows="2" placeholder="Izoh..."></textarea>
+    <button class="rating-submit" onclick="submitRating()">⭐ Yuborish</button>
+    <div class="rating-thanks" id="ratingThanks">✅ Rahmat!</div>
+  </div>
+</div>
+<script>
+var MODULE_INTRO = {
+  title: "🎯 17-Modul haqida",
+  text: "Bu modulda siz Klassifikatsiya — ma'lumotni toifalarga ajratish usullarini chuqur o'rganasiz.\n\nk-NN dan boshlab, klassifikatorlarni baholash (Jaccard index, Confusion Matrix), Decision Tree va Random Forest, Logistic Regression — barcha asosiy klassifikatsiya algoritmlarini nazariy va amaliy tomondan ko'rib chiqasiz.\n\nModul oxirida portfolio darajasidagi real loyihalar (diabet tashxisi, yakuniy amaliy topshiriq) orqali bilimingizni mustahkamlaysiz — bular real ish/portfolio uchun ishlatish mumkin bo'lgan to'liq loyihalar.",
+  count: 17
+};
+
+var M = [
+
+{id:'17.1', type:'test',
+ title:'Kirish — Klassifikatsiya nima?',
+ terms:[
+   ['Klassifikatsiya','Ma\'lumotni oldindan belgilangan toifalarga ajratuvchi ML usuli'],
+   ['Binary Classification','Ikki toifali klassifikatsiya (ha/yo\'q, 0/1)'],
+   ['Multiclass Classification','Ikkitadan ortiq toifali klassifikatsiya'],
+   ['Decision boundary','Toifalarni ajratuvchi chegara']
+ ],
+ detail:'KLASSIFIKATSIYA VA REGRESSIYA FARQI\n\n16-modulda Regressiya raqamli qiymat bashorat qilishini o\'rgandingiz. Klassifikatsiya esa TOIFA bashorat qiladi: "bu email spam yoki yo\'q", "bu rasm it yoki mushuk", "bu mijoz ketadi yoki qoladi".\n\nBINARY VA MULTICLASS:\nBinary Classification — faqat ikki toifa (masalan kasal/sog\'lom, spam/spam emas). Multiclass Classification — ikkitadan ortiq toifa (masalan raqamlarni tanish 0-9, mahsulot toifasini aniqlash).\n\nDECISION BOUNDARY NIMA?\nKlassifikator ma\'lumotlarni xususiyatlar fazosida chegara chizib ajratadi — bu chegaraning bir tomonida bir toifa, ikkinchi tomonida boshqa toifa joylashadi. Chegara to\'g\'ri chiziq (Logistic Regression da) yoki murakkab egri shakl (Decision Tree, k-NN da) bo\'lishi mumkin.\n\nREAL HAYOTDA KLASSIFIKATSIYA:\nTibbiy tashxis (kasal/sog\'lom), kredit berish qarori (beriladi/berilmaydi), spam filtri, yuz tanish, mijozlarni segmentatsiya qilish, sentiment tahlil (musbat/manfiy fikr) — bularning barchasi klassifikatsiya masalalari.',
+ tests:[
+   {q:'Klassifikatsiya nima narsani bashorat qiladi?',
+    opts:['Raqamli (uzluksiz) qiymatni','Toifani (categorical natijani)','Faqat rasmlarni','Vaqt qatorini'],
+    ans:1,
+    exp:'Klassifikatsiya ma\'lumotni oldindan belgilangan toifalardan biriga ajratadi — raqamli qiymatni Regressiya bashorat qiladi.'},
+   {q:'"Email spam yoki spam emas" — bu qaysi klassifikatsiya turi?',
+    opts:['Multiclass Classification','Binary Classification','Regression','Clustering'],
+    ans:1,
+    exp:'Faqat ikki toifa (spam / spam emas) bor, shuning uchun bu Binary Classification.'},
+   {q:'Decision boundary nima?',
+    opts:['Modelni o\'qitish tezligi','Toifalarni ajratuvchi chegara','Ma\'lumotlar soni','Xato funksiyasi'],
+    ans:1,
+    exp:'Decision boundary — klassifikator xususiyatlar fazosida chizgan, toifalarni ajratuvchi chegara.'}
+ ]},
+
+{id:'17.2', type:'test',
+ title:'k-NN algoritmi',
+ terms:[
+   ['k-NN (k-Nearest Neighbors)','Eng yaqin k qo\'shni asosida toifa aniqlovchi algoritm'],
+   ['Masofa (Distance)','Ikki nuqta orasidagi yaqinlikni o\'lchash usuli'],
+   ['Euclidean distance','Eng ko\'p ishlatiladigan masofa formulasi (Pifagor teoremasi asosida)'],
+   ['k parametri','Qancha qo\'shniga qarashni belgilaydigan son']
+ ],
+ detail:'k-NN QANDAY ISHLAYDI?\n\nk-NN — eng sodda klassifikatsiya algoritmlaridan biri: u "o\'qitish" jarayonida hech qanday formula chiqarmaydi, shunchaki barcha ma\'lumotni saqlab qo\'yadi (shuning uchun "lazy learning" — dangasa o\'rganish deyiladi).\n\nYANGI NUQTA UCHUN QAROR: Yangi nuqta kelganda, k-NN undan eng yaqin k ta nuqtani (qo\'shnini) topadi, va shu k qo\'shnining ko\'pchilik toifasini yangi nuqtaga beradi ("ovoz berish" tamoyili).\n\nMASOFA QANDAY HISOBLANADI? Eng ko\'p ishlatiladigan — Euclidean distance: sqrt((x1-x2)² + (y1-y2)² + ...) — bu Pifagor teoremasining ko\'p o\'lchovli versiyasi.\n\nMUHIM TUZOQ — FEATURE SCALING: Agar bir xususiyat 0-1 oralig\'ida, ikkinchisi 0-1000000 oralig\'ida bo\'lsa, masofa hisobida katta oraliqli xususiyat hukmronlik qiladi va kichik oraliqli xususiyat e\'tiborga olinmay qoladi. Shuning uchun k-NN dan oldin StandardScaler bilan barcha xususiyatlarni bir xil o\'lchovga keltirish SHART.\n\nK QIYMATI TANLASH: k=1 — faqat eng yaqin bitta nuqtaga qaraydi, shovqinga (outlier) juda sezgir. Katta k — ko\'proq qo\'shnini hisobga oladi, silliqroq, lekin chegaralarni "loyqalashtirishi" mumkin.',
+ tests:[
+   {q:'k-NN yangi nuqta uchun qanday qaror qabul qiladi?',
+    opts:['Formula orqali hisoblab','Eng yaqin k qo\'shnining ko\'pchilik toifasi asosida','Tasodifiy tanlab','Eng uzoq nuqtaga qarab'],
+    ans:1,
+    exp:'k-NN eng yaqin k ta qo\'shnini topib, ular orasida ko\'pchilik toifasini yangi nuqtaga beradi.'},
+   {q:'k-NN da feature scaling (masofani standartlashtirish) nima uchun muhim?',
+    opts:['Modelni tezlashtirish uchun','Turli o\'lchovdagi xususiyatlar masofa hisobini noto\'g\'ri buzib yuborishi mumkin','Bu shart emas','Faqat rasmlar uchun kerak'],
+    ans:1,
+    exp:'Agar xususiyatlar turli oraliqda bo\'lsa, katta oraliqli xususiyat masofa hisobida noo\'rin hukmronlik qiladi — shuning uchun scaling zarur.'},
+   {q:'k=1 bo\'lganda model qanday xavfga ega?',
+    opts:['Juda sekin ishlaydi','Shovqin (outlier) ga juda sezgir bo\'lib qoladi','Hech qachon xato qilmaydi','Faqat binary masalalar uchun ishlaydi'],
+    ans:1,
+    exp:'k=1 da qaror faqat bitta eng yaqin nuqtaga asoslanadi — agar shu nuqta shovqin (outlier) bo\'lsa, bashorat xato bo\'lib qoladi.'}
+ ]},
+
+{id:'17.3', type:'test',
+ title:'Klassifikatorni baholash. Jaccard index',
+ terms:[
+   ['Jaccard Index','Ikki to\'plam o\'xshashligini o\'lchaydigan metrika'],
+   ['Intersection (kesishma)','Ikki to\'plamda umumiy bo\'lgan elementlar'],
+   ['Union (birlashma)','Ikki to\'plamdagi barcha noyob elementlar'],
+   ['Jaccard = Kesishma / Birlashma','Indeksni hisoblash formulasi']
+ ],
+ detail:'JACCARD INDEX FORMULASI\n\nJaccard Index = |A ∩ B| / |A ∪ B|\n\nBu yerda A — haqiqiy musbat natijalar to\'plami, B — model bashorat qilgan musbat natijalar to\'plami. |A ∩ B| — ikkisida ham mavjud bo\'lgan elementlar soni (kesishma), |A ∪ B| — ikkisidan birida bo\'lgan barcha noyob elementlar soni (birlashma).\n\nMISOL: Haqiqiy musbatlar = {1,2,3,4}, Bashorat qilingan musbatlar = {2,3,4,5}. Kesishma = {2,3,4} = 3 ta. Birlashma = {1,2,3,4,5} = 5 ta. Jaccard = 3/5 = 0.6.\n\nQIYMAT ORALIG\'I: Jaccard Index 0 dan 1 gacha. 1 — ikki to\'plam mukammal bir xil (model 100% to\'g\'ri). 0 — ikki to\'plam umuman kesishmaydi (model butunlay xato).\n\nQACHON ISHLATILADI? Jaccard Index ayniqsa to\'plamlar o\'xshashligini solishtirish kerak bo\'lgan vazifalarda (masalan tavsiya tizimlari, matn o\'xshashligi) va ba\'zi klassifikatsiya baholashlarida ishlatiladi — u accuracy ga o\'xshash, lekin to\'plam nuqtai nazaridan hisoblanadi.',
+ tests:[
+   {q:'Jaccard Index formulasi qanday hisoblanadi?',
+    opts:['Birlashma / Kesishma','Kesishma / Birlashma','Kesishma * Birlashma','Kesishma - Birlashma'],
+    ans:1,
+    exp:'Jaccard Index = Kesishma (Intersection) / Birlashma (Union).'},
+   {q:'Jaccard Index 1 ga teng bo\'lsa, bu nimani bildiradi?',
+    opts:['Ikki to\'plam umuman bog\'liq emas','Ikki to\'plam mukammal mos keladi','Model hech narsa bashorat qilmagan','Ma\'lumot yetarli emas'],
+    ans:1,
+    exp:'Jaccard Index = 1 — haqiqiy va bashorat qilingan to\'plamlar mukammal bir xil, ya\'ni model 100% to\'g\'ri.'},
+   {q:'Agar bashorat va haqiqiy to\'plam umuman kesishmasa, Jaccard Index nimaga teng bo\'ladi?',
+    opts:['1','0.5','0','Aniqlanmaydi'],
+    ans:2,
+    exp:'Kesishma 0 bo\'lsa, Jaccard Index = 0/Birlashma = 0, ya\'ni ikki to\'plam umuman mos kelmaydi.'}
+ ]},
+
+{id:'17.4', type:'test',
+ title:'Klassifikatorni baholash. Confusion matrix',
+ terms:[
+   ['Confusion Matrix','Haqiqiy va bashorat natijalarni jadval ko\'rinishida ko\'rsatish'],
+   ['TP, TN, FP, FN','To\'g\'ri/Noto\'g\'ri musbat/manfiy bashoratlar'],
+   ['Precision','Musbat deb topilganlardan qanchasi haqiqatan musbat'],
+   ['Recall','Haqiqiy musbatlardan qanchasi to\'g\'ri topilgan']
+ ],
+ detail:'CONFUSION MATRIX TO\'RT QISMI\n\nTP (True Positive) — model musbat dedi, haqiqatda ham musbat (to\'g\'ri).\nTN (True Negative) — model manfiy dedi, haqiqatda ham manfiy (to\'g\'ri).\nFP (False Positive) — model musbat dedi, lekin haqiqatda manfiy (xato — "yolg\'on signal").\nFN (False Negative) — model manfiy dedi, lekin haqiqatda musbat (xato — "o\'tkazib yuborilgan holat").\n\nPRECISION VA RECALL FORMULALARI:\nPrecision = TP / (TP + FP) — "musbat deb topilganlardan qanchasi haqiqatan musbat".\nRecall = TP / (TP + FN) — "haqiqiy musbatlardan qanchasi to\'g\'ri topilgan".\n\nQAYSI BIRI MUHIMROQ? Bu vaziyatga bog\'liq. Tibbiy tashxisda (saraton skrining) — Recall muhimroq: kasal odamni "sog\'lom" deb o\'tkazib yuborish (FN) juda xavfli, hatto ba\'zi sog\'lom odamlarni "kasal" deb shubha qilish (FP, keyin qo\'shimcha tekshirish bilan rad etiladi) bunchalik xavfli emas. Spam filtrida esa Precision ko\'pincha muhimroq: muhim xatni spam deb belgilash (FP) jiddiy muammo, bir-ikkita spam o\'tib ketishi (FN) unchalik emas.',
+ tests:[
+   {q:'False Positive (FP) nima?',
+    opts:['Model manfiy dedi, haqiqatda ham manfiy','Model musbat dedi, lekin haqiqatda manfiy bo\'lgan holat','Model musbat dedi, haqiqatda ham musbat','Model hech narsa demagan holat'],
+    ans:1,
+    exp:'False Positive — model "musbat" deb bashorat qilgan, lekin haqiqiy natija manfiy bo\'lgan xato turi.'},
+   {q:'Tibbiy tashxis (masalan saraton skrining) kabi hayot-o\'lim masalalarida odatda qaysi metrika ko\'proq muhim?',
+    opts:['Precision','Recall','Ikkisi ham ahamiyatsiz','Faqat accuracy'],
+    ans:1,
+    exp:'Bunday holatlarda Recall muhimroq — kasal bemorni o\'tkazib yubormaslik (FN ni kamaytirish) hayotiy ahamiyatga ega.'},
+   {q:'Precision formulasi qanday?',
+    opts:['TP / (TP + FN)','TP / (TP + FP)','(TP+TN) / Jami','FP / (FP+TN)'],
+    ans:1,
+    exp:'Precision = TP / (TP + FP) — musbat deb topilganlarning qanchasi haqiqatan to\'g\'ri ekanini ko\'rsatadi.'}
+ ]},
+
+{id:'17.5', type:'eskiz',
+ title:'k-NN. scikit-learn',
+ terms:[
+   ['KNeighborsClassifier','sklearn dagi k-NN klassifikator klassi'],
+   ['n_neighbors','k qiymatini belgilaydigan parametr'],
+   ['.fit(X, y)','Modelga ma\'lumotni "saqlash" (lazy learning)'],
+   ['.predict()','Yangi nuqta uchun toifa bashorat qilish']
+ ],
+ detail:'KNEIGHBORSCLASSIFIER ASOSLARI\n\nsklearn dagi k-NN klassi — KNeighborsClassifier. Asosiy parametri n_neighbors — bu "k" qiymatining o\'zi.\n\nDIQQAT: k-NN da .fit() chaqirilganda, model hech qanday formula "o\'rganmaydi" — u shunchaki X va y ma\'lumotini xotirada saqlaydi. Haqiqiy hisoblash faqat .predict() chaqirilganda, yangi nuqta uchun barcha saqlangan nuqtalargacha masofa hisoblanganda amalga oshadi. Shuning uchun k-NN "lazy learning" (dangasa o\'rganish) deb ataladi — boshqa modellar (Linear Regression, Decision Tree) esa "eager learning" — ular .fit() paytida formula/qoidalarni darhol chiqarib oladi.',
+ sim:'>>> from sklearn.neighbors import KNeighborsClassifier\n>>> X = [[1,2],[2,3],[3,1],[6,5],[7,7],[8,6]]\n>>> y = [0,0,0,1,1,1]\n>>> model = KNeighborsClassifier(n_neighbors=3)\n>>> model.fit(X, y)\n>>> model.predict([[2,2]])\narray([0])',
+ eskizlar:[
+  {q:'KNeighborsClassifier import qilib, n_neighbors=3 bilan model yaratib o\'qiting.',
+   lines:[
+    {c:'from sklearn.neighbors import KNeighborsClassifier',n:'Siz KNeighborsClassifier klassini import qildingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'X = [[1,2],[2,3],[3,1],[6,5],[7,7],[8,6]]',n:'Siz X xususiyatlar massivini yaratdingiz'},
+    {c:'y = [0, 0, 0, 1, 1, 1]',n:'Siz y toifalar massivini yaratdingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'model = KNeighborsClassifier(n_neighbors=3)',n:'Siz k=3 bilan k-NN modelini yaratdingiz'},
+    {c:'model.fit(X, y)',n:'Siz modelga ma\'lumotni saqladingiz'},
+   ]},
+  {q:'predict() bilan yangi nuqta uchun toifa aniqlang.',
+   lines:[
+    {c:'yangi_nuqta = [[2, 2]]',n:'Siz yangi nuqtani 2D ro\'yxat qilib yaratdingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'bashorat = model.predict(yangi_nuqta)',n:'Siz yangi nuqta uchun toifani bashorat qildingiz'},
+    {c:'print(\'Bashorat qilingan toifa:\', bashorat)',n:'Siz bashoratni ekranga chiqardingiz'},
+   ]},
+ ]},
+
+{id:'17.6', type:'eskiz',
+ title:'k-NN. Eng yaxshi k tanlash',
+ terms:[
+   ['for sikli orqali sinash','Turli k qiymatlarini ketma-ket tekshirish usuli'],
+   ['accuracy ro\'yxati','Har bir k uchun aniqlikni saqlab borish'],
+   ['Optimal k','Eng yuqori test aniqligini beradigan k qiymati'],
+   ['Kichik k vs Katta k','Kichik k — overfitting, Katta k — underfitting xavfi']
+ ],
+ detail:'ENG YAXSHI K NI QANDAY TOPISH MUMKIN?\n\nk ning "to\'g\'ri" qiymati oldindan ma\'lum emas — u ma\'lumotga bog\'liq. Amaliy yo\'l: bir nechta k qiymatini (masalan 1 dan 10 gacha) ketma-ket sinab ko\'rish, har birida modelni o\'qitib test to\'plamida accuracy ni o\'lchash, va eng yuqori accuracy bergan k ni tanlash.\n\nNEGA BU MUVOZANAT TALAB QILADI? Kichik k (masalan 1-2) — model juda "sezgir", train ma\'lumotidagi har bir nuqtaga yaqin moslashadi (overfitting xavfi). Katta k (masalan 50) — model juda "silliq", chegaralar noaniqlashadi, kichik guruhlarni payqamay qoladi (underfitting xavfi). Optimal k odatda bu ikki holat orasida joylashadi.',
+ sim:'>>> from sklearn.neighbors import KNeighborsClassifier\n>>> natijalar = []\n>>> for k in range(1, 11):\n...     model = KNeighborsClassifier(n_neighbors=k)\n...     model.fit(X_train, y_train)\n...     acc = model.score(X_test, y_test)\n...     natijalar.append(acc)\n>>> eng_yaxshi_k = natijalar.index(max(natijalar)) + 1\n>>> print(eng_yaxshi_k)\n5',
+ eskizlar:[
+  {q:'for sikli bilan k=1 dan 10 gacha har biri uchun accuracy hisoblang.',
+   lines:[
+    {c:'from sklearn.neighbors import KNeighborsClassifier',n:'Siz KNeighborsClassifier klassini import qildingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'natijalar = []',n:'Siz natijalarni saqlash uchun bo\'sh ro\'yxat yaratdingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'for k in range(1, 11):',n:'Siz k=1 dan 10 gacha sikl boshladingiz'},
+    {c:'    model = KNeighborsClassifier(n_neighbors=k)',n:'Siz har bir k uchun yangi model yaratdingiz'},
+    {c:'    model.fit(X_train, y_train)',n:'Siz modelni train qismida o\'qitdingiz'},
+    {c:'    acc = model.score(X_test, y_test)',n:'Siz test qismida aniqlikni hisobladingiz'},
+    {c:'    natijalar.append(acc)',n:'Siz natijani ro\'yxatga qo\'shdingiz'},
+   ]},
+  {q:'Natijalardan eng yuqori accuracy bergan k qiymatini toping.',
+   lines:[
+    {c:'eng_yaxshi_acc = max(natijalar)',n:'Siz eng yuqori accuracy qiymatini topdingiz'},
+    {c:'eng_yaxshi_k = natijalar.index(eng_yaxshi_acc) + 1',n:'Siz shu accuracy ga mos k qiymatini topdingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'print(\'Eng yaxshi k:\', eng_yaxshi_k, \'Accuracy:\', eng_yaxshi_acc)',n:'Siz natijani ekranga chiqardingiz'},
+   ]},
+ ]},
+
+{id:'17.7', type:'eskiz',
+ title:'Jupyter Notebook. k-NN',
+ terms:[
+   ['To\'liq k-NN workflow','Ma\'lumotdan baholashgacha bo\'lgan barcha qadamlar'],
+   ['train_test_split','Ma\'lumotni train va test qismlariga bo\'lish'],
+   ['accuracy_score','Klassifikator aniqligini hisoblash funksiyasi'],
+   ['classification_report','Precision, Recall, F1 ni bir vaqtda ko\'rsatuvchi hisobot']
+ ],
+ detail:'TO\'LIQ K-NN PIPELINE\n\nBu mashqda barcha qadamlar birlashtiriladi: ma\'lumotni train/test ga bo\'lish, KNeighborsClassifier ni o\'qitish, predict qilish, va classification_report bilan to\'liq baholash (Precision, Recall, F1-score barchasi bir hisobotda).\n\nCLASSIFICATION_REPORT NEGA QULAY? accuracy_score faqat bitta umumiy son qaytaradi, lekin classification_report har bir toifa uchun alohida Precision, Recall va F1-score ni ko\'rsatadi — bu nomutanosib (imbalanced) ma\'lumotlarda ayniqsa foydali, chunki umumiy accuracy yetarli ma\'lumot bermaydi.',
+ sim:'>>> from sklearn.model_selection import train_test_split\n>>> from sklearn.neighbors import KNeighborsClassifier\n>>> from sklearn.metrics import classification_report\n>>> X_train, X_test, y_train, y_test = train_test_split(\n...   X, y, test_size=0.2, random_state=42)\n>>> model = KNeighborsClassifier(n_neighbors=5)\n>>> model.fit(X_train, y_train)\n>>> bashorat = model.predict(X_test)\n>>> print(classification_report(y_test, bashorat))',
+ eskizlar:[
+  {q:'train_test_split bilan ma\'lumotni bo\'lib, KNeighborsClassifier ni o\'qiting.',
+   lines:[
+    {c:'from sklearn.model_selection import train_test_split',n:'Siz train_test_split funksiyasini import qildingiz'},
+    {c:'from sklearn.neighbors import KNeighborsClassifier',n:'Siz KNeighborsClassifier klassini import qildingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'X_train, X_test, y_train, y_test = train_test_split(',n:'Siz ma\'lumotni bo\'lishni boshladingiz'},
+    {c:'  X, y, test_size=0.2, random_state=42)',n:'Siz 20% test va random_state berdingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'model = KNeighborsClassifier(n_neighbors=5)',n:'Siz k=5 bilan model yaratdingiz'},
+    {c:'model.fit(X_train, y_train)',n:'Siz modelni train qismida o\'qitdingiz'},
+   ]},
+  {q:'classification_report bilan modelni to\'liq baholang.',
+   lines:[
+    {c:'from sklearn.metrics import classification_report',n:'Siz classification_report funksiyasini import qildingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'bashorat = model.predict(X_test)',n:'Siz test qismida bashorat qildingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'hisobot = classification_report(y_test, bashorat)',n:'Siz to\'liq baholash hisobotini hosil qildingiz'},
+    {c:'print(hisobot)',n:'Siz hisobotni ekranga chiqardingiz'},
+   ]},
+ ]},
+
+{id:'17.8', type:'eskiz',
+ title:'Portfolio uchun amaliyot. Diabet kasalligiga tashxis qo\'yish',
+ terms:[
+   ['sklearn.datasets','sklearn ichidagi tayyor o\'quv datasetlari to\'plami'],
+   ['Tibbiy klassifikatsiya dataseti','Glyukoza, BMI, yosh kabi xususiyatlar asosida tashxis'],
+   ['StandardScaler','Xususiyatlarni bir xil o\'lchovga keltiruvchi vosita'],
+   ['Portfolio loyiha','Real ko\'nikmalarni ko\'rsatish uchun to\'liq mustaqil loyiha']
+ ],
+ detail:'PORTFOLIO DARAJASIDAGI LOYIHA\n\nBu — shunchaki mashq emas, balki portfolio (CV, GitHub) uchun ko\'rsatish mumkin bo\'lgan TO\'LIQ loyiha: glyukoza darajasi, BMI, yosh kabi tibbiy xususiyatlar asosida bemorda diabet borligini bashorat qilish (klassik "Pima Indians Diabetes" turidagi masala).\n\nNEGA STANDARDSCALER BU YERDA SHART? 17.2 da o\'rganganingizdek, k-NN masofaga asoslangan algoritm. Bu datasetda glyukoza 0-200 oralig\'ida, BMI esa 15-50 oralig\'ida bo\'lishi mumkin — agar scaling qilinmasa, glyukoza ustuni masofa hisobida noo\'rin hukmronlik qiladi.\n\nNEGA RECALL BU YERDA MUHIM? 17.4 dagi tibbiy misol kabi — diabetli bemorni "sog\'lom" deb o\'tkazib yuborish (False Negative) jiddiy oqibatlarga olib kelishi mumkin, shuning uchun yakuniy hisobotda Recall ko\'rsatkichiga alohida e\'tibor berish kerak.',
+ sim:'>>> from sklearn.preprocessing import StandardScaler\n>>> from sklearn.model_selection import train_test_split\n>>> from sklearn.neighbors import KNeighborsClassifier\n>>> import pandas as pd\n>>> df = pd.DataFrame({\n...   \'glyukoza\':[85,168,89,137,116],\n...   \'bmi\':[26.6,38.0,23.3,43.1,25.6],\n...   \'natija\':[0,1,0,1,0]})\n>>> X = df[[\'glyukoza\',\'bmi\']]\n>>> y = df[\'natija\']\n>>> scaler = StandardScaler()\n>>> X_scaled = scaler.fit_transform(X)',
+ eskizlar:[
+  {q:'Diabet ma\'lumotini StandardScaler bilan standartlashtirib, train/test ga bo\'ling.',
+   lines:[
+    {c:'from sklearn.preprocessing import StandardScaler',n:'Siz StandardScaler klassini import qildingiz'},
+    {c:'from sklearn.model_selection import train_test_split',n:'Siz train_test_split funksiyasini import qildingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'scaler = StandardScaler()',n:'Siz standartlashtiruvchi obyekt yaratdingiz'},
+    {c:'X_scaled = scaler.fit_transform(X)',n:'Siz xususiyatlarni standartlashtirdingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'X_train, X_test, y_train, y_test = train_test_split(',n:'Siz ma\'lumotni bo\'lishni boshladingiz'},
+    {c:'  X_scaled, y, test_size=0.2, random_state=42)',n:'Siz 20% test va random_state berdingiz'},
+   ]},
+  {q:'k-NN modelini o\'qitib, classification_report bilan tashxis natijasini baholang.',
+   lines:[
+    {c:'from sklearn.neighbors import KNeighborsClassifier',n:'Siz KNeighborsClassifier klassini import qildingiz'},
+    {c:'from sklearn.metrics import classification_report',n:'Siz classification_report funksiyasini import qildingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'model = KNeighborsClassifier(n_neighbors=5)',n:'Siz k=5 bilan model yaratdingiz'},
+    {c:'model.fit(X_train, y_train)',n:'Siz modelni o\'qitdingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'bashorat = model.predict(X_test)',n:'Siz tashxis bashoratini chiqardingiz'},
+    {c:'print(classification_report(y_test, bashorat))',n:'Siz to\'liq tashxis hisobotini chiqardingiz'},
+   ]},
+ ]},
+
+{id:'17.9', type:'test',
+ title:'Decision Tree algoritmi',
+ terms:[
+   ['Decision Tree','Savol-javob daraxti orqali qaror qabul qiluvchi algoritm'],
+   ['Node (tugun)','Daraxtdagi bitta savol/shart joylashgan nuqta'],
+   ['Gini / Entropy','Daraxt bo\'linishini tanlash uchun ishlatiladigan tozalik mezoni'],
+   ['Leaf (yaproq)','Daraxtning yakuniy qaror chiqadigan nuqtasi']
+ ],
+ detail:'DECISION TREE QANDAY ISHLAYDI?\n\nDecision Tree — inson qaror qabul qilish jarayoniga juda o\'xshash ishlaydi: "Agar glyukoza > 120 bo\'lsa → chap tomonga, aks holda → o\'ng tomonga" kabi ketma-ket savollar (shartlar) orqali ma\'lumot bo\'linib boriladi, toki har bir guruh deyarli bir xil toifadan iborat bo\'lguncha (leaf — yaproq).\n\nENG YAXSHI BO\'LINISH QANDAY TANLANADI? Har bir tugunda, algoritm BARCHA mumkin bo\'lgan bo\'linishlarni sinab ko\'radi va eng "toza" guruhlarni hosil qiladigan bo\'linishni tanlaydi. Tozalik Gini impurity yoki Entropy orqali o\'lchanadi — agar bo\'linishdan keyin bir guruhda faqat bitta toifa qolsa, bu "toza" (gini=0), agar guruhda toifalar aralash bo\'lsa, bu "iflos" (gini yuqori).\n\nDECISION TREE NING ASOSIY AFZALLIGI: U JUDA TUSHUNARLI. Har bir qarorni aniq "agar...bo\'lsa" qoidalari bilan tushuntirish mumkin — bu masalan tibbiyot va moliyada, qarorni izohlash zarur bo\'lgan sohalarda, juda qadrlidi.\n\nASOSIY KAMCHILIGI: Yagona, chuqur daraxt train ma\'lumotini deyarli to\'liq "yodlab" olishi mumkin — har bir alohida holat uchun maxsus shoxcha yaratib, yangi ma\'lumotda yomon ishlaydi (overfitting). Bu muammo 17.12 (Hyperparameters) va 17.13 (Random Forest) da hal qilinadi.',
+ tests:[
+   {q:'Decision Tree da har bir "savol/shart" qayerda joylashgan?',
+    opts:['Faqat ildizda (root)','Node (tugun) da','Faqat yaproqda','Hech qayerda, formula bor'],
+    ans:1,
+    exp:'Har bir node (tugun) — bitta savol/shartni o\'z ichiga oladi, shu savol javobiga qarab daraxt bo\'linadi.'},
+   {q:'Gini/Entropy nima uchun ishlatiladi?',
+    opts:['Modelni tezlashtirish uchun','Eng yaxshi (eng "toza" guruhlarni hosil qiladigan) bo\'linishni tanlash uchun','Ma\'lumotni saralash uchun','Xato xabarlarini ko\'rsatish uchun'],
+    ans:1,
+    exp:'Gini/Entropy — har bir tugunda qaysi bo\'linish eng "toza" (bir xil toifali) guruhlarni hosil qilishini o\'lchaydigan mezon.'},
+   {q:'Yagona, chuqur Decision Tree ning asosiy kamchiligi nima?',
+    opts:['Juda sekin ishlaydi','Tushunarsiz bo\'lib qoladi','Train ma\'lumotni yodlab olishi (overfitting)','Faqat raqamli ma\'lumot bilan ishlaydi'],
+    ans:2,
+    exp:'Yagona chuqur daraxt har bir alohida holat uchun maxsus shoxcha yaratib, train ma\'lumotni yodlab oladi — bu yangi ma\'lumotda yomon natija beradi.'}
+ ]},
+
+{id:'17.10', type:'eskiz',
+ title:'Decision Tree. Scikit-learn',
+ terms:[
+   ['DecisionTreeClassifier','sklearn dagi Decision Tree klassi'],
+   ['criterion','Bo\'linish mezonini belgilaydigan parametr (gini/entropy)'],
+   ['.fit() / .predict()','Standart sklearn o\'qitish va bashorat metodlari'],
+   ['Bir xil API','sklearn da barcha klassifikatorlar bir xil uslubda ishlatiladi']
+ ],
+ detail:'DECISIONTREECLASSIFIER ASOSLARI\n\nsklearn dagi Decision Tree klassi — DecisionTreeClassifier. Diqqat qiling: kod tarkibi KNeighborsClassifier bilan deyarli bir xil (.fit(), .predict()) — bu sklearn ning universal API dizayni tufayli, model turini almashtirish juda oson.\n\nCRITERION PARAMETRI: criterion=\'gini\' (standart) yoki criterion=\'entropy\' — ikkisi ham bo\'linish sifatini o\'lchashning ozgina farqli usullari, amalda natijalar ko\'pincha juda yaqin bo\'ladi.',
+ sim:'>>> from sklearn.tree import DecisionTreeClassifier\n>>> X = [[1,2],[2,3],[3,1],[6,5],[7,7],[8,6]]\n>>> y = [0,0,0,1,1,1]\n>>> model = DecisionTreeClassifier(criterion=\'gini\')\n>>> model.fit(X, y)\n>>> model.predict([[2,2]])\narray([0])',
+ eskizlar:[
+  {q:'DecisionTreeClassifier import qilib, criterion=\'gini\' bilan model yaratib o\'qiting.',
+   lines:[
+    {c:'from sklearn.tree import DecisionTreeClassifier',n:'Siz DecisionTreeClassifier klassini import qildingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'X = [[1,2],[2,3],[3,1],[6,5],[7,7],[8,6]]',n:'Siz X xususiyatlar massivini yaratdingiz'},
+    {c:'y = [0, 0, 0, 1, 1, 1]',n:'Siz y toifalar massivini yaratdingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'model = DecisionTreeClassifier(criterion=\'gini\')',n:'Siz gini mezoni bilan Decision Tree yaratdingiz'},
+    {c:'model.fit(X, y)',n:'Siz modelni ma\'lumotga o\'qitdingiz'},
+   ]},
+  {q:'predict() bilan bashorat qilib, accuracy_score bilan baholang.',
+   lines:[
+    {c:'from sklearn.metrics import accuracy_score',n:'Siz accuracy_score funksiyasini import qildingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'bashorat = model.predict(X)',n:'Siz X uchun bashorat qildingiz'},
+    {c:'aniqlik = accuracy_score(y, bashorat)',n:'Siz aniqlikni hisobladingiz'},
+    {c:'print(\'Aniqlik:\', aniqlik)',n:'Siz aniqlikni ekranga chiqardingiz'},
+   ]},
+ ]},
+
+{id:'17.11', type:'eskiz',
+ title:'Decision Tree. Grafik',
+ terms:[
+   ['plot_tree()','sklearn.tree dagi daraxtni chizadigan funksiya'],
+   ['feature_names','Grafikda xususiyat nomlarini ko\'rsatish parametri'],
+   ['filled=True','Tugunlarni toifa bo\'yicha rang bilan to\'ldirish'],
+   ['Daraxtni o\'qish','Har bir tugundagi shart va natijani tushunish']
+ ],
+ detail:'DARAXTNI KO\'Z BILAN KO\'RISH\n\nDecision Tree ning eng katta afzalligi — uni TO\'LIQ vizualizatsiya qilish mumkin. plot_tree(model, feature_names=[...], filled=True) — bu funksiya butun qaror logikasini daraxt diagrammasi sifatida chizadi: har bir tugunda qaysi shart tekshirilgani, gini qiymati, namunalar soni va toifa taqsimoti ko\'rsatiladi.\n\nFILLED=TRUE NEGA FOYDALI? Bu parametr har bir tugunni hukmron toifaga mos rang bilan bo\'yaydi — natijada daraxtning qaysi qismi qaysi toifaga "moyil" ekanini bir qarashda ko\'rish mumkin.\n\nBU NEGA MUHIM? Boshqa ko\'p modellar (Random Forest, Neural Network) "qora quti" hisoblanadi — ularning qarorini aniq tushuntirish qiyin. Decision Tree esa har bir qarorni LITERALLY ko\'rsatib, tushuntirib berishi mumkin — bu ayniqsa qarorni boshqalarga (mijoz, shifokor, sud) izohlash kerak bo\'lgan vaziyatlarda qadrlidi.',
+ sim:'>>> from sklearn.tree import DecisionTreeClassifier, plot_tree\n>>> import matplotlib.pyplot as plt\n>>> model = DecisionTreeClassifier(max_depth=3)\n>>> model.fit(X, y)\n>>> plt.figure(figsize=(10,6))\n>>> plot_tree(model, feature_names=[\'x1\',\'x2\'],\n...   filled=True)\n>>> plt.show()',
+ eskizlar:[
+  {q:'matplotlib va sklearn.tree dan plot_tree import qiling.',
+   lines:[
+    {c:'import matplotlib.pyplot as plt',n:'Siz matplotlib pyplot modulini yukladingiz'},
+    {c:'from sklearn.tree import DecisionTreeClassifier, plot_tree',n:'Siz DecisionTreeClassifier va plot_tree ni import qildingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'model = DecisionTreeClassifier(max_depth=3)',n:'Siz chuqurligi 3 bo\'lgan daraxt yaratdingiz'},
+    {c:'model.fit(X, y)',n:'Siz modelni o\'qitdingiz'},
+   ]},
+  {q:'plot_tree() bilan o\'qitilgan daraxtni chizing.',
+   lines:[
+    {c:'plt.figure(figsize=(10, 6))',n:'Siz grafik o\'lchamini belgiladingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'plot_tree(model,',n:'Siz daraxtni chizishni boshladingiz'},
+    {c:'  feature_names=[\'x1\', \'x2\'],',n:'Siz xususiyat nomlarini berdingiz'},
+    {c:'  filled=True)',n:'Siz tugunlarni rang bilan to\'ldirishni so\'radingiz'},
+    {c:'plt.show()',n:'Siz daraxtni ekranda ko\'rsatdingiz'},
+   ]},
+ ]},
+
+{id:'17.12', type:'test',
+ title:'Decision Tree. Hyperparameters',
+ terms:[
+   ['max_depth','Daraxtning maksimal chuqurligini cheklash parametri'],
+   ['min_samples_split','Tugunni bo\'lish uchun kerakli minimal namuna soni'],
+   ['min_samples_leaf','Yaproqda bo\'lishi kerak bo\'lgan minimal namuna soni'],
+   ['Pruning (kesish)','Daraxtni soddalashtirib overfitting ni kamaytirish']
+ ],
+ detail:'DARAXT MURAKKABLIGINI BOSHQARISH\n\n17.9 da ko\'rganingizdek, cheksiz chuqur daraxt overfitting qiladi. Hyperparameter lar — bu daraxt qanchalik murakkab bo\'lishini cheklovchi sozlamalar.\n\nMAX_DEPTH: Daraxtning eng yuqori chuqurligini belgilaydi. max_depth=3 — daraxt faqat 3 qatlam pastga tushishi mumkin. Kichik qiymat — soddaroq daraxt (underfitting xavfi), katta qiymat — murakkabroq (overfitting xavfi).\n\nMIN_SAMPLES_SPLIT: Bir tugunni yana bo\'lish uchun unda kamida shuncha namuna bo\'lishi kerak. Agar tugunda atigi 3 ta namuna bo\'lsa va min_samples_split=10 bo\'lsa, bu tugun endi bo\'linmaydi (yaproqqa aylanadi).\n\nMIN_SAMPLES_LEAF: Yaproqda bo\'lishi kerak bo\'lgan minimal namuna soni. Bu juda kichik guruhlar (masalan faqat 1 ta namunaga asoslangan qoida) yaratilishining oldini oladi — bunday mikroskopik qoidalar ko\'pincha shovqinni aks ettiradi, haqiqiy naqsh emas.\n\nPRUNING (KESISH): Bu parametrlarni cheklash umumiy nom bilan "pruning" deyiladi — daraxtni "haddan tashqari o\'sib ketishidan" oldini olish, xuddi bog\'dorchilikdagi shoxlarni kesish kabi.',
+ tests:[
+   {q:'max_depth parametri nimani cheklaydi?',
+    opts:['Namunalar sonini','Daraxtning maksimal chuqurligini','Xususiyatlar sonini','Modelni o\'qitish vaqtini'],
+    ans:1,
+    exp:'max_depth — daraxt necha qatlam pastga tushishi mumkinligini cheklaydi, bu daraxt murakkabligini boshqaradi.'},
+   {q:'min_samples_leaf juda kichik (masalan 1) qilib qo\'yilsa, qanday xavf bor?',
+    opts:['Underfitting','Overfitting (har bir alohida holatga moslashish)','Model umuman ishlamay qoladi','Hech qanday xavf yo\'q'],
+    ans:1,
+    exp:'Juda kichik min_samples_leaf daraxtga har bir alohida (hatto shovqinli) holat uchun alohida shoxcha yaratish imkonini beradi — bu overfitting.'},
+   {q:'Bu giperparametrlarni cheklash (pruning) nima uchun foydali?',
+    opts:['Modelni tezlashtirish uchun','Daraxtni soddalashtirib overfitting ni kamaytirish uchun','Ma\'lumotni tozalash uchun','Yangi xususiyat yaratish uchun'],
+    ans:1,
+    exp:'Pruning — daraxtni soddalashtirib, train ma\'lumotni haddan tashqari yodlab olishining oldini oladi.'}
+ ]},
+
+{id:'17.13', type:'test',
+ title:'Random Forest',
+ terms:[
+   ['Random Forest','Ko\'p Decision Tree larni birlashtiruvchi ensemble algoritm'],
+   ['Bagging (Bootstrap Aggregating)','Har bir daraxtni tasodifiy tanlangan ma\'lumot ulushida o\'qitish'],
+   ['n_estimators','O\'rmondagi daraxtlar sonini belgilaydigan parametr'],
+   ['Majority voting','Barcha daraxtlar ovozi asosida yakuniy qarorni chiqarish']
+ ],
+ detail:'KO\'P DARAXT — KO\'PROQ ISHONCH\n\n17.9 da yagona Decision Tree ning kamchiligini ko\'rdik — u osongina overfitting qiladi. Random Forest bu muammoni hal qiladi: bitta daraxt o\'rniga, YUZLAB daraxt yaratiladi, va ularning JAMOAVIY qarori olinadi.\n\nQANDAY QILIB DARAXTLAR XILMA-XIL BO\'LADI? Ikki tasodifiylik manbai bor: (1) BAGGING — har bir daraxt butun ma\'lumotning emas, balki tasodifiy tanlangan (qaytarib qo\'yish bilan) ulushida o\'qitiladi; (2) har bir bo\'linishda, daraxt BARCHA xususiyatlarni emas, balki tasodifiy tanlangan xususiyatlar to\'plamidan eng yaxshisini tanlaydi. Bu ikkisi har bir daraxtni "boshqacha" qiladi.\n\nNEGA BU ISHLAYDI? Agar bitta daraxt xato qilsa (shovqinga moslashgan bo\'lsa), boshqa ko\'pchilik daraxtlar bu xatoni "qoplaydi" — chunki ular boshqacha ma\'lumot/xususiyatlarga asoslanib o\'sgan. Yakuniy qaror — barcha daraxtlarning ko\'pchilik ovozi (majority voting) orqali chiqadi. Bu "olomon donoligi" (wisdom of crowds) tamoyiliga o\'xshaydi.\n\nN_ESTIMATORS: O\'rmondagi daraxtlar sonini belgilaydi (masalan 100). Ko\'proq daraxt — odatda barqarorroq natija, lekin biror chegaradan keyin foyda kamayadi va hisoblash sekinlashadi.',
+ tests:[
+   {q:'Random Forest nima uchun ko\'pincha yagona Decision Tree dan yaxshiroq ishlaydi?',
+    opts:['Faqat bitta daraxt ishlatadi, shuning uchun tezroq','Ko\'p xilma-xil daraxtlarning ovozini birlashtirib, overfittingni kamaytiradi','U hech qachon xato qilmaydi','U faqat kichik datasetlar uchun ishlaydi'],
+    ans:1,
+    exp:'Random Forest ko\'p xilma-xil daraxtlarning jamoaviy qarorini oladi — bu individual daraxtlarning overfitting xatolarini "o\'rtachalashtirib" kamaytiradi.'},
+   {q:'n_estimators parametri nimani belgilaydi?',
+    opts:['Har bir daraxtning chuqurligini','O\'rmondagi daraxtlar sonini','Xususiyatlar sonini','Test to\'plami hajmini'],
+    ans:1,
+    exp:'n_estimators — Random Forest ichida nechta Decision Tree yaratilishini belgilaydi.'},
+   {q:'Bagging (Bootstrap Aggregating) nima?',
+    opts:['Barcha daraxtni bir xil to\'liq ma\'lumotda o\'qitish','Har bir daraxtni tasodifiy tanlangan ma\'lumot ulushida o\'qitish usuli','Faqat eng yaxshi daraxtni tanlash','Xususiyatlarni o\'chirish usuli'],
+    ans:1,
+    exp:'Bagging — har bir daraxt uchun ma\'lumotdan tasodifiy (qaytarib qo\'yish bilan) ulush tanlanib, shu ulushda o\'qitilishi usuli.'}
+ ]},
+
+{id:'17.14', type:'eskiz',
+ title:'Jupyter Notebook. Decision Tree',
+ terms:[
+   ['RandomForestClassifier','sklearn dagi Random Forest klassi'],
+   ['Ikki modelni solishtirish','Decision Tree va Random Forest natijalarini taqqoslash'],
+   ['Test accuracy farqi','Qaysi model yangi ma\'lumotda yaxshiroq ishlaganini ko\'rish'],
+   ['Bir xil bo\'linishda sinash','Adolatli taqqoslash uchun bir xil train/test split ishlatish']
+ ],
+ detail:'DECISION TREE VA RANDOM FOREST NI SOLISHTIRISH\n\nBu mashqda bir xil ma\'lumot va bir xil train/test bo\'linishida ham yagona DecisionTreeClassifier, ham RandomForestClassifier o\'qitiladi, so\'ngra ularning test accuracy si solishtiriladi.\n\nNIMANI KUTISH MUMKIN? Odatda Random Forest test to\'plamida yagona Decision Tree dan yuqori (yoki kamida teng) natija beradi, ayniqsa train va test accuracy orasidagi farq Decision Tree da kattaroq, Random Forest da kichikroq bo\'ladi — bu 17.13 da o\'rgangan overfitting kamayishi amalda qanday ko\'rinishini namoyish qiladi.',
+ sim:'>>> from sklearn.tree import DecisionTreeClassifier\n>>> from sklearn.ensemble import RandomForestClassifier\n>>> dt = DecisionTreeClassifier()\n>>> rf = RandomForestClassifier(n_estimators=100)\n>>> dt.fit(X_train, y_train)\n>>> rf.fit(X_train, y_train)\n>>> print(\'DT:\', dt.score(X_test, y_test))\n>>> print(\'RF:\', rf.score(X_test, y_test))\nDT: 0.81\nRF: 0.89',
+ eskizlar:[
+  {q:'DecisionTreeClassifier va RandomForestClassifier ikkisini bir xil ma\'lumotda o\'qiting.',
+   lines:[
+    {c:'from sklearn.tree import DecisionTreeClassifier',n:'Siz DecisionTreeClassifier klassini import qildingiz'},
+    {c:'from sklearn.ensemble import RandomForestClassifier',n:'Siz RandomForestClassifier klassini import qildingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'dt = DecisionTreeClassifier()',n:'Siz yagona Decision Tree yaratdingiz'},
+    {c:'rf = RandomForestClassifier(n_estimators=100)',n:'Siz 100 daraxtli Random Forest yaratdingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'dt.fit(X_train, y_train)',n:'Siz Decision Tree ni o\'qitdingiz'},
+    {c:'rf.fit(X_train, y_train)',n:'Siz Random Forest ni o\'qitdingiz'},
+   ]},
+  {q:'Ikkisining test accuracy sini solishtirib chiqaring.',
+   lines:[
+    {c:'dt_acc = dt.score(X_test, y_test)',n:'Siz Decision Tree test aniqligini hisobladingiz'},
+    {c:'rf_acc = rf.score(X_test, y_test)',n:'Siz Random Forest test aniqligini hisobladingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'print(\'Decision Tree:\', dt_acc)',n:'Siz Decision Tree natijasini chiqardingiz'},
+    {c:'print(\'Random Forest:\', rf_acc)',n:'Siz Random Forest natijasini chiqardingiz'},
+   ]},
+ ]},
+
+{id:'17.15', type:'eskiz',
+ title:'Logistic Regression',
+ terms:[
+   ['LogisticRegression()','sklearn dagi logistik regressiya klassi (klassifikatsiya uchun!)'],
+   ['Sigmoid funksiya','Natijani 0-1 ehtimollik oralig\'iga siquvchi funksiya'],
+   ['.predict_proba()','Har bir toifa uchun ehtimollikni qaytaruvchi metod'],
+   ['Nom chalkashligi','"Regression" nomida bo\'lsa ham, bu Classification algoritmi']
+ ],
+ detail:'NOM CHALKASHLIGIGA E\'TIBOR BERING!\n\nLogisticRegression nomida "Regression" so\'zi bo\'lsa ham, bu aslida KLASSIFIKATSIYA algoritmi! Tarixiy sabablarga ko\'ra shu nom qolib ketgan. U haqiqatda toifa ehtimolligini bashorat qiladi, keyin shu ehtimollikka asoslanib yakuniy toifani tanlaydi.\n\nSIGMOID FUNKSIYA: Linear Regression dagi kabi chiziqli formula (w*x+b) hisoblanadi, lekin natija to\'g\'ridan-to\'g\'ri ishlatilmaydi — u Sigmoid funksiya orqali 0 va 1 orasidagi ehtimollikka aylantiriladi. Agar ehtimollik 0.5 dan katta bo\'lsa — model "1" (musbat) toifani, aks holda "0" (manfiy) toifani tanlaydi (bu chegara — threshold deyiladi).\n\nPREDICT() VA PREDICT_PROBA() FARQI: model.predict(X) — yakuniy toifani (0 yoki 1) qaytaradi. model.predict_proba(X) — har bir toifa uchun ehtimollikni qaytaradi (masalan [0.2, 0.8] — 80% ehtimollik bilan "1" toifa). predict_proba() ayniqsa foydali, chunki 17.4 da ko\'rgan Precision/Recall muvozanatini sozlash uchun standart 0.5 chegarani o\'zgartirish imkonini beradi (masalan tibbiy tashxisda Recall ni oshirish uchun chegarani 0.3 ga tushirish mumkin).',
+ sim:'>>> from sklearn.linear_model import LogisticRegression\n>>> X = [[1,2],[2,3],[3,1],[6,5],[7,7],[8,6]]\n>>> y = [0,0,0,1,1,1]\n>>> model = LogisticRegression()\n>>> model.fit(X, y)\n>>> model.predict([[5,5]])\narray([1])\n>>> model.predict_proba([[5,5]])\narray([[0.18, 0.82]])',
+ eskizlar:[
+  {q:'LogisticRegression import qilib, modelni o\'qiting.',
+   lines:[
+    {c:'from sklearn.linear_model import LogisticRegression',n:'Siz LogisticRegression klassini import qildingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'X = [[1,2],[2,3],[3,1],[6,5],[7,7],[8,6]]',n:'Siz X xususiyatlar massivini yaratdingiz'},
+    {c:'y = [0, 0, 0, 1, 1, 1]',n:'Siz y toifalar massivini yaratdingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'model = LogisticRegression()',n:'Siz Logistic Regression modelini yaratdingiz'},
+    {c:'model.fit(X, y)',n:'Siz modelni ma\'lumotga o\'qitdingiz'},
+   ]},
+  {q:'predict() va predict_proba() ikkisini solishtirib chiqaring.',
+   lines:[
+    {c:'yangi_nuqta = [[5, 5]]',n:'Siz yangi nuqtani yaratdingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'toifa = model.predict(yangi_nuqta)',n:'Siz yakuniy toifani bashorat qildingiz'},
+    {c:'ehtimollik = model.predict_proba(yangi_nuqta)',n:'Siz har bir toifa ehtimolligini oldingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'print(\'Toifa:\', toifa)',n:'Siz toifani chiqardingiz'},
+    {c:'print(\'Ehtimollik:\', ehtimollik)',n:'Siz ehtimollikni chiqardingiz'},
+   ]},
+ ]},
+
+{id:'17.16', type:'test',
+ title:'Qaysi modelni tanlash',
+ terms:[
+   ['Interpretability','Model qarorlarini tushunish/tushuntirish qulayligi'],
+   ['Training/Prediction speed','Modelni o\'qitish va bashorat tezligi'],
+   ['Dataset hajmi','Ma\'lumotlar sonining model tanlashga ta\'siri'],
+   ['No Free Lunch teoremasi','Hech qaysi model barcha vazifalar uchun universal eng yaxshi emas']
+ ],
+ detail:'TO\'RT MODELNI TAQQOSLASH\n\nk-NN: Sodda va tushunarli, lekin katta datasetda SEKIN (har bir bashorat uchun barcha ma\'lumot bilan masofa hisoblash kerak) va feature scaling talab qiladi. Kichik-o\'rta datasetlar uchun yaxshi.\n\nDecision Tree: Eng TUSHUNARLI/IZOHLANADIGAN model — qarorlarni aniq qoidalar bilan ko\'rsatish mumkin. Lekin yolg\'iz holda osongina overfit qiladi.\n\nRandom Forest: Odatda eng ANIQ va BARQAROR natija beradi ko\'pchilik real masalalarda. Lekin "qora quti"ga yaqinroq — yuzlab daraxtning jamoaviy qarorini bitta aniq qoida sifatida tushuntirish qiyinroq.\n\nLogistic Regression: TEZ, sodda, yaxshi boshlang\'ich (baseline) model. Lekin faqat chiziqli (yoki chiziqqa yaqin) ajratiladigan masalalarda yaxshi ishlaydi — murakkab, egri chegaralarda kuchsiz.\n\n"NO FREE LUNCH" TEOREMASI: Mashinada o\'rganishda muhim tamoyil — hech qaysi algoritm BARCHA masalalar uchun universal ravishda eng yaxshi emas. Har bir masala o\'ziga xos xususiyatga ega (ma\'lumot hajmi, chiziqlilik, izohlash zarurligi), va eng mos modelni tanlash amaliyot va sinov orqali topiladi.\n\nAMALIY MASLAHAT: Ko\'pincha sodda baseline (Logistic Regression yoki Decision Tree) bilan boshlang, natijani ko\'ring, keyin agar aniqlik yetarli bo\'lmasa, Random Forest kabi murakkabroq modelga o\'ting.',
+ tests:[
+   {q:'Qaror qabul qilish jarayonini eng oson tushuntirish mumkin bo\'lgan model qaysi?',
+    opts:['Random Forest','Yagona Decision Tree','k-NN','Hammasi bir xil darajada tushunarli'],
+    ans:1,
+    exp:'Yagona Decision Tree har bir qarorni aniq "agar...bo\'lsa" qoidalari bilan ko\'rsatadi — bu eng oson izohlanadigan model.'},
+   {q:'Katta hajmli ma\'lumotda k-NN ning asosiy kamchiligi nima?',
+    opts:['U hech qachon ishlamaydi','Har bir bashorat uchun barcha ma\'lumot bilan masofa hisoblashi kerak, shuning uchun sekin','U faqat rasm bilan ishlaydi','U overfitting qilmaydi'],
+    ans:1,
+    exp:'k-NN "lazy learning" bo\'lgani uchun har bir yangi bashorat uchun BARCHA saqlangan nuqtalargacha masofani qayta hisoblaydi — katta datasetda bu sekin.'},
+   {q:'"No Free Lunch" teoremasi nimani anglatadi?',
+    opts:['Barcha modellar bepul ishlatiladi','Hech qaysi model barcha masalalar uchun universal eng yaxshi emas','Eng murakkab model har doim eng yaxshisi','Faqat Random Forest ishlatish kerak'],
+    ans:1,
+    exp:'Bu tamoyil — har bir masala uchun eng mos model farqli bo\'lishi mumkinligini, universal "eng yaxshi" model yo\'qligini bildiradi.'}
+ ]},
+
+{id:'17.17', type:'eskiz',
+ title:'Klassifikatsiya bo\'yicha yakuniy amaliy topshiriq',
+ terms:[
+   ['To\'liq pipeline','Ma\'lumotdan yakuniy baholashgacha bo\'lgan barcha bosqichlar'],
+   ['Model tanlash va taqqoslash','Bir nechta algoritmni sinab, eng mosini tanlash'],
+   ['confusion_matrix','Barcha TP/TN/FP/FN ni jadval ko\'rinishida ko\'rsatish'],
+   ['Yakuniy hisobot va talqin','Natijalarni real kontekstda tushuntirish']
+ ],
+ detail:'YAKUNIY LOYIHA — HAMMASINI BIRLASHTIRISH\n\nBu — 17-modul davomida o\'rgangan barcha ko\'nikmalarni birlashtiruvchi yakuniy amaliy topshiriq. To\'liq klassifikatsiya pipeline quyidagi bosqichlardan iborat:\n\n1. Ma\'lumotni tayyorlash (DataFrame, kerak bo\'lsa scaling)\n2. train_test_split bilan bo\'lish\n3. Modelni tanlash va o\'qitish (bu mashqda RandomForestClassifier — modul davomida eng barqaror natija ko\'rsatgan model)\n4. Test to\'plamida bashorat qilish\n5. classification_report VA confusion_matrix bilan TO\'LIQ baholash\n6. Natijani real kontekstda talqin qilish (masalan: agar bu tibbiy masala bo\'lsa, Recall ga alohida e\'tibor berish)\n\nBU NEGA PORTFOLIO UCHUN MUHIM? Real ish beruvchilar (yoki mijozlar) shunchaki "model.fit() qila olaman" emas, balki "to\'liq muammoni tahlil qilib, to\'g\'ri model tanlab, natijani tushunarli tarzda izohlay olaman" degan ko\'nikmani qadrlaydi. Aynan shu — bu yakuniy topshiriqning maqsadi.',
+ sim:'>>> from sklearn.ensemble import RandomForestClassifier\n>>> from sklearn.metrics import classification_report, confusion_matrix\n>>> model = RandomForestClassifier(n_estimators=100, random_state=42)\n>>> model.fit(X_train, y_train)\n>>> bashorat = model.predict(X_test)\n>>> print(confusion_matrix(y_test, bashorat))\n[[50  3]\n [ 4 43]]\n>>> print(classification_report(y_test, bashorat))',
+ eskizlar:[
+  {q:'Ma\'lumotni train/test ga bo\'lib, RandomForestClassifier ni o\'qiting.',
+   lines:[
+    {c:'from sklearn.model_selection import train_test_split',n:'Siz train_test_split funksiyasini import qildingiz'},
+    {c:'from sklearn.ensemble import RandomForestClassifier',n:'Siz RandomForestClassifier klassini import qildingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'X_train, X_test, y_train, y_test = train_test_split(',n:'Siz ma\'lumotni bo\'lishni boshladingiz'},
+    {c:'  X, y, test_size=0.2, random_state=42)',n:'Siz 20% test va random_state berdingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'model = RandomForestClassifier(n_estimators=100, random_state=42)',n:'Siz 100 daraxtli Random Forest yaratdingiz'},
+    {c:'model.fit(X_train, y_train)',n:'Siz modelni train qismida o\'qitdingiz'},
+   ]},
+  {q:'Test to\'plamida bashorat qilib, confusion_matrix ni chiqaring.',
+   lines:[
+    {c:'from sklearn.metrics import confusion_matrix',n:'Siz confusion_matrix funksiyasini import qildingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'bashorat = model.predict(X_test)',n:'Siz test qismida bashorat qildingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'cm = confusion_matrix(y_test, bashorat)',n:'Siz confusion matrix ni hisobladingiz'},
+    {c:'print(cm)',n:'Siz xatolar jadvalini ekranga chiqardingiz'},
+   ]},
+  {q:'classification_report bilan yakuniy to\'liq hisobotni chiqaring.',
+   lines:[
+    {c:'from sklearn.metrics import classification_report',n:'Siz classification_report funksiyasini import qildingiz'},
+    {c:'',n:'Bo\'sh qator'},
+    {c:'hisobot = classification_report(y_test, bashorat)',n:'Siz to\'liq baholash hisobotini hosil qildingiz'},
+    {c:'print(hisobot)',n:'Siz yakuniy hisobotni ekranga chiqardingiz'},
+   ]},
+ ]},
+
+];
+
+// ═══════ HOLAT ═══════
+var cur=0, curEskiz=0, skipOn=false, ghostVisible=true;
+var lineData=[], doneSet=new Set(), eskizDoneSet=new Set();
+var testAnswers={}, selectedStar=0, ratingSubmitted=false;
+var BRIGHT=[0,0.05,0.1,0.2,0.3,0.42,0.55,0.65,0.75,0.85,0.95];
+
+window.onload=function(){buildStars();buildTabs();buildIntro();loadMod(0);};
+
+function buildIntro(){
+  var testTopics=M.filter(function(m){return m.type==='test';}).length;
+  var eskizCount=M.reduce(function(s,m){return s+(m.type==='eskiz'?m.eskizlar.length:0);},0);
+  var h='<div class="intro-title">'+MODULE_INTRO.title+'</div>';
+  h+='<div class="intro-text">'+esc(MODULE_INTRO.text)+'</div>';
+  h+='<div class="intro-stats">';
+  h+='<div class="intro-stat"><div class="intro-stat-v">'+testTopics+'</div><div class="intro-stat-l">TEST</div></div>';
+  h+='<div class="intro-stat"><div class="intro-stat-v">'+eskizCount+'</div><div class="intro-stat-l">ESKIZ</div></div>';
+  h+='<div class="intro-stat"><div class="intro-stat-v">sklearn</div><div class="intro-stat-l">KUTUBXONA</div></div>';
+  h+='</div>';
+  document.getElementById('introBox').innerHTML=h;
+}
+
+function loadMod(i){
+  cur=i; curEskiz=0;
+  document.getElementById('detailPanel').classList.remove('show');
+  document.getElementById('badge') && (document.getElementById('badge').className='badge');
+  var m=M[i];
+  document.getElementById('topSub').textContent=m.id;
+  document.getElementById('svMod').textContent=(i+1)+'/'+M.length;
+  // terms
+  var th='<div class="terms-title">📚 Yangi atamalar:</div>';
+  m.terms.forEach(function(t){
+    th+='<div class="term-row"><span class="term-key">'+esc(t[0])+'</span><span class="term-val">'+esc(t[1])+'</span></div>';
+  });
+  document.getElementById('termsBox').innerHTML=th;
+  // content
+  if(m.type==='test') renderTest(m);
+  else renderEskiz(m);
+  buildTabs(); updateTopStats();
+}
+
+// ═══════ TEST ═══════
+function renderTest(m){
+  if(!testAnswers[cur]) testAnswers[cur]={};
+  var h='<div class="test-panel"><div class="test-title">🧠 '+m.title+' — Test</div>';
+  m.tests.forEach(function(t,qi){
+    h+='<div class="test-q" id="tq'+qi+'">';
+    h+='<div class="test-qtext">'+(qi+1)+'. '+esc(t.q)+'</div>';
+    h+='<div class="test-opts">';
+    var answered = testAnswers[cur][qi] !== undefined;
+    t.opts.forEach(function(o,oi){
+      var cls='test-opt';
+      if(answered){
+        if(oi===t.ans) cls+=' show-correct';
+        else if(oi===testAnswers[cur][qi] && oi!==t.ans) cls+=' wrong';
+      }
+      h+='<button class="'+cls+'" onclick="answerTest('+qi+','+oi+')" '+(answered?'disabled':'')+'>'+esc(o)+'</button>';
+    });
+    h+='</div>';
+    if(answered){
+      var isCorrect = testAnswers[cur][qi]===t.ans;
+      h+='<div class="test-exp show">'+(isCorrect?'✅':'❌')+' '+esc(t.exp)+'</div>';
+    }
+    h+='</div>';
+  });
+  // score
+  var answered=Object.keys(testAnswers[cur]).length;
+  var correct=0;
+  Object.keys(testAnswers[cur]).forEach(function(qi){
+    if(testAnswers[cur][qi]===m.tests[qi].ans) correct++;
+  });
+  if(answered===m.tests.length){
+    h+='<div class="test-score show">Natija: '+correct+'/'+m.tests.length+' ✅</div>';
+    doneSet.add(cur);
+  }
+  h+='</div>';
+  document.getElementById('mainContent').innerHTML=h;
+  document.getElementById('result-panel') && document.getElementById('result-panel').classList.remove('show');
+  updateTopStats();
+}
+
+function answerTest(qi,oi){
+  if(!testAnswers[cur]) testAnswers[cur]={};
+  if(testAnswers[cur][qi]!==undefined) return;
+  testAnswers[cur][qi]=oi;
+  renderTest(M[cur]);
+  buildTabs(); updateTopStats();
+}
+
+// ═══════ ESKIZ (kod yozish mavzulari) ═══════
+function renderEskiz(m){
+  var e=m.eskizlar[curEskiz];
+  // eskiz dots
+  var dotsH='<div style="display:flex;gap:6px;justify-content:center;margin-bottom:10px;">';
+  m.eskizlar.forEach(function(_,i){
+    var key=cur+'-'+i;
+    var w=i===curEskiz?'40px':'26px';
+    var bg=eskizDoneSet.has(key)?'#22c55e':(i===curEskiz?'#00f0c8':'#1e3048');
+    dotsH+='<div onclick="jumpEskiz('+i+')" style="width:'+w+';height:6px;border-radius:3px;background:'+bg+';cursor:pointer;transition:all .2s;"></div>';
+  });
+  dotsH+='</div>';
+  // question
+  var qH='<div style="background:#0d1828;border:1px solid #1e3048;border-left:3px solid #a855f7;border-radius:8px;padding:10px 12px;margin-bottom:10px;font-size:.71rem;line-height:1.8;color:#c4b5fd;white-space:pre-wrap;">Eskiz '+(curEskiz+1)+'/'+m.eskizlar.length+' — '+esc(e.q)+'</div>';
+  // skip row
+  var skipH='<div class="skip-row" onclick="toggleSkip()"><div class="sw" id="sw"></div><span id="skipLbl"># Kommentlarni o\'tkazib yuboring</span></div>';
+  // result panel
+  var resH='<div class="result-panel" id="resultPanel"><div class="result-title">📊 NATIJA — SIMULYATSIYA</div><div class="sim-wrap" id="simWrap"></div></div>';
+  // code block
+  var codeH='<div class="code-block"><div class="fbar"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div><div class="fn" id="fname">cls_17_'+(curEskiz+1)+'.py</div><div class="fhint">↔️ suring ✏️ yozing</div></div><div class="lines-wrap" id="linesWrap"></div><div class="btn-row"><button class="btn btn-chk" onclick="doCheck()">✅ Tekshir</button><button class="btn btn-clr" onclick="doClear()">🗑️ Tozala</button><button class="btn btn-ghost" id="ghostBtn" onclick="toggleGhost()">👁️ Yashir</button><button class="btn btn-det" onclick="toggleDetail()">📖 Batafsil</button><button class="btn btn-res" onclick="toggleResult()">📊 Natija</button></div><div class="badge" id="badge"></div></div>';
+  document.getElementById('mainContent').innerHTML=dotsH+qH+skipH+resH+codeH;
+  buildLines(e);
+  // sync skip sw
+  document.getElementById('sw').classList.toggle('on',skipOn);
+  document.getElementById('skipLbl').textContent=skipOn?'Kommentlar o\'tkazilmoqda':'# Kommentlarni o\'tkazib yuboring';
+  applyBright(); updateStats();
+}
+
+function jumpEskiz(i){ curEskiz=i; renderEskiz(M[cur]); }
+
+function buildLines(e){
+  var wrap=document.getElementById('linesWrap');
+  if(!wrap) return;
+  wrap.innerHTML=''; lineData=[];
+  var op=BRIGHT[parseInt(document.getElementById('brightSlider').value)||3];
+  e.lines.forEach(function(ln,i){
+    var isCom=ln.c.replace(/^\s+/,'').charAt(0)==='#';
+    var isEmpty=ln.c==='';
+    var isSlash=ln.c.endsWith('\\');
+    var block=document.createElement('div');
+    block.className='line-block';
+    var row=document.createElement('div');
+    row.className='line-row';
+    var num=document.createElement('div');
+    num.className='line-num'; num.id='num'+i;
+    num.textContent=isEmpty?'':(i+1);
+    var content=document.createElement('div');
+    content.className='line-content';
+    var ghost=document.createElement('div');
+    ghost.className='line-ghost'+((isCom&&skipOn)?' skip-c':'');
+    ghost.id='ghost'+i;
+    ghost.style.color=ghostVisible?'rgba(74,96,128,'+op+')':'transparent';
+    ghost.textContent=ln.c||' ';
+    var colors=document.createElement('div');
+    colors.className='line-colors'; colors.id='clr'+i;
+    var inp=document.createElement('input');
+    inp.type='text'; inp.className='line-input'; inp.id='inp'+i;
+    inp.setAttribute('spellcheck','false'); inp.setAttribute('autocorrect','off');
+    inp.setAttribute('autocapitalize','off'); inp.setAttribute('autocomplete','off');
+    if(isEmpty||(isCom&&skipOn)) inp.disabled=true;
+    (function(idx,target,noteText){
+      inp.addEventListener('input',function(){
+        if(!target) return;
+        updateLineClr(idx,target);
+        if(inp.value===target&&target!==''&&noteText!=='') showNote(idx);
+        else if(inp.value!==target) hideNote(idx);
+        updateStats();
+      });
+    })(i,ln.c,ln.n);
+    content.appendChild(ghost); content.appendChild(colors); content.appendChild(inp);
+    row.appendChild(num); row.appendChild(content);
+    var note=document.createElement('div');
+    note.className='line-done-note'; note.id='note'+i;
+    note.textContent=ln.n?('✅ '+ln.n+'!'):'';
+    block.appendChild(row);
+    if(ln.n) block.appendChild(note);
+    wrap.appendChild(block);
+    lineData.push({inp:inp,target:ln.c,isCom:isCom,isEmpty:isEmpty});
+  });
+}
+
+function updateLineClr(idx,target){
+  var inp=document.getElementById('inp'+idx);
+  var clr=document.getElementById('clr'+idx);
+  if(!inp||!clr) return;
+  var typed=inp.value, html='';
+  for(var ci=0;ci<target.length;ci++){
+    var ch=target[ci];
+    if(ci<typed.length) html+=typed[ci]===ch?'<span style="color:#22c55e">'+esc(ch)+'</span>':'<span style="color:#f43f5e;text-decoration:underline">'+esc(ch)+'</span>';
+    else html+='<span style="color:transparent">'+esc(ch)+'</span>';
+  }
+  clr.innerHTML=html;
+  var num=document.getElementById('num'+idx);
+  if(num) num.style.color=(typed===target&&target!=='')?'#22c55e':'';
+}
+
+function showNote(i){var n=document.getElementById('note'+i);if(n&&n.textContent)n.classList.add('show');}
+function hideNote(i){var n=document.getElementById('note'+i);if(n)n.classList.remove('show');}
+
+function doCheck(){
+  var e=M[cur].eskizlar[curEskiz];
+  var done=0,total=0,errors=[];
+  lineData.forEach(function(l,i){
+    if(l.isEmpty||(l.isCom&&skipOn)) return;
+    total++;
+    if(l.inp.value===l.target){
+      done++; document.getElementById('num'+i).style.color='#22c55e';
+      if(e.lines[i].n) showNote(i);
+    } else {
+      errors.push(i+1); document.getElementById('num'+i).style.color='#f43f5e';
+    }
+  });
+  var pct=total>0?Math.round(done/total*100):0;
+  var b=document.getElementById('badge');
+  if(!b) return;
+  b.className='badge show';
+  if(pct>=85){
+    b.className+=' g';
+    eskizDoneSet.add(cur+'-'+curEskiz);
+    var isLast=curEskiz===M[cur].eskizlar.length-1;
+    if(isLast){ doneSet.add(cur); b.textContent='✅ Zo\'r! '+pct+'% — barcha eskizlar tugadi!'; showRating(); }
+    else { b.textContent='✅ Zo\'r! '+pct+'% — keyingi eskiz →'; setTimeout(function(){curEskiz++;renderEskiz(M[cur]);},900); }
+  } else if(pct>=55){
+    b.className+=' o'; b.textContent='⚡ '+pct+'% — xato qatorlar: '+errors.join(', ')+'-qator';
+  } else {
+    b.className+=' r'; b.textContent='❌ '+pct+'% — qaytadan urinib ko\'ring';
+  }
+  updateStats(); buildTabs();
+}
+
+function doClear(){
+  lineData.forEach(function(l,i){
+    l.inp.value='';
+    var clr=document.getElementById('clr'+i); if(clr) clr.innerHTML='';
+    var num=document.getElementById('num'+i); if(num) num.style.color='';
+    hideNote(i);
+  });
+  var b=document.getElementById('badge'); if(b) b.className='badge';
+  updateStats();
+}
+
+function updateStats(){
+  if(M[cur].type!=='eskiz') return;
+  var done=0,total=0;
+  lineData.forEach(function(l){
+    if(l.isEmpty||(l.isCom&&skipOn)) return;
+    total++;
+    if(l.inp.value===l.target) done++;
+  });
+  var pct=total>0?Math.round(done/total*100):0;
+  document.getElementById('svDone').textContent=done+'/'+total;
+  document.getElementById('svScore').textContent=done>0?pct+'%':'—';
+  document.getElementById('progressFill').style.width=(doneSet.size/M.length*100)+'%';
+}
+
+function updateTopStats(){
+  // test balini hisoblash
+  var totalQ=0, correctQ=0;
+  M.forEach(function(m,mi){
+    if(m.type!=='test') return;
+    m.tests.forEach(function(t,qi){
+      totalQ++;
+      if(testAnswers[mi]&&testAnswers[mi][qi]===t.ans) correctQ++;
+    });
+  });
+  document.getElementById('svScore').textContent=totalQ>0?(correctQ+'/'+totalQ):'—';
+  document.getElementById('svDone').textContent=doneSet.size+'/'+M.length;
+  document.getElementById('progressFill').style.width=(doneSet.size/M.length*100)+'%';
+}
+
+function toggleGhost(){
+  ghostVisible=!ghostVisible;
+  document.querySelectorAll('.line-ghost').forEach(function(g){g.style.visibility=ghostVisible?'visible':'hidden';});
+  var gb=document.getElementById('ghostBtn');
+  if(gb) gb.textContent=ghostVisible?'👁️ Yashir':'👁️ Ko\'rsat';
+}
+
+function toggleSkip(){
+  skipOn=!skipOn;
+  var sw=document.getElementById('sw'); if(sw) sw.classList.toggle('on',skipOn);
+  var sl=document.getElementById('skipLbl'); if(sl) sl.textContent=skipOn?'Kommentlar o\'tkazilmoqda':'# Kommentlarni o\'tkazib yuboring';
+  if(M[cur].type==='eskiz'){ buildLines(M[cur].eskizlar[curEskiz]); applyBright(); updateStats(); }
+}
+
+function toggleDetail(){
+  var p=document.getElementById('detailPanel');
+  if(p.classList.contains('show')){p.classList.remove('show');}
+  else{document.getElementById('detailContent').textContent=M[cur].detail;p.classList.add('show');}
+}
+
+function toggleResult(){
+  var p=document.getElementById('resultPanel');
+  if(!p) return;
+  if(p.classList.contains('show')){p.classList.remove('show');}
+  else{document.getElementById('simWrap').innerHTML='<pre>'+esc(M[cur].sim)+'</pre>';p.classList.add('show');}
+}
+
+function setBright(v){document.getElementById('brightVal').textContent=v;applyBright();}
+
+function applyBright(){
+  var v=parseInt(document.getElementById('brightSlider').value)||3;
+  var op=BRIGHT[v];
+  document.querySelectorAll('.line-ghost').forEach(function(g){
+    if(!g.classList.contains('skip-c')&&ghostVisible) g.style.color='rgba(74,96,128,'+op+')';
+  });
+}
+
+function buildTabs(){
+  var c=document.getElementById('tabs'); c.innerHTML='';
+  M.forEach(function(m,i){
+    var d=document.createElement('div');
+    d.className='tab'+(i===cur?' on':'')+(doneSet.has(i)?' done':'');
+    d.textContent=m.id;
+    d.onclick=(function(n){return function(){loadMod(n);};})(i);
+    c.appendChild(d);
+  });
+}
+
+function buildStars(){
+  var sc=document.getElementById('stars'); sc.innerHTML='';
+  for(var i=1;i<=10;i++){
+    var s=document.createElement('span');
+    s.className='star'; s.textContent='⭐'; s.dataset.v=i;
+    s.onclick=(function(v){return function(){
+      selectedStar=v;
+      document.getElementById('ratingScore').textContent=v+' / 10';
+      document.querySelectorAll('.star').forEach(function(st){st.classList.toggle('on',parseInt(st.dataset.v)<=v);});
+    };})(i);
+    sc.appendChild(s);
+  }
+}
+
+function showRating(){document.getElementById('ratingBox').classList.add('show');}
+
+function submitRating(){
+  if(ratingSubmitted) return;
+  if(selectedStar===0){alert('Baho tanlang!');return;}
+  ratingSubmitted=true;
+  document.getElementById('ratingThanks').style.display='block';
+  document.querySelector('.rating-submit').style.display='none';
+}
+
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+</script>
+</body>
+</html>

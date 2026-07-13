@@ -1,0 +1,1198 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Eskiz — 12-Modul. Uyg'unlashtirish, ulash va qayta shakllash</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:#0a0e1a;color:#dde5f0;font-family:'JetBrains Mono',monospace;font-size:13px;min-height:100vh;}
+.top{background:#0f1520;border-bottom:1px solid #1e3048;padding:8px 14px;display:flex;align-items:center;gap:8px;position:sticky;top:0;z-index:50;}
+.top-t{color:#00f0c8;font-size:.78rem;font-weight:700;}
+.top-s{color:#4a6080;font-size:.65rem;margin-left:auto;}
+.bright-bar{background:#0f1520;border-bottom:1px solid #1e3048;padding:6px 14px;display:flex;align-items:center;gap:10px;position:sticky;top:41px;z-index:49;}
+.bright-lbl{font-size:.65rem;color:#4a6080;flex-shrink:0;}
+.bright-slider{flex:1;-webkit-appearance:none;height:4px;border-radius:2px;background:#1e3048;outline:none;cursor:pointer;}
+.bright-slider::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:#00f0c8;cursor:pointer;}
+.bright-val{font-size:.68rem;color:#00f0c8;font-weight:700;width:20px;text-align:right;flex-shrink:0;}
+.wrap{padding:10px 14px;max-width:540px;margin:0 auto;}
+.tabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;margin-bottom:10px;scrollbar-width:none;}
+.tabs::-webkit-scrollbar{display:none;}
+.tab{flex-shrink:0;padding:6px 12px;border-radius:20px;border:1px solid #1e3048;background:#141e2e;color:#4a6080;font-size:.68rem;cursor:pointer;transition:all .15s;}
+.tab.on{border-color:#00f0c8;color:#00f0c8;background:rgba(0,240,200,.08);}
+.tab.done{border-color:#22c55e;color:#22c55e;background:rgba(34,197,94,.06);}
+.skip-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;padding:8px 12px;background:#141e2e;border:1px solid #1e3048;border-radius:8px;cursor:pointer;}
+.skip-row span{font-size:.7rem;color:#4a6080;}
+.sw{width:34px;height:18px;background:#1e3048;border-radius:10px;position:relative;transition:background .2s;flex-shrink:0;}
+.sw.on{background:#fbbf24;}
+.sw::after{content:'';position:absolute;top:2px;left:2px;width:14px;height:14px;background:#fff;border-radius:50%;transition:left .2s;}
+.sw.on::after{left:18px;}
+.stats{display:flex;gap:8px;margin-bottom:10px;}
+.stat{flex:1;background:#141e2e;border:1px solid #1e3048;border-radius:8px;padding:7px 8px;text-align:center;}
+.sv{font-size:.95rem;font-weight:700;color:#00f0c8;}
+.sl{font-size:.58rem;color:#4a6080;margin-top:2px;}
+.progress-bar{height:3px;background:#1e3048;border-radius:2px;margin-bottom:10px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,#00f0c8,#2563eb);border-radius:2px;transition:width .4s;}
+.intro-box{background:#0d1828;border:1px solid #1e3048;border-left:3px solid #00f0c8;border-radius:10px;padding:14px;margin-bottom:10px;}
+.intro-title{font-size:.8rem;font-weight:700;color:#00f0c8;margin-bottom:8px;}
+.intro-text{font-size:.7rem;line-height:1.85;color:#9fb0c8;margin-bottom:10px;white-space:pre-wrap;}
+.intro-stats{display:flex;gap:8px;margin-top:10px;}
+.intro-stat{flex:1;background:#080c14;border:1px solid #1e3048;border-radius:8px;padding:8px;text-align:center;}
+.intro-stat-v{font-size:1.1rem;font-weight:700;color:#00f0c8;}
+.intro-stat-l{font-size:.58rem;color:#4a6080;margin-top:2px;}
+.terms-box{background:#080c14;border:1px solid #1e3048;border-left:3px solid #a855f7;border-radius:8px;padding:10px 12px;margin-bottom:10px;}
+.terms-title{font-size:.68rem;font-weight:700;color:#a855f7;margin-bottom:8px;}
+.term-row{display:flex;gap:6px;margin-bottom:5px;align-items:flex-start;}
+.term-key{font-size:.64rem;color:#fbbf24;font-weight:700;min-width:110px;flex-shrink:0;}
+.term-val{font-size:.63rem;color:#4a6080;line-height:1.6;}
+.detail-panel{display:none;background:#0a1628;border:1px solid #2563eb;border-radius:8px;padding:12px 14px;margin-bottom:10px;font-size:.72rem;line-height:2;color:#93c5fd;white-space:pre-wrap;}
+.detail-panel.show{display:block;}
+.detail-title{color:#60a5fa;font-weight:700;margin-bottom:8px;font-size:.76rem;}
+.result-panel{display:none;background:#080c14;border:1px solid #22c55e;border-radius:10px;padding:12px;margin-bottom:10px;}
+.result-panel.show{display:block;}
+.result-title{color:#22c55e;font-size:.72rem;font-weight:700;margin-bottom:8px;}
+.sim-wrap{width:100%;overflow-x:auto;}
+.sim-wrap pre{font-size:.68rem;line-height:1.9;color:#22c55e;white-space:pre;}
+.code-block{border:1px solid #1e3048;border-radius:10px;overflow:hidden;margin-bottom:10px;background:#090d18;}
+.fbar{display:flex;align-items:center;gap:5px;padding:7px 12px;background:#0f1520;border-bottom:1px solid #1e3048;}
+.dot{width:6px;height:6px;border-radius:50%;}
+.dot.r{background:#f43f5e;}.dot.y{background:#fbbf24;}.dot.g{background:#22c55e;}
+.fn{font-size:.65rem;color:#4a6080;margin-left:4px;}
+.fhint{margin-left:auto;font-size:.6rem;color:#00f0c8;opacity:.7;}
+.lines-wrap{padding:4px 0;}
+.line-block{margin:0;}
+.line-row{display:flex;align-items:center;position:relative;min-height:30px;}
+.line-num{width:28px;flex-shrink:0;font-size:.63rem;padding:4px 4px 4px 5px;color:#2a3a50;text-align:right;user-select:none;transition:color .2s;align-self:center;}
+.line-content{flex:1;position:relative;overflow-x:auto;overflow-y:hidden;min-height:30px;}
+.line-content::-webkit-scrollbar{height:2px;}
+.line-content::-webkit-scrollbar-thumb{background:#1e3048;border-radius:1px;}
+.line-ghost{font-size:.76rem;line-height:1.8;padding:4px 8px;white-space:pre;pointer-events:none;min-height:30px;display:block;}
+.line-ghost.skip-c{opacity:.08!important;}
+.line-colors{position:absolute;top:0;left:0;font-size:.76rem;line-height:1.8;padding:4px 8px;white-space:pre;pointer-events:none;z-index:2;min-height:30px;}
+.line-input{position:absolute;top:0;left:0;right:0;bottom:0;width:100%;font-family:'JetBrains Mono',monospace;font-size:.76rem;line-height:1.8;padding:4px 8px;color:transparent;-webkit-text-fill-color:transparent;caret-color:#00f0c8;background:transparent;border:none;outline:none;white-space:pre;overflow:hidden;z-index:10;-webkit-appearance:none;}
+.line-input:disabled{cursor:default;}
+.line-done-note{display:none;font-size:.66rem;line-height:1.6;padding:3px 8px 3px 34px;color:#38bdf8;background:rgba(56,189,248,.06);border-left:2px solid #38bdf8;white-space:pre-wrap;animation:fadeIn .25s ease;}
+.line-done-note.show{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:translateY(0)}}
+.btn-row{display:flex;gap:6px;flex-wrap:wrap;padding:9px 12px;background:#0f1520;border-top:1px solid #1e3048;}
+.btn{padding:8px 11px;border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:.68rem;font-weight:700;border:none;cursor:pointer;flex-shrink:0;transition:opacity .15s;}
+.btn:active{opacity:.7;}
+.btn-chk{background:#00f0c8;color:#080c14;}
+.btn-clr{background:transparent;border:1px solid #1e3048;color:#4a6080;}
+.btn-det{background:#2563eb;color:#fff;}
+.btn-ghost{background:#7c3aed;color:#fff;}
+.btn-res{background:#16a34a;color:#fff;}
+.btn-at{background:#f59e0b;color:#080c14;font-size:.85rem;padding:8px 14px;}
+.badge{display:none;margin:0 12px 10px;padding:7px 12px;border-radius:8px;font-size:.7rem;border:1px solid #1e3048;}
+.badge.show{display:block;}
+.badge.g{border-color:#22c55e;color:#22c55e;background:rgba(34,197,94,.07);}
+.badge.o{border-color:#fbbf24;color:#fbbf24;background:rgba(251,191,36,.07);}
+.badge.r{border-color:#f43f5e;color:#f43f5e;background:rgba(244,63,94,.07);}
+.rating-box{background:#0d1828;border:1px solid #fbbf24;border-radius:12px;padding:14px 16px;margin-top:10px;display:none;}
+.rating-box.show{display:block;}
+.rating-title{font-size:.72rem;font-weight:700;color:#fbbf24;text-align:center;margin-bottom:4px;}
+.rating-sub{font-size:.62rem;color:#4a6080;text-align:center;margin-bottom:12px;}
+.stars{display:flex;justify-content:center;gap:4px;margin-bottom:10px;flex-wrap:wrap;}
+.star{font-size:1.5rem;cursor:pointer;filter:grayscale(1);opacity:.35;transition:transform .1s,filter .1s,opacity .1s;user-select:none;}
+.star.on{filter:none;opacity:1;}
+.star:active{transform:scale(1.3);}
+.rating-score{text-align:center;font-size:.72rem;color:#fbbf24;font-weight:700;margin-bottom:8px;min-height:18px;}
+.rating-comment{width:100%;background:#141e2e;border:1px solid #1e3048;border-radius:8px;padding:8px 10px;color:#dde5f0;font-family:'JetBrains Mono',monospace;font-size:.68rem;resize:none;outline:none;margin-bottom:8px;}
+.rating-comment:focus{border-color:#fbbf24;}
+.rating-submit{width:100%;padding:10px;background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#080c14;font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:700;border:none;border-radius:8px;cursor:pointer;}
+.rating-submit:active{opacity:.8;}
+.rating-thanks{display:none;text-align:center;padding:10px;font-size:.72rem;color:#22c55e;font-weight:700;}
+
+/* YANGI: Tushundingizmi panel */
+.check-box{background:#0d1828;border:1px solid #1e3048;border-radius:10px;padding:14px;margin-bottom:10px;display:none;}
+.check-box.show{display:block;}
+.check-title{font-size:.78rem;font-weight:700;color:#fbbf24;margin-bottom:4px;}
+.check-sub{font-size:.62rem;color:#4a6080;margin-bottom:12px;}
+.check-item{background:#141e2e;border:1px solid #1e3048;border-radius:8px;padding:10px 12px;margin-bottom:8px;}
+.check-item-top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;}
+.check-term{font-size:.72rem;color:#dde5f0;font-weight:700;flex:1;}
+.check-btns{display:flex;gap:6px;flex-shrink:0;}
+.check-btn{padding:6px 10px;border-radius:6px;border:1px solid #1e3048;background:#0a0e1a;font-size:.62rem;cursor:pointer;color:#4a6080;}
+.check-btn.yes.active{background:#0a2e1a;border-color:#22c55e;color:#22c55e;}
+.check-btn.no.active{background:#2e0a0a;border-color:#f43f5e;color:#f43f5e;}
+.check-extra{display:none;margin-top:10px;padding-top:10px;border-top:1px dashed #2a3a50;}
+.check-extra.show{display:block;}
+.check-extra-section{margin-bottom:10px;}
+.check-extra-label{font-size:.6rem;font-weight:700;color:#a855f7;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px;}
+.check-extra-text{font-size:.66rem;line-height:1.8;color:#9fb0c8;white-space:pre-wrap;margin-bottom:8px;}
+.check-extra-code{background:#080c14;border:1px solid #1e3048;border-radius:6px;padding:8px 10px;font-size:.66rem;color:#22c55e;white-space:pre;overflow-x:auto;margin-bottom:6px;}
+.check-extra-sim{background:#080c14;border:1px solid #22c55e;border-radius:6px;padding:8px 10px;font-size:.62rem;color:#6ee7b7;white-space:pre;overflow-x:auto;}
+.check-all-done{display:none;text-align:center;padding:14px;color:#22c55e;font-size:.74rem;font-weight:700;}
+.check-all-done.show{display:block;}
+.btn-checknext{display:none;width:100%;margin-top:10px;padding:11px;background:#22c55e;color:#fff;font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:700;border:none;border-radius:8px;cursor:pointer;}
+.btn-checknext.show{display:block;}
+</style>
+</head>
+<body>
+
+<div class="top">
+  <div class="top-t">✏️ Pandas — 12-Modul</div>
+  <div class="top-s" id="topSub">12.1</div>
+</div>
+<div class="bright-bar">
+  <span class="bright-lbl">👁️ Xiralik:</span>
+  <input type="range" class="bright-slider" id="brightSlider" min="1" max="10" value="3" oninput="setBright(this.value)">
+  <span class="bright-val" id="brightVal">3</span>
+</div>
+<div class="wrap">
+  <div class="stats">
+    <div class="stat"><div class="sv" id="svPctV">—</div><div class="sl">TO'G'RI</div></div>
+    <div class="stat"><div class="sv" id="svDone">0/0</div><div class="sl">BAJARILDI</div></div>
+    <div class="stat"><div class="sv" id="svMod">1/6</div><div class="sl">MAVZU</div></div>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+  <div class="tabs" id="tabs"></div>
+  <div class="skip-row" onclick="toggleSkip()">
+    <div class="sw" id="sw"></div>
+    <span id="skipLbl"># Kommentlarni o'tkazib yuboring</span>
+  </div>
+
+  <div class="intro-box" id="introBox"></div>
+
+  <div class="terms-box" id="termsBox"></div>
+  <div class="detail-panel" id="detailPanel">
+    <div class="detail-title">📘 BATAFSIL</div>
+    <div id="detailContent"></div>
+  </div>
+  <div class="result-panel" id="resultPanel">
+    <div class="result-title">📊 NATIJA — SIMULYATSIYA</div>
+    <div class="sim-wrap" id="simWrap"></div>
+  </div>
+  <div class="code-block">
+    <div class="fbar">
+      <div class="dot r"></div><div class="dot y"></div><div class="dot g"></div>
+      <div class="fn" id="fname">pandas_12.py</div>
+      <div class="fhint">↔️ suring ✏️ yozing</div>
+    </div>
+    <div class="lines-wrap" id="linesWrap"></div>
+    <div class="btn-row">
+      <button class="btn btn-chk" onclick="doCheck()">✅ Tekshir</button>
+      <button class="btn btn-at" onclick="insertAtSymbol()">@ Belgi</button>
+      <button class="btn btn-clr" onclick="doClear()">🗑️ Tozala</button>
+      <button class="btn btn-ghost" id="ghostBtn" onclick="toggleGhost()">👁️ Yashir</button>
+      <button class="btn btn-det" onclick="toggleDetail()">📖 Batafsil</button>
+      <button class="btn btn-res" onclick="toggleResult()">📊 Natija</button>
+    </div>
+    <div style="padding:6px 12px;background:#0f1520;border-top:1px solid #1e3048;">
+      <button onclick="showCheckBox()" style="width:100%;padding:10px;background:#0d1828;border:1px solid #fbbf24;color:#fbbf24;font-family:'JetBrains Mono',monospace;font-size:.7rem;font-weight:700;border-radius:8px;cursor:pointer;">🤔 Tushundingizmi? — Mavzu oxirida tekshiring</button>
+    </div>
+    <div class="badge" id="badge"></div>
+  </div>
+
+  <!-- YANGI: Tushundingizmi panel -->
+  <div class="check-box" id="checkBox">
+    <div class="check-title">🤔 Tushundingizmi?</div>
+    <div class="check-sub">Har bir atama bo'yicha o'zingizni tekshiring</div>
+    <div id="checkItems"></div>
+    <div class="check-all-done" id="checkAllDone">✅ Barcha atamalarni belgiladingiz!</div>
+  </div>
+  <button class="btn-checknext" id="btnCheckNext" onclick="goNextTopicFromCheck()">Keyingi mavzu →</button>
+
+  <div class="rating-box" id="ratingBox">
+    <div class="rating-title">⭐ 12-Modulni baholang</div>
+    <div class="rating-sub">Fikringiz keyingi versiyani yaxshilashga yordam beradi</div>
+    <div class="stars" id="stars"></div>
+    <div class="rating-score" id="ratingScore">Baho tanlang (1–10)</div>
+    <textarea class="rating-comment" id="ratingComment" rows="2" placeholder="Izoh: nima yoqdi, nima yetishmadi..."></textarea>
+    <button class="rating-submit" onclick="submitRating()">⭐ Yuborish</button>
+    <div class="rating-thanks" id="ratingThanks">✅ Rahmat! Fikringiz qabul qilindi.</div>
+  </div>
+</div>
+
+<script>
+var MODULE_INTRO = {
+  title: "📦 12-Modul haqida",
+  text: "Bu modulda siz bir nechta ma'lumotlar to'plamini birlashtirish va murakkab indekslash bilan ishlashni o'rganasiz.\n\nHaqiqiy loyihalarda ma'lumot kamdan-kam holda bitta jadvalda keladi. Mijozlar — bitta jadvalda, buyurtmalar — boshqasida, mahsulotlar — uchinchisida. Bularni birlashtirmasdan turib tahlil qilib bo'lmaydi. Bu modul aynan shu — turli manbalardan kelgan ma'lumotlarni bitta yaxlit ko'rinishga keltirish ko'nikmasini beradi.\n\nMavzular: avval iyerarxik indeks (MultiIndex) — ma'lumotni bir necha qavatda guruhlash, keyin stack/unstack — jadval shaklini almashtirish, so'ng merge/join — SQL uslubida jadvallarni birlashtirish, concat — jadvallarni ustma-ust qo'shish, va pivot — uzun formatdan keng formatga o'tkazish.\n\nReal loyihada bu nima beradi? Onlayn-do'kon misolida: mijozlar jadvali va buyurtmalar jadvalini merge() bilan birlashtirasiz, har oy uchun alohida fayl kelsa concat() bilan ulaysiz, kunlik tranzaksiyalarni oylik hisobotga pivot qilasiz. Bu — har qanday Data Analyst kundalik ishining asosi.",
+  count: 6
+};
+
+var M = [
+
+{id:'12.1',f:'pandas_12_1.py',
+plan:['MultiIndex nima va nega kerak','from_arrays() bilan yaratish','from_tuples() bilan yaratish','set_index() orqali ko\'p ustunli indeks'],
+terms:[
+  ['MultiIndex','Bir nechta qavatli (darajali) indeks',
+    {text:'MultiIndex — bu jadval qatorlariga BIR EMAS, BIR NECHTA "yorliq" berish usuli. Oddiy indeks 0,1,2 kabi bitta raqam bo\'lsa, MultiIndex "Toshkent + 2023" kabi ikki yoki undan ko\'p qiymatni birlashtirib, bitta qatorni aniqlaydi. Bu Excel\'dagi "guruhlangan jadval" ga o\'xshaydi — avval katta sarlavha (Shahar), uning ostida kichik sarlavha (Yil).',
+     code:'idx = pd.MultiIndex.from_arrays(\n  [[\'T\',\'T\'],[2023,2024]],\n  names=[\'Shahar\',\'Yil\'])',
+     sim:'>>> idx\nMultiIndex([(\'T\', 2023),\n            (\'T\', 2024)],\n           names=[\'Shahar\', \'Yil\'])'}],
+  ['from_arrays()','Massivlar ro\'yxatidan MultiIndex yaratish',
+    {text:'from_arrays() — har indeks qavati uchun ALOHIDA massiv (ro\'yxat) beradi. Birinchi massiv — barcha shaharlar, ikkinchi massiv — barcha yillar. Pandas ularni bittama-bitta "qo\'shib", har qatorga mos juftlik yaratadi. Bu usul qulay, agar ma\'lumotlaringiz allaqachon alohida ustun/ro\'yxat ko\'rinishida bo\'lsa.',
+     code:'pd.MultiIndex.from_arrays(\n  [[\'A\',\'B\'],[1,2]])',
+     sim:'>>> MultiIndex([(\'A\', 1), (\'B\', 2)])'}],
+  ['from_tuples()','Juftliklar ro\'yxatidan MultiIndex yaratish',
+    {text:'from_tuples() — har qator uchun TAYYOR juftlik (tuple) beradi: (\'A\',1), (\'B\',2). Bu from_arrays() dan farqli, chunki bu yerda har bir qator allaqachon "to\'liq" holda kelgan. Bu usul qulay, agar ma\'lumotlaringiz tabiiy ravishda juftlik-juftlik bo\'lib kelsa (masalan ma\'lumotlar bazasidan).',
+     code:'pd.MultiIndex.from_tuples(\n  [(\'A\',1),(\'B\',2)])',
+     sim:'>>> MultiIndex([(\'A\', 1), (\'B\', 2)])'}],
+  ['names','Har indeks qavatiga nom berish',
+    {text:'names parametri — bu indeks qavatlariga "yorliq" beradi, masalan birinchi qavat "Shahar", ikkinchisi "Yil" deb nomlanadi. Bu funksional jihatdan ixtiyoriy (kod ishlaydi nomsiz ham), lekin natijani o\'qishni ancha osonlashtiradi — ayniqsa keyinchalik .loc[] yoki groupby() bilan ishlaganda qaysi qavat nima ekanini eslab qolish qulay bo\'ladi.',
+     code:'idx = pd.MultiIndex.from_arrays(\n  [[\'A\'],[1]],\n  names=[\'Harf\',\'Son\'])',
+     sim:'>>> idx.names\nFrozenList([\'Harf\', \'Son\'])'}]
+],
+detail:'MULTIINDEX NIMA VA NEGA KERAK?\n\nOddiy indeks — bu jadvalning har qatoriga bitta nom yoki raqam berish (masalan 0,1,2...). MultiIndex esa — bir qatorga BIR NECHTA "yorliq" berish imkonini beradi. Masalan "Toshkent, 2023" — bu ikkita ma\'lumot (shahar va yil) birlashib, bitta qatorni aniqlaydi.\n\nNEGA KERAK? Real hayotda ma\'lumotlar ko\'pincha ko\'p o\'lchovli bo\'ladi: "qaysi shahar, qaysi yil, qaysi mahsulot". Agar bularni alohida-alohida ustun qilib saqlasangiz, guruhlash va filtrlashda har safar uchta shartni yozish kerak bo\'ladi. MultiIndex bu jarayonni soddalashtiradi — "Toshkent, 2023" ni bitta "manzil" sifatida ishlatish mumkin.\n\nFROM_ARRAYS VA FROM_TUPLES FARQI: from_arrays() — har qavat uchun alohida ro\'yxat beradi (masalan barcha shaharlar bitta ro\'yxatda, barcha yillar boshqasida). from_tuples() — har qatorni alohida juftlik sifatida beradi (Toshkent,2023), (Toshkent,2024). Ikkalasi ham bir xil natija beradi, faqat ma\'lumot qanday tayyor bo\'lishiga qarab qulayrog\'i tanlanadi.\n\nSET_INDEX() ORQALI: Agar sizda allaqachon oddiy DataFrame bo\'lsa (Shahar va Yil alohida ustunlar), set_index([\'Shahar\',\'Yil\']) shu ikki ustunni MultiIndex ga aylantiradi — bu eng tez-tez ishlatiladigan usul, chunki ma\'lumotlar odatda CSV dan oddiy ustunlar sifatida keladi.',
+sim:'>>> arrays = [[\'Toshkent\',\'Toshkent\',\'Samarqand\'],\n...           [2023,2024,2023]]\n>>> idx = pd.MultiIndex.from_arrays(\n...   arrays, names=[\'Shahar\',\'Yil\'])\n>>> s = pd.Series([100,120,80], index=idx)\n>>> s\nShahar     Yil \nToshkent   2023    100\n           2024    120\nSamarqand  2023     80\ndtype: int64',
+eskizlar:[
+{q:'from_arrays() bilan MultiIndex yarating: Shahar va Yil qavatlari bilan.',
+ lines:[
+  {c:'import pandas as pd',n:'Siz pandas kutubxonasini pd nomi bilan yukladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'massivlar = [',n:'Siz massivlar ro\'yxatini yaratishni boshladingiz'},
+  {c:'  [\'Toshkent\',\'Toshkent\',\'Samarqand\'],',n:'Siz shaharlar massivini qo\'shdingiz'},
+  {c:'  [2023,2024,2023]',n:'Siz yillar massivini qo\'shdingiz'},
+  {c:']',n:'Siz massivlar ro\'yxatini yakunladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'idx = pd.MultiIndex',n:'Siz MultiIndex yaratishni boshladingiz'},
+  {c:'  .from_arrays(massivlar,',n:'Siz from_arrays() ga massivlarni berdingiz'},
+  {c:'  names=[\'Shahar\',\'Yil\'])',n:'Siz har qavatga nom berdingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'s = pd.Series(',n:'Siz Series yaratishni boshladingiz'},
+  {c:'  [100,120,80], index=idx)',n:'Siz qiymatlarni MultiIndex bilan bog\'ladingiz'},
+  {c:'print(s)',n:'Siz natijani ekranga chiqardingiz'},
+ ]},
+{q:'from_tuples() bilan MultiIndex yarating: Mahsulot va Rang qavatlari bilan.',
+ lines:[
+  {c:'import pandas as pd',n:'Siz pandas kutubxonasini pd nomi bilan yukladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'juftliklar = [',n:'Siz juftliklar ro\'yxatini yaratishni boshladingiz'},
+  {c:'  (\'Olma\',\'Qizil\'),',n:'Siz birinchi juftlikni qo\'shdingiz'},
+  {c:'  (\'Olma\',\'Yashil\'),',n:'Siz ikkinchi juftlikni qo\'shdingiz'},
+  {c:'  (\'Nok\',\'Sariq\')',n:'Siz uchinchi juftlikni qo\'shdingiz'},
+  {c:']',n:'Siz juftliklar ro\'yxatini yakunladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'idx = pd.MultiIndex',n:'Siz MultiIndex yaratishni boshladingiz'},
+  {c:'  .from_tuples(juftliklar,',n:'Siz from_tuples() ga juftliklarni berdingiz'},
+  {c:'  names=[\'Mahsulot\',\'Rang\'])',n:'Siz har qavatga nom berdingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'s = pd.Series(',n:'Siz Series yaratishni boshladingiz'},
+  {c:'  [10,15,8], index=idx)',n:'Siz qiymatlarni MultiIndex bilan bog\'ladingiz'},
+  {c:'print(s)',n:'Siz natijani ekranga chiqardingiz'},
+ ]},
+{q:'Oddiy DataFrame dan set_index() orqali MultiIndex yarating.',
+ lines:[
+  {c:'import pandas as pd',n:'Siz pandas kutubxonasini pd nomi bilan yukladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'df = pd.DataFrame({',n:'Siz DataFrame yaratishni boshladingiz'},
+  {c:'  \'Shahar\':[\'Toshkent\',\'Samarqand\'],',n:'Siz Shahar ustunini qo\'shdingiz'},
+  {c:'  \'Yil\':[2023,2023],',n:'Siz Yil ustunini qo\'shdingiz'},
+  {c:'  \'Savdo\':[100,80]',n:'Siz Savdo ustunini qo\'shdingiz'},
+  {c:'})',n:'Siz DataFrame yaratishni yakunladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'df2 = df.set_index(',n:'Siz indeksni o\'rnatishni boshladingiz'},
+  {c:'  [\'Shahar\',\'Yil\'])',n:'Siz ikki ustunni MultiIndex qildingiz'},
+  {c:'print(df2)',n:'Siz natijani ekranga chiqardingiz'},
+ ]},
+]},
+
+{id:'12.2',f:'pandas_12_2.py',
+plan:['stack() — ustundan qatorga sochish','unstack() — qatordan ustunga yig\'ish','Ular bir-birining teskarisi'],
+terms:[
+  ['stack()','Ustunlarni qatorlarga "sochish" (keng→uzun)',
+    {text:'stack() — jadvalni "vertikal" yo\'nalishda siqadi. Har bir ustun nomi qator indeksining yangi qavatiga aylanadi. Natijada jadval "kengligi" kamayib, "balandligi" oshadi. Bu — ko\'pchilik tahlil vositalari "uzun" formatni yaxshi ko\'rishi sabab tez-tez ishlatiladi.',
+     code:'df = pd.DataFrame(\n  {\'2023\':[100,80],\'2024\':[120,90]},\n  index=[\'T\',\'S\'])\nprint(df.stack())',
+     sim:'T  2023    100\n   2024    120\nS  2023     80\n   2024     90'}],
+  ['unstack()','Qatorlarni ustunlarga "yig\'ish" (uzun→keng)',
+    {text:'unstack() — stack() ning aynan teskarisi. U MultiIndex ning oxirgi qavatini olib, uni yangi ustunlarga aylantiradi. Natijada jadval "balandligi" kamayib, "kengligi" oshadi. Odatda tahlil qilingandan keyin natijani chiroyli jadval ko\'rinishida ko\'rsatish uchun ishlatiladi.',
+     code:'s = pd.Series([100,120,80,90],\n  index=idx)\nprint(s.unstack())',
+     sim:'     2023  2024\nS      80    90\nT     100   120'}]
+],
+detail:'STACK VA UNSTACK NEGA KERAK?\n\nBa\'zan ma\'lumot "keng" formatda keladi — har yil alohida ustun (2023, 2024, 2025...). Bu ko\'rishga qulay, lekin tahlil qilishga noqulay — masalan "yillar bo\'yicha o\'rtacha" hisoblash uchun avval ularni "uzun" formatga aylantirish kerak bo\'ladi.\n\nSTACK() NIMA QILADI? U ustunlarni "yig\'ishtirib", ularni qator indeksining yangi qavatiga aylantiradi. Natijada jadval "kengligi" kamayadi, lekin "balandligi" oshadi — har ustun qiymati endi alohida qatorga aylanadi.\n\nUNSTACK() NIMA QILADI? Bu — stack() ning aynan teskarisi. U qator indeksining bir qavatini olib, uni qaytadan ustunlarga "yoyadi". Demak uzun formatdan yana keng formatga qaytariladi.\n\nQACHON ISHLATILADI? stack() — guruhlash, statistika hisoblash, grafik chizish uchun (ko\'pchilik vositalar "uzun" formatni yaxshi ko\'radi). unstack() — natijani odamlar uchun "o\'qish qulay" jadval ko\'rinishida ko\'rsatish uchun.',
+sim:'>>> df = pd.DataFrame({\'2023\':[100,80],\n...   \'2024\':[120,90]},\n...   index=[\'Toshkent\',\'Samarqand\'])\n>>> df.stack()\nToshkent   2023    100\n           2024    120\nSamarqand  2023     80\n           2024     90\n>>> df.stack().unstack()\n           2023  2024\nToshkent    100   120\nSamarqand    80    90',
+eskizlar:[
+{q:'Keng formatdagi jadvalni stack() bilan uzun formatga aylantiring.',
+ lines:[
+  {c:'import pandas as pd',n:'Siz pandas kutubxonasini pd nomi bilan yukladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'df = pd.DataFrame({',n:'Siz DataFrame yaratishni boshladingiz'},
+  {c:'  \'2023\':[100,80],',n:'Siz 2023-yil ustunini qo\'shdingiz'},
+  {c:'  \'2024\':[120,90]',n:'Siz 2024-yil ustunini qo\'shdingiz'},
+  {c:'}, index=[\'Toshkent\',',n:'Siz qator indekslarini berishni boshladingiz'},
+  {c:'  \'Samarqand\'])',n:'Siz indeks ro\'yxatini yakunladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'uzun = df.stack()',n:'Siz stack() bilan uzun formatga o\'tkazdingiz'},
+  {c:'print(uzun)',n:'Siz natijani ekranga chiqardingiz'},
+ ]},
+{q:'Uzun formatdagi Series ni unstack() bilan keng jadvalga qaytaring.',
+ lines:[
+  {c:'import pandas as pd',n:'Siz pandas kutubxonasini pd nomi bilan yukladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'df = pd.DataFrame({',n:'Siz DataFrame yaratishni boshladingiz'},
+  {c:'  \'2023\':[100,80],',n:'Siz 2023-yil ustunini qo\'shdingiz'},
+  {c:'  \'2024\':[120,90]',n:'Siz 2024-yil ustunini qo\'shdingiz'},
+  {c:'}, index=[\'Toshkent\',',n:'Siz qator indekslarini berishni boshladingiz'},
+  {c:'  \'Samarqand\'])',n:'Siz indeks ro\'yxatini yakunladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'uzun = df.stack()',n:'Siz avval stack() bilan uzun format yaratdingiz'},
+  {c:'keng = uzun.unstack()',n:'Siz unstack() bilan yana keng formatga qaytardingiz'},
+  {c:'print(keng)',n:'Siz natijani ekranga chiqardingiz'},
+ ]},
+{q:'MultiIndex Series ni unstack() bilan jadval ko\'rinishiga keltiring.',
+ lines:[
+  {c:'import pandas as pd',n:'Siz pandas kutubxonasini pd nomi bilan yukladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'arrays = [',n:'Siz massivlar ro\'yxatini yaratishni boshladingiz'},
+  {c:'  [\'Toshkent\',\'Toshkent\'],',n:'Siz shaharlar massivini qo\'shdingiz'},
+  {c:'  [2023,2024]',n:'Siz yillar massivini qo\'shdingiz'},
+  {c:']',n:'Siz massivlar ro\'yxatini yakunladingiz'},
+  {c:'idx = pd.MultiIndex',n:'Siz MultiIndex yaratishni boshladingiz'},
+  {c:'  .from_arrays(arrays)',n:'Siz from_arrays() ga massivlarni berdingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'s = pd.Series(',n:'Siz Series yaratishni boshladingiz'},
+  {c:'  [100,120], index=idx)',n:'Siz qiymatlarni MultiIndex bilan bog\'ladingiz'},
+  {c:'print(s.unstack())',n:'Siz unstack() bilan jadval ko\'rinishini chiqardingiz'},
+ ]},
+]},
+
+{id:'12.3',f:'pandas_12_3.py',
+plan:['MultiIndex bo\'yicha .loc[] bilan tanlash','Bitta qavat bo\'yicha filtrlash','Ikki qavat bo\'yicha aniq qiymat olish'],
+terms:[
+  ['.loc[]','MultiIndex bo\'yicha qator(lar)ni tanlash',
+    {text:'.loc[] — MultiIndex da ma\'lumotni "qavat-qavat" qidirish uchun asosiy vosita. Xuddi papka ichida fayl topishga o\'xshaydi: avval katta papka (tashqi qavat), keyin ichki papka. Har bir qavatni vergul bilan ajratib berasiz.',
+     code:'s.loc[\'Toshkent\']       # birinchi qavat\ns.loc[\'Toshkent\', 2024] # ikkala qavat',
+     sim:'>>> s.loc[\'Toshkent\']\n2023    100\n2024    120\n>>> s.loc[\'Toshkent\', 2024]\n120'}],
+  ['Qisman tanlash','Faqat tashqi qavatni ko\'rsatib, ichki qavatni olish',
+    {text:'Qisman tanlashda faqat birinchi (tashqi) qavatni ko\'rsatasiz. Pandas o\'sha qiymatga tegishli BARCHA ichki qavat qiymatlarini qaytaradi. Natija yangi, kichikroq Series yoki DataFrame bo\'ladi — ichki qavat esa uning yangi indeksiga aylanadi.',
+     code:'# Faqat tashqi qavat\nnatija = s.loc[\'Toshkent\']\nprint(natija)',
+     sim:'Yil\n2023    100\n2024    120\ndtype: int64'}],
+  ['To\'liq tanlash','Barcha qavatlarni ko\'rsatib, bitta qiymat olish',
+    {text:'To\'liq tanlashda barcha qavatlarni ko\'rsatasiz (masalan ikkala qavatni ham). Bu holatda pandas faqat BITTA aniq qiymat qaytaradi — butun bir Series emas, balki oddiy son yoki matn. Bu xuddi GPS koordinatalar kabi ishlaydi: aniq joy uchun aniq natija.',
+     code:'# Ikkala qavat ham ko\'rsatilgan\nnatija = s.loc[\'Toshkent\', 2024]\nprint(type(natija))  # int',
+     sim:'>>> s.loc[\'Toshkent\', 2024]\n120\n>>> type(s.loc[\'Toshkent\', 2024])\n<class \'numpy.int64\'>'}]
+],
+detail:'MULTIINDEX BO\'YICHA QANDAY QIDIRISH MUMKIN?\n\nMultiIndex Series yoki DataFrame da .loc[] orqali ma\'lumotni "qavat-qavat" qidirish mumkin. Bu xuddi papkalar ichida fayl qidirishga o\'xshaydi — avval katta papkani, keyin ichidagi kichikroq papkani tanlaysiz.\n\nQISMAN TANLASH: Agar faqat tashqi qavat nomini bersangiz (masalan .loc[\'Toshkent\']), pandas o\'sha shaharga tegishli BARCHA ichki qavat qiymatlarini qaytaradi — natija yangi, kichikroq Series yoki DataFrame bo\'ladi.\n\nTO\'LIQ TANLASH: Agar ikkala qavatni ham bersangiz (masalan .loc[\'Toshkent\', 2024]), pandas faqat BITTA aniq qiymatni qaytaradi — chunki ikkala "manzil" ham to\'liq ko\'rsatilgan.\n\nNEGA BU FOYDALI? Katta ma\'lumotlar to\'plamida (masalan minglab qator) kerakli ma\'lumotni tezda topish uchun MultiIndex va .loc[] birgalikda juda samarali ishlaydi — SQL dagi WHERE shartiga o\'xshaydi, lekin tezroq.',
+sim:'>>> idx = pd.MultiIndex.from_arrays(\n...   [[\'Toshkent\',\'Toshkent\',\'Samarqand\'],\n...    [2023,2024,2023]])\n>>> s = pd.Series([100,120,80], index=idx)\n>>> s.loc[\'Toshkent\']\n2023    100\n2024    120\n>>> s.loc[\'Toshkent\', 2024]\n120',
+eskizlar:[
+{q:'MultiIndex Series dan faqat "Toshkent" ga oid qiymatlarni oling.',
+ lines:[
+  {c:'import pandas as pd',n:'Siz pandas kutubxonasini pd nomi bilan yukladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'idx = pd.MultiIndex',n:'Siz MultiIndex yaratishni boshladingiz'},
+  {c:'  .from_arrays([',n:'Siz massivlar ro\'yxatini berishni boshladingiz'},
+  {c:'  [\'Toshkent\',\'Toshkent\',',n:'Siz birinchi qavat massivini qo\'shdingiz'},
+  {c:'    \'Samarqand\'],',n:'Siz massiv qo\'shishni yakunladingiz'},
+  {c:'  [2023,2024,2023]])',n:'Siz ikkinchi qavat massivini qo\'shdingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'s = pd.Series(',n:'Siz Series yaratishni boshladingiz'},
+  {c:'  [100,120,80], index=idx)',n:'Siz qiymatlarni MultiIndex bilan bog\'ladingiz'},
+  {c:'print(s.loc[\'Toshkent\'])',n:'Siz faqat Toshkent qiymatlarini chiqardingiz'},
+ ]},
+{q:'MultiIndex Series dan "Toshkent, 2024" aniq qiymatini oling.',
+ lines:[
+  {c:'import pandas as pd',n:'Siz pandas kutubxonasini pd nomi bilan yukladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'idx = pd.MultiIndex',n:'Siz MultiIndex yaratishni boshladingiz'},
+  {c:'  .from_arrays([',n:'Siz massivlar ro\'yxatini berishni boshladingiz'},
+  {c:'  [\'Toshkent\',\'Toshkent\',',n:'Siz birinchi qavat massivini qo\'shdingiz'},
+  {c:'    \'Samarqand\'],',n:'Siz massiv qo\'shishni yakunladingiz'},
+  {c:'  [2023,2024,2023]])',n:'Siz ikkinchi qavat massivini qo\'shdingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'s = pd.Series(',n:'Siz Series yaratishni boshladingiz'},
+  {c:'  [100,120,80], index=idx)',n:'Siz qiymatlarni MultiIndex bilan bog\'ladingiz'},
+  {c:'natija = s.loc[',n:'Siz aniq qiymat qidirishni boshladingiz'},
+  {c:'  \'Toshkent\', 2024]',n:'Siz ikkala qavatni ham ko\'rsatdingiz'},
+  {c:'print(natija)',n:'Siz natijani ekranga chiqardingiz'},
+ ]},
+{q:'MultiIndex DataFrame dan bitta shahar uchun barcha ma\'lumotni oling.',
+ lines:[
+  {c:'import pandas as pd',n:'Siz pandas kutubxonasini pd nomi bilan yukladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'df = pd.DataFrame({',n:'Siz DataFrame yaratishni boshladingiz'},
+  {c:'  \'Shahar\':[\'Toshkent\',',n:'Siz Shahar ustunini berishni boshladingiz'},
+  {c:'    \'Toshkent\',\'Samarqand\'],',n:'Siz Shahar ustunini yakunladingiz'},
+  {c:'  \'Yil\':[2023,2024,2023],',n:'Siz Yil ustunini qo\'shdingiz'},
+  {c:'  \'Savdo\':[100,120,80]',n:'Siz Savdo ustunini qo\'shdingiz'},
+  {c:'}).set_index(',n:'Siz indeksni o\'rnatishni boshladingiz'},
+  {c:'  [\'Shahar\',\'Yil\'])',n:'Siz ikki ustunni MultiIndex qildingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'print(df.loc[\'Toshkent\'])',n:'Siz faqat Toshkent qatorlarini chiqardingiz'},
+ ]},
+]},
+
+{id:'12.4',f:'pandas_12_4.py',
+plan:['Ustunlarda MultiIndex yaratish','Iyerarxik ustunlardan tanlash','columns.names bilan nomlash'],
+terms:[
+  ['Ustunli MultiIndex','Ustunlarning o\'zi ham bir necha qavatli bo\'lishi',
+    {text:'Odatda MultiIndex qatorlarda ishlatiladi, lekin ustunlar ham ko\'p qavatli bo\'lishi mumkin. Bu foydali — masalan "Savdo" va "Foyda" toifalari bor, har birida "2023" va "2024" bor. Bunda har ustun nomi ikki qismdan iborat: (Savdo, 2023), (Savdo, 2024)...',
+     code:'data = {(\'Savdo\',\'2023\'):[100],\n        (\'Foyda\',\'2023\'):[20]}\ndf = pd.DataFrame(data)',
+     sim:'      Savdo Foyda\n       2023  2023\n0       100    20'}],
+  ['columns.names','Ustun qavatlariga nom berish',
+    {text:'columns.names — ustun qavatlariga "yorliq" beradi. Masalan birinchi qavat "Toifa" (Savdo, Foyda), ikkinchisi "Yil" (2023, 2024). Bu funksional jihatdan ixtiyoriy, lekin natijani o\'qishni ancha osonlashtiradi ayniqsa ko\'p ustunli jadvallarda.',
+     code:'df.columns.names = [\'Toifa\',\'Yil\']\nprint(df)',
+     sim:'Toifa  Savdo Foyda\nYil     2023  2023\n0        100    20'}],
+  ['Tuple kalit','(\'Savdo\',\'2023\') kabi ikki qismli ustun nomi',
+    {text:'Tuple kalit — bu DataFrame yaratishda lug\'at kaliti sifatida oddiy matn o\'rniga juftlik (tuple) ishlatish. Masalan {(\'Savdo\',\'2023\'): [...]} degani "Savdo toifasida, 2023 yil uchun" degan ustun. Pandas bunday kalitlarni avtomatik MultiIndex ustunlarga aylantiradi.',
+     code:'# Tuple kalit bilan\ndf[(\'Savdo\',\'2023\')]\n# Bir qavatni to\'liq olish\ndf[\'Savdo\']',
+     sim:'>>> df[(\'Savdo\',\'2023\')]\n0    100\n>>> df[\'Savdo\']\n2023    100'}]
+],
+detail:'NEGA USTUNLAR HAM MULTIINDEX BO\'LISHI MUMKIN?\n\nOddatda MultiIndex haqida gap ketganda QATORLAR haqida o\'ylaymiz. Lekin pandas ustunlarni ham bir necha qavatli qilish imkonini beradi. Bu foydali — masalan "Savdo" va "Foyda" toifalari bor, va har birida "2023" va "2024" yillar bor. Bunda ustun nomi ikki qismdan iborat bo\'ladi: (Savdo, 2023), (Savdo, 2024), (Foyda, 2023)...\n\nQANDAY YARATILADI? DataFrame yaratishda kalit sifatida tuple (juftlik) ishlatiladi: {(\'Savdo\',\'2023\'): [...], (\'Savdo\',\'2024\'): [...]}. Pandas avtomatik bu kalitlarni MultiIndex ustunlarga aylantiradi.\n\nQANDAY TANLANADI? df[\'Savdo\'] — bu butun "Savdo" toifasini (ikkala yil bilan) qaytaradi. df[\'Savdo\'][\'2023\'] — aynan bitta ustunni beradi. Bu xuddi papka ichidagi fayl tuzilmasiga o\'xshaydi.\n\nCOLUMNS.NAMES NEGA KERAK? Bu shunchaki ustun qavatlariga "yorliq" beradi (masalan "Toifa" va "Yil"), bu jadval chop etilganda tushunarliroq ko\'rinishni ta\'minlaydi — funksional jihatdan ixtiyoriy, lekin o\'qish qulayligi uchun foydali.',
+sim:'>>> data = {(\'Savdo\',\'2023\'):[100,80],\n...   (\'Savdo\',\'2024\'):[120,90]}\n>>> df = pd.DataFrame(data,\n...   index=[\'Toshkent\',\'Samarqand\'])\n>>> df\n          Savdo     \n           2023 2024\nToshkent    100  120\nSamarqand    80   90',
+eskizlar:[
+{q:'Tuple kalitlar bilan ustunli MultiIndex DataFrame yarating.',
+ lines:[
+  {c:'import pandas as pd',n:'Siz pandas kutubxonasini pd nomi bilan yukladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'malumot = {',n:'Siz lug\'at yaratishni boshladingiz'},
+  {c:'  (\'Savdo\',\'2023\'):[100,80],',n:'Siz Savdo-2023 ustunini tuple kalit bilan qo\'shdingiz'},
+  {c:'  (\'Savdo\',\'2024\'):[120,90]',n:'Siz Savdo-2024 ustunini tuple kalit bilan qo\'shdingiz'},
+  {c:'}',n:'Siz lug\'atni yakunladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'df = pd.DataFrame(',n:'Siz DataFrame yaratishni boshladingiz'},
+  {c:'  malumot, index=[',n:'Siz qator indekslarini berishni boshladingiz'},
+  {c:'  \'Toshkent\',\'Samarqand\'])',n:'Siz indeks ro\'yxatini yakunladingiz'},
+  {c:'print(df)',n:'Siz natijani ekranga chiqardingiz'},
+ ]},
+{q:'Ustunli MultiIndex dan "Savdo" toifasini to\'liq tanlang.',
+ lines:[
+  {c:'import pandas as pd',n:'Siz pandas kutubxonasini pd nomi bilan yukladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'malumot = {',n:'Siz lug\'at yaratishni boshladingiz'},
+  {c:'  (\'Savdo\',\'2023\'):[100,80],',n:'Siz Savdo-2023 ustunini qo\'shdingiz'},
+  {c:'  (\'Foyda\',\'2023\'):[20,15]',n:'Siz Foyda-2023 ustunini qo\'shdingiz'},
+  {c:'}',n:'Siz lug\'atni yakunladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'df = pd.DataFrame(',n:'Siz DataFrame yaratishni boshladingiz'},
+  {c:'  malumot, index=[',n:'Siz qator indekslarini berishni boshladingiz'},
+  {c:'  \'Toshkent\',\'Samarqand\'])',n:'Siz indeks ro\'yxatini yakunladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'print(df[\'Savdo\'])',n:'Siz faqat Savdo toifasini tanladingiz'},
+ ]},
+{q:'columns.names yordamida ustun qavatlariga nom bering.',
+ lines:[
+  {c:'import pandas as pd',n:'Siz pandas kutubxonasini pd nomi bilan yukladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'malumot = {',n:'Siz lug\'at yaratishni boshladingiz'},
+  {c:'  (\'Savdo\',\'2023\'):[100,80],',n:'Siz Savdo-2023 ustunini qo\'shdingiz'},
+  {c:'  (\'Savdo\',\'2024\'):[120,90]',n:'Siz Savdo-2024 ustunini qo\'shdingiz'},
+  {c:'}',n:'Siz lug\'atni yakunladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'df = pd.DataFrame(',n:'Siz DataFrame yaratishni boshladingiz'},
+  {c:'  malumot, index=[',n:'Siz qator indekslarini berishni boshladingiz'},
+  {c:'  \'Toshkent\',\'Samarqand\'])',n:'Siz indeks ro\'yxatini yakunladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'df.columns.names = [',n:'Siz ustun qavat nomlarini berishni boshladingiz'},
+  {c:'  \'Toifa\',\'Yil\']',n:'Siz ikkala qavatga nom berdingiz'},
+  {c:'print(df)',n:'Siz natijani ekranga chiqardingiz'},
+ ]},
+]},
+
+{id:'12.5',f:'pandas_12_5.py',
+plan:['swaplevel() — qavatlar o\'rnini almashtirish','sort_index() — MultiIndex bo\'yicha saralash','Ikkalasini birga ishlatish'],
+terms:[
+  ['swaplevel()','MultiIndex qavatlarining o\'rnini almashtirish',
+    {text:'swaplevel() — MultiIndex da birinchi va ikkinchi qavatning o\'rnini almashtiradi. Ma\'lumot o\'zgarmaydi, faqat "qaysi qavat birinchi" o\'zgaradi. Masalan (Shahar, Yil) dan (Yil, Shahar) ga o\'tish. Bu kerak bo\'lganda — yil bo\'yicha avval saralash, keyin shahar bo\'yicha ko\'rish uchun.',
+     code:'# (Shahar, Yil) → (Yil, Shahar)\ns.swaplevel()',
+     sim:'Yil   Shahar\n2023  T         100\n2024  T         120\n2023  S          80'}],
+  ['sort_index()','Indeks bo\'yicha qatorlarni saralash',
+    {text:'sort_index() — MultiIndex da barcha qavatlarni tartibga soladi. swaplevel() dan keyin indeks tartibsiz bo\'lib qoladi (2023, 2024, 2023 aralash) — sort_index() buni to\'g\'rilaydi. Natijada avval kichik qiymatlar, keyin katta qiymatlar keladi.',
+     code:'# Avval almashtir, keyin tartiblash\ns.swaplevel().sort_index()',
+     sim:'Yil   Shahar\n2023  S          80\n      T         100\n2024  S          90\n      T         120'}],
+  ['level','Qaysi qavatni nazarda tutish',
+    {text:'level parametri — swaplevel(0, 1) kabi aniq qaysi qavatlarni almashtirish kerakligini ko\'rsatadi. 0 — birinchi qavat, 1 — ikkinchi qavat. 2 va undan ko\'p qavatli MultiIndex da bu parametr muhim bo\'ladi. Agar faqat swaplevel() desangiz, standart ravishda oxirgi ikki qavat almashtiriladi.',
+     code:'# 0 va 1-qavatlarni almashtir\ndf.swaplevel(0, 1)',
+     sim:'# 0-qavat birinchi, 1-qavat ikkinchi\n# endi 1-qavat birinchi, 0-qavat ikkinchi'}]
+],
+detail:'SWAPLEVEL VA SORT_INDEX NEGA KERAK?\n\nMultiIndex yaratilganda qavatlar tartibi har doim mantiqiy bo\'lavermaydi. Masalan avval "Shahar" keyin "Yil" qilib yaratgan bo\'lsangiz, lekin tahlilda avval "Yil" bo\'yicha guruhlash kerak bo\'lsa — qavatlar tartibini almashtirish kerak bo\'ladi.\n\nSWAPLEVEL() NIMA QILADI? Bu ikki qavatning o\'rnini almashtiradi — birinchi qavat ikkinchi bo\'ladi, ikkinchisi birinchi. Ma\'lumotning o\'zi o\'zgarmaydi, faqat "qaysi tartibda ko\'rsatilishi" o\'zgaradi.\n\nSORT_INDEX() NIMA UCHUN KERAK? swaplevel() dan keyin indeks tartibsiz bo\'lib qoladi (masalan 2023, 2024, 2023, 2024 aralash tartibda). sort_index() bu tartibsizlikni hal qiladi — barcha qavatlarni mantiqiy, alifbo yoki son tartibida joylashtiradi.\n\nNEGA IKKALASI BIRGA ISHLATILADI? Amalda swaplevel() dan keyin deyarli har doim sort_index() chaqiriladi — chunki almashtirilgan indeks odatda tartibsiz bo\'lib qoladi, va tartibsiz ma\'lumot bilan ishlash (filtrlash, .loc[] orqali qidirish) qiyinroq bo\'ladi.',
+sim:'>>> idx = pd.MultiIndex.from_arrays(\n...   [[\'T\',\'T\',\'S\',\'S\'],[2023,2024,2023,2024]],\n...   names=[\'Shahar\',\'Yil\'])\n>>> s = pd.Series([100,120,80,90], index=idx)\n>>> s.swaplevel()\nYil   Shahar\n2023  T         100\n2024  T         120\n2023  S          80\n2024  S          90\n>>> s.swaplevel().sort_index()\nYil   Shahar\n2023  S          80\n      T         100\n2024  S          90\n      T         120',
+eskizlar:[
+{q:'MultiIndex Series da swaplevel() bilan qavatlar o\'rnini almashtiring.',
+ lines:[
+  {c:'import pandas as pd',n:'Siz pandas kutubxonasini pd nomi bilan yukladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'idx = pd.MultiIndex',n:'Siz MultiIndex yaratishni boshladingiz'},
+  {c:'  .from_arrays([',n:'Siz massivlar ro\'yxatini berishni boshladingiz'},
+  {c:'  [\'T\',\'T\',\'S\',\'S\'],',n:'Siz shaharlar massivini qisqartma bilan qo\'shdingiz'},
+  {c:'  [2023,2024,2023,2024]],',n:'Siz yillar massivini qo\'shdingiz'},
+  {c:'  names=[\'Shahar\',\'Yil\'])',n:'Siz har qavatga nom berdingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'s = pd.Series([100,120,',n:'Siz Series qiymatlarini berishni boshladingiz'},
+  {c:'  80,90], index=idx)',n:'Siz Series yaratishni yakunladingiz'},
+  {c:'print(s.swaplevel())',n:'Siz qavatlar o\'rnini almashtirib chiqardingiz'},
+ ]},
+{q:'swaplevel() dan keyin sort_index() bilan tartibga soling.',
+ lines:[
+  {c:'import pandas as pd',n:'Siz pandas kutubxonasini pd nomi bilan yukladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'idx = pd.MultiIndex',n:'Siz MultiIndex yaratishni boshladingiz'},
+  {c:'  .from_arrays([',n:'Siz massivlar ro\'yxatini berishni boshladingiz'},
+  {c:'  [\'T\',\'T\',\'S\',\'S\'],',n:'Siz shaharlar massivini qo\'shdingiz'},
+  {c:'  [2023,2024,2023,2024]],',n:'Siz yillar massivini qo\'shdingiz'},
+  {c:'  names=[\'Shahar\',\'Yil\'])',n:'Siz har qavatga nom berdingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'s = pd.Series([100,120,',n:'Siz Series qiymatlarini berishni boshladingiz'},
+  {c:'  80,90], index=idx)',n:'Siz Series yaratishni yakunladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'almashgan = s.swaplevel()',n:'Siz avval qavatlarni almashtirdingiz'},
+  {c:'natija = almashgan',n:'Siz tartibga solishni boshladingiz'},
+  {c:'  .sort_index()',n:'Siz sort_index() bilan saraladingiz'},
+  {c:'print(natija)',n:'Siz natijani ekranga chiqardingiz'},
+ ]},
+{q:'DataFrame uchun swaplevel(0,1) bilan aniq qavatlarni ko\'rsatib almashtiring.',
+ lines:[
+  {c:'import pandas as pd',n:'Siz pandas kutubxonasini pd nomi bilan yukladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'df = pd.DataFrame({',n:'Siz DataFrame yaratishni boshladingiz'},
+  {c:'  \'Shahar\':[\'T\',\'T\',\'S\'],',n:'Siz Shahar ustunini qo\'shdingiz'},
+  {c:'  \'Yil\':[2023,2024,2023],',n:'Siz Yil ustunini qo\'shdingiz'},
+  {c:'  \'Savdo\':[100,120,80]',n:'Siz Savdo ustunini qo\'shdingiz'},
+  {c:'}).set_index(',n:'Siz indeksni o\'rnatishni boshladingiz'},
+  {c:'  [\'Shahar\',\'Yil\'])',n:'Siz ikki ustunni MultiIndex qildingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'natija = df.swaplevel(',n:'Siz aniq qavatlarni ko\'rsatib almashtirishni boshladingiz'},
+  {c:'  0, 1).sort_index()',n:'Siz 0 va 1-qavatlarni almashtirib saraladingiz'},
+  {c:'print(natija)',n:'Siz natijani ekranga chiqardingiz'},
+ ]},
+]},
+
+{id:'12.6',f:'pandas_12_6.py',
+plan:['merge() — ikki jadvalni umumiy ustun bo\'yicha birlashtirish','how parametri — inner, left, right','concat() — jadvallarni ustma-ust qo\'shish'],
+terms:[
+  ['merge()','Ikki DataFrame ni umumiy ustun (kalit) bo\'yicha birlashtirish',
+    {text:'merge() — pandas dagi SQL JOIN ga o\'xshash vosita. Ikki jadvalda umumiy ustun (masalan ID) bo\'lsa, merge() ularni shu ustun orqali "moslashtiradi" va bitta katta jadvalga birlashtiradi. Bu real loyihalarda juda tez-tez kerak bo\'ladi — chunki ma\'lumotlar kamdan-kam holda bitta jadvalda keladi.',
+     code:'pd.merge(df1, df2, on=\'ID\')',
+     sim:'   ID  Ism   Bolim\n0   1  Ali      IT\n1   2  Vali     HR'}],
+  ['on','Qaysi ustun bo\'yicha birlashtirish kerakligini ko\'rsatish',
+    {text:'on parametri — merge() ga "qaysi ustun orqali bog\'laymiz" deb ko\'rsatish uchun. Bu ustun IKKALA jadvalda ham mavjud bo\'lishi kerak, va mos kelgan qiymatlar birlashtiriladi. Agar ustun nomlari farqli bo\'lsa, left_on va right_on parametrlari ishlatiladi.',
+     code:'# Bir xil nom\npd.merge(df1, df2, on=\'ID\')\n# Har xil nom\npd.merge(df1, df2,\n  left_on=\'id\', right_on=\'ID\')',
+     sim:'# on=\'ID\' degani:\n# df1[\'ID\'] == df2[\'ID\'] bo\'lgan\n# qatorlarni birlashtir'}],
+  ['how','Birlashtirish turi: inner, left, right, outer',
+    {text:'how parametri — qaysi qatorlar saqlanishini belgilaydi. inner (standart): faqat ikkala jadvalda ham mos qiymat bor bo\'lgan qatorlar. left: chap jadvaldagi barcha qatorlar, o\'ng jadvalda mos yo\'q bo\'lsa NaN. right: o\'ng jadvaldagi barcha qatorlar. outer: ikkala jadvaldagi barcha qatorlar.',
+     code:'pd.merge(df1, df2, on=\'ID\',\n  how=\'left\')  # barcha chap qator',
+     sim:'   ID   Ism  Bolim\n0   1   Ali     IT\n1   2  Vali     HR\n2   3  Sora    NaN'}],
+  ['concat()','Jadvallarni vertikal yoki gorizontal ulash',
+    {text:'concat() — jadvallarni shunchaki "ustma-ust" (vertikal) yoki "yonma-yon" (gorizontal) qo\'shadi, umumiy kalit talab qilmaydi. merge() dan farqi: merge() ikki jadvalni ma\'no jihatdan "bog\'laydi", concat() esa shunchaki "qo\'shib qo\'yadi". ignore_index=True eski indekslarni o\'chirib, yangisini tartiblab beradi.',
+     code:'pd.concat([df1, df2],\n  ignore_index=True)',
+     sim:'     Ism\n0    Ali\n1   Vali\n2   Sora\n3  Nodira'}]
+],
+detail:'MERGE() NEGA SQL GA O\'XSHAYDI?\n\nmerge() — pandas dagi eng kuchli vositalardan biri, u SQL dagi JOIN operatsiyasiga o\'xshaydi. Ikkita alohida jadvalda umumiy ustun (masalan ID) bo\'lsa, merge() ularni shu umumiy ustun orqali "bog\'laydi" va bitta jadvalga birlashtiradi.\n\nON PARAMETRI: Bu — "qaysi ustun orqali bog\'laymiz" degan ko\'rsatma. Masalan ishchilar jadvalida "ID" bor, bo\'limlar jadvalida ham "ID" bor — on=\'ID\' ikkalasini shu ustun orqali moslashtiradi.\n\nHOW PARAMETRI — 4 TA ASOSIY TUR:\ninner (standart) — faqat ikkala jadvalda ham mavjud bo\'lgan qiymatlar qoladi\nleft — chap jadvaldagi BARCHA qatorlar qoladi, mos kelmasa NaN qo\'yiladi\nright — o\'ng jadvaldagi barcha qatorlar qoladi\nouter — ikkala jadvaldagi barcha qatorlar qoladi\n\nCONCAT() FARQI NIMADA? merge() — ustunlar bo\'yicha "yon-yon" birlashtiradi (umumiy kalit orqali). concat() — jadvallarni shunchaki "ustma-ust" yoki "yonma-yon" qo\'shadi, umumiy kalit talab qilmaydi. Masalan har oy uchun alohida fayl kelsa, concat() bilan ularni bitta katta jadvalga aylantirasiz.',
+sim:'>>> ishchilar = pd.DataFrame({\'ID\':[1,2,3],\n...   \'Ism\':[\'Ali\',\'Vali\',\'Sora\']})\n>>> bolim = pd.DataFrame({\'ID\':[1,2],\n...   \'Bolim\':[\'IT\',\'HR\']})\n>>> pd.merge(ishchilar, bolim, on=\'ID\')\n   ID   Ism Bolim\n0   1   Ali    IT\n1   2  Vali    HR\n>>> pd.merge(ishchilar, bolim,\n...   on=\'ID\', how=\'left\')\n   ID   Ism Bolim\n0   1   Ali    IT\n1   2  Vali    HR\n2   3  Sora   NaN',
+eskizlar:[
+{q:'Ikki jadvalni umumiy "ID" ustuni bo\'yicha merge() bilan birlashtiring.',
+ lines:[
+  {c:'import pandas as pd',n:'Siz pandas kutubxonasini pd nomi bilan yukladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'ishchilar = pd.DataFrame({',n:'Siz ishchilar jadvalini yaratishni boshladingiz'},
+  {c:'  \'ID\':[1,2,3],',n:'Siz ID ustunini qo\'shdingiz'},
+  {c:'  \'Ism\':[\'Ali\',\'Vali\',\'Sora\']',n:'Siz Ism ustunini qo\'shdingiz'},
+  {c:'})',n:'Siz ishchilar jadvalini yakunladingiz'},
+  {c:'bolim = pd.DataFrame({',n:'Siz bo\'lim jadvalini yaratishni boshladingiz'},
+  {c:'  \'ID\':[1,2],',n:'Siz ID ustunini qo\'shdingiz'},
+  {c:'  \'Bolim\':[\'IT\',\'HR\']',n:'Siz Bolim ustunini qo\'shdingiz'},
+  {c:'})',n:'Siz bo\'lim jadvalini yakunladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'natija = pd.merge(',n:'Siz merge() chaqirishni boshladingiz'},
+  {c:'  ishchilar, bolim,',n:'Siz ikkala jadvalni berdingiz'},
+  {c:'  on=\'ID\')',n:'Siz ID ustuni bo\'yicha birlashtirishni ko\'rsatdingiz'},
+  {c:'print(natija)',n:'Siz natijani ekranga chiqardingiz'},
+ ]},
+{q:'how=\'left\' parametri bilan chap jadvaldagi barcha qatorlarni saqlang.',
+ lines:[
+  {c:'import pandas as pd',n:'Siz pandas kutubxonasini pd nomi bilan yukladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'ishchilar = pd.DataFrame({',n:'Siz ishchilar jadvalini yaratishni boshladingiz'},
+  {c:'  \'ID\':[1,2,3],',n:'Siz ID ustunini qo\'shdingiz, 3 ta ishchi bor'},
+  {c:'  \'Ism\':[\'Ali\',\'Vali\',\'Sora\']',n:'Siz Ism ustunini qo\'shdingiz'},
+  {c:'})',n:'Siz ishchilar jadvalini yakunladingiz'},
+  {c:'bolim = pd.DataFrame({',n:'Siz bo\'lim jadvalini yaratishni boshladingiz'},
+  {c:'  \'ID\':[1,2],',n:'Siz ID ustunini qo\'shdingiz, faqat 2 ta bo\'lim'},
+  {c:'  \'Bolim\':[\'IT\',\'HR\']',n:'Siz Bolim ustunini qo\'shdingiz'},
+  {c:'})',n:'Siz bo\'lim jadvalini yakunladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'natija = pd.merge(',n:'Siz merge() chaqirishni boshladingiz'},
+  {c:'  ishchilar, bolim,',n:'Siz ikkala jadvalni berdingiz'},
+  {c:'  on=\'ID\', how=\'left\')',n:'Siz left turi bilan barcha ishchilarni saqladingiz'},
+  {c:'print(natija)',n:'Siz natijani ekranga chiqardingiz, Sora uchun Bolim NaN'},
+ ]},
+{q:'Ikkita jadvalni concat() bilan ustma-ust ulang.',
+ lines:[
+  {c:'import pandas as pd',n:'Siz pandas kutubxonasini pd nomi bilan yukladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'yanvar = pd.DataFrame({',n:'Siz yanvar oyi jadvalini yaratishni boshladingiz'},
+  {c:'  \'Ism\':[\'Ali\',\'Vali\']',n:'Siz Ism ustunini qo\'shdingiz'},
+  {c:'})',n:'Siz yanvar jadvalini yakunladingiz'},
+  {c:'fevral = pd.DataFrame({',n:'Siz fevral oyi jadvalini yaratishni boshladingiz'},
+  {c:'  \'Ism\':[\'Sora\',\'Nodira\']',n:'Siz Ism ustunini qo\'shdingiz'},
+  {c:'})',n:'Siz fevral jadvalini yakunladingiz'},
+  {c:'',n:'Bo\'sh qator'},
+  {c:'natija = pd.concat([',n:'Siz concat() chaqirishni boshladingiz'},
+  {c:'  yanvar, fevral],',n:'Siz ikkala jadvalni ro\'yxat sifatida berdingiz'},
+  {c:'  ignore_index=True)',n:'Siz indeksni qayta tartibladingiz'},
+  {c:'print(natija)',n:'Siz natijani ekranga chiqardingiz'},
+ ]},
+]},
+
+];
+
+var cur = 0;
+var curEskiz = 0;
+var skipOn = false;
+var ghostVisible = true;
+var lineData = [];
+var doneSet = new Set();
+var eskizDoneSet = new Set();
+var checkState = {}; // {topicIdx: {termIdx: true/false}}
+var selectedStar = 0;
+var ratingSubmitted = false;
+var BRIGHT = [0,0.05,0.1,0.2,0.3,0.42,0.55,0.65,0.75,0.85,0.95];
+var SPECIAL = ['{','}','(',')',']','[','\'','"',':',',','.',' '];
+
+window.onload = function(){
+  buildStars();
+  buildTabs();
+  buildIntro();
+  loadMod(0);
+  if(window.visualViewport){
+    var t = null;
+    window.visualViewport.addEventListener('resize', function(){
+      clearTimeout(t);
+      t = setTimeout(function(){
+        var el = document.activeElement;
+        if(!el || !el.classList.contains('line-input')) return;
+        var blk = el.closest('.line-block');
+        if(!blk) return;
+        var vp = window.visualViewport;
+        var rc = blk.getBoundingClientRect();
+        var tgt = window.scrollY + rc.top + rc.height/2 - (vp.offsetTop + vp.height*0.38);
+        window.scrollTo({top:tgt, behavior:'smooth'});
+      }, 150);
+    });
+  }
+};
+
+// ═══════════════════════════════════════════════════════════════
+// INTRO
+// ═══════════════════════════════════════════════════════════════
+function buildIntro(){
+  var totalEskiz = M.reduce(function(s,m){ return s + m.eskizlar.length; }, 0);
+  var h = '<div class="intro-title">'+MODULE_INTRO.title+'</div>';
+  h += '<div class="intro-text">'+esc(MODULE_INTRO.text)+'</div>';
+  h += '<div class="intro-stats">';
+  h += '<div class="intro-stat"><div class="intro-stat-v">'+MODULE_INTRO.count+'</div><div class="intro-stat-l">MAVZU</div></div>';
+  h += '<div class="intro-stat"><div class="intro-stat-v">'+totalEskiz+'</div><div class="intro-stat-l">ESKIZ</div></div>';
+  h += '<div class="intro-stat"><div class="intro-stat-v">Pandas</div><div class="intro-stat-l">KUTUBXONA</div></div>';
+  h += '</div>';
+  document.getElementById('introBox').innerHTML = h;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// MOD YUKLASH
+// ═══════════════════════════════════════════════════════════════
+function loadMod(i){
+  cur = i;
+  curEskiz = 0;
+  document.getElementById('detailPanel').classList.remove('show');
+  document.getElementById('resultPanel').classList.remove('show');
+  document.getElementById('checkBox').classList.remove('show');
+  document.getElementById('badge').className = 'badge';
+  document.getElementById('btnCheckNext').classList.remove('show');
+  var m = M[i];
+  document.getElementById('topSub').textContent = m.id;
+  document.getElementById('svMod').textContent = (i+1)+'/'+M.length;
+  buildTerms(m);
+  loadEskiz();
+  buildTabs();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ATAMALAR PANELI
+// ═══════════════════════════════════════════════════════════════
+function buildTerms(m){
+  var th = '<div class="terms-title">📚 Yangi atamalar:</div>';
+  m.terms.forEach(function(t){
+    th += '<div class="term-row"><span class="term-key">'+esc(t[0])+'</span><span class="term-val">'+esc(t[1])+'</span></div>';
+  });
+  document.getElementById('termsBox').innerHTML = th;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ESKIZ YUKLASH
+// ═══════════════════════════════════════════════════════════════
+function loadEskiz(){
+  var m = M[cur];
+  var e = m.eskizlar[curEskiz];
+  document.getElementById('detailPanel').classList.remove('show');
+  document.getElementById('resultPanel').classList.remove('show');
+  document.getElementById('badge').className = 'badge';
+  document.getElementById('fname').textContent = m.f.replace('.py','_'+(curEskiz+1)+'.py');
+  buildEskizDots();
+  buildEskizQ(e);
+  buildLines(e);
+  updateStats();
+}
+
+function buildEskizQ(e){
+  var existing = document.getElementById('eskizQBox');
+  if(existing) existing.remove();
+  var q = document.createElement('div');
+  q.id = 'eskizQBox';
+  q.style.cssText = 'background:#0d1828;border:1px solid #1e3048;border-left:3px solid #a855f7;border-radius:8px;padding:10px 12px;margin-bottom:10px;font-size:.71rem;line-height:1.8;color:#c4b5fd;white-space:pre-wrap;';
+  q.textContent = 'Eskiz '+(curEskiz+1)+'/'+M[cur].eskizlar.length+' — '+e.q;
+  var anchor = document.getElementById('termsBox');
+  anchor.parentNode.insertBefore(q, anchor.nextSibling);
+}
+
+function buildEskizDots(){
+  var existing = document.getElementById('eskizDotsRow');
+  if(existing) existing.remove();
+  var row = document.createElement('div');
+  row.id = 'eskizDotsRow';
+  row.style.cssText = 'display:flex;gap:6px;justify-content:center;margin-bottom:10px;';
+  M[cur].eskizlar.forEach(function(_,i){
+    var key = cur+'-'+i;
+    var dot = document.createElement('div');
+    dot.style.cssText = 'height:6px;border-radius:3px;cursor:pointer;transition:all .2s;';
+    dot.style.width = (i===curEskiz ? '40px' : '26px');
+    dot.style.background = eskizDoneSet.has(key) ? '#22c55e' : (i===curEskiz ? '#00f0c8' : '#1e3048');
+    dot.onclick = (function(idx){ return function(){ curEskiz=idx; loadEskiz(); }; })(i);
+    row.appendChild(dot);
+  });
+  var qBox = document.getElementById('eskizQBox');
+  if(qBox) qBox.parentNode.insertBefore(row, qBox);
+  else document.getElementById('termsBox').parentNode.insertBefore(row, document.getElementById('termsBox').nextSibling);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// QATORLARNI QURISHISH
+// ═══════════════════════════════════════════════════════════════
+function buildLines(e){
+  var wrap = document.getElementById('linesWrap');
+  wrap.innerHTML = '';
+  lineData = [];
+  var op = BRIGHT[parseInt(document.getElementById('brightSlider').value)||3];
+  e.lines.forEach(function(ln, i){
+    var isCom = ln.c.replace(/^\s+/,'').charAt(0) === '#';
+    var isEmpty = ln.c === '';
+    var endsWithBrace = /[\{\(\[]\s*$/.test(ln.c);
+    var block = document.createElement('div');
+    block.className = 'line-block';
+    var row = document.createElement('div');
+    row.className = 'line-row';
+    var num = document.createElement('div');
+    num.className = 'line-num';
+    num.id = 'num'+i;
+    num.textContent = isEmpty ? '' : (i+1);
+    var content = document.createElement('div');
+    content.className = 'line-content';
+    var ghost = document.createElement('div');
+    ghost.className = 'line-ghost' + ((isCom&&skipOn) ? ' skip-c' : '');
+    ghost.id = 'ghost'+i;
+    ghost.style.color = ghostVisible ? 'rgba(74,96,128,'+op+')' : 'transparent';
+    ghost.textContent = ln.c || ' ';
+    var colors = document.createElement('div');
+    colors.className = 'line-colors';
+    colors.id = 'clr'+i;
+    var inp = document.createElement('input');
+    inp.type = 'text';
+    inp.className = 'line-input';
+    inp.id = 'inp'+i;
+    inp.setAttribute('spellcheck','false');
+    inp.setAttribute('autocorrect','off');
+    inp.setAttribute('autocapitalize','off');
+    inp.setAttribute('autocomplete','off');
+    if(isEmpty||(isCom&&skipOn)) inp.disabled = true;
+    (function(idx,target,noteText,brace){
+      inp.addEventListener('input',function(){
+        if(!target) return;
+        updateLineClr(idx,target);
+        if(brace && inp.value.length>0 && /[\{\(\[]\s*$/.test(inp.value)){
+          var n=document.getElementById('num'+idx);
+          if(n) n.style.color='#a855f7';
+        }
+        if(inp.value===target && target!=='' && noteText!==''){
+          showNote(idx);
+        } else if(inp.value!==target){
+          hideNote(idx);
+        }
+        updateStats();
+      });
+    })(i, ln.c, ln.n, endsWithBrace);
+    content.appendChild(ghost);
+    content.appendChild(colors);
+    content.appendChild(inp);
+    row.appendChild(num);
+    row.appendChild(content);
+    var note = document.createElement('div');
+    note.className = 'line-done-note';
+    note.id = 'note'+i;
+    note.textContent = ln.n ? ('✅ '+ln.n+'!') : '';
+    block.appendChild(row);
+    if(ln.n) block.appendChild(note);
+    wrap.appendChild(block);
+    lineData.push({inp:inp, target:ln.c, isCom:isCom, isEmpty:isEmpty});
+  });
+}
+
+function updateLineClr(idx, target){
+  var inp = document.getElementById('inp'+idx);
+  var clr = document.getElementById('clr'+idx);
+  if(!inp||!clr) return;
+  var typed = inp.value;
+  var html = '';
+  for(var ci=0;ci<target.length;ci++){
+    var ch = target[ci];
+    if(ci<typed.length){
+      html += typed[ci]===ch
+        ? '<span style="color:#22c55e">'+esc(ch)+'</span>'
+        : '<span style="color:#f43f5e;text-decoration:underline">'+esc(ch)+'</span>';
+    } else {
+      html += '<span style="color:transparent">'+esc(ch)+'</span>';
+    }
+  }
+  clr.innerHTML = html;
+  var num = document.getElementById('num'+idx);
+  if(num) num.style.color = (typed===target&&target!=='') ? '#22c55e' : '';
+}
+
+function showNote(i){ var n=document.getElementById('note'+i); if(n&&n.textContent) n.classList.add('show'); }
+function hideNote(i){ var n=document.getElementById('note'+i); if(n) n.classList.remove('show'); }
+
+// ═══════════════════════════════════════════════════════════════
+// @ UNIVERSAL BELGI TUGMASI — fokusdan mustaqil
+// ═══════════════════════════════════════════════════════════════
+function insertAtSymbol(){
+  var activeInp = null, activeIdx = -1;
+  // 1. Fokusda turgan inputni top
+  for(var i=0;i<lineData.length;i++){
+    if(lineData[i].inp === document.activeElement){ activeInp=lineData[i].inp; activeIdx=i; break; }
+  }
+  // 2. Fokusda yo'q — yozilmagan birinchi qatorni top
+  if(!activeInp){
+    for(var j=0;j<lineData.length;j++){
+      var l=lineData[j];
+      if(l.target===''||l.isCom||l.inp.disabled||l.inp.value===l.target) continue;
+      activeInp=l.inp; activeIdx=j; break;
+    }
+  }
+  if(!activeInp){ showBadge('o','💡 Barcha qatorlar to`ldirilgan!'); return; }
+
+  // Ushbu va keyingi qatorlarda maxsus belgini top
+  function findNext(startLine, startPos){
+    for(var li=startLine;li<lineData.length;li++){
+      var tg=lineData[li].target;
+      var from = (li===startLine) ? startPos : 0;
+      if(tg===''||lineData[li].isCom||lineData[li].inp.disabled||lineData[li].inp.value===tg) continue;
+      for(var ci=from;ci<tg.length;ci++){
+        if(SPECIAL.indexOf(tg[ci])!==-1) return {li:li, ci:ci};
+      }
+    }
+    return null;
+  }
+
+  var pos = activeInp.value.length;
+  var found = findNext(activeIdx, pos);
+  if(!found){ showBadge('o','💡 Qolgan qatorlarda maxsus belgi yo`q'); return; }
+
+  // Topilgan joyga o't va kirit
+  activeInp = lineData[found.li].inp;
+  activeIdx = found.li;
+  var target = lineData[found.li].target;
+  activeInp.value = target.substring(0, found.ci+1);
+  updateLineClr(activeIdx, target);
+
+  // Sariq rang effekti
+  var num=document.getElementById('num'+activeIdx);
+  if(num){ num.style.color='#f59e0b'; setTimeout(function(){ num.style.color=(activeInp.value===target&&target!=='')?'#22c55e':''; },400); }
+  if(activeInp.value===target&&target!==''){ var nt=M[cur].eskizlar[curEskiz].lines[activeIdx].n; if(nt) showNote(activeIdx); }
+  updateStats();
+  if(activeInp.focus) activeInp.focus();
+}
+
+function showBadge(type, msg){
+  var b=document.getElementById('badge');
+  b.className='badge show '+type;
+  b.textContent=msg;
+  setTimeout(function(){ b.className='badge'; },2000);
+}
+
+
+// ═══════════════════════════════════════════════════════════════
+// TEKSHIRISH
+// ═══════════════════════════════════════════════════════════════
+function doCheck(){
+  var e = M[cur].eskizlar[curEskiz];
+  var done=0, total=0, errors=[];
+  lineData.forEach(function(l,i){
+    if(l.isEmpty||(l.isCom&&skipOn)) return;
+    total++;
+    if(l.inp.value===l.target){
+      done++;
+      document.getElementById('num'+i).style.color='#22c55e';
+      if(e.lines[i].n) showNote(i);
+    } else {
+      errors.push(i+1);
+      document.getElementById('num'+i).style.color='#f43f5e';
+    }
+  });
+  var pct = total>0 ? Math.round(done/total*100) : 0;
+  var b = document.getElementById('badge');
+  b.className = 'badge show';
+  if(pct>=85){
+    b.className += ' g';
+    var key = cur+'-'+curEskiz;
+    eskizDoneSet.add(key);
+    buildEskizDots();
+    var isLastEskiz = curEskiz === M[cur].eskizlar.length-1;
+    if(isLastEskiz){
+      doneSet.add(cur);
+      b.textContent = '✅ Zo\'r! '+pct+'% — barcha eskizlar tugadi!';
+      showCheckBox();
+    } else {
+      b.textContent = '✅ Zo\'r! '+pct+'% — keyingi eskizga o\'ting →';
+      setTimeout(function(){
+        curEskiz++;
+        loadEskiz();
+      }, 900);
+    }
+    showRating();
+  } else if(pct>=55){
+    b.className += ' o';
+    b.textContent = '⚡ '+pct+'% — xato qatorlar: '+errors.join(', ')+'-qator';
+  } else {
+    b.className += ' r';
+    b.textContent = '❌ '+pct+'% — qaytadan urinib ko\'ring';
+  }
+  updateStats();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// TUSHUNDINGIZMI TIZIMI
+// ═══════════════════════════════════════════════════════════════
+function showCheckBox(){
+  var m = M[cur];
+  var box = document.getElementById('checkBox');
+  var items = document.getElementById('checkItems');
+  box.classList.add('show');
+  if(!checkState[cur]) checkState[cur] = {};
+
+  items.innerHTML = '';
+  m.terms.forEach(function(t, ti){
+    var state = checkState[cur][ti]; // true=tushundim, false=tushunmadim, undefined=tanlanmagan
+
+    var item = document.createElement('div');
+    item.className = 'check-item';
+    item.id = 'chkitem'+ti;
+
+    var top = document.createElement('div');
+    top.className = 'check-item-top';
+
+    var term = document.createElement('div');
+    term.className = 'check-term';
+    term.textContent = t[0];
+
+    var btns = document.createElement('div');
+    btns.className = 'check-btns';
+
+    var btnYes = document.createElement('button');
+    btnYes.className = 'check-btn yes' + (state===true ? ' active' : '');
+    btnYes.textContent = '✅ Tushundim';
+    btnYes.onclick = (function(idx){ return function(){ markCheck(idx, true); }; })(ti);
+
+    var btnNo = document.createElement('button');
+    btnNo.className = 'check-btn no' + (state===false ? ' active' : '');
+    btnNo.textContent = '❌ Tushunmadim';
+    btnNo.onclick = (function(idx){ return function(){ markCheck(idx, false); }; })(ti);
+
+    btns.appendChild(btnYes);
+    btns.appendChild(btnNo);
+    top.appendChild(term);
+    top.appendChild(btns);
+    item.appendChild(top);
+
+    // Extra panel (tushunmadim bosilganda)
+    if(t[2] && state===false){
+      var extra = buildExtraPanel(t[2]);
+      extra.classList.add('show');
+      item.appendChild(extra);
+    } else if(t[2]){
+      var extra2 = buildExtraPanel(t[2]);
+      item.appendChild(extra2);
+    }
+
+    items.appendChild(item);
+  });
+
+  updateCheckDone();
+}
+
+function buildExtraPanel(ex){
+  var div = document.createElement('div');
+  div.className = 'check-extra';
+  div.innerHTML =
+    '<div class="check-extra-section">'
+    +'<div class="check-extra-label">📖 Tushuntirish</div>'
+    +'<div class="check-extra-text">'+esc(ex.text)+'</div>'
+    +'</div>'
+    +'<div class="check-extra-section">'
+    +'<div class="check-extra-label">✏️ Misol kod</div>'
+    +'<div class="check-extra-code">'+esc(ex.code)+'</div>'
+    +'</div>'
+    +'<div class="check-extra-section">'
+    +'<div class="check-extra-label">📊 Natija</div>'
+    +'<div class="check-extra-sim">'+esc(ex.sim)+'</div>'
+    +'</div>';
+  return div;
+}
+
+function markCheck(termIdx, understood){
+  if(!checkState[cur]) checkState[cur] = {};
+  checkState[cur][termIdx] = understood;
+  showCheckBox(); // qayta render
+}
+
+function updateCheckDone(){
+  var m = M[cur];
+  var total = m.terms.length;
+  var answered = 0;
+  if(checkState[cur]){
+    for(var k in checkState[cur]) answered++;
+  }
+  var allDone = answered >= total;
+  document.getElementById('checkAllDone').classList.toggle('show', allDone);
+  document.getElementById('btnCheckNext').classList.toggle('show', allDone && cur < M.length-1);
+}
+
+function goNextTopicFromCheck(){
+  loadMod(cur+1);
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+// ═══════════════════════════════════════════════════════════════
+// STATISTIKA
+// ═══════════════════════════════════════════════════════════════
+function updateStats(){
+  var done=0, total=0;
+  lineData.forEach(function(l){
+    if(l.isEmpty||(l.isCom&&skipOn)) return;
+    total++;
+    if(l.inp.value===l.target) done++;
+  });
+  var pct = total>0 ? Math.round(done/total*100) : 0;
+  document.getElementById('svPctV').textContent = done>0 ? pct+'%' : '—';
+  document.getElementById('svDone').textContent = done+'/'+total;
+  document.getElementById('progressFill').style.width = (doneSet.size/M.length*100)+'%';
+  buildTabs();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// TOZALASH
+// ═══════════════════════════════════════════════════════════════
+function doClear(){
+  lineData.forEach(function(l,i){
+    l.inp.value='';
+    var clr=document.getElementById('clr'+i);
+    if(clr) clr.innerHTML='';
+    var num=document.getElementById('num'+i);
+    if(num) num.style.color='';
+    hideNote(i);
+  });
+  document.getElementById('badge').className='badge';
+  updateStats();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// TOGGLELAR
+// ═══════════════════════════════════════════════════════════════
+function toggleGhost(){
+  ghostVisible = !ghostVisible;
+  document.querySelectorAll('.line-ghost').forEach(function(g){
+    g.style.visibility = ghostVisible ? 'visible' : 'hidden';
+  });
+  document.getElementById('ghostBtn').textContent = ghostVisible ? '👁️ Yashir' : '👁️ Ko\'rsat';
+}
+
+function toggleSkip(){
+  skipOn = !skipOn;
+  document.getElementById('sw').classList.toggle('on', skipOn);
+  document.getElementById('skipLbl').textContent = skipOn ? 'Kommentlar o\'tkazilmoqda' : '# Kommentlarni o\'tkazib yuboring';
+  buildLines(M[cur].eskizlar[curEskiz]);
+  applyBright();
+  updateStats();
+}
+
+function toggleDetail(){
+  var p = document.getElementById('detailPanel');
+  if(p.classList.contains('show')){ p.classList.remove('show'); }
+  else { document.getElementById('detailContent').textContent = M[cur].detail; p.classList.add('show'); }
+}
+
+function toggleResult(){
+  var p = document.getElementById('resultPanel');
+  if(p.classList.contains('show')){ p.classList.remove('show'); }
+  else { document.getElementById('simWrap').innerHTML = '<pre>'+esc(M[cur].sim)+'</pre>'; p.classList.add('show'); }
+}
+
+function setBright(v){
+  document.getElementById('brightVal').textContent = v;
+  applyBright();
+}
+
+function applyBright(){
+  var v = parseInt(document.getElementById('brightSlider').value)||3;
+  var op = BRIGHT[v];
+  document.querySelectorAll('.line-ghost').forEach(function(g){
+    if(!g.classList.contains('skip-c') && ghostVisible)
+      g.style.color = 'rgba(74,96,128,'+op+')';
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// TABLAR
+// ═══════════════════════════════════════════════════════════════
+function buildTabs(){
+  var c = document.getElementById('tabs');
+  c.innerHTML = '';
+  M.forEach(function(m,i){
+    var d = document.createElement('div');
+    d.className = 'tab'+(i===cur?' on':'')+(doneSet.has(i)?' done':'');
+    d.textContent = m.id;
+    d.onclick = (function(n){ return function(){ loadMod(n); }; })(i);
+    c.appendChild(d);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// REYTING
+// ═══════════════════════════════════════════════════════════════
+function buildStars(){
+  var sc = document.getElementById('stars');
+  sc.innerHTML = '';
+  for(var i=1;i<=10;i++){
+    var s = document.createElement('span');
+    s.className = 'star';
+    s.textContent = '⭐';
+    s.dataset.v = i;
+    s.onclick = (function(v){
+      return function(){
+        selectedStar = v;
+        document.getElementById('ratingScore').textContent = v+' / 10';
+        document.querySelectorAll('.star').forEach(function(st){
+          st.classList.toggle('on', parseInt(st.dataset.v)<=v);
+        });
+      };
+    })(i);
+    sc.appendChild(s);
+  }
+}
+
+function showRating(){
+  document.getElementById('ratingBox').classList.add('show');
+}
+
+function submitRating(){
+  if(ratingSubmitted) return;
+  if(selectedStar===0){ alert('Iltimos baho tanlang!'); return; }
+  ratingSubmitted = true;
+  document.getElementById('ratingThanks').style.display = 'block';
+  document.querySelector('.rating-submit').style.display = 'none';
+}
+
+function esc(s){
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+</script>
+</body>
+</html>
