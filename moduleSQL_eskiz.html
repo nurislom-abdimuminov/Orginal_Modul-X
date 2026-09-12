@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Eskiz — 23-Bonus SQL/PostgreSQL</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:#0a0e1a;color:#dde5f0;font-family:'JetBrains Mono',monospace;font-size:13px;min-height:100vh;}
+.top{background:#0f1520;border-bottom:1px solid #1e3048;padding:8px 14px;display:flex;align-items:center;gap:8px;position:sticky;top:0;z-index:50;}
+.top-t{color:#00f0c8;font-size:.78rem;font-weight:700;}
+.top-s{color:#4a6080;font-size:.65rem;margin-left:auto;}
+.bright-bar{background:#0f1520;border-bottom:1px solid #1e3048;padding:6px 14px;display:flex;align-items:center;gap:10px;position:sticky;top:41px;z-index:49;}
+.bright-lbl{font-size:.65rem;color:#4a6080;flex-shrink:0;}
+.bright-slider{flex:1;-webkit-appearance:none;height:4px;border-radius:2px;background:#1e3048;outline:none;cursor:pointer;}
+.bright-slider::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:#00f0c8;cursor:pointer;}
+.bright-val{font-size:.68rem;color:#00f0c8;font-weight:700;width:20px;text-align:right;flex-shrink:0;}
+.wrap{padding:10px 14px;max-width:540px;margin:0 auto;}
+.tabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;margin-bottom:10px;scrollbar-width:none;}
+.tabs::-webkit-scrollbar{display:none;}
+.tab{flex-shrink:0;padding:6px 12px;border-radius:20px;border:1px solid #1e3048;background:#141e2e;color:#4a6080;font-size:.68rem;cursor:pointer;transition:all .15s;}
+.tab.on{border-color:#00f0c8;color:#00f0c8;background:rgba(0,240,200,.08);}
+.tab.done{border-color:#22c55e;color:#22c55e;background:rgba(34,197,94,.06);}
+.skip-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;padding:8px 12px;background:#141e2e;border:1px solid #1e3048;border-radius:8px;cursor:pointer;}
+.skip-row span{font-size:.7rem;color:#4a6080;}
+.sw{width:34px;height:18px;background:#1e3048;border-radius:10px;position:relative;transition:background .2s;flex-shrink:0;}
+.sw.on{background:#fbbf24;}
+.sw::after{content:'';position:absolute;top:2px;left:2px;width:14px;height:14px;background:#fff;border-radius:50%;transition:left .2s;}
+.sw.on::after{left:18px;}
+.stats{display:flex;gap:8px;margin-bottom:10px;}
+.stat{flex:1;background:#141e2e;border:1px solid #1e3048;border-radius:8px;padding:7px 8px;text-align:center;}
+.sv{font-size:.95rem;font-weight:700;color:#00f0c8;}
+.sl{font-size:.58rem;color:#4a6080;margin-top:2px;}
+.progress-bar{height:3px;background:#1e3048;border-radius:2px;margin-bottom:10px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,#00f0c8,#2563eb);border-radius:2px;transition:width .4s;}
+.intro-box{background:#0d1828;border:1px solid #1e3048;border-left:3px solid #00f0c8;border-radius:10px;padding:14px;margin-bottom:10px;}
+.intro-title{font-size:.8rem;font-weight:700;color:#00f0c8;margin-bottom:8px;}
+.intro-text{font-size:.7rem;line-height:1.85;color:#9fb0c8;margin-bottom:10px;white-space:pre-wrap;}
+.intro-stats{display:flex;gap:8px;margin-top:10px;}
+.intro-stat{flex:1;background:#080c14;border:1px solid #1e3048;border-radius:8px;padding:8px;text-align:center;}
+.intro-stat-v{font-size:1.1rem;font-weight:700;color:#00f0c8;}
+.intro-stat-l{font-size:.58rem;color:#4a6080;margin-top:2px;}
+.terms-box{background:#080c14;border:1px solid #1e3048;border-left:3px solid #a855f7;border-radius:8px;padding:10px 12px;margin-bottom:10px;}
+.terms-title{font-size:.68rem;font-weight:700;color:#a855f7;margin-bottom:8px;}
+.term-row{display:flex;gap:6px;margin-bottom:5px;align-items:flex-start;}
+.term-key{font-size:.64rem;color:#fbbf24;font-weight:700;min-width:110px;flex-shrink:0;}
+.term-val{font-size:.63rem;color:#4a6080;line-height:1.6;}
+.detail-panel{display:none;background:#0a1628;border:1px solid #2563eb;border-radius:8px;padding:12px 14px;margin-bottom:10px;font-size:.72rem;line-height:2;color:#93c5fd;white-space:pre-wrap;}
+.detail-panel.show{display:block;}
+.detail-title{color:#60a5fa;font-weight:700;margin-bottom:8px;font-size:.76rem;}
+.result-panel{display:none;background:#080c14;border:1px solid #22c55e;border-radius:10px;padding:12px;margin-bottom:10px;}
+.result-panel.show{display:block;}
+.result-title{color:#22c55e;font-size:.72rem;font-weight:700;margin-bottom:8px;}
+.sim-wrap{width:100%;overflow-x:auto;}
+.sim-wrap pre{font-size:.68rem;line-height:1.9;color:#22c55e;white-space:pre;}
+.code-block{border:1px solid #1e3048;border-radius:10px;overflow:hidden;margin-bottom:10px;background:#090d18;}
+.fbar{display:flex;align-items:center;gap:5px;padding:7px 12px;background:#0f1520;border-bottom:1px solid #1e3048;}
+.dot{width:6px;height:6px;border-radius:50%;}
+.dot.r{background:#f43f5e;}.dot.y{background:#fbbf24;}.dot.g{background:#22c55e;}
+.fn{font-size:.65rem;color:#4a6080;margin-left:4px;}
+.fhint{margin-left:auto;font-size:.6rem;color:#00f0c8;opacity:.7;}
+.lines-wrap{padding:4px 0;}
+.line-block{margin:0;}
+.line-row{display:flex;align-items:center;position:relative;min-height:30px;}
+.line-num{width:28px;flex-shrink:0;font-size:.63rem;padding:4px 4px 4px 5px;color:#2a3a50;text-align:right;user-select:none;transition:color .2s;align-self:center;}
+.line-content{flex:1;position:relative;overflow-x:auto;overflow-y:hidden;min-height:30px;}
+.line-content::-webkit-scrollbar{height:2px;}
+.line-content::-webkit-scrollbar-thumb{background:#1e3048;border-radius:1px;}
+.line-ghost{font-size:.76rem;line-height:1.8;padding:4px 8px;white-space:pre;pointer-events:none;min-height:30px;display:block;}
+.line-ghost.skip-c{opacity:.08!important;}
+.line-colors{position:absolute;top:0;left:0;font-size:.76rem;line-height:1.8;padding:4px 8px;white-space:pre;pointer-events:none;z-index:2;min-height:30px;}
+.line-input{position:absolute;top:0;left:0;right:0;bottom:0;width:100%;font-family:'JetBrains Mono',monospace;font-size:.76rem;line-height:1.8;padding:4px 8px;color:transparent;-webkit-text-fill-color:transparent;caret-color:#00f0c8;background:transparent;border:none;outline:none;white-space:pre;overflow:hidden;z-index:10;-webkit-appearance:none;}
+.line-input:disabled{cursor:default;}
+.line-done-note{display:none;font-size:.66rem;line-height:1.6;padding:3px 8px 3px 34px;color:#38bdf8;background:rgba(56,189,248,.06);border-left:2px solid #38bdf8;white-space:pre-wrap;animation:fadeIn .25s ease;}
+.line-done-note.show{display:block;}
+.line-start-note{display:none;font-size:.64rem;line-height:1.6;padding:3px 8px 3px 34px;color:#a855f7;background:rgba(168,85,247,.06);border-left:2px solid #a855f7;white-space:pre-wrap;animation:fadeIn .25s ease;}
+.line-start-note.show{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:translateY(0)}}
+.btn-row{display:flex;gap:6px;flex-wrap:wrap;padding:9px 12px;background:#0f1520;border-top:1px solid #1e3048;}
+.btn{padding:8px 11px;border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:.68rem;font-weight:700;border:none;cursor:pointer;flex-shrink:0;transition:opacity .15s;}
+.btn:active{opacity:.7;}
+.btn-chk{background:#00f0c8;color:#080c14;}
+.btn-clr{background:transparent;border:1px solid #1e3048;color:#4a6080;}
+.btn-det{background:#2563eb;color:#fff;}
+.btn-ghost{background:#7c3aed;color:#fff;}
+.btn-res{background:#16a34a;color:#fff;}
+.badge{display:none;margin:0 12px 10px;padding:7px 12px;border-radius:8px;font-size:.7rem;border:1px solid #1e3048;}
+.badge.show{display:block;}
+.badge.g{border-color:#22c55e;color:#22c55e;background:rgba(34,197,94,.07);}
+.badge.o{border-color:#fbbf24;color:#fbbf24;background:rgba(251,191,36,.07);}
+.badge.r{border-color:#f43f5e;color:#f43f5e;background:rgba(244,63,94,.07);}
+.rating-box{background:#0d1828;border:1px solid #fbbf24;border-radius:12px;padding:14px 16px;margin-top:10px;display:none;}
+.rating-box.show{display:block;}
+.rating-title{font-size:.72rem;font-weight:700;color:#fbbf24;text-align:center;margin-bottom:4px;}
+.rating-sub{font-size:.62rem;color:#4a6080;text-align:center;margin-bottom:12px;}
+.stars{display:flex;justify-content:center;gap:4px;margin-bottom:10px;flex-wrap:wrap;}
+.star{font-size:1.5rem;cursor:pointer;filter:grayscale(1);opacity:.35;transition:transform .1s,filter .1s,opacity .1s;user-select:none;}
+.star.on{filter:none;opacity:1;}
+.star:active{transform:scale(1.3);}
+.rating-score{text-align:center;font-size:.72rem;color:#fbbf24;font-weight:700;margin-bottom:8px;min-height:18px;}
+.rating-comment{width:100%;background:#141e2e;border:1px solid #1e3048;border-radius:8px;padding:8px 10px;color:#dde5f0;font-family:'JetBrains Mono',monospace;font-size:.68rem;resize:none;outline:none;margin-bottom:8px;}
+.rating-comment:focus{border-color:#fbbf24;}
+.rating-submit{width:100%;padding:10px;background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#080c14;font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:700;border:none;border-radius:8px;cursor:pointer;}
+.rating-submit:active{opacity:.8;}
+.rating-thanks{display:none;text-align:center;padding:10px;font-size:.72rem;color:#22c55e;font-weight:700;}
+</style>
+</head>
+<body>
+<div class="top">
+  <div class="top-t">✏️ SQL / PostgreSQL</div>
+  <div class="top-s" id="topSub">11.2</div>
+</div>
+<div class="bright-bar">
+  <span class="bright-lbl">👁️ Xiralik:</span>
+  <input type="range" class="bright-slider" id="brightSlider" min="1" max="10" value="3" oninput="setBright(this.value)">
+  <span class="bright-val" id="brightVal">3</span>
+</div>
+<div class="wrap">
+  <div class="stats">
+    <div class="stat"><div class="sv" id="svPctV">—</div><div class="sl">TO'G'RI</div></div>
+    <div class="stat"><div class="sv" id="svDone">0/0</div><div class="sl">BAJARILDI</div></div>
+    <div class="stat"><div class="sv" id="svMod">1/23</div><div class="sl">MAVZU</div></div>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+  <div class="tabs" id="tabs"></div>
+  <div class="skip-row" onclick="toggleSkip()">
+    <div class="sw" id="sw"></div>
+    <span id="skipLbl"># Kommentlarni o'tkazib yuboring</span>
+  </div>
+
+  <div class="intro-box" id="introBox"></div>
+
+  <div class="terms-box" id="termsBox"></div>
+  <div class="detail-panel" id="detailPanel">
+    <div class="detail-title">📘 BATAFSIL</div>
+    <div id="detailContent"></div>
+  </div>
+  <div class="result-panel" id="resultPanel">
+    <div class="result-title">📊 NATIJA — SIMULYATSIYA</div>
+    <div class="sim-wrap" id="simWrap"></div>
+  </div>
+  <div class="code-block">
+    <div class="fbar">
+      <div class="dot r"></div><div class="dot y"></div><div class="dot g"></div>
+      <div class="fn" id="fname">sorov_1.step</div>
+      <div class="fhint">↔️ suring ✏️ yozing</div>
+    </div>
+    <div class="lines-wrap" id="linesWrap"></div>
+    <div class="btn-row">
+      <button class="btn btn-chk" onclick="doCheck()">✅ Tekshir</button>
+      <button class="btn btn-clr" onclick="doClear()">🗑️ Tozala</button>
+      <button class="btn btn-ghost" id="ghostBtn" onclick="toggleGhost()">👁️ Yashir</button>
+      <button class="btn btn-det" onclick="toggleDetail()">📖 Batafsil</button>
+      <button class="btn btn-res" onclick="toggleResult()">📊 Natija</button>
+    </div>
+    <div class="badge" id="badge"></div>
+  </div>
+  <div class="rating-box" id="ratingBox">
+    <div class="rating-title">⭐ SQL modulini baholang</div>
+    <div class="rating-sub">Fikringiz keyingi versiyani yaxshilashga yordam beradi</div>
+    <div class="stars" id="stars"></div>
+    <div class="rating-score" id="ratingScore">Baho tanlang (1–10)</div>
+    <textarea class="rating-comment" id="ratingComment" rows="2" placeholder="Izoh: nima yoqdi, nima yetishmadi..."></textarea>
+    <button class="rating-submit" onclick="submitRating()">⭐ Yuborish</button>
+    <div class="rating-thanks" id="ratingThanks">✅ Rahmat! Fikringiz qabul qilindi.</div>
+  </div>
+</div>
+
+<script>
+var MODULE_INTRO = {"title": "🗄️ 23-Bonus: SQL / PostgreSQL", "text": "Bu modul Mohirdev kursidagi \"23. Bonus: SQL ma'lumotlar ombori\" bo'limi asosida, PostgreSQL sintaksisida tuzilgan.\n\nO'rnatish (23.2), so'ngso'z va so'rovnoma (23.25-23.26) kabi administrativ qismlar bu yerga kiritilmagan — faqat AMALIY yoziladigan SQL mavzulari bor.\n\nHar bir mavzuda haqiqiy SQL so'rovini qator-qator o'zingiz yozib chiqasiz.", "count": 23};
+
+var M = [{"id": "23.1", "f": "sorov_1.step", "terms": [["SQL", "Ma'lumotlar ombori bilan so'zlashish tili (Structured Query Language)"], ["PostgreSQL", "Bepul, kuchli relyatsion ma'lumotlar ombori tizimi (RDBMS)"], ["psql", "PostgreSQL bilan terminal orqali ishlash vositasi"]], "detail": "SQL VA POSTGRESQL NIMA?\n\nSQL — ma'lumotlar omborida ma'lumot so'rash, qo'shish, o'zgartirish va o'chirish uchun til.\n\nPostgreSQL — bu tilni amalga oshiruvchi bepul, ochiq manbali DBMS (Data Base Management System). MySQL'ga o'xshaydi, lekin ba'zi sintaksis farqlari bor (masalan AUTO_INCREMENT o'rniga SERIAL).\n\npsql — PostgreSQL bilan terminal (buyruqlar qatori) orqali ishlash dasturi.", "sim": "MISOL: psql terminalda ma'lumotlar bazalari ro'yxatini ko'rish:\n\n\\l\n\n(backslash + l — databases ro'yxatini chiqaradi)", "eskizlar": [{"q": "psql terminalda barcha ma'lumotlar bazalarini ko'rsatuvchi buyruqni yozing.", "lines": [{"c": "\\l", "n": "Siz barcha bazalar ro'yxatini so'radingiz"}]}, {"q": "psql terminalda yordam (help) chiqaruvchi buyruqni yozing.", "lines": [{"c": "\\?", "n": "Siz yordam menyusini so'radingiz"}]}]}, {"id": "23.3", "f": "sorov_3.step", "terms": [["\\c", "Ma'lumotlar bazasiga ulanish buyrug'i"], ["\\dt", "Joriy bazadagi jadvallar ro'yxatini ko'rsatish"], ["\\d", "Bitta jadval tuzilishini ko'rsatish"], ["\\q", "psql dan chiqish"]], "detail": "PSQL META-BUYRUQLARI\n\n\\c baza_nomi — ma'lum bir bazaga ulanadi.\n\\dt — joriy bazadagi barcha jadvallarni ko'rsatadi.\n\\d jadval_nomi — bitta jadvalning ustunlari va turlarini ko'rsatadi.\n\\q — psql dasturidan chiqadi.\n\nBular SQL buyruqlari EMAS — bu psql dasturining o'ziga xos qisqa buyruqlari (backslash bilan boshlanadi).", "sim": "MISOL: 'do_kon' bazasiga ulanib, jadvallarni ko'rish:\n\n\\c do_kon\n\\dt", "eskizlar": [{"q": "'maktab' nomli bazaga ulaning.", "lines": [{"c": "\\c maktab", "n": "Siz bazaga ulandingiz"}]}, {"q": "Joriy bazadagi barcha jadvallarni ko'rsating.", "lines": [{"c": "\\dt", "n": "Siz jadvallar ro'yxatini so'radingiz"}]}, {"q": "'talabalar' jadvalining tuzilishini (ustunlari) ko'rsating.", "lines": [{"c": "\\d talabalar", "n": "Siz jadval tuzilishini so'radingiz"}]}]}, {"id": "23.4", "f": "sorov_4.step", "terms": [["Ma'lumotlar ombori (DB)", "Bog'liq jadvallar to'plami saqlanadigan joy"], ["Jadval (table)", "Qatorlar va ustunlardan iborat ma'lumot tuzilishi"], ["Qator (row)", "Jadvaldagi bitta yozuv"], ["Ustun (column)", "Jadvaldagi bir turdagi ma'lumot maydoni"]], "detail": "MA'LUMOTLAR OMBORI TUZILISHI\n\nMa'lumotlar ombori (DB) — bir nechta JADVALlardan iborat bo'ladi.\nHar bir JADVAL — Excel jadvaliga o'xshaydi: USTUNlar (ism, yosh...) va QATORlar (har bir talaba — 1 qator).\n\nMisol: 'maktab' bazasida 'talabalar' va 'sinflar' jadvallari bo'lishi mumkin, ular bir-biriga bog'langan.", "sim": "MISOL tuzilma:\n\nBAZA: maktab\n  JADVAL: talabalar (id, ism, yosh, sinf_id)\n  JADVAL: sinflar (id, nomi)", "eskizlar": [{"q": "'talabalar' jadvalining tuzilishini ko'rish uchun buyruq yozing.", "lines": [{"c": "\\d talabalar", "n": "Siz jadval tuzilishini tekshirdingiz"}]}, {"q": "Joriy bazadagi barcha jadvallarni sanab bering.", "lines": [{"c": "\\dt", "n": "Siz barcha jadvallarni so'radingiz"}]}]}, {"id": "23.5", "f": "sorov_5.step", "terms": [["CREATE DATABASE", "Yangi ma'lumotlar ombori yaratish buyrug'i"], ["DROP DATABASE", "Ma'lumotlar omborini o'chirish buyrug'i"]], "detail": "BAZA YARATISH VA O'CHIRISH\n\nCREATE DATABASE baza_nomi;\n\nDROP DATABASE baza_nomi;\n— ⚠️ butun baza va undagi BARCHA jadvallar butunlay o'chadi, ehtiyot bo'ling!\n\nYaratilgandan so'ng, unga ulanish uchun: \\c baza_nomi", "sim": "MISOL: 'internet_dokon' nomli baza yaratish va unga ulanish:\n\nCREATE DATABASE internet_dokon;\n\\c internet_dokon", "eskizlar": [{"q": "'maktab' nomli yangi ma'lumotlar ombori yarating.", "lines": [{"c": "CREATE DATABASE maktab;", "n": "Siz yangi baza yaratdingiz"}]}, {"q": "'eski_baza' nomli ma'lumotlar omborini o'chiring.", "lines": [{"c": "DROP DATABASE eski_baza;", "n": "Siz bazani butunlay o'chirdingiz"}]}, {"q": "'internet_dokon' bazasini yaratib, darhol unga ulaning.", "lines": [{"c": "CREATE DATABASE internet_dokon;", "n": "Siz bazani yaratdingiz"}, {"c": "\\c internet_dokon", "n": "Siz shu bazaga ulandingiz"}]}]}, {"id": "23.6", "f": "sorov_6.step", "terms": [["INTEGER / INT", "Butun son turi"], ["VARCHAR(n)", "n belgigacha matn turi"], ["TEXT", "Cheksiz uzunlikdagi matn turi"], ["BOOLEAN", "Rost/yolg'on (true/false) turi"], ["SERIAL", "O'z-o'zidan ortib boruvchi butun son (id uchun)"], ["NUMERIC", "Aniq kasr son turi (pul uchun qulay)"]], "detail": "ASOSIY MA'LUMOT TURLARI (PostgreSQL)\n\nINTEGER — butun son (yosh, miqdor)\nVARCHAR(50) — chegaralangan matn (ism, email)\nTEXT — chegarasiz matn (izoh, tavsif)\nBOOLEAN — true yoki false (faol/nofaol)\nDATE — sana\nSERIAL — id uchun avtomatik o'suvchi raqam (MySQL'dagi AUTO_INCREMENT o'rnini bosadi)\nNUMERIC(10,2) — aniq kasr son, pul-narx uchun ishlatiladi", "sim": "MISOL: turli ma'lumot turlari bilan jadval:\n\nCREATE TABLE mahsulotlar (\n  id SERIAL,\n  nomi VARCHAR(100),\n  narxi NUMERIC(10,2),\n  mavjud BOOLEAN\n);", "eskizlar": [{"q": "id (SERIAL), ism (VARCHAR 50) ustunlari bilan jadval yarating.", "lines": [{"c": "CREATE TABLE talabalar (", "n": "Siz jadval yaratishni boshladingiz"}, {"c": "  id SERIAL,", "n": "Siz avtomatik id qo'shdingiz"}, {"c": "  ism VARCHAR(50)", "n": "Siz ism ustunini qo'shdingiz"}, {"c": ");", "n": "Siz jadvalni yakunladingiz"}]}, {"q": "narxi (NUMERIC) va mavjud (BOOLEAN) ustunlari bilan jadval yarating.", "lines": [{"c": "CREATE TABLE mahsulotlar (", "n": "Siz jadval yaratishni boshladingiz"}, {"c": "  narxi NUMERIC(10,2),", "n": "Siz narx ustunini qo'shdingiz"}, {"c": "  mavjud BOOLEAN", "n": "Siz mantiqiy ustunni qo'shdingiz"}, {"c": ");", "n": "Siz jadvalni yakunladingiz"}]}]}, {"id": "23.7", "f": "sorov_7.step", "terms": [["DROP TABLE", "Jadvalni butunlay o'chirish"], ["TRUNCATE TABLE", "Jadval ichidagi barcha qatorlarni tozalash (jadvalning o'zi qoladi)"]], "detail": "FOYDALI BUYRUQLAR\n\nDROP TABLE jadval_nomi; — jadvalni butunlay o'chiradi (tuzilishi bilan birga).\nTRUNCATE TABLE jadval_nomi; — faqat ichidagi ma'lumotlarni tozalaydi, jadval tuzilishi qoladi.\n\n⚠️ Ikkalasi ham QAYTARIB BO'LMAYDI, ehtiyot bo'ling.", "sim": "MISOL: 'test' jadvalidagi ma'lumotlarni tozalash (jadvalni saqlab qolib):\n\nTRUNCATE TABLE test;", "eskizlar": [{"q": "'eski_jadval' nomli jadvalni butunlay o'chiring.", "lines": [{"c": "DROP TABLE eski_jadval;", "n": "Siz jadvalni butunlay o'chirdingiz"}]}, {"q": "'log' jadvalidagi barcha ma'lumotlarni tozalang (jadvalning o'zini saqlab).", "lines": [{"c": "TRUNCATE TABLE log;", "n": "Siz jadval ichini tozaladingiz"}]}]}, {"id": "23.8", "f": "sorov_8.step", "terms": [["INSERT INTO", "Jadvalga yangi qator qo'shish buyrug'i"], ["VALUES", "Kiritiladigan qiymatlar ro'yxati"]], "detail": "MA'LUMOT KIRITISH\n\nINSERT INTO jadval (ustun1, ustun2) VALUES (qiymat1, qiymat2);\n\nBir nechta qatorni birdaniga qo'shish ham mumkin:\nINSERT INTO talabalar (ism, yosh) VALUES\n  ('Aziz', 16),\n  ('Malika', 15);", "sim": "MISOL: bitta talaba qo'shish:\n\nINSERT INTO talabalar (ism, yosh)\nVALUES ('Aziz', 16);", "eskizlar": [{"q": "talabalar jadvaliga (ism='Sardor', yosh=17) qo'shing.", "lines": [{"c": "INSERT INTO talabalar (ism, yosh)", "n": "Siz jadval va ustunlarni ko'rsatdingiz"}, {"c": "VALUES ('Sardor', 17);", "n": "Siz qiymatlarni kiritdingiz"}]}, {"q": "mahsulotlar jadvaliga ikkita mahsulotni birdaniga qo'shing.", "lines": [{"c": "INSERT INTO mahsulotlar (nomi, narxi)", "n": "Siz jadval va ustunlarni ko'rsatdingiz"}, {"c": "VALUES ('Non', 3000), ('Sut', 8000);", "n": "Siz ikkita qatorni birdaniga kiritdingiz"}]}]}, {"id": "23.9", "f": "sorov_9.step", "terms": [["NULL", "Qiymat noma'lum yoki mavjud emasligini bildiradi"], ["DEFAULT", "Qiymat kiritilmasa avtomatik qo'yiladigan qiymat"], ["IS NULL / IS NOT NULL", "NULL qiymatni tekshirish sharti"]], "detail": "NULL NIMA?\n\nNULL — \"bo'sh\" emas, balki \"noma'lum/mavjud emas\" degani. 0 yoki bo'sh matn ('') bilan bir xil emas!\n\nDEFAULT QIYMAT\nCREATE TABLE talabalar (\n  ism VARCHAR(50),\n  faol BOOLEAN DEFAULT true\n);\n— faol ustuni kiritilmasa, avtomatik true bo'ladi.\n\nNULL TEKSHIRISH\nWHERE email IS NULL — email kiritilmagan qatorlarni topadi.\nWHERE email IS NOT NULL — email kiritilgan qatorlarni topadi.\n\n⚠️ WHERE email = NULL ISHLAMAYDI, faqat IS NULL to'g'ri!", "sim": "MISOL: emaili kiritilmagan mijozlarni topish:\n\nSELECT * FROM mijozlar\nWHERE email IS NULL;", "eskizlar": [{"q": "telefon raqami kiritilmagan (NULL) mijozlarni toping.", "lines": [{"c": "SELECT * FROM mijozlar", "n": "Siz jadvalni tanladingiz"}, {"c": "WHERE telefon IS NULL;", "n": "Siz NULL tekshiruvini yozdingiz"}]}, {"q": "faol ustuni DEFAULT true bo'lgan jadval yarating.", "lines": [{"c": "CREATE TABLE foydalanuvchilar (", "n": "Siz jadval yaratishni boshladingiz"}, {"c": "  ism VARCHAR(50),", "n": "Siz ism ustunini qo'shdingiz"}, {"c": "  faol BOOLEAN DEFAULT true", "n": "Siz standart qiymat berdingiz"}, {"c": ");", "n": "Siz jadvalni yakunladingiz"}]}]}, {"id": "23.10", "f": "sorov_10.step", "terms": [["SELECT", "Qaysi ustunlarni ko'rsatishni tanlash"], ["FROM", "Qaysi jadvaldan olishni bildirish"]], "detail": "ENG ODDIY SO'ROV\n\nSELECT ustun1, ustun2 FROM jadval;\nSELECT * FROM jadval; — barcha ustunlar\n\nHar bir so'rov ; bilan tugaydi, ustunlar vergul bilan ajratiladi.", "sim": "MISOL:\n\nSELECT ism, yosh\nFROM talabalar;", "eskizlar": [{"q": "'mijozlar' jadvalidan barcha ustunlarni oling.", "lines": [{"c": "SELECT * FROM mijozlar;", "n": "Siz barcha ustunlarni tanladingiz"}]}, {"q": "'talabalar' jadvalidan faqat ism va yosh ustunlarini oling.", "lines": [{"c": "SELECT ism, yosh", "n": "Siz kerakli ustunlarni tanladingiz"}, {"c": "FROM talabalar;", "n": "Siz jadval nomini ko'rsatdingiz"}]}]}, {"id": "23.11", "f": "sorov_11.step", "terms": [["= , <> (yoki !=)", "Teng / teng emas"], [">, <, >=, <=", "Katta, kichik, katta yoki teng, kichik yoki teng"], ["WHERE", "Shart bo'yicha filtrlash"]], "detail": "TAQQOSLASH OPERATORLARI\n\n= teng\n<> yoki != teng emas\n> katta\n< kichik\n>= katta yoki teng\n<= kichik yoki teng\n\nWHERE bilan birga ishlatiladi:\nSELECT * FROM talabalar WHERE yosh >= 18;", "sim": "MISOL: 18 yoshdan katta yoki teng talabalar:\n\nSELECT * FROM talabalar\nWHERE yosh >= 18;", "eskizlar": [{"q": "Yoshi 20 dan katta talabalarni toping.", "lines": [{"c": "SELECT * FROM talabalar", "n": "Siz jadvalni tanladingiz"}, {"c": "WHERE yosh > 20;", "n": "Siz shartni yozdingiz"}]}, {"q": "Kategoriyasi 'kitob' EMAS bo'lgan mahsulotlarni toping.", "lines": [{"c": "SELECT * FROM mahsulotlar", "n": "Siz jadvalni tanladingiz"}, {"c": "WHERE kategoriya <> 'kitob';", "n": "Siz teng emas shartini yozdingiz"}]}]}, {"id": "23.12", "f": "sorov_12.step", "terms": [["AND", "Barcha shartlar bajarilishi kerak"], ["OR", "Kamida bitta shart bajarilsa yetarli"], ["NOT", "Shartni teskarisiga aylantirish"]], "detail": "SHARTLARNI JAMLASH\n\nAND — barcha shartlar TO'G'RI bo'lishi kerak\nOR — kamida BITTASI to'g'ri bo'lsa yetarli\nNOT — shartni inkor qiladi\n\nSELECT * FROM talabalar\nWHERE yosh > 15 AND sinf = '9-A';\n\nSELECT * FROM mahsulotlar\nWHERE kategoriya = 'kitob' OR kategoriya = 'jurnal';", "sim": "MISOL: narxi 10000 dan katta VA mavjud bo'lgan mahsulotlar:\n\nSELECT * FROM mahsulotlar\nWHERE narxi > 10000 AND mavjud = true;", "eskizlar": [{"q": "Yoshi 15 dan katta VA sinfi '9-A' bo'lgan talabalarni toping.", "lines": [{"c": "SELECT * FROM talabalar", "n": "Siz jadvalni tanladingiz"}, {"c": "WHERE yosh > 15 AND sinf = '9-A';", "n": "Siz ikki shartni AND bilan birlashtirdingiz"}]}, {"q": "Kategoriyasi 'kitob' YOKI 'jurnal' bo'lgan mahsulotlarni toping.", "lines": [{"c": "SELECT * FROM mahsulotlar", "n": "Siz jadvalni tanladingiz"}, {"c": "WHERE kategoriya = 'kitob' OR kategoriya = 'jurnal';", "n": "Siz ikki shartni OR bilan birlashtirdingiz"}]}, {"q": "Mavjud (mavjud=true) EMAS bo'lgan mahsulotlarni toping.", "lines": [{"c": "SELECT * FROM mahsulotlar", "n": "Siz jadvalni tanladingiz"}, {"c": "WHERE NOT mavjud;", "n": "Siz shartni inkor qildingiz"}]}]}, {"id": "23.13", "f": "sorov_13.step", "terms": [["LIKE", "Matn ichidan qism bo'yicha qidirish"], ["%", "LIKE'da istalgan sondagi belgi o'rnini bosuvchi belgi"], ["BETWEEN", "Ikki qiymat oralig'ini tekshirish"], ["IN", "Berilgan ro'yxatdan biriga tengligini tekshirish"]], "detail": "LIKE — MATN QIDIRISH\nWHERE ism LIKE 'A%' — 'A' bilan boshlanuvchi ismlar\nWHERE ism LIKE '%ov' — 'ov' bilan tugovchi ismlar\nWHERE ism LIKE '%ali%' — ichida 'ali' bo'lgan ismlar\n\nBETWEEN — ORALIQ\nWHERE yosh BETWEEN 15 AND 18 — 15 dan 18 gacha (ikkalasi ham kiradi)\n\nIN — RO'YXATDAN BIRI\nWHERE shahar IN ('Toshkent', 'Samarqand', 'Buxoro')", "sim": "MISOL: ismi 'A' bilan boshlanuvchi talabalar:\n\nSELECT * FROM talabalar\nWHERE ism LIKE 'A%';", "eskizlar": [{"q": "Ismi 'M' bilan boshlanuvchi mijozlarni toping.", "lines": [{"c": "SELECT * FROM mijozlar", "n": "Siz jadvalni tanladingiz"}, {"c": "WHERE ism LIKE 'M%';", "n": "Siz LIKE shartini yozdingiz"}]}, {"q": "Narxi 10000 dan 50000 gacha bo'lgan mahsulotlarni toping.", "lines": [{"c": "SELECT * FROM mahsulotlar", "n": "Siz jadvalni tanladingiz"}, {"c": "WHERE narxi BETWEEN 10000 AND 50000;", "n": "Siz BETWEEN shartini yozdingiz"}]}, {"q": "Shahri 'Toshkent', 'Andijon' yoki 'Farg'ona' bo'lgan mijozlarni toping.", "lines": [{"c": "SELECT * FROM mijozlar", "n": "Siz jadvalni tanladingiz"}, {"c": "WHERE shahar IN ('Toshkent', 'Andijon', 'Farg''ona');", "n": "Siz IN shartini yozdingiz"}]}]}, {"id": "23.14", "f": "sorov_14.step", "terms": [["ORDER BY", "Natijalarni tartiblash"], ["MIN / MAX", "Eng kichik / eng katta qiymat"], ["GROUP BY", "Ma'lumotlarni guruhlarga bo'lish"]], "detail": "ORDER BY\nSELECT * FROM talabalar ORDER BY yosh DESC;\n\nMIN / MAX\nSELECT MIN(narxi), MAX(narxi) FROM mahsulotlar;\n\nGROUP BY — guruhlash\nSELECT shahar, COUNT(*)\nFROM mijozlar\nGROUP BY shahar;\n— har bir shahar bo'yicha nechta mijoz borligini ko'rsatadi.", "sim": "MISOL: har bir kategoriya bo'yicha eng qimmat mahsulot narxi:\n\nSELECT kategoriya, MAX(narxi)\nFROM mahsulotlar\nGROUP BY kategoriya;", "eskizlar": [{"q": "Talabalarni yoshi bo'yicha kamayish tartibida tartiblang.", "lines": [{"c": "SELECT * FROM talabalar", "n": "Siz jadvalni tanladingiz"}, {"c": "ORDER BY yosh DESC;", "n": "Siz kamayish tartibida saraladingiz"}]}, {"q": "Eng arzon va eng qimmat mahsulot narxlarini toping.", "lines": [{"c": "SELECT MIN(narxi), MAX(narxi)", "n": "Siz min va max ni yozdingiz"}, {"c": "FROM mahsulotlar;", "n": "Siz jadvalni tanladingiz"}]}, {"q": "Har bir sinf bo'yicha talabalar sonini hisoblang.", "lines": [{"c": "SELECT sinf, COUNT(*)", "n": "Siz sinf va sonini tanladingiz"}, {"c": "FROM talabalar", "n": "Siz jadvalni tanladingiz"}, {"c": "GROUP BY sinf;", "n": "Siz sinf bo'yicha guruhladingiz"}]}]}, {"id": "23.15", "f": "sorov_15.step", "terms": [["UPDATE", "Mavjud qatorni o'zgartirish buyrug'i"], ["SET", "Qaysi ustun qanday yangi qiymat olishini bildirish"]], "detail": "UPDATE — YANGILASH\n\nUPDATE jadval\nSET ustun = yangi_qiymat\nWHERE shart;\n\n⚠️ MUHIM: WHERE shartisiz yozsangiz — JADVALDAGI BARCHA qatorlar o'zgaradi!\n\nBir nechta ustunni birdaniga yangilash ham mumkin:\nUPDATE talabalar SET yosh = 17, sinf = '10-A' WHERE ism = 'Aziz';", "sim": "MISOL: 'Aziz' ismli talabaning yoshini yangilash:\n\nUPDATE talabalar\nSET yosh = 17\nWHERE ism = 'Aziz';", "eskizlar": [{"q": "'Aziz' ismli talabaning sinfini '10-A' ga o'zgartiring.", "lines": [{"c": "UPDATE talabalar", "n": "Siz jadvalni tanladingiz"}, {"c": "SET sinf = '10-A'", "n": "Siz yangi qiymatni yozdingiz"}, {"c": "WHERE ism = 'Aziz';", "n": "Siz shartni yozdingiz — MUHIM!"}]}, {"q": "'Noutbuk' mahsulotining narxini 7500000 ga yangilang.", "lines": [{"c": "UPDATE mahsulotlar", "n": "Siz jadvalni tanladingiz"}, {"c": "SET narxi = 7500000", "n": "Siz yangi narxni yozdingiz"}, {"c": "WHERE nomi = 'Noutbuk';", "n": "Siz shartni yozdingiz — MUHIM!"}]}]}, {"id": "23.16", "f": "sorov_16.step", "terms": [["DELETE FROM", "Qatorlarni o'chirish buyrug'i"]], "detail": "DELETE — O'CHIRISH\n\nDELETE FROM jadval\nWHERE shart;\n\n⚠️ MUHIM: WHERE shartisiz yozsangiz — JADVALDAGI BARCHA qatorlar o'chib ketadi!\n\nDELETE va TRUNCATE farqi: DELETE shart bilan tanlab o'chiradi, TRUNCATE hammasini bir zumda tozalaydi.", "sim": "MISOL: yoshi 0 dan kichik (xato kiritilgan) talabalarni o'chirish:\n\nDELETE FROM talabalar\nWHERE yosh < 0;", "eskizlar": [{"q": "Narxi 0 bo'lgan mahsulotlarni o'chiring.", "lines": [{"c": "DELETE FROM mahsulotlar", "n": "Siz o'chirish jadvalini tanladingiz"}, {"c": "WHERE narxi = 0;", "n": "Siz shartni yozdingiz — MUHIM!"}]}, {"q": "'Aziz' ismli talabani jadvaldan o'chiring.", "lines": [{"c": "DELETE FROM talabalar", "n": "Siz o'chirish jadvalini tanladingiz"}, {"c": "WHERE ism = 'Aziz';", "n": "Siz shartni yozdingiz — MUHIM!"}]}]}, {"id": "23.17", "f": "sorov_17.step", "terms": [["Normalizatsiya", "Ma'lumotlarni takrorlanishdan xoli, mantiqiy jadvallarga bo'lish jarayoni"], ["Bir mavzu — bitta jadval", "Har bir jadval faqat bitta mavzu haqida ma'lumot saqlashi kerak"]], "detail": "YAXSHI JADVAL DIZAYNI QOIDALARI\n\n1) Har bir jadval FAQAT BITTA mavzu haqida bo'lishi kerak (masalan 'talabalar' jadvalida sinf ma'lumotlarini takrorlab yozmang, alohida 'sinflar' jadvali oching).\n\n2) Ma'lumot TAKRORLANMASLIGI kerak — bir xil ma'lumotni bir necha joyda saqlash xatoliklarga olib keladi.\n\n3) Har bir jadvalda NOYOB identifikator (odatda id) bo'lishi kerak.\n\nBu qoidalarga rioya qilish — NORMALIZATSIYA deb ataladi.", "sim": "YOMON DIZAYN MISOLI (takrorlanish bor):\ntalabalar(ism, sinf_nomi, sinf_oqituvchisi)\n\nYAXSHI DIZAYN (ajratilgan):\ntalabalar(ism, sinf_id)\nsinflar(id, nomi, oqituvchisi)", "eskizlar": [{"q": "sinf ma'lumotlarini alohida jadvalga chiqarib, faqat sinf_id saqlaydigan talabalar jadvalini yarating.", "lines": [{"c": "CREATE TABLE talabalar (", "n": "Siz jadval yaratishni boshladingiz"}, {"c": "  id SERIAL,", "n": "Siz noyob id qo'shdingiz"}, {"c": "  ism VARCHAR(50),", "n": "Siz ism ustunini qo'shdingiz"}, {"c": "  sinf_id INTEGER", "n": "Siz sinfga bog'lanish uchun ustun qo'shdingiz"}, {"c": ");", "n": "Siz jadvalni yakunladingiz"}]}]}, {"id": "23.18", "f": "sorov_18.step", "terms": [["PRIMARY KEY", "Jadvaldagi har bir qatorni noyob aniqlaydigan ustun"]], "detail": "PRIMARY KEY — BOSH KALIT\n\nHar bir jadvalda bitta ustun PRIMARY KEY bo'lishi kerak — u har bir qatorni NOYOB aniqlaydi, takrorlanmaydi va bo'sh (NULL) bo'lolmaydi.\n\nCREATE TABLE talabalar (\n  id SERIAL PRIMARY KEY,\n  ism VARCHAR(50)\n);\n\nSERIAL + PRIMARY KEY birgalikda — avtomatik o'suvchi, noyob id yaratadi (eng ko'p ishlatiladigan usul).", "sim": "MISOL:\n\nCREATE TABLE mahsulotlar (\n  id SERIAL PRIMARY KEY,\n  nomi VARCHAR(100)\n);", "eskizlar": [{"q": "id ustunini SERIAL PRIMARY KEY qilib jadval yarating.", "lines": [{"c": "CREATE TABLE mijozlar (", "n": "Siz jadval yaratishni boshladingiz"}, {"c": "  id SERIAL PRIMARY KEY,", "n": "Siz noyob avtomatik kalit qo'shdingiz"}, {"c": "  ism VARCHAR(50)", "n": "Siz ism ustunini qo'shdingiz"}, {"c": ");", "n": "Siz jadvalni yakunladingiz"}]}]}, {"id": "23.19", "f": "sorov_19.step", "terms": [["ALTER TABLE", "Mavjud jadval tuzilishini o'zgartirish buyrug'i"], ["ADD COLUMN", "Jadvalga yangi ustun qo'shish"], ["DROP COLUMN", "Jadvaldan ustunni o'chirish"]], "detail": "ALTER TABLE — JADVALNI O'ZGARTIRISH\n\nYangi ustun qo'shish:\nALTER TABLE talabalar ADD COLUMN email VARCHAR(100);\n\nUstunni o'chirish:\nALTER TABLE talabalar DROP COLUMN email;\n\nUstun nomini o'zgartirish:\nALTER TABLE talabalar RENAME COLUMN ism TO toliq_ism;", "sim": "MISOL: 'mahsulotlar' jadvaliga 'mavjud' ustunini qo'shish:\n\nALTER TABLE mahsulotlar\nADD COLUMN mavjud BOOLEAN DEFAULT true;", "eskizlar": [{"q": "'talabalar' jadvaliga 'email' (VARCHAR) ustunini qo'shing.", "lines": [{"c": "ALTER TABLE talabalar", "n": "Siz o'zgartiriladigan jadvalni tanladingiz"}, {"c": "ADD COLUMN email VARCHAR(100);", "n": "Siz yangi ustun qo'shdingiz"}]}, {"q": "'mahsulotlar' jadvalidan 'izoh' ustunini o'chiring.", "lines": [{"c": "ALTER TABLE mahsulotlar", "n": "Siz o'zgartiriladigan jadvalni tanladingiz"}, {"c": "DROP COLUMN izoh;", "n": "Siz ustunni o'chirdingiz"}]}]}, {"id": "23.20", "f": "sorov_20.step", "terms": [["Jadvalni ajratish", "Bir jadvaldagi takrorlanuvchi ma'lumotni alohida jadvalga chiqarish"]], "detail": "NEGA JADVALNI AJRATISH KERAK?\n\nAgar bir jadvalda bir xil ma'lumot (masalan sinf nomi va o'qituvchisi) har bir talaba qatorida TAKRORLANSA — bu xato dizayn.\n\nYECHIM: sinf haqidagi ma'lumotni ALOHIDA 'sinflar' jadvaliga chiqaramiz, 'talabalar' jadvalida esa faqat sinf_id (bog'lovchi raqam) qoldiramiz.\n\nBu — ma'lumotni TAKRORLANISHDAN saqlaydi va yangilashni osonlashtiradi (masalan o'qituvchi almashsa, faqat 1 joyda o'zgartirish kifoya).", "sim": "MISOL: ajratilgan ikki jadval:\n\nCREATE TABLE sinflar (\n  id SERIAL PRIMARY KEY,\n  nomi VARCHAR(10),\n  oqituvchi VARCHAR(50)\n);\n\nCREATE TABLE talabalar (\n  id SERIAL PRIMARY KEY,\n  ism VARCHAR(50),\n  sinf_id INTEGER\n);", "eskizlar": [{"q": "'sinflar' jadvalini (id, nomi, oqituvchi) alohida yarating.", "lines": [{"c": "CREATE TABLE sinflar (", "n": "Siz alohida jadval yaratishni boshladingiz"}, {"c": "  id SERIAL PRIMARY KEY,", "n": "Siz noyob kalit qo'shdingiz"}, {"c": "  nomi VARCHAR(10),", "n": "Siz sinf nomini qo'shdingiz"}, {"c": "  oqituvchi VARCHAR(50)", "n": "Siz o'qituvchi ustunini qo'shdingiz"}, {"c": ");", "n": "Siz jadvalni yakunladingiz"}]}]}, {"id": "23.21", "f": "sorov_21.step", "terms": [["FOREIGN KEY", "Bir jadvaldan boshqasiga ishora qiluvchi ustun"], ["REFERENCES", "FOREIGN KEY qaysi jadval/ustunga bog'langanini bildirish"]], "detail": "JADVALLAR O'RTASIDAGI BOG'LANISH\n\nIkki jadvalni bog'lash uchun FOREIGN KEY ishlatiladi — bu bir jadvaldagi ustun, boshqa jadvalning PRIMARY KEY'iga ishora qiladi.\n\nCREATE TABLE talabalar (\n  id SERIAL PRIMARY KEY,\n  ism VARCHAR(50),\n  sinf_id INTEGER REFERENCES sinflar(id)\n);\n\nBu — 'sinf_id' ustuni 'sinflar' jadvalidagi mavjud id'lardan biriga teng bo'lishini MAJBUR qiladi (mavjud bo'lmagan sinfga bog'lab bo'lmaydi).", "sim": "MISOL: 'buyurtmalar' jadvalini 'mijozlar' jadvaliga bog'lash:\n\nCREATE TABLE buyurtmalar (\n  id SERIAL PRIMARY KEY,\n  mijoz_id INTEGER REFERENCES mijozlar(id)\n);", "eskizlar": [{"q": "'talabalar' jadvalida sinf_id ni 'sinflar' jadvaliga FOREIGN KEY qilib bog'lang.", "lines": [{"c": "CREATE TABLE talabalar (", "n": "Siz jadval yaratishni boshladingiz"}, {"c": "  id SERIAL PRIMARY KEY,", "n": "Siz noyob kalit qo'shdingiz"}, {"c": "  ism VARCHAR(50),", "n": "Siz ism ustunini qo'shdingiz"}, {"c": "  sinf_id INTEGER REFERENCES sinflar(id)", "n": "Siz sinflar jadvaliga bog'ladingiz"}, {"c": ");", "n": "Siz jadvalni yakunladingiz"}]}]}, {"id": "23.22", "f": "sorov_22.step", "terms": [["One-to-Many (1:N)", "Bitta yozuv ko'p yozuvga bog'langan munosabat (masalan 1 sinf — ko'p talaba)"], ["Many-to-Many (N:N)", "Ikki tomon ham ko'p yozuvga bog'lanadigan munosabat, oraliq jadval kerak"], ["JOIN", "Bog'langan jadvallarni birga ko'rsatish"]], "detail": "MUNOSABAT TURLARI\n\n1) ONE-TO-MANY (1:N) — eng keng tarqalgan. Masalan: 1 ta sinfda ko'p talaba bo'ladi, lekin 1 talaba faqat 1 sinfda.\n\n2) MANY-TO-MANY (N:N) — masalan: 1 talaba ko'p fanni o'qiydi, 1 fanni ko'p talaba o'qiydi. Bunday holda ORALIQ jadval kerak bo'ladi (masalan 'talaba_fanlar').\n\nBog'langan jadvallarni birga ko'rish uchun JOIN ishlatiladi:\nSELECT talabalar.ism, sinflar.nomi\nFROM talabalar\nJOIN sinflar ON talabalar.sinf_id = sinflar.id;", "sim": "MISOL: talaba va uning sinfini birga ko'rsatish (1:N munosabat):\n\nSELECT t.ism, s.nomi\nFROM talabalar t\nJOIN sinflar s ON t.sinf_id = s.id;", "eskizlar": [{"q": "talabalar va sinflar jadvallarini JOIN orqali birga ko'rsating.", "lines": [{"c": "SELECT talabalar.ism, sinflar.nomi", "n": "Siz kerakli ustunlarni tanladingiz"}, {"c": "FROM talabalar", "n": "Siz asosiy jadvalni tanladingiz"}, {"c": "JOIN sinflar ON talabalar.sinf_id = sinflar.id;", "n": "Siz JOIN shartini yozdingiz"}]}, {"q": "Many-to-Many uchun oraliq jadval 'talaba_fanlar' (talaba_id, fan_id) yarating.", "lines": [{"c": "CREATE TABLE talaba_fanlar (", "n": "Siz oraliq jadval yaratishni boshladingiz"}, {"c": "  talaba_id INTEGER REFERENCES talabalar(id),", "n": "Siz talabaga bog'ladingiz"}, {"c": "  fan_id INTEGER REFERENCES fanlar(id)", "n": "Siz fanga bog'ladingiz"}, {"c": ");", "n": "Siz jadvalni yakunladingiz"}]}]}, {"id": "23.23", "f": "sorov_23.step", "terms": [["Kombinatsiyalangan so'rov", "WHERE, JOIN, GROUP BY, ORDER BY'ni birga ishlatish"]], "detail": "HAMMA BILGANLARINGIZNI BIRGA QO'LLASH\n\nHaqiqiy so'rovlarda odatda bir necha qism birga ishlatiladi:\n\nSELECT s.nomi, COUNT(*) AS talabalar_soni\nFROM talabalar t\nJOIN sinflar s ON t.sinf_id = s.id\nWHERE t.yosh >= 15\nGROUP BY s.nomi\nORDER BY talabalar_soni DESC;\n\nTARTIB: SELECT → FROM → JOIN → WHERE → GROUP BY → HAVING → ORDER BY → LIMIT", "sim": "MISOL: har bir sinfda 15 yoshdan katta talabalar sonini, ko'pdan kamga tartiblab ko'rsatish:\n\nSELECT s.nomi, COUNT(*)\nFROM talabalar t\nJOIN sinflar s ON t.sinf_id = s.id\nWHERE t.yosh >= 15\nGROUP BY s.nomi\nORDER BY COUNT(*) DESC;", "eskizlar": [{"q": "Har bir sinfdagi talabalar sonini JOIN+GROUP BY+ORDER BY bilan toping.", "lines": [{"c": "SELECT s.nomi, COUNT(*) AS soni", "n": "Siz ustun va sanashni tanladingiz"}, {"c": "FROM talabalar t", "n": "Siz asosiy jadvalga alias berdingiz"}, {"c": "JOIN sinflar s ON t.sinf_id = s.id", "n": "Siz jadvallarni bog'ladingiz"}, {"c": "GROUP BY s.nomi", "n": "Siz sinf bo'yicha guruhladingiz"}, {"c": "ORDER BY soni DESC;", "n": "Siz ko'pdan kamga tartibladingiz"}]}]}, {"id": "23.24", "f": "sorov_24.step", "terms": [["psycopg2", "Python dasturidan PostgreSQL'ga ulanish uchun kutubxona"], ["cursor", "So'rovlarni bajarish va natijani olish vositasi"]], "detail": "SQL NI PYTHON BILAN BIRGA ISHLATISH\n\npsycopg2 — Python orqali PostgreSQL'ga ulanish uchun eng mashhur kutubxona.\n\nimport psycopg2\n\nconn = psycopg2.connect(dbname=\"maktab\", user=\"postgres\", password=\"parol\")\ncursor = conn.cursor()\n\ncursor.execute(\"SELECT * FROM talabalar\")\nnatija = cursor.fetchall()\n\nconn.close()\n\nBu orqali Python dasturi ichida SQL so'rovlarini yuborib, natijani olish mumkin — real loyihalarda backend shu tarzda bazaga ulanadi.", "sim": "MISOL: Python orqali barcha talabalarni olish:\n\nimport psycopg2\nconn = psycopg2.connect(dbname=\"maktab\", user=\"postgres\", password=\"parol\")\ncursor = conn.cursor()\ncursor.execute(\"SELECT * FROM talabalar\")\nprint(cursor.fetchall())", "eskizlar": [{"q": "psycopg2 kutubxonasini import qiling.", "lines": [{"c": "import psycopg2", "n": "Siz kutubxonani ulading"}]}, {"q": "'maktab' bazasiga ulanish (connect) qatorini yozing.", "lines": [{"c": "conn = psycopg2.connect(dbname=\"maktab\", user=\"postgres\", password=\"parol\")", "n": "Siz bazaga ulandingiz"}]}, {"q": "cursor yaratib, SELECT so'rovini bajaring.", "lines": [{"c": "cursor = conn.cursor()", "n": "Siz cursor yaratdingiz"}, {"c": "cursor.execute(\"SELECT * FROM talabalar\")", "n": "Siz so'rovni bajardingiz"}, {"c": "natija = cursor.fetchall()", "n": "Siz natijani oldingiz"}]}]}];
+
+
+var cur = 0;
+var curEskiz = 0;
+var skipOn = false;
+var ghostVisible = true;
+var lineData = [];
+var doneSet = new Set();
+var eskizDoneSet = new Set(); // "topicIdx-eskizIdx" format
+var selectedStar = 0;
+var ratingSubmitted = false;
+var BRIGHT = [0,0.05,0.1,0.2,0.3,0.42,0.55,0.65,0.75,0.85,0.95];
+
+window.onload = function(){
+  buildStars();
+  buildTabs();
+  buildIntro();
+  loadMod(0);
+  if(window.visualViewport){
+    var t = null;
+    window.visualViewport.addEventListener('resize', function(){
+      clearTimeout(t);
+      t = setTimeout(function(){
+        var el = document.activeElement;
+        if(!el || !el.classList.contains('line-input')) return;
+        var blk = el.closest('.line-block');
+        if(!blk) return;
+        var vp = window.visualViewport;
+        var rc = blk.getBoundingClientRect();
+        var tgt = window.scrollY + rc.top + rc.height/2 - (vp.offsetTop + vp.height*0.38);
+        window.scrollTo({top: tgt, behavior:'smooth'});
+      }, 150);
+    });
+  }
+};
+
+function buildIntro(){
+  var h = '<div class="intro-title">'+MODULE_INTRO.title+'</div>';
+  h += '<div class="intro-text">'+esc(MODULE_INTRO.text)+'</div>';
+  h += '<div class="intro-stats">';
+  h += '<div class="intro-stat"><div class="intro-stat-v">'+MODULE_INTRO.count+'</div><div class="intro-stat-l">MAVZU</div></div>';
+  var totalEskiz = M.reduce(function(sum, m){ return sum + m.eskizlar.length; }, 0);
+  h += '<div class="intro-stat"><div class="intro-stat-v">'+totalEskiz+'</div><div class="intro-stat-l">ESKIZ</div></div>';
+  h += '<div class="intro-stat"><div class="intro-stat-v">PostgreSQL</div><div class="intro-stat-l">TIZIM</div></div>';
+  h += '</div>';
+  document.getElementById('introBox').innerHTML = h;
+}
+
+function loadMod(i){
+  cur = i;
+  curEskiz = 0;
+  document.getElementById('detailPanel').classList.remove('show');
+  document.getElementById('resultPanel').classList.remove('show');
+  document.getElementById('badge').className = 'badge';
+  var m = M[i];
+  document.getElementById('topSub').textContent = m.id;
+  document.getElementById('svMod').textContent = (i+1)+'/'+M.length;
+  var th = '<div class="terms-title">📚 Yangi atamalar:</div>';
+  m.terms.forEach(function(t){
+    th += '<div class="term-row"><span class="term-key">'+esc(t[0])+'</span><span class="term-val">'+esc(t[1])+'</span></div>';
+  });
+  document.getElementById('termsBox').innerHTML = th;
+  loadEskiz();
+  buildTabs();
+}
+
+function loadEskiz(){
+  var m = M[cur];
+  var e = m.eskizlar[curEskiz];
+  document.getElementById('detailPanel').classList.remove('show');
+  document.getElementById('resultPanel').classList.remove('show');
+  document.getElementById('badge').className = 'badge';
+  document.getElementById('fname').textContent = m.f.replace('.step', '_'+(curEskiz+1)+'.step');
+  document.getElementById('fhintQ') ; // no-op guard
+  buildEskizDots();
+  buildLines(e);
+  updateStats();
+}
+
+function buildEskizDots(){
+  var existing = document.getElementById('eskizDotsRow');
+  if(existing) existing.remove();
+  var m = M[cur];
+  var row = document.createElement('div');
+  row.id = 'eskizDotsRow';
+  row.style.display = 'flex';
+  row.style.gap = '6px';
+  row.style.justifyContent = 'center';
+  row.style.marginBottom = '10px';
+  m.eskizlar.forEach(function(_, i){
+    var key = cur+'-'+i;
+    var dot = document.createElement('div');
+    dot.style.width = (i===curEskiz ? '40px' : '26px');
+    dot.style.height = '6px';
+    dot.style.borderRadius = '3px';
+    dot.style.cursor = 'pointer';
+    dot.style.background = eskizDoneSet.has(key) ? '#22c55e' : (i===curEskiz ? '#00f0c8' : '#1e3048');
+    dot.onclick = (function(idx){ return function(){ curEskiz = idx; loadEskiz(); }; })(i);
+    row.appendChild(dot);
+  });
+  var qBox = document.getElementById('eskizQBox');
+  if(qBox) qBox.remove();
+  var q = document.createElement('div');
+  q.id = 'eskizQBox';
+  q.style.cssText = 'background:#0d1828;border:1px solid #1e3048;border-left:3px solid #a855f7;border-radius:8px;padding:10px 12px;margin-bottom:10px;font-size:.71rem;line-height:1.8;color:#c4b5fd;white-space:pre-wrap;';
+  q.textContent = 'Eskiz '+(curEskiz+1)+'/'+M[cur].eskizlar.length+' — '+M[cur].eskizlar[curEskiz].q;
+
+  var anchor = document.getElementById('termsBox');
+  anchor.parentNode.insertBefore(row, anchor.nextSibling);
+  anchor.parentNode.insertBefore(q, row.nextSibling);
+}
+
+function buildLines(e){
+  var wrap = document.getElementById('linesWrap');
+  wrap.innerHTML = '';
+  lineData = [];
+  var op = BRIGHT[parseInt(document.getElementById('brightSlider').value)||3];
+  e.lines.forEach(function(ln, i){
+    var trimmed = ln.c.replace(/^\s+/,'');
+    var isCom = trimmed.charAt(0) === '#';
+    var isEmpty = ln.c === '';
+    var endsWithBrace = /[\{\(\[]\s*$/.test(ln.c);
+    var block = document.createElement('div');
+    block.className = 'line-block';
+    block.id = 'block'+i;
+    var row = document.createElement('div');
+    row.className = 'line-row';
+    var num = document.createElement('div');
+    num.className = 'line-num';
+    num.id = 'num'+i;
+    num.textContent = isEmpty ? '' : (i+1);
+    var content = document.createElement('div');
+    content.className = 'line-content';
+    var ghost = document.createElement('div');
+    ghost.className = 'line-ghost' + ((isCom && skipOn) ? ' skip-c' : '');
+    ghost.id = 'ghost'+i;
+    ghost.style.color = ghostVisible ? 'rgba(74,96,128,'+op+')' : 'transparent';
+    ghost.textContent = ln.c || ' ';
+    var colors = document.createElement('div');
+    colors.className = 'line-colors';
+    colors.id = 'clr'+i;
+    var inp = document.createElement('input');
+    inp.type = 'text';
+    inp.className = 'line-input';
+    inp.id = 'inp'+i;
+    inp.setAttribute('spellcheck','false');
+    inp.setAttribute('autocorrect','off');
+    inp.setAttribute('autocapitalize','off');
+    inp.setAttribute('autocomplete','off');
+    if(isEmpty || (isCom && skipOn)) inp.disabled = true;
+    (function(idx, target, noteText, braceTrigger){
+      inp.addEventListener('input', function(){
+        if(!target) return;
+        updateLineClr(idx, target);
+        if(braceTrigger && inp.value.length > 0 && /[\{\(\[]\s*$/.test(inp.value)){
+          showStartNote(idx);
+        }
+        if(inp.value === target && target !== '' && noteText !== ''){
+          showNote(idx);
+        } else if(inp.value !== target) {
+          hideNote(idx);
+        }
+        updateStats();
+      });
+    })(i, ln.c, ln.n, endsWithBrace);
+    content.appendChild(ghost);
+    content.appendChild(colors);
+    content.appendChild(inp);
+    row.appendChild(num);
+    row.appendChild(content);
+    var note = document.createElement('div');
+    note.className = 'line-done-note';
+    note.id = 'note'+i;
+    note.textContent = ln.n ? ('✅ ' + ln.n + '!') : '';
+    block.appendChild(row);
+    if(ln.n) block.appendChild(note);
+    wrap.appendChild(block);
+    lineData.push({inp:inp, target:ln.c, isCom:isCom, isEmpty:isEmpty});
+  });
+}
+
+function updateLineClr(idx, target){
+  var inp = document.getElementById('inp'+idx);
+  var clr = document.getElementById('clr'+idx);
+  if(!inp || !clr) return;
+  var typed = inp.value;
+  var html = '';
+  for(var ci = 0; ci < target.length; ci++){
+    var ch = target[ci];
+    if(ci < typed.length){
+      html += typed[ci] === ch
+        ? '<span style="color:#22c55e">'+esc(ch)+'</span>'
+        : '<span style="color:#f43f5e;text-decoration:underline">'+esc(ch)+'</span>';
+    } else {
+      html += '<span style="color:transparent">'+esc(ch)+'</span>';
+    }
+  }
+  clr.innerHTML = html;
+  var num = document.getElementById('num'+idx);
+  if(num) num.style.color = (typed === target && target !== '') ? '#22c55e' : '';
+}
+
+function showNote(i){ var n=document.getElementById('note'+i); if(n && n.textContent) n.classList.add('show'); }
+function hideNote(i){ var n=document.getElementById('note'+i); if(n) n.classList.remove('show'); }
+function showStartNote(i){ var num=document.getElementById('num'+i); if(num) num.style.color = '#a855f7'; }
+
+function updateStats(){
+  var done = 0, total = 0;
+  lineData.forEach(function(l){
+    if(l.isEmpty || (l.isCom && skipOn)) return;
+    total++;
+    if(l.inp.value === l.target) done++;
+  });
+  var pct = total > 0 ? Math.round(done/total*100) : 0;
+  document.getElementById('svPctV').textContent = done > 0 ? pct+'%' : '—';
+  document.getElementById('svDone').textContent = done+'/'+total;
+  if(done === total && total > 0) doneSet.add(cur);
+  document.getElementById('progressFill').style.width = (doneSet.size/M.length*100)+'%';
+  buildTabs();
+}
+
+function doCheck(){
+  var e = M[cur].eskizlar[curEskiz];
+  var done = 0, total = 0, errors = [];
+  lineData.forEach(function(l, i){
+    if(l.isEmpty || (l.isCom && skipOn)) return;
+    total++;
+    if(l.inp.value === l.target){
+      done++;
+      document.getElementById('num'+i).style.color = '#22c55e';
+      if(e.lines[i].n) showNote(i);
+    } else {
+      errors.push(i+1);
+      document.getElementById('num'+i).style.color = '#f43f5e';
+    }
+  });
+  var pct = total > 0 ? Math.round(done/total*100) : 0;
+  var b = document.getElementById('badge');
+  b.className = 'badge show';
+  if(pct >= 85){
+    b.className += ' g';
+    var key = cur+'-'+curEskiz;
+    eskizDoneSet.add(key);
+    var allDone = M[cur].eskizlar.every(function(_, idx){ return eskizDoneSet.has(cur+'-'+idx); });
+    if(allDone){
+      doneSet.add(cur);
+      b.textContent = '✅ Zo\'r! '+pct+'% — '+M[cur].id+' mavzusi to\'liq tugadi!';
+    } else {
+      b.textContent = '✅ Zo\'r! '+pct+'% ('+done+'/'+total+' qator). Keyingi eskizga o\'ting →';
+    }
+    buildEskizDots();
+    showRating();
+  } else if(pct >= 55){
+    b.className += ' o';
+    b.textContent = '⚡ '+pct+'% — xato qatorlar: '+errors.join(', ')+'-qator';
+  } else {
+    b.className += ' r';
+    b.textContent = '❌ '+pct+'% — qaytadan urinib ko\'ring';
+  }
+  updateStats();
+}
+
+function doClear(){
+  lineData.forEach(function(l, i){
+    l.inp.value = '';
+    var clr = document.getElementById('clr'+i);
+    if(clr) clr.innerHTML = '';
+    var num = document.getElementById('num'+i);
+    if(num) num.style.color = '';
+    hideNote(i);
+  });
+  document.getElementById('badge').className = 'badge';
+  updateStats();
+}
+
+function toggleGhost(){
+  ghostVisible = !ghostVisible;
+  document.querySelectorAll('.line-ghost').forEach(function(g){
+    g.style.visibility = ghostVisible ? 'visible' : 'hidden';
+  });
+  document.getElementById('ghostBtn').textContent = ghostVisible ? '👁️ Yashir' : '👁️ Ko\'rsat';
+}
+
+function toggleSkip(){
+  skipOn = !skipOn;
+  document.getElementById('sw').classList.toggle('on', skipOn);
+  document.getElementById('skipLbl').textContent = skipOn ? 'Kommentlar o\'tkazilmoqda' : '# Kommentlarni o\'tkazib yuboring';
+  buildLines(M[cur].eskizlar[curEskiz]);
+  applyBright();
+  updateStats();
+}
+
+function toggleDetail(){
+  var p = document.getElementById('detailPanel');
+  if(p.classList.contains('show')){
+    p.classList.remove('show');
+  } else {
+    document.getElementById('detailContent').textContent = M[cur].detail;
+    p.classList.add('show');
+  }
+}
+
+function toggleResult(){
+  var p = document.getElementById('resultPanel');
+  if(p.classList.contains('show')){
+    p.classList.remove('show');
+  } else {
+    document.getElementById('simWrap').innerHTML = '<pre>'+esc(M[cur].sim)+'</pre>';
+    p.classList.add('show');
+  }
+}
+
+function setBright(v){
+  document.getElementById('brightVal').textContent = v;
+  applyBright();
+}
+
+function applyBright(){
+  var v = parseInt(document.getElementById('brightSlider').value) || 3;
+  var op = BRIGHT[v];
+  document.querySelectorAll('.line-ghost').forEach(function(g){
+    if(!g.classList.contains('skip-c') && ghostVisible){
+      g.style.color = 'rgba(74,96,128,'+op+')';
+    }
+  });
+}
+
+function buildTabs(){
+  var c = document.getElementById('tabs');
+  c.innerHTML = '';
+  M.forEach(function(m, i){
+    var d = document.createElement('div');
+    d.className = 'tab'+(i===cur?' on':'')+(doneSet.has(i)?' done':'');
+    d.textContent = m.id;
+    d.onclick = (function(n){ return function(){ loadMod(n); }; })(i);
+    c.appendChild(d);
+  });
+}
+
+function buildStars(){
+  var sc = document.getElementById('stars');
+  sc.innerHTML = '';
+  for(var i = 1; i <= 10; i++){
+    var s = document.createElement('span');
+    s.className = 'star';
+    s.textContent = '⭐';
+    s.dataset.v = i;
+    s.onclick = (function(v){
+      return function(){
+        selectedStar = v;
+        document.getElementById('ratingScore').textContent = v+' / 10';
+        document.querySelectorAll('.star').forEach(function(st){
+          st.classList.toggle('on', parseInt(st.dataset.v) <= v);
+        });
+      };
+    })(i);
+    sc.appendChild(s);
+  }
+}
+
+function showRating(){
+  document.getElementById('ratingBox').classList.add('show');
+}
+
+function submitRating(){
+  if(ratingSubmitted) return;
+  if(selectedStar === 0){ alert('Iltimos baho tanlang!'); return; }
+  ratingSubmitted = true;
+  document.getElementById('ratingThanks').style.display = 'block';
+  document.querySelector('.rating-submit').style.display = 'none';
+}
+
+function esc(s){
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+</script>
+</body>
+</html>
