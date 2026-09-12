@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Eskiz — Barcha Modullar</title>
+<style>
+  :root{
+    --bg:#080c14;
+    --panel:#0d1828;
+    --border:#1e3048;
+    --orange:#f97316;
+    --red:#ef4444;
+    --purple:#a855f7;
+    --text:#e2e8f0;
+    --muted:#8ba0c0;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    padding:32px 16px 80px;
+  }
+  .wrap{max-width:760px;margin:0 auto;}
+  header{margin-bottom:36px;text-align:center;}
+  header h1{
+    font-size:1.6rem;
+    margin:0 0 6px;
+    background:linear-gradient(90deg,var(--orange),var(--red));
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+  }
+  header p{color:var(--muted);font-size:.85rem;margin:0;}
+
+  .group{margin-bottom:28px;}
+  .group-title{
+    font-size:.72rem;
+    font-weight:700;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:var(--orange);
+    margin:0 0 10px 4px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .group-title::before{
+    content:"";
+    width:14px;height:2px;
+    background:var(--orange);
+    display:inline-block;
+    border-radius:2px;
+  }
+
+  a.card{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-left:3px solid var(--orange);
+    border-radius:8px;
+    padding:12px 14px;
+    margin-bottom:8px;
+    text-decoration:none;
+    color:var(--text);
+    transition:transform .15s ease, border-color .15s ease, background .15s ease;
+  }
+  a.card:hover{
+    transform:translateX(3px);
+    border-left-color:var(--purple);
+    background:#101d31;
+  }
+  .badge{
+    flex:0 0 auto;
+    font-size:.68rem;
+    font-weight:700;
+    color:var(--orange);
+    background:#1a2438;
+    border:1px solid var(--border);
+    border-radius:6px;
+    padding:4px 8px;
+    min-width:34px;
+    text-align:center;
+  }
+  .card-title{font-size:.86rem;font-weight:600;}
+  .card-sub{font-size:.72rem;color:var(--muted);margin-top:1px;}
+  .card-body{flex:1;}
+  .arrow{color:var(--muted);font-size:.9rem;}
+
+  footer{
+    text-align:center;
+    margin-top:40px;
+    color:var(--muted);
+    font-size:.7rem;
+  }
+
+  /* Gate */
+  #gate{
+    max-width:340px;
+    margin:80px auto;
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-left:3px solid var(--orange);
+    border-radius:10px;
+    padding:24px;
+    text-align:center;
+  }
+  #gate h2{font-size:1.1rem;margin:0 0 6px;}
+  #gate p{color:var(--muted);font-size:.78rem;margin:0 0 16px;}
+  #gate input{
+    width:100%;
+    padding:10px 12px;
+    border-radius:8px;
+    border:1px solid var(--border);
+    background:#080c14;
+    color:var(--text);
+    font-size:.9rem;
+    text-align:center;
+    letter-spacing:.05em;
+    margin-bottom:10px;
+    box-sizing:border-box;
+  }
+  #gate input:focus{outline:none;border-color:var(--orange);}
+  #gate button{
+    width:100%;
+    padding:10px;
+    border-radius:8px;
+    border:none;
+    background:linear-gradient(90deg,var(--orange),var(--red));
+    color:#fff;
+    font-weight:700;
+    font-size:.85rem;
+    cursor:pointer;
+  }
+  #gate-error{
+    color:var(--red);
+    font-size:.75rem;
+    margin-top:10px;
+    min-height:14px;
+  }
+  #content{display:none;}
+</style>
+</head>
+<body>
+
+<div id="gate">
+  <h2>🔒 Kirish kodi</h2>
+  <p>Modullarni ko'rish uchun sizga berilgan shaxsiy kodni kiriting</p>
+  <input type="text" id="code-input" placeholder="Kodni kiriting" autocomplete="off">
+  <button onclick="checkCode()">Kirish</button>
+  <div id="gate-error"></div>
+</div>
+
+<div class="wrap" id="content">
+  <header>
+    <h1>Eskiz — Barcha Modullar</h1>
+    <p>Kursning to'liq eskiz materiallari ro'yxati</p>
+  </header>
+
+  <div class="group">
+    <p class="group-title">Qo'llanma</p>
+    <a class="card" href="moduleGuide_eskiz.html">
+      <span class="badge">Gui</span>
+      <span class="card-body">
+        <div class="card-title">Platformadan Foydalanish Qo'llanmasi</div>
+      </span>
+      <span class="arrow">→</span>
+    </a>
+  </div>
+
+  <div class="group">
+    <p class="group-title">Python</p>
+    <a class="card" href="eskiz_python_part1.html">
+      <span class="badge">3.1</span>
+      <span class="card-body">
+        <div class="card-title">Python 3.1–3.15</div>
+      </span>
+      <span class="arrow">→</span>
+    </a>
+    <a class="card" href="eskiz_python_part2.html">
+      <span class="badge">3.17</span>
+      <span class="card-body">
+        <div class="card-title">Python 3.17–3.30</div>
+      </span>
+      <span class="arrow">→</span>
+    </a>
+  </div>
+
+  <div class="group">
+    <p class="group-title">NumPy</p>
+    <a class="card" href="eskiz_numpy_part1.html">
+      <span class="badge">8.1</span>
+      <span class="card-body">
+        <div class="card-title">NumPy 8.1–8.13</div>
+      </span>
+      <span class="arrow">→</span>
+    </a>
+    <a class="card" href="eskiz_numpy_part2.html">
+      <span class="badge">8.14</span>
+      <span class="card-body">
+        <div class="card-title">NumPy 8.14–8.26</div>
+      </span>
+      <span class="arrow">→</span>
+    </a>
+  </div>
+
+  <div class="group">
+    <p class="group-title">Pandas</p>
+    <a class="card" href="eskiz_pandas_part1.html">
+      <span class="badge">9.1</span>
+      <span class="card-body">
+        <div class="card-title">Pandas 9.1–9.17</div>
+      </span>
+      <span class="arrow">→</span>
+    </a>
+    <a class="card" href="eskiz_pandas_part2.html">
+      <span class="badge">9.18</span>
+      <span class="card-body">
+        <div class="card-title">Pandas 9.18–9.33</div>
+      </span>
+      <span class="arrow">→</span>
+    </a>
+  </div>
+
+  <div class="group">
+    <p class="group-title">SQL / PostgreSQL</p>
+    <a class="card" href="moduleSQL_eskiz.html">
+      <span class="badge">23</span>
+      <span class="card-body">
+        <div class="card-title">SQL / PostgreSQL — 0 dan to'liq</div>
+        <div class="card-sub">23 mavzu · 47 amaliy masala</div>
+      </span>
+      <span class="arrow">→</span>
+    </a>
+  </div>
+
+  <div class="group">
+    <p class="group-title">10-Modul</p>
+    <a class="card" href="eskiz_modul10_part1.html">
+      <span class="badge">10.1</span>
+      <span class="card-body">
+        <div class="card-title">10-Modul (1-qism)</div>
+      </span>
+      <span class="arrow">→</span>
+    </a>
+    <a class="card" href="eskiz_modul10_part2.html">
+      <span class="badge">10.2</span>
+      <span class="card-body">
+        <div class="card-title">10-Modul (2-qism)</div>
+      </span>
+      <span class="arrow">→</span>
+    </a>
+  </div>
+
+  <div class="group">
+    <p class="group-title">Modullar</p>
+    <a class="card" href="modul11_eskiz_v4.html">
+      <span class="badge">11</span>
+      <span class="card-body">
+        <div class="card-title">Ma'lumotlarni tayyorlash</div>
+      </span>
+      <span class="arrow">→</span>
+    </a>
+    <a class="card" href="modul12_eskiz.html">
+      <span class="badge">12</span>
+      <span class="card-body">
+        <div class="card-title">Uyg'unlashtirish, ulash va qayta shakllash</div>
+      </span>
+      <span class="arrow">→</span>
+    </a>
+    <a class="card" href="modul13_eskiz-1.html">
+      <span class="badge">13</span>
+      <span class="card-body">
+        <div class="card-title">Vizualizatsiya. Grafiklar</div>
+      </span>
+      <span class="arrow">→</span>
+    </a>
+    <a class="card" href="modul14_eskiz.html">
+      <span class="badge">14</span>
+      <span class="card-body">
+        <div class="card-title">Machine Learning</div>
+      </span>
+      <span class="arrow">→</span>
+    </a>
+    <a class="card" href="modul16_eskiz.html">
+      <span class="badge">16</span>
+      <span class="card-body">
+        <div class="card-title">Regressiya (Regression)</div>
+      </span>
+      <span class="arrow">→</span>
+    </a>
+    <a class="card" href="modul17_eskiz.html">
+      <span class="badge">17</span>
+      <span class="card-body">
+        <div class="card-title">Klassifikatsiya (Classification)</div>
+      </span>
+      <span class="arrow">→</span>
+    </a>
+    <a class="card" href="modul20a_eskiz.html">
+      <span class="badge">20</span>
+      <span class="card-body">
+        <div class="card-title">Deep Learning - Asoslar (1-qism)</div>
+      </span>
+      <span class="arrow">→</span>
+    </a>
+  </div>
+
+  <div class="group">
+  <div class="group">
+    <p class="group-title">Deep Learning Matematikasi</p>
+    <a class="card" href="modulM1_math_eskiz.html">
+      <span class="badge">M1</span>
+      <span class="card-body">
+        <div class="card-title">Deep Learning Matematikasi (1-qism)</div>
+      </span>
+      <span class="arrow">→</span>
+    </a>
+    <a class="card" href="modulM2_math_eskiz.html">
+      <span class="badge">M2</span>
+      <span class="card-body">
+        <div class="card-title">Deep Learning Matematikasi (2-qism)</div>
+      </span>
+      <span class="arrow">→</span>
+    </a>
+    <a class="card" href="modulM3_math_eskiz.html">
+      <span class="badge">M3</span>
+      <span class="card-body">
+        <div class="card-title">Deep Learning Matematikasi (3-qism). Transformer</div>
+      </span>
+      <span class="arrow">→</span>
+    </a>
+  </div>
+
+  <div class="group">
+    <p class="group-title">Freymvorklar</p>
+    <a class="card" href="moduleTF_eskiz-1.html">
+      <span class="badge">TF</span>
+      <span class="card-body">
+        <div class="card-title">TensorFlow Moduli</div>
+      </span>
+      <span class="arrow">→</span>
+    </a>
+    <a class="card" href="modulePT_eskiz.html">
+      <span class="badge">PT</span>
+      <span class="card-body">
+        <div class="card-title">PyTorch Moduli</div>
+      </span>
+      <span class="arrow">→</span>
+    </a>
+  </div>
+
+  <footer>Jami 20 ta fayl</footer>
+</div>
+
+<script>
+  // ==========================================================
+  // TO'LOV QILGAN FOYDALANUVCHILARGA BERILADIGAN KODLAR RO'YXATI
+  // Yangi mijoz to'lov qilganda, shu massivga yangi kod qo'shing
+  // (har bir qatorni vergul bilan ajrating)
+  // ==========================================================
+  const validCodes = [
+    "MXG-XAJI0",
+    "MXG-Y6DPB",
+    "MXG-HSAHX",
+    "MXG-THV3A",
+    "MXG-3ZMF8",
+    "MXG-MDD4V",
+    "MXG-30T9N",
+    "MXG-T3W5U",
+    "MXG-ZBIKC",
+    "MXG-IDKWN",
+    "MXG-NHJ7X",
+    "MXG-VG0FN",
+    "MXG-9XUY4",
+    "MXG-1IBLJ",
+    "MXG-H75LX",
+    "MXG-O6QJI",
+    "MXG-UJV6O",
+    "MXG-H9SDB",
+    "MXG-DW2PC",
+    "MXG-N9T84",
+    "MXG-AZYTJ",
+    "MXG-XEPQ8",
+    "MXG-5JSG6",
+    "MXG-5KXVF",
+    "MXG-1T2TA",
+    "MXG-LA753",
+    "MXG-LC58D",
+    "MXG-RC11E",
+    "MXG-RTJ5P",
+    "MXG-HT0HL",
+    "MXG-9XPSE",
+    "MXG-IMVIH",
+    "MXG-CWI64",
+    "MXG-CIYHE",
+    "MXG-7UR23",
+    "MXG-GDPPQ",
+    "MXG-0Y9DO",
+    "MXG-M5IGQ",
+    "MXG-PKI7P",
+    "MXG-5TB94",
+    "MXG-874FR",
+    "MXG-HOCN9",
+    "MXG-J2QP8",
+    "MXG-9UZFK",
+    "MXG-8UT0C",
+    "MXG-VS4F8",
+    "MXG-CGVYI",
+    "MXG-E6IVW",
+    "MXG-PVS7H",
+    "MXG-ZIOYK",
+    "MXG-L1CQ9",
+    "MXG-9CHJ7",
+    "MXG-55NF4",
+    "MXG-ZW9XA",
+    "MXG-3KX7E",
+    "MXG-EDTJV",
+    "MXG-ZHWJR",
+    "MXG-64DPJ",
+    "MXG-A1WJ0",
+    "MXG-TPAC5",
+    "MXG-6T4UF",
+    "MXG-EL624",
+    "MXG-6HID2",
+    "MXG-5OWF7",
+    "MXG-5935A",
+    "MXG-0L725",
+    "MXG-3J2D5",
+    "MXG-4I3QK",
+    "MXG-2IAGL",
+    "MXG-58KXO",
+    "MXG-9T7E8",
+    "MXG-G8JDP",
+    "MXG-0LVSN",
+    "MXG-UJZA7",
+    "MXG-TZ0YN",
+    "MXG-CXLL4",
+    "MXG-ZKLOO",
+    "MXG-KEP7Y",
+    "MXG-6WKTA",
+    "MXG-KPUXQ",
+    "MXG-PHR62",
+    "MXG-GDSWM",
+    "MXG-31YIH",
+    "MXG-AIR4C",
+    "MXG-OWGZR",
+    "MXG-IXA11",
+    "MXG-DPG8S",
+    "MXG-BI4Q2",
+    "MXG-Y9V86",
+    "MXG-WZS3T",
+    "MXG-60RJI",
+    "MXG-W1SWJ",
+    "MXG-CKJLT",
+    "MXG-EIYZC",
+    "MXG-OTOHP",
+    "MXG-6VZ41",
+    "MXG-NAM14",
+    "MXG-8P0TV",
+    "MXG-HHPBM",
+    "MXG-YOFQE"
+  ];
+
+  function checkCode(){
+    const input = document.getElementById('code-input').value.trim().toUpperCase();
+    const errorEl = document.getElementById('gate-error');
+    if(validCodes.includes(input)){
+      document.getElementById('gate').style.display = 'none';
+      document.getElementById('content').style.display = 'block';
+    } else {
+      errorEl.textContent = "Kod noto'g'ri. Qaytadan urinib ko'ring yoki sotuvchiga murojaat qiling.";
+    }
+  }
+
+  document.getElementById('code-input').addEventListener('keydown', function(e){
+    if(e.key === 'Enter') checkCode();
+  });
+</script>
+</body>
+</html>
